@@ -1,0 +1,69 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+#
+# Macro that adds a new 2D feature.
+#
+
+import qmt.freecad.fileIO
+reload(qmt.freecad.fileIO)
+from qmt.freecad.fileIO import getModel
+import qmt.freecad.sketchUtils
+reload(qmt.freecad.sketchUtils)
+
+
+import FreeCAD
+import FreeCADGui
+from PySide import QtGui, QtCore
+import numpy as np
+
+myDoc = FreeCAD.ActiveDocument
+
+class Popup(QtGui.QDialog):
+    def __init__(self, parent=None):
+        super(Popup, self).__init__()
+
+        layout = QtGui.QFormLayout()
+        self.setLayout(layout)
+
+
+        self.featureName = QtGui.QLineEdit('featureName', self)
+        layout.addRow(QtGui.QLabel('Feature name:', self), self.featureName)
+
+        ok = QtGui.QPushButton('OK', self)
+        ok.clicked.connect(self.close)
+        layout.addRow(ok)
+
+popup = Popup()
+popup.exec_()
+featureName = popup.featureName.text()
+
+newSketch = myDoc.addObject('Sketcher::SketchObject',featureName)
+
+# We first need to determine which face to bind to. To do that, loop over the
+# faces in the target object and check center of mass:
+targetObj = FreeCADGui.Selection.getSelection()[0]
+for i,face in enumerate(targetObj.Shape.Faces):
+    zCOM = face.CenterOfMass[2]
+    if np.isclose(zCOM,0.):
+        targetFaceIndex = i
+        break
+targetFaceName = "Face"+str(targetFaceIndex+1)
+newSketch.Support = (targetObj,targetFaceName)
+# Now attach the all the proper edges to it:
+for i,edge in enumerate(targetObj.Shape.Edges):
+    zCOM = edge.CenterOfMass[2]
+    if np.isclose(zCOM ,0.):
+        edgeIndex = i + 1
+        edgeName = "Edge"+str(edgeIndex)
+        newSketch.addExternal(targetObj.Name,edgeName)
+
+myDoc.recompute()
+
+myModel = getModel()
+myModel.modelDict['freeCADInfo'][newSketch.Name] = {'2DObject':{'label':newSketch.Label,
+                                                       'type':'boundary',
+                                                       'physicsProps':{'boundaryValue':None,'boundaryType':None,'sliceID':0,'geoID':len(myModel.modelDict['freeCADInfo'])}}}
+myModel.saveModel()
+
+

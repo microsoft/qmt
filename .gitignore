@@ -99,3 +99,16 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# Setuptools distribution folder.
+/dist/
+
+# MacOS artifacts
+/.DS_Store
+.DS_Store
+
+# Binary output and IDEs
+*.pdf
+*.h5
+.idea
+.vscode

@@ -1,0 +1,61 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+#
+# Macro that writes meshinfo of selected objects to the model file.
+#
+# meshInfo: {'maxSize': float,
+#            'growthRate': float,
+#            'elements': {elementId' (multiple instances): {'type': 'Edge' or 'Face',
+#                                                           'point': '[x, y, z]',
+#                                                           'maxSize': float,
+#                                                           'growthRate': float}}}
+
+import json
+import os
+import qmt as QMT
+
+from PySide import QtGui, QtCore
+
+class Popup(QtGui.QDialog):
+    def __init__(self, parent=None, listInfo=None):
+        super(Popup, self).__init__(parent)
+
+        layout = QtGui.QFormLayout()
+        self.setLayout(layout)
+
+        layout.addRow(QtGui.QLabel('<b>'+listInfo+'</b>: ', self))
+
+        self.maxSize = QtGui.QLineEdit('1.0', self)
+        layout.addRow(QtGui.QLabel('Maximum size:', self), self.maxSize)
+
+        self.growthRate = QtGui.QLineEdit('0.1', self)
+        layout.addRow(QtGui.QLabel('Growth rate:', self), self.growthRate)
+
+        ok = QtGui.QPushButton('OK', self)
+        ok.clicked.connect(self.close)
+        layout.addRow(ok)
+
+
+
+fileName = App.ActiveDocument.modelFilePath.modelFilePath # need to have set this before
+selObjs = Gui.Selection.getSelectionEx()
+
+myModel = QMT.Model(modelPath=fileName)
+myModel.loadModel()
+
+if selObjs:
+    if not 'elements' in myModel.modelDict['meshInfo']:
+        myModel.modelDict['meshInfo']['elements'] = {}
+
+for obj in selObjs:
+    name = obj.FullName
+    popup = Popup(listInfo=name)
+    popup.exec_()
+    com = obj.SubObjects[0].CenterOfMass  # not serialisable
+    idx = obj.ObjectName + '_' + '_'.join(obj.SubElementNames)
+    myModel.modelDict['meshInfo']['elements'].update( { idx: {'type': obj.SubObjects[0].ShapeType,
+                                                              'point': [com[0], com[1], com[2]],
+                                                              'maxSize': popup.maxSize.text(),
+                                                              'growthRate': popup.growthRate.text()} } )
+
+myModel.saveModel()

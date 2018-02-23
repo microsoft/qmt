@@ -1,0 +1,39 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+#
+# Macro that adds a new 2D feature.
+#
+
+import qmt.freecad.fileIO
+reload(qmt.freecad.fileIO)
+from qmt.freecad.fileIO import getModel
+import qmt.freecad.sketchUtils
+reload(qmt.freecad.sketchUtils)
+
+
+import FreeCAD
+import FreeCADGui
+from PySide import QtGui, QtCore
+import numpy as np
+
+myDoc = FreeCAD.ActiveDocument
+myModel = getModel()
+
+targetSketch = FreeCADGui.Selection.getSelection()[0]
+pocketName = targetSketch.Name+'_pocket'
+myPocket = myDoc.addObject("PartDesign::Pocket",pocketName)
+myPocket.Sketch = targetSketch
+myPocket.Length = 5.0
+myPocket.Type=0
+myPocket.UpToFace = None
+FreeCADGui.ActiveDocument.hide(targetSketch.Name)
+FreeCADGui.ActiveDocument.hide(targetSketch.Support[0].Name)
+myDoc.recompute()
+
+
+myModel = getModel()
+myModel.modelDict['freeCADInfo'][targetSketch.Name]['2DObject']['type'] = 'domain'
+myModel.modelDict['freeCADInfo'][targetSketch.Name]['2DObject']['physicsProps'] = {'material':None}
+myModel.saveModel()
+

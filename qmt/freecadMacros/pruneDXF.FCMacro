@@ -1,0 +1,106 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+#
+# Macro to prune a dxf import. To use, select the DXF layers that you want to 
+# prune and run the macro. You will be asked to enter the label on a shape, which
+# will be used as a mask.
+#
+
+from PySide import QtGui, QtCore
+import numpy as np 
+import Draft
+
+
+class GuiClass(QtGui.QDialog):
+    """"""
+    def __init__(self):
+        super(GuiClass, self).__init__()
+        self.initUI()
+    def initUI(self):
+        self.result = False
+        # create our window
+        # define window		xLoc,yLoc,xDim,yDim
+        self.setGeometry(	250, 250, 500, 150)
+        self.setWindowTitle("Set the mask label for DXF Pruning")
+        self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
+
+        def vPix(elementNum):
+            # compute the vertical pixel offset for a given element
+            offset = 10
+            lineWidth = 40
+            return elementNum*lineWidth+offset
+        
+        # First, snag the selected layers to use for generating the pruned objects:
+        selObjs = Gui.Selection.getSelection()
+        self.selObjNames = []
+        for obj in selObjs:
+            self.selObjNames += [obj.Name]
+        
+        # Next, specify the mask name:
+
+        self.maskLabelLabel = QtGui.QLabel('Enter mask label:',self)
+        self.maskLabelLabel.setFont('Courier')
+        self.maskLabelLabel.move(20,vPix(1))
+        self.maskLabel = QtGui.QLineEdit(self)
+        self.maskLabel.setFixedWidth(190)
+        self.maskLabel.move(220,vPix(1))
+        self.maskLabel.setText('mask')
+
+        self.OKButton = QtGui.QPushButton('OK', self)
+        self.OKButton.move(20,vPix(2))
+        self.OKButton.clicked.connect(self.onOK)
+        self.CancelButton = QtGui.QPushButton("Cancel",self)
+        self.CancelButton.move(220,vPix(2))
+        self.CancelButton.clicked.connect(self.onCancel)
+
+    def onFile(self):
+        self.filePath = QtGui.QFileDialog.getOpenFileName()[0]
+        self.filePathBox.setText(self.filePath)
+    def onOK(self):
+        self.result = True
+        self.close()
+    def onCancel(self):
+        self.result	= False
+        self.close()
+    # def onGroupMenu(self,selectedText):
+    #     self.groupLabel = selectedText
+
+form = GuiClass()
+form.exec_()
+
+if not form.result:
+    raise ValueError('Error with input!')
+else:
+    dxfLayerNames = form.selObjNames
+    maskLabel = form.maskLabel.text()
+
+survivingLayerDict = {}
+
+for layerName in dxfLayerNames:
+    layerGroup = App.activeDocument().getObject(layerName)
+    objsInLayer = layerGroup.OutList
+    survivingLayerDict[layerName] = {}
+    for obj in objsInLayer:
+        objLabel = obj.Label
+        mergedName = layerName+'_'+objLabel
+        draftLabel = mergedName+'_draft'
+        maskCopyLabel = mergedName+'_mask'
+        App.ActiveDocument.addObject('Part::Feature',maskCopyLabel).Shape=App.ActiveDocument.getObjectsByLabel(maskLabel)[0].Shape
+        Draft.makeSketch(obj,autoconstraints=True,name='tempSketch')
+        Draft.draftify(App.ActiveDocument.tempSketch,delete=True)
+        App.ActiveDocument.ActiveObject.Label = draftLabel
+        App.ActiveDocument.addObject("Part::MultiCommon",mergedName)
+        App.ActiveDocument.getObject(mergedName).Shapes = \
+        [App.ActiveDocument.getObjectsByLabel(draftLabel)[0],\
+         App.ActiveDocument.getObjectsByLabel(maskCopyLabel)[0]]
+        App.ActiveDocument.recompute()
+        vertLen = len(App.ActiveDocument.getObjectsByLabel(mergedName)[0].Shape.Vertexes)
+        if vertLen >0:
+            survivingLayerDict[layerName] = mergedName
+        else:
+            draftName = App.ActiveDocument.getObjectsByLabel(draftLabel)[0].Name
+            maskCopyName = App.ActiveDocument.getObjectsByLabel(maskCopyLabel)[0].Name
+            App.ActiveDocument.removeObject(mergedName)
+            App.ActiveDocument.removeObject(draftName)
+            App.ActiveDocument.removeObject(maskCopyName)

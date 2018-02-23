@@ -1,0 +1,95 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+#
+# Macro that locates/creates the model information json file. We record this
+# in a spreadsheet in a standard location so that 
+#
+
+from PySide import QtGui, QtCore
+import numpy as np 
+import json
+import os
+
+import qmt as QMT
+reload(QMT)
+import qmt.freecad.fileIO
+reload(qmt.freecad.fileIO)
+from qmt.freecad.fileIO import setupModelFile
+
+class GuiClass(QtGui.QDialog):
+    """"""
+    def __init__(self):
+        super(GuiClass, self).__init__()
+        self.initUI()
+    def initUI(self):
+        self.result = False
+        # create our window
+        # define window		xLoc,yLoc,xDim,yDim
+        self.setGeometry(	250, 250, 500, 140)
+        self.setWindowTitle("Set up model parameters")
+        self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
+    
+        def vPix(elementNum):
+            # compute the vertical pixel offset for a given element
+            offset = 10
+            lineWidth = 40
+            return elementNum*lineWidth+offset
+
+        # path input
+        self.folderPath =  os.path.expanduser('~')
+        self.pathLabel = QtGui.QLabel("Path to json file:", self)
+        self.pathLabel.setFont('Courier') 
+        self.pathLabel.move(20, vPix(0))
+
+        self.locateFolder = QtGui.QPushButton("Locate folder",self)     
+        self.locateFolder.move(170,vPix(0))   
+        self.locateFolder.clicked.connect(self.onLocateFolder)
+
+        self.jsonPath = QtGui.QLineEdit(self)
+        self.jsonPath.setText(self.folderPath+'/model.json')
+        self.jsonPath.setFixedWidth(200)
+        self.jsonPath.move(300, vPix(0)) 
+
+        # buttons:
+        self.OKButton = QtGui.QPushButton('OK', self)
+        self.OKButton.move(20,vPix(1))
+        self.OKButton.clicked.connect(self.onOK)
+        self.CancelButton = QtGui.QPushButton("Cancel",self)
+        self.CancelButton.move(225,vPix(1))
+        self.CancelButton.clicked.connect(self.onCancel)
+
+    def onLocateFolder(self):
+        self.folderPath = QtGui.QFileDialog.getExistingDirectory()
+        self.jsonPath.setText(self.folderPath+'/model.json')
+    def onOK(self):
+        self.result = True
+        self.close()
+    def onCancel(self):
+        self.result	= False
+        self.close()
+form = GuiClass()
+form.exec_()
+if not form.result:
+    raise ValueError('Error loading file!')
+else:
+    modelFilePath = form.jsonPath.text()
+
+setupModelFile(modelFilePath)
+
+
+# objList = App.ActiveDocument.Objects
+# objNames = [x.Name for x in objList]
+
+# if 'modelFilePath' in objNames:
+#     App.ActiveDocument.removeObject('modelFilePath')
+# App.ActiveDocument.recompute()
+# App.ActiveDocument.addObject('Spreadsheet::Sheet','modelFilePath')
+# spreadSheet = App.ActiveDocument.modelFilePath
+# spreadSheet.set('A1', 'Path to model file:')
+# spreadSheet.set('B1', modelFilePath)
+# spreadSheet.setAlias('B1','modelFilePath')
+# spreadSheet.setColumnWidth('A', 200)
+
+# myModelFile = mph4py.Model(modelPath=modelFilePath)
+# myModelFile.loadModel()
+# myModelFile.saveModel()
