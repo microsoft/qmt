@@ -1,4 +1,5 @@
 # Qubit Modeling Tools (QMT)
+[![Build Status](https://travis-ci.com/Microsoft/qmt.svg?token=ukrJZxPf4mQFHvy1yJ9t&branch=release/1.0.0)](https://travis-ci.com/Microsoft/qmt)
 
 Welcome to our qubit modeling tools (qmt)! This package is designed to automate
 the setup of complex geometries appropriate to physical qubit simulations. This 
