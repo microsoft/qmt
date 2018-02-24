@@ -4,17 +4,14 @@ Welcome to our qubit modeling tools (qmt)! This package is designed to automate
 the setup of complex geometries appropriate to physical qubit simulations. This 
 package is licensed with an MIT open source license.
 
+To set up your python environment, see the environment.yml file. If you are 
+running Anaconda, simply run
+
+    conda env create -f environment.yml
+
 A significant part of the repository consists of Python functions and macros to
 be executed within FreeCAD, either interactively or in batch mode. These
 require the latest stable version of FreeCAD (0.16).
-
-Required Python packages:
-* numpy
-* scipy
-* sympy
-* matplotlib
-* mpi4py
-* pytest
 
 
 # Development notes
