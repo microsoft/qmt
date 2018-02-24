@@ -2,16 +2,41 @@ language: python
 python:
   - "2.7"
 virtualenv:
-  system_site_packages: true
-before_install:
-  - sudo add-apt-repository -y ppa:freecad-maintainers/freecad-stable
-  - sudo apt-get -qq update
-  - sudo apt-get install -y python-pyside
-  - sudo apt-get install -y freecad
-# command to run tests
-script:
+  system_site_packages: false
+install:
+  - sudo apt-get update
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh -O miniconda.sh;
+    else
+      wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh -O miniconda.sh;
+    fi
+  - bash miniconda.sh -b -p $HOME/miniconda
+  - export PATH="$HOME/miniconda/bin:$PATH"
+  - hash -r
+  - conda config --set always_yes yes --set changeps1 no
+  - conda update -q conda
+  - conda info -a
+  - conda env create -q -n test-environment -f environment.yml
+  - source activate test-environment
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      sudo add-apt-repository -y ppa:freecad-maintainers/freecad-stable;
+      sudo apt-get -qq update;
+      sudo apt-get install -y freecad;
+      conda install pyside;
+    else
+      conda config --add channels conda-forge
+      conda config --add channels freecad
+      conda config --add channels anaconda
+      conda install freecad;
+    fi
   - python setup.py develop
-  - export PYTHONPATH=$PYTHONPATH:/usr/lib/freecad/lib
+  
+script:
+  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
+      export PYTHONPATH=$PYTHONPATH:/usr/lib/freecad/lib ;
+    else
+      export PYTHONPATH=$PYTHONPATH:$HOME/miniconda/envs/test-environment/lib ;
+    fi
   - pytest tests
 
    

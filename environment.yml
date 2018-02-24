@@ -1,9 +1,10 @@
 name: qmt
 dependencies:
-  - python=2.7.14
-  - scipy
+  - python=2.7
   - numpy
+  - scipy
+  - sympy
   - matplotlib
-  - mpi4py
   - pytest
+  - pyside
   - future
