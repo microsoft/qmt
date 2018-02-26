@@ -12,7 +12,14 @@ running Anaconda, simply run
 
 A significant part of the repository consists of Python functions and macros to
 be executed within FreeCAD, either interactively or in batch mode. These
-require the latest stable version of FreeCAD (0.16).
+require the latest stable version of FreeCAD (0.16). Currently, FreeCAD only
+supports Python 2.7. So while the non-FreeCAD sections of the code are designed
+to work with either Python 3.6 or Python 2.7, the FreeCAD module will only run
+with 2.7.
+
+Note that this initial release does not contain examples or introductory 
+documentation, which we plan to add in time. If you want to get started, feel 
+free to email John Gamble at john.gamble@microsoft.com.
 
 
 # Development notes
