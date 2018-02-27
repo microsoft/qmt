@@ -24,8 +24,8 @@ free to email John Gamble at john.gamble@microsoft.com.
 
 # Development notes
 
-We are using gitflow for the development of this code. Please see
-[here](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow)
+We are using GitHub Flow for the development of this code. Please see
+[here](https://guides.github.com/introduction/flow/)
 for a tutorial.
 
 
