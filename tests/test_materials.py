@@ -8,7 +8,7 @@ import qmt.materials as materials
 
 def test_band_offsets():
     """Test calculation of band positions and offsets."""
-    matlib = materials.Materials('qmt/materials.json')
+    matlib = materials.Materials()
     mat1 = matlib.find('InSb', eunit='eV')
     mat2 = matlib.find('InAs', eunit='eV')
     mat3 = matlib.find('GaAs', eunit='eV')
