@@ -78,7 +78,7 @@ def updateParams(passModel=None):
     # in the model. This means that if we have old parameters sitting
     # in the FreeCAD file, they won't get wiped out if we comment out
     # a geometry sweep in the model script.
-    if len(paramDict) > 1:
+    if len(paramDict) > 0:
         # First, determine if we already have a spreadsheet:
         objList = FreeCAD.ActiveDocument.Objects
         objNames = [x.Name for x in objList]
