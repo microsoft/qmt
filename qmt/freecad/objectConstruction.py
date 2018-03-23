@@ -13,7 +13,7 @@ import numpy as np
 from six import iteritems
 
 from qmt.freecad import extrude, copy, delete, genUnion, getBB, \
-    makeBB, splitSketch, makeHexFace, extendSketch, exportCAD, exportMeshed, \
+    makeBB, splitSketch, makeHexFace, extendSketch, exportCAD, exportMeshed, updateParams,\
     deepRemove, findSegments, extrudeBetween, centerObjects, \
     intersect, checkOverlap, subtract, getModel, crossSection, findEdgeCycles, draftOffset
 
@@ -167,6 +167,8 @@ class modelBuilder:
         self._buildPartsDict = {}
         self.lithoSetup = False  # Has the litho setup routine been run?
         self.trash = []  # trash for garbage collection at the end
+        # Update the FreeCAD model to reflect the current value of any model parameters:
+        updateParams(passModel=self.model)
 
     def buildPart(self, partName):
         partDict = self.model.modelDict['3DParts'][partName]
