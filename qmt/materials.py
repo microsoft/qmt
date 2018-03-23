@@ -490,6 +490,9 @@ if __name__ == '__main__':
     materials.genMat('degenDopedSi','metal',relativePermittivity=1000,
                       # source - Ioffe Institute, http://www.ioffe.ru/SVA/NSM/Semicond/Si/basic.html
                       workFunction=4050.)
+    materials.genMat('NbTiN','metal',relativePermittivity=1000,
+                      # Unknown; just setting it to Al for now.
+                      workFunction=4280.)                      
 
     # === Dielectrics ===
     # Sources:
@@ -603,6 +606,14 @@ if __name__ == '__main__':
                      electronMass=.0795, directBandGap=1423.6, valenceBandOffset=-940.,
                      luttingerGamma1=5.08, luttingerGamma2=1.60, luttingerGamma3=2.10,
                      spinOrbitSplitting=108., interbandMatrixElement=20700.)
+    materials.genMat('Si', 'semi',
+                     # 300 K, http://www.ioffe.ru/SVA/NSM/Semicond/Si/basic.html
+                     relativePermittivity=11.7, electronAffinity=4050.,
+                     electronMass=(0.98+0.19*2)**(1./3.), # DOS mass
+                     # Yu & Cardona
+                     directBandGap=3480.,
+                     luttingerGamma1=4.28, luttingerGamma2=0.339, luttingerGamma3=1.446,
+                     spinOrbitSplitting=44.)                     
 
     # bowing parameters from Vurgaftman et al. (2001)
     materials.setBowingParameters('GaAs', 'InAs', 'semi', electronMass=0.0091,
