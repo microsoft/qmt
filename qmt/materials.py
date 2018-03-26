@@ -528,7 +528,7 @@ if __name__ == '__main__':
     # ZrO2
     # [Robertson] eps=25
     # [Biercuk] eps=20-29 for ALD ZrO2
-    materials.genMat('HfO2', 'dielectric', relativePermittivity=25.)  # Robertson
+    materials.genMat('ZrO2', 'dielectric', relativePermittivity=25.)  # Robertson
 
     # Al2O3
     # [Robertson] eps=9
