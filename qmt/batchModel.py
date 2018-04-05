@@ -152,7 +152,8 @@ class Model:
         self.modelDict['comsolInfo']['quantumParams']['B'] = B
         self.modelDict['comsolInfo']['quantumParams']['BUnit'] = BUnit
         self.modelDict['comsolInfo']['quantumParams']['Delta'] = Delta  
-        self.modelDict['comsolInfo']['quantumParams']['DeltaUnit'] = BUnit
+        self.modelDict['comsolInfo']['quantumParams']['DeltaUnit'] = DeltaUnit
+        self.modelDict['comsolInfo']['quantumParams']['gFactor'] = g
            
 
 
