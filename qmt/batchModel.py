@@ -115,18 +115,46 @@ class Model:
         self.modelDict['comsolInfo']['zeroLevel'] = [partName,property]
 
     def genComsolInfo(self, meshExport=None, fileName='comsolModel', exportDir='solutions',
-                      repairTolerance=None):
+                      repairTolerance=None,physics=['electrostatics']):
         '''
         Generate meta information required by COSMOL
         @param meshExport: string with name for the exported mesh. None means no mesh is exported
         @param repairTolerance: float with the repair tolerance for building the geometry in COMSOl
         @param fileName: string with the name of the resulting COMSOL file
         @param exportDir: string with directory to which results are exported
+        @param physics: which physics interfaces to allow. The options are 'electrostatics',
+            'bdg', and 'schrodinger'.
         '''
         self.modelDict['comsolInfo']['meshExport'] = meshExport
         self.modelDict['comsolInfo']['repairTolerance'] = repairTolerance
         self.modelDict['comsolInfo']['fileName'] = fileName
         self.modelDict['comsolInfo']['exportDir'] = exportDir
+        self.modelDict['comsolInfo']['physics'] = physics
+    
+    def setComsolQuantumParams(self,quantumDomain,alpha=[0.,0.,0.],alphaUnit='meV*nm',
+                               B=[0.,0.,0.],BUnit='T',g=-2.0,Delta=0.0,DeltaUnit='meV'):
+        '''
+        Set the physics parameters needed for quantum solves in COMSOL.
+        @param quantumDomain: the name of the part on which we want to perform quantum
+            solves.
+        @param alpha: vector defining the SOC field alphax,alphay,alphaz. The expected
+            units.
+        @param alphaUnit: The string (COMSOL-readable) corresponding to the units of alpha.
+        @param B: The magnetic field vector.
+        @param BUnit: The string (COMSOL-readable) corresponding to the units of B.
+        @param Delta: The superconducting pairing potential.
+        @param DeltaUnit: The string (COMSOL-readable) corresponding to the units of Delta.
+        '''
+        self.modelDict['comsolInfo']['quantumParams'] = {}
+        self.modelDict['comsolInfo']['quantumParams']['domain'] = quantumDomain
+        self.modelDict['comsolInfo']['quantumParams']['alpha'] = alpha
+        self.modelDict['comsolInfo']['quantumParams']['alphaUnit'] = alphaUnit
+        self.modelDict['comsolInfo']['quantumParams']['B'] = B
+        self.modelDict['comsolInfo']['quantumParams']['BUnit'] = BUnit
+        self.modelDict['comsolInfo']['quantumParams']['Delta'] = Delta  
+        self.modelDict['comsolInfo']['quantumParams']['DeltaUnit'] = BUnit
+           
+
 
 
     def addPart(self,partName,fcName,directive,domainType,material=None,\
