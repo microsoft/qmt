@@ -132,7 +132,8 @@ class Model:
         self.modelDict['comsolInfo']['physics'] = physics
     
     def setComsolQuantumParams(self,quantumDomain,alpha=[0.,0.,0.],alphaUnit='meV*nm',
-                               B=[0.,0.,0.],BUnit='T',g=-2.0,Delta=0.0,DeltaUnit='meV'):
+                               B=[0.,0.,0.],BUnit='T',g=-2.0,Delta=0.0,DeltaUnit='meV',
+                               numEigVals=10,eigValSearch=0.0):
         '''
         Set the physics parameters needed for quantum solves in COMSOL.
         @param quantumDomain: the name of the part on which we want to perform quantum
@@ -144,6 +145,8 @@ class Model:
         @param BUnit: The string (COMSOL-readable) corresponding to the units of B.
         @param Delta: The superconducting pairing potential.
         @param DeltaUnit: The string (COMSOL-readable) corresponding to the units of Delta.
+        @param numEigVals: The number of eigenvalues to find.
+        @param eigValSearch: The energy around which to search for eigenvalues.
         '''
         self.modelDict['comsolInfo']['quantumParams'] = {}
         self.modelDict['comsolInfo']['quantumParams']['domain'] = quantumDomain
@@ -154,7 +157,8 @@ class Model:
         self.modelDict['comsolInfo']['quantumParams']['Delta'] = Delta  
         self.modelDict['comsolInfo']['quantumParams']['DeltaUnit'] = DeltaUnit
         self.modelDict['comsolInfo']['quantumParams']['gFactor'] = g
-           
+        self.modelDict['comsolInfo']['quantumParams']['numEigVals'] = numEigVals        
+        self.modelDict['comsolInfo']['quantumParams']['eigValSearch'] = eigValSearch           
 
 
 
