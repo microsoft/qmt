@@ -165,8 +165,8 @@ class Model:
     def addPart(self,partName,fcName,directive,domainType,material=None,\
                 z0=None,thickness=None,targetWire=None,shellVerts=None,depoZone=None,etchZone=None,\
                 zMiddle=None,tIn=None,tOut=None,layerNum=None,lithoBase=[],\
-                fillLitho=True,meshMaxSize=None,meshGrowthRate=None,boundaryCondition = None,\
-                subtractList=[]):
+                fillLitho=True,meshMaxSize=None,meshGrowthRate=None, meshScaleVector=None,\
+                boundaryCondition = None,subtractList=[]):
         ''' Add a geometric part to the model. 
             @param partName: The descriptive name of this new part.
             @param fcName: The name of the 2D freeCAD object that this is built from.
@@ -216,6 +216,7 @@ class Model:
                                 parasolid if left to True.
             @param maxMeshSize: The maximum allowable mesh size for this part, in microns.
             @param meshGrowthRate: The maximum allowable mesh growth rate for this part
+            @param meshScaleVector: 3D list with scaling factors for the mesh in x, y, z direction
             @param boundaryCondition: One or more boundary conditions, if applicable, of the form of
                                 a type -> value mapping. For example, this could be {'voltage':1.0}
                                 or, more explicitly, {'voltage': {'type': 'dirichlet', 'value': 1.0,
@@ -255,6 +256,7 @@ class Model:
         partDict['fillLitho'] = fillLitho
         partDict['meshMaxSize'] = meshMaxSize
         partDict['meshGrowthRate'] = meshGrowthRate
+        partDict['meshScaleVector'] = meshScaleVector
         partDict['boundaryCondition'] = boundaryCondition
         partDict['subtractList'] = subtractList
         self.modelDict['buildOrder'][len(self.modelDict['buildOrder'])] = partName
