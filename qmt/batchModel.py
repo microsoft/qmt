@@ -58,6 +58,10 @@ class Model:
         @param symbol: Variable name for the quantity used in the COMSOL model.
         @param dense: Whether to do a dense/filled sweep (True) or a sparse one (False).
         """
+        # we allow 'V' as a shorthand for 'voltage'
+        if quantity == 'V':
+            symbol = 'V'
+            quantity = 'voltage'
         sweep = {}
         sweep['part'] = partName
         sweep['quantity'] = quantity
