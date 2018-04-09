@@ -195,7 +195,7 @@ class Harness:
                     fracComplete = min(len(eigenList) / float(numVoltages),fracComplete)
                 print('... ' + str(fracComplete))
                 time.sleep(5.)
-                if len(solsList) >= numVoltages:  # we are done!
+                if fracComplete >= 1.0:  # we are done!
                     print('COMSOL run finished, but failed to exit!')
                     print('Closing it in 10 seconds...')
                     sys.stdout.flush()
