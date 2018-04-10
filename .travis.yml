@@ -32,7 +32,7 @@ install:
   
 script:
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      export PYTHONPATH=$PYTHONPATH:/usr/lib/freecad/lib ;
+      export PYTHONPATH=$PYTHONPATH:/usr/lib/freecad-0.16/lib ;
     else
       export PYTHONPATH=$PYTHONPATH:$HOME/miniconda/envs/test-environment/lib ;
     fi
