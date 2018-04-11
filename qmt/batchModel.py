@@ -111,12 +111,28 @@ class Model:
         self.modelDict['comsolInfo']['volumeIntegrals'][partName] = quantities
 
     def setSimZero(self,partName,property='workFunction'):
-        ''' Sets the zero level for the electric potential in COMSOL simulations. This doesn't 
-        impact any of the physics, but makes the results much easier to look at.
+        ''' Sets the zero level for the electric potential.
+
+        For self-consistent electrostatics solves, this doesn't impact any of the physics, but makes
+        the results much easier to look at.
         @param partName: Target partName to use
         @param property: The property to use as the zero level.
         '''
         self.modelDict['comsolInfo']['zeroLevel'] = [partName,property]
+
+
+    def getSimZero(self, parts=None):
+        '''Retrieve the zero level for the electric potential [in Volts].'''
+        zeroLevelPart, zeroLevelProp = self.modelDict['comsolInfo']['zeroLevel']
+        if zeroLevelPart is None:
+            return 0.0
+        matLib = qmt.Materials(matDict=self.modelDict['materials'])
+        if parts is None:
+            parts = self.modelDict['3DParts']
+        zeroLevelMatName = parts[zeroLevelPart]['material']
+        mat_dict = matLib.find(zeroLevelMatName, eunit='eV')
+        return mat_dict[zeroLevelProp]
+
 
     def genComsolInfo(self, meshExport=None, fileName='comsolModel', exportDir='solutions',
                       repairTolerance=None,physics=['electrostatics']):
