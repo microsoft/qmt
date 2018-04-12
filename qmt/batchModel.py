@@ -111,12 +111,28 @@ class Model:
         self.modelDict['comsolInfo']['volumeIntegrals'][partName] = quantities
 
     def setSimZero(self,partName,property='workFunction'):
-        ''' Sets the zero level for the electric potential in COMSOL simulations. This doesn't 
-        impact any of the physics, but makes the results much easier to look at.
+        ''' Sets the zero level for the electric potential.
+
+        For self-consistent electrostatics solves, this doesn't impact any of the physics, but makes
+        the results much easier to look at.
         @param partName: Target partName to use
         @param property: The property to use as the zero level.
         '''
         self.modelDict['comsolInfo']['zeroLevel'] = [partName,property]
+
+
+    def getSimZero(self, parts=None):
+        '''Retrieve the zero level for the electric potential [in Volts].'''
+        zeroLevelPart, zeroLevelProp = self.modelDict['comsolInfo']['zeroLevel']
+        if zeroLevelPart is None:
+            return 0.0
+        matLib = qmt.Materials(matDict=self.modelDict['materials'])
+        if parts is None:
+            parts = self.modelDict['3DParts']
+        zeroLevelMatName = parts[zeroLevelPart]['material']
+        mat_dict = matLib.find(zeroLevelMatName, eunit='eV')
+        return mat_dict[zeroLevelProp]
+
 
     def genComsolInfo(self, meshExport=None, fileName='comsolModel', exportDir='solutions',
                       repairTolerance=None,physics=['electrostatics']):
@@ -347,7 +363,8 @@ class Model:
         sliceParts[partName] = slicePart
         self.modelDict['buildOrder'][len(self.modelDict['buildOrder'])] = partName
 
-    def addThomasFermi2dTask(self, region, grid, slice_name, name=None, temperature=0.):
+    def addThomasFermi2dTask(self, region, grid, slice_name, name=None, write_data=True,
+                             plot_data=True, temperature=0.):
         """Add a 2D Thomas-Fermi postprocessing task.
 
         @param region: 2D region to simulate. May simply be the name of a 2DPart (i.e. an entry in
@@ -358,9 +375,26 @@ class Model:
         @param slice_name: Name of the slice (a key in the model's slices dict) to be simulated.
         @param name: Custom name for this task. Defaults to 'thomasFermi2d' concatenated with an
             integer ID.
+        @param write_data: (bool|list(str)) Which of the following quantities are to be written to
+            disk: 'density', 'electrostatic_potential', 'potential_energy', 'effective_mass'. A
+            boolean value corresponds to all or none of these.
+        @param plot_data: (bool|list(str)) Which of the following quantities are to be plotted:
+            'density', 'electrostatic_potential', 'potential_energy', 'effective_mass',
+            'bare_bands'. A boolean value corresponds to all or none of these.
         @param temperature: Temperature [in K] for the simulation.
         """
-        task = {'task': 'thomasFermi2d', 'slice': slice_name}
+        if write_data is True:
+            write_data = ['density', 'electrostatic_potential', 'potential_energy',
+                          'effective_mass']
+        elif write_data is False:
+            write_data = []
+        if plot_data is True:
+            plot_data = ['density', 'electrostatic_potential', 'potential_energy', 'effective_mass',
+                         'bare_bands']
+        elif plot_data is False:
+            plot_data = []
+        task = {'task': 'thomasFermi2d', 'slice': slice_name, 'write_data': write_data,
+                'plot_data': plot_data}
         grid_spec = {'region': region}
         if np.isscalar(grid):
             grid_spec['step_size'] = grid
@@ -379,7 +413,8 @@ class Model:
 
     def addSchrodinger2dTask(self, region, grid, slice_name, eigenvalues=1, target_energy=None,
                              solver=None, name=None, write_wavefunctions=True,
-                             plot_wavefunctions=True, temperature=0.):
+                             plot_wavefunctions=True, write_data=True, plot_data=True,
+                             temperature=0.):
         """Add a 2D Schrodinger postprocessing task.
 
         @param region: 2D region to simulate. May simply be the name of a 2DPart (i.e. an entry in
@@ -394,15 +429,40 @@ class Model:
         @param str solver: ('sparse'|'dense') for sparse or dense eigensolver.
         @param name: Custom name for this task. Defaults to 'schrodinger2d' concatenated with an
             integer ID.
-        @param bool write_wavefunctions: Whether wave functions of eigenstates are to be written to
-            disk.
-        @param bool plot_wavefunctions: Whether wave functions of eigenstates are to be plotted.
+        @param write_wavefunctions: (bool|list(int)) Whether wave functions of eigenstates are to be
+            written to disk. If a list, only states whose index appears in the list are written.
+        @param plot_wavefunctions: (bool|list(int)) Whether wave functions of eigenstates are to be
+            plotted. If a list, only states whose index appears in the list are plotted.
+        @param write_data: (bool|list(str)) Which of the following quantities are to be written to
+            disk: 'energies', 'density', 'electrostatic_potential', 'potential_energy'. A boolean
+            value corresponds to all or none of these.
+        @param plot_data: (bool|list(str)) Which of the following quantities are to be plotted:
+            'density', 'electrostatic_potential', 'potential_energy'. A boolean value corresponds to
+            all or none of these.
         @param temperature: Temperature [in K] for the calculation of densities.
         """
+        if write_wavefunctions is True:
+            write_wavefunctions = list(range(eigenvalues))
+        elif write_wavefunctions is False:
+            write_wavefunctions = []
+        if plot_wavefunctions is True:
+            plot_wavefunctions = list(range(eigenvalues))
+        elif plot_wavefunctions is False:
+            plot_wavefunctions = []
+        if write_data is True:
+            write_data = ['energies', 'density', 'electrostatic_potential', 'potential_energy']
+        elif write_data is False:
+            write_data = []
+        if plot_data is True:
+            plot_data = ['density', 'electrostatic_potential', 'potential_energy']
+        elif plot_data is False:
+            plot_data = []
         task = {'task': 'schrodinger2d',
                 'slice': slice_name,
                 'spectrum': {'eigenvalues': eigenvalues, 'target energy': target_energy},
-                'wave functions': {'write': write_wavefunctions, 'plot': plot_wavefunctions}
+                'write_data': write_data,
+                'plot_data': plot_data,
+                'wave_functions': {'write': write_wavefunctions, 'plot': plot_wavefunctions}
                 }
         grid_spec = {'region': region}
         if np.isscalar(grid):
@@ -422,7 +482,8 @@ class Model:
         assert name not in self.modelDict['postProcess']['tasks']
         self.modelDict['postProcess']['tasks'][name] = task
 
-    def addPlotPotential2dTask(self, region, grid, slice_name, name=None):
+    def addPlotPotential2dTask(self, region, grid, slice_name, name=None, write_data=True,
+                               plot_data=True):
         """Add a 2D Schrodinger postprocessing task.
 
         @param region: 2D region to plot. May simply be the name of a 2DPart (i.e. an entry in
@@ -433,8 +494,23 @@ class Model:
         @param slice_name: Name of the slice (a key in the model's slices dict) to be plotted.
         @param name: Custom name for this task. Defaults to 'schrodinger2d' concatenated with an
             integer ID.
+        @param write_data: (bool|list(str)) Which of the following quantities are to be written to
+            disk: 'electrostatic_potential', 'potential_energy'. A boolean value corresponds to all
+            or none of these.
+        @param plot_data: (bool|list(str)) Which of the following quantities are to be plotted:
+            'electrostatic_potential', 'potential_energy'. A boolean value corresponds to all or
+            none of these.
         """
-        task = {'task': 'plotPotential2d', 'slice': slice_name}
+        if write_data is True:
+            write_data = ['electrostatic_potential', 'potential_energy']
+        elif write_data is False:
+            write_data = []
+        if plot_data is True:
+            plot_data = ['electrostatic_potential', 'potential_energy']
+        elif plot_data is False:
+            plot_data = []
+        task = {'task': 'plotPotential2d', 'slice': slice_name, 'write_data': write_data,
+                'plot_data': plot_data}
         grid_spec = {'region': region}
         if np.isscalar(grid):
             grid_spec['step_size'] = grid
