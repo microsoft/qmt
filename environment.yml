@@ -8,5 +8,6 @@ dependencies:
   - pytest
   - pyside
   - future
-  - pytablewriter
+  - pip:
+    - pytablewriter
 
