@@ -12,8 +12,9 @@ import re
 import os
 import sys
 import collections
-from six import iteritems
+from six import iteritems, itervalues
 from ast import literal_eval
+import textwrap
 import numpy as np
 
 try:
@@ -134,7 +135,7 @@ class Material(collections.Mapping):
             raise RuntimeError('invalid direction: ' + str(direction))
 
 
-class Materials:
+class Materials(collections.Mapping):
     '''Class for creating, loading, and manipulating a json file that
         contains information about materials.
 
@@ -163,6 +164,12 @@ class Materials:
         if matDict is not None:
             self.bowingParameters.update(matDict.pop('__bowing_parameters', {}))
             self.matDict = matDict
+
+    def __iter__(self):
+        return iter(self.matDict)
+
+    def __len__(self):
+        return len(self.matDict)
 
     def genMat(self, name, matType, **kwargs):
         '''Generate a material and add it to the matDict.
@@ -312,7 +319,7 @@ class Materials:
         '''
         db = self.serializeDict()
         with open(self.matPath, 'w') as myFile:
-            json.dump(db, myFile)
+            json.dump(db, myFile, indent=4, sort_keys=True)
 
     def load(self):
         '''Load the materials database from disk.
@@ -472,6 +479,135 @@ def valence_band_offset(mat, ref_mat):
         return e_ref - e_ion
 
 
+def write_database_to_markdown(out_file, mat_lib):
+    '''
+    Write all materials parameters in mat_lib to a nicely formatted markdown file.
+
+    Arguments
+    ---------
+    out_file: stream
+    Output file handle.
+
+    mat_lib: Materials
+    Materials database to be written.
+    '''
+    import pytablewriter
+    print('# Materials database', file=out_file)
+    print(file=out_file)
+
+    print('## Metals', file=out_file)
+    writer = pytablewriter.MarkdownTableWriter()
+    writer.stream = out_file
+    table = []
+    for name in sorted(mat_lib.matDict.keys()):
+        mat = mat_lib.find(name, eunit='eV')
+        if mat['type'] == 'metal':
+            table.append([name, mat['workFunction']])
+    writer.header_list = ['metal', 'work function [eV]']
+    writer.value_matrix = table
+    writer.write_table()
+    print(textwrap.dedent('''\
+        Sources:
+        * Wikipedia
+        * Ioffe Institute, http://www.ioffe.ru/SVA/NSM/Semicond/Si/basic.html
+        '''), file=out_file)
+
+    print('## Dielectrics', file=out_file)
+    table = []
+    for name in sorted(mat_lib.matDict.keys()):
+        mat = mat_lib.find(name, eunit='eV')
+        if mat['type'] == 'dielectric':
+            table.append([name, mat['relativePermittivity']])
+    writer.header_list = ['dielectric', 'relative permittivity']
+    writer.value_matrix = table
+    writer.write_table()
+    print(textwrap.dedent('''\
+        Sources:
+        * Robertson, EPJAP 28, 265 (2004): High dielectric constant oxides,
+          https://doi.org/10.1051/epjap:2004206
+        * Biercuk et al., APL 83, 2405 (2003), Low-temperature atomic-layer-deposition lift-off method
+          for microelectronic and nanoelectronic applications, https://doi.org/10.1063/1.1612904
+        * Yota et al.,  JVSTA 31, 01A134 (2013), Characterization of atomic layer deposition HfO2,
+          Al2O3, and plasma-enhanced chemical vapor deposition Si3N4 as metal-insulator-metal
+          capacitor dielectric for GaAs HBT technology, https://doi.org/10.1116/1.4769207
+        '''), file=out_file)
+
+    print('## Semiconductors', file=out_file)
+    semi_props = [('relativePermittivity', 'relative permittivity'),
+                  ('electronMass', r'electron mass [m_e]'),
+                  ('electronAffinity', r'electron affinity $\chi$ [eV]'),
+                  ('directBandGap', r'direct band gap $E_g(\Gamma)$ [eV]'),
+                  ('valenceBandOffset', r'valence band offset w.r.t. InSb [eV]'),
+                  ('spinOrbitSplitting', r'spin-orbit splitting $\Delta_{so}$ [eV]'),
+                  ('interbandMatrixElement', r'interband matrix element $E_P$ [eV]'),
+                  ('luttingerGamma1', r'Luttinger parameter $\gamma_1$'),
+                  ('luttingerGamma2', r'Luttinger parameter $\gamma_2$'),
+                  ('luttingerGamma3', r'Luttinger parameter $\gamma_3$'),
+                  ('chargeNeutralityLevel', r'charge neutrality level [from VB edge, in eV]'),
+                  ('surfaceChargeDensity', r'density of surface states [10$^{12}$ cm$^{-2}$ eV$^(-1)$]')
+                 ]
+    scale_factors = dict(surfaceChargeDensity=1e-12)
+    table = [[desc] for desc in list(zip(*semi_props))[1]]
+    semi_names = [name for name, mat in sorted(iteritems(mat_lib)) if mat['type'] == 'semi']
+    for name in semi_names:
+        mat = mat_lib.find(name, eunit='eV')
+        for i, (p, _) in enumerate(semi_props):
+            if p in scale_factors and p in mat:
+                value = scale_factors[p] * mat[p]
+            else:
+                value = mat.get(p, '')
+            table[i].append(value)
+    writer.header_list = [''] + semi_names
+    writer.value_matrix = table
+    writer.write_table()
+    print(textwrap.dedent('''\
+        Sources:
+        * [Vurgaftman] Vurgaftman et al., APR 89, 5815 (2001): Band parameters for III-V compound
+          semiconductors and their alloys,  https://doi.org/10.1063/1.1368156
+        * [Heedt] Heedt, et al. Resolving ambiguities in nanowire field-effect transistor
+          characterization. Nanoscale 7, 18188-18197, 2015. https://doi.org/10.1039/c5nr03608a
+        * [Monch] Monch, Semiconductor Surfaces and Interfaces, 3rd Edition, Springer (2001).
+        * [ioffe.ru] http://www.ioffe.ru/SVA/NSM/Semicond
+        '''), file=out_file)
+
+    print(textwrap.dedent('''\
+        ### Bowing parameters
+
+        Properties of an alloy $A_{1-x} B_x$ are computed by quadratic interpolation between the
+        endpoints if there is a corresponding bowing parameter for this property and alloy.
+        Otherwise linear interpolation is employed. The quadratic interpolation formula uses the
+        convention
+            $O(A_{1-x} B_x) = (1-x) O(A) + x O(B) - x(1-x) O_{AB}$,
+        with the bowing parameter $O_{AB}$.
+        '''), file=out_file)
+    scale_factors = dict((p, 1e-3) for p in ('workFunction', 'electronAffinity', 'directBandGap',
+                                             'valenceBandOffset', 'chargeNeutralityLevel',
+                                             'interbandMatrixElement', 'spinOrbitSplitting'))
+    table = []
+    bowing_mats = sorted(mat_lib.bowingParameters.keys())
+    bowing_props = []
+    for p, desc in semi_props:
+        if np.any([p in bow_parms for bow_parms in itervalues(mat_lib.bowingParameters)]):
+            bowing_props.append(p)
+            table.append([desc])
+    for name in bowing_mats:
+        bow_parms = mat_lib.bowingParameters[name]
+        for i, p in enumerate(bowing_props):
+            if p in bow_parms:
+                value = bow_parms[p] * scale_factors.get(p, 1.)
+            else:
+                value = ''
+            table[i].append(value)
+    writer.header_list = [''] + ['({}, {})'.format(*k) for k in bowing_mats]
+    writer.value_matrix = table
+    writer.write_table()
+    print(textwrap.dedent('''\
+        Sources:
+        * [Vurgaftman] Vurgaftman et al., APR 89, 5815 (2001): Band parameters for III-V compound
+          semiconductors and their alloys,  https://doi.org/10.1063/1.1368156
+        '''), file=out_file)
+
+
 # New physical materials go here:
 if __name__ == '__main__':
     if len(sys.argv) > 1:
@@ -629,3 +765,6 @@ if __name__ == '__main__':
                                   spinOrbitSplitting=1200.)
 
     materials.save()
+
+    with open('materials.md', 'w') as f:
+        write_database_to_markdown(f, materials)
