@@ -91,4 +91,3 @@ def test_runJob():
     shutil.rmtree(os.path.join(jobPath, 'geo_2'))
     os.rmdir(jobPath)  # safety if jobPath == rootPath
 
-manual_testing(test_runJob)
