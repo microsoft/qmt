@@ -197,9 +197,9 @@ class Harness:
                 time.sleep(5.)
                 if fracComplete >= 1.0:  # we are done!
                     print('COMSOL run finished, but failed to exit!')
-                    print('Closing it in 10 seconds...')
+                    print('Closing it in 120 seconds...')
                     sys.stdout.flush()
-                    time.sleep(10.)
+                    time.sleep(120.)
                     comsolRun.terminate()
                     break
         comsolLog.close()
@@ -219,3 +219,4 @@ class Harness:
         pythonCmd = [pythonName, batchPostProcpath, '\"' + modelFilePath + '\"']
         print('Running {}...'.format(mpiCmd + pythonCmd))
         subprocess.check_call(mpiCmd + pythonCmd)
+        # subprocess.check_call(' '.join(mpiCmd + pythonCmd))

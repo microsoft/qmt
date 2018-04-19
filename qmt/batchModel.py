@@ -135,7 +135,7 @@ class Model:
 
 
     def genComsolInfo(self, meshExport=None, fileName='comsolModel', exportDir='solutions',
-                      repairTolerance=None,physics=['electrostatics']):
+                      repairTolerance=None,physics=['electrostatics'],exportDomains=[],exportScalingVec=[5.,5.,5.]):
         '''
         Generate meta information required by COSMOL
         @param meshExport: string with name for the exported mesh. None means no mesh is exported
@@ -144,12 +144,18 @@ class Model:
         @param exportDir: string with directory to which results are exported
         @param physics: which physics interfaces to allow. The options are 'electrostatics',
             'bdg', and 'schrodinger'.
+        @param exportDomains: Domains used to form the bounding box for the solution export.
+            An empty list will use all domains.
+        @param exportScalingVec: Increase the resolution along x, y, and z axes. Higher numbers
+            are higher resolutions.
         '''
         self.modelDict['comsolInfo']['meshExport'] = meshExport
         self.modelDict['comsolInfo']['repairTolerance'] = repairTolerance
         self.modelDict['comsolInfo']['fileName'] = fileName
         self.modelDict['comsolInfo']['exportDir'] = exportDir
         self.modelDict['comsolInfo']['physics'] = physics
+        self.modelDict['comsolInfo']['exportDomains'] = exportDomains
+        self.modelDict['comsolInfo']['exportScalingVec'] = exportScalingVec
     
     def setComsolQuantumParams(self,quantumDomain,alpha=[0.,0.,0.],alphaUnit='meV*nm',
                                B=[0.,0.,0.],BUnit='T',g=-2.0,Delta=0.0,DeltaUnit='meV',
@@ -234,7 +240,7 @@ class Model:
                                 and subsequent lithography layers, but this can sometimes 
                                 fail in opencascade. COMSOL takes care of this using 
                                 parasolid if left to True.
-            @param maxMeshSize: The maximum allowable mesh size for this part, in microns.
+            @param meshMaxSize: The maximum allowable mesh size for this part, in microns.
             @param meshGrowthRate: The maximum allowable mesh growth rate for this part
             @param meshScaleVector: 3D list with scaling factors for the mesh in x, y, z direction
             @param boundaryCondition: One or more boundary conditions, if applicable, of the form of
