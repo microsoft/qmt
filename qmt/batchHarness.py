@@ -175,26 +175,31 @@ class Harness:
         print('Running {}...'.format(comsolCommand))
         comsolRun = subprocess.Popen(comsolCommand, stdout=comsolLog, stderr=comsolErr)
         print('Starting COMSOL run...')
-        # Determine the number of voltages we are expecting. This is crude and
-        # should be made more reliable, since I'm assuming a full (dense) sweep:
+        # Determine the number of voltages we are expecting.
         numVoltages = myModel.modelDict['physicsSweep']['length']
         resultFileBase = '{}/{}_export'.format(comsolSolsPath,
+                                               myModel.modelDict['comsolInfo']['fileName'])
+        eigenFileBase = '{}/{}_eigvals'.format(comsolSolsPath,
                                                myModel.modelDict['comsolInfo']['fileName'])
         while True:
             if comsolRun.poll() != None:  # If the run is done, tag it as complete
                 print('COMSOL run finshed!')
                 break
             else:
-                solsList = glob.glob(resultFileBase + '*.txt')
-                fracComplete = len(solsList) / float(numVoltages)
+                fracComplete = 1.0
+                if 'electrostatics' in self.model.modelDict['comsolInfo']['physics']:
+                    solsList = glob.glob(resultFileBase + '*.txt')
+                    fracComplete = min(len(solsList) / float(numVoltages),fracComplete)
+                if ('schrodinger' in self.model.modelDict['comsolInfo']['physics']) or ('bdg' in self.model.modelDict['comsolInfo']['physics']):
+                    eigenList = glob.glob(eigenFileBase + '*.txt')
+                    fracComplete = min(len(eigenList) / float(numVoltages),fracComplete)
                 print('... ' + str(fracComplete))
                 time.sleep(5.)
-                #TODO Add check for integrals as well so we don't stop early!
-                if len(solsList) >= numVoltages:  # we are done!
+                if fracComplete >= 1.0:  # we are done!
                     print('COMSOL run finished, but failed to exit!')
-                    print('Closing it in 10 seconds...')
+                    print('Closing it in 120 seconds...')
                     sys.stdout.flush()
-                    time.sleep(10.)
+                    time.sleep(120.)
                     comsolRun.terminate()
                     break
         comsolLog.close()
@@ -214,3 +219,4 @@ class Harness:
         pythonCmd = [pythonName, batchPostProcpath, '\"' + modelFilePath + '\"']
         print('Running {}...'.format(mpiCmd + pythonCmd))
         subprocess.check_call(mpiCmd + pythonCmd)
+        # subprocess.check_call(' '.join(mpiCmd + pythonCmd))
