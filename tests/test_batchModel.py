@@ -70,9 +70,10 @@ def test_genComsolInfo():
 
 
 def test_addPart():
+    model.addPart('test_part_1','i_AlEtch_Polyline003_sketch','extrude','dielectric',
+                  material = 'SiO2',z0=-0.2,thickness=0.2,meshMaxSize=0.2)
 
-
-
+#~ manual_testing(test_addPart)
 
 def test_addJob():
     jobPath = os.path.join(testDir, 'testJob')

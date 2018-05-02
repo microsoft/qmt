@@ -10,6 +10,14 @@ running Anaconda, simply run
 
     conda env create -f environment.yml
 
+Or with pip in the current directory
+
+    pip install .
+
+Optionally in development mode (symlinks) and per user (not system wide)
+
+    pip install --user -e .
+
 A significant part of the repository consists of Python functions and macros to
 be executed within FreeCAD, either interactively or in batch mode. These
 require the latest stable version of FreeCAD (0.16). Currently, FreeCAD only

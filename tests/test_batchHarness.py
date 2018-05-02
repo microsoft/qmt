@@ -65,6 +65,8 @@ def test_runJob():
     m.addJob(jobPath,jobSequence=['geoGen'],numCoresPerJob=1)
     m.genGeomSweep('d', [0.1, 0.2, 0.3])
     m.setPaths(freeCADPath = os.path.join(testDir, '2DEG_example.FCStd'))
+    #~ m.setPaths(freeCADPath = os.path.join(
+               #~ testDir,'..','examples','1_3D_2DEG','2DEGFCDoc.FCStd'))
     m.saveModel()
 
     harn = qmt.Harness(modelPath)
