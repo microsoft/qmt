@@ -11,6 +11,8 @@ from qmt.freecad.geomUtils import *
 def setup_function(function):
     global myDoc
     myDoc = FreeCAD.newDocument('testDoc')
+    global vec
+    vec = FreeCAD.Vector
 
 
 def teardown_function(function):
@@ -30,15 +32,13 @@ def aux_two_cycle_sketch( a=( 20, 20, 0), b=(-30, 20, 0), c=(-30,-10, 0), d=( 20
     '''
 
     sketch = FreeCAD.activeDocument().addObject('Sketcher::SketchObject','Sketch')
-    geoList = []
-    geoList.append(Part.Line(FreeCAD.Vector(*a),FreeCAD.Vector(*b)))
-    geoList.append(Part.Line(FreeCAD.Vector(*b),FreeCAD.Vector(*c)))
-    geoList.append(Part.Line(FreeCAD.Vector(*c),FreeCAD.Vector(*d)))
-    geoList.append(Part.Line(FreeCAD.Vector(*d),FreeCAD.Vector(*a)))
-    geoList.append(Part.Line(FreeCAD.Vector(*e),FreeCAD.Vector(*f)))
-    geoList.append(Part.Line(FreeCAD.Vector(*f),FreeCAD.Vector(*g)))
-    geoList.append(Part.Line(FreeCAD.Vector(*g),FreeCAD.Vector(*e)))
-    FreeCAD.ActiveDocument.Sketch.addGeometry(geoList,False)
+    sketch.addGeometry(Part.LineSegment(vec(*a),vec(*b)),False)
+    sketch.addGeometry(Part.LineSegment(vec(*b),vec(*c)),False)
+    sketch.addGeometry(Part.LineSegment(vec(*c),vec(*d)),False)
+    sketch.addGeometry(Part.LineSegment(vec(*d),vec(*a)),False)
+    sketch.addGeometry(Part.LineSegment(vec(*e),vec(*f)),False)
+    sketch.addGeometry(Part.LineSegment(vec(*f),vec(*g)),False)
+    sketch.addGeometry(Part.LineSegment(vec(*g),vec(*e)),False)
     FreeCAD.ActiveDocument.recompute()
     return sketch
 
@@ -53,12 +53,10 @@ def aux_unit_square_sketch():
     d = (0,1,0)
 
     sketch = FreeCAD.activeDocument().addObject('Sketcher::SketchObject','Sketch')
-    geoList = []
-    geoList.append(Part.Line(FreeCAD.Vector(*a),FreeCAD.Vector(*b)))
-    geoList.append(Part.Line(FreeCAD.Vector(*b),FreeCAD.Vector(*c)))
-    geoList.append(Part.Line(FreeCAD.Vector(*c),FreeCAD.Vector(*d)))
-    geoList.append(Part.Line(FreeCAD.Vector(*d),FreeCAD.Vector(*a)))
-    FreeCAD.ActiveDocument.Sketch.addGeometry(geoList,False)
+    sketch.addGeometry(Part.LineSegment(vec(*a),vec(*b)),False)
+    sketch.addGeometry(Part.LineSegment(vec(*b),vec(*c)),False)
+    sketch.addGeometry(Part.LineSegment(vec(*c),vec(*d)),False)
+    sketch.addGeometry(Part.LineSegment(vec(*d),vec(*a)),False)
     FreeCAD.ActiveDocument.recompute()
     return sketch
 
