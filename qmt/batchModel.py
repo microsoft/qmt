@@ -622,9 +622,8 @@ class Model:
         else:
             self.modelDict = modelDict
 
-    def addJob(self, rootPath, jobSequence=None, numParallelJobs=1,numCoresPerJob=1,
-               geoGenArgs={}, comsolRunMode='batch',
-               postProcArgs={}):
+    def addJob(self, rootPath, jobSequence=None, numNodes=1,numJobsPerNode=1,numCoresPerJob=1,hostFile=None,
+               geoGenArgs={}, comsolRunMode='batch',postProcArgs={}):
         '''Add a job to the model.
 
             Parameters
@@ -646,10 +645,14 @@ class Model:
                     postProc : run post-processing routines.
                 If left as None, this degaults to:
                 ['geoGen','comsolRun','postProc']
-            numParallelJobs : int, default 1
-                Number of parallel jobs to run.
+            numNodes : int, default 1
+                Number of physical nodes to use.
+            numJobsPerNode : int, default 1
+                Number of jobs to run in parallel on each node.
             numCoresPerJob : int, default 1
-                Number of cores to use per job.
+                Number of cores to use for each job
+            hostFile : str, default None
+                File containing the list of node names
             geoGenArgs : dict, default {}
                 Arguments for use by the geoGen nodes.        
             comsolRunArgs : dict, default {}
@@ -662,8 +665,10 @@ class Model:
             self.modelDict['jobSettings']['jobSequence'] = ['geoGen']
         else:
             self.modelDict['jobSettings']['jobSequence'] = jobSequence
-        self.modelDict['jobSettings']['numParallelJobs'] = numParallelJobs
+        self.modelDict['jobSettings']['numNodes'] = numNodes
+        self.modelDict['jobSettings']['numJobsPerNode'] = numJobsPerNode
         self.modelDict['jobSettings']['numCoresPerJob'] = numCoresPerJob
+        self.modelDict['jobSettings']['hostFile'] = hostFile        
         self.modelDict['jobSettings']['geoGenArgs'] = geoGenArgs
         self.modelDict['jobSettings']['comsolRunMode'] = comsolRunMode
         self.modelDict['jobSettings']['postProcArgs'] = postProcArgs

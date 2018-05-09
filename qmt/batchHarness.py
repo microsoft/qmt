@@ -19,18 +19,26 @@ import time
 
 
 class Harness:
-    def __init__(self, jsonPath):
+    def __init__(self, jsonPath,os='linux'):
         ''' Class to run a batch 3D job on the cluster. 
 
             Parameters
             ----------
             jsonPath : str
                 Path to the model json file used to build the run
+            os : str
+                Either 'linux' or 'windows'
         '''
-        self.jsonPath = os.path.abspath(jsonPath)
+        try:
+            self.jsonPath = os.path.abspath(jsonPath)
+        except AttributeError:
+            self.jsonPath = jsonPath
         self.model = QMT.Model(self.jsonPath)
         self.modelFilePaths = []
         self.model.loadModel()
+        if os not in ['linux','windows']:
+            raise ValueError('os must be either "windows" or "linux"!')
+        self.os = os
 
     def setupRun(self, genModelFiles=True):
         ''' Set up the folder structure of a run, broken out by the geomSweep
@@ -136,21 +144,39 @@ class Harness:
         from qms import comsol
         myModel = QMT.Model(modelPath=modelFilePath)
         myModel.loadModel()
+        numNodes = myModel.modelDict['jobSettings']['numNodes']
+        numJobsPerNode = myModel.modelDict['jobSettings']['numJobsPerNode']
         numCoresPerJob = myModel.modelDict['jobSettings']['numCoresPerJob']
-        numParallelJobs = myModel.modelDict['jobSettings']['numParallelJobs']
+        numParallelJobs = numNodes*numJobsPerNode
+        hostFile = myModel.modelDict['jobSettings']['hostFile']
         comsolExecPath = myModel.modelDict['pathSettings']['COMSOLExecPath']
+        comsolCompilePath = myModel.modelDict['pathSettings']['COMSOLCompilePath']
+        jdkPath = myModel.modelDict['pathSettings']['jdkPath']
         mpiPath = myModel.modelDict['pathSettings']['mpiPath']
+        folder = myModel.modelDict['pathSettings']['dirPath']
+        name = myModel.modelDict['comsolInfo']['fileName']
         myComsolModel = comsol.ComsolModel(modelFilePath, run_mode=self.model.modelDict['jobSettings']['comsolRunMode'])
+
         print('Compiling COMSOL java file...')
-        myComsolModel._compile()
+        myComsolModel._write()
+        if self.os == 'windows':
+            compileList = [comsolCompilePath, '-jdkroot', jdkPath, '{0}/{1}.java'.format(folder,name)]
+        elif self.os == 'linux':
+            compileList = [comsolExecPath, 'compile', '{0}/{1}.java'.format(folder,name)]      
+        print('Running '+' '.join(compileList))         
+        subprocess.check_call(compileList)  
+        
         # Make the export directory if it doesn't exist:
         comsolSolsPath = myModel.modelDict['pathSettings']['dirPath'] + \
                          '/' + myModel.modelDict['comsolInfo']['exportDir']
         if not os.path.isdir(comsolSolsPath):
             os.mkdir(comsolSolsPath)
-        comsolModelPath = '\"' + myModel.modelDict['pathSettings'][
-            'dirPath'] + '/' + myComsolModel.name + '.class' + '\"'
-
+        if self.os == 'windows':
+            comsolModelPath = '\"' + myModel.modelDict['pathSettings'][
+                'dirPath'] + '/' + myComsolModel.name + '.class' + '\"'
+        elif self.os == 'linux':
+            comsolModelPath = myModel.modelDict['pathSettings'][
+                'dirPath'] + '/' + myComsolModel.name + '.class'     
         # Initiate the COMSOL run:
         # comsolCommand = [mpiPath, '-n', str(numCores), comsolExecPath, '-nosave', '-np', '1', '-inputFile', comsolModelPath]
         # The above doesn't work with double quotes in the path names
@@ -160,51 +186,64 @@ class Harness:
         # and it shouldn't exceed the number of physical cores on a machine. Apparently, 
         # the MPI -n flag should be the number of computational nodes, not the number of total
         # cores.'
-        if not self.model.modelDict['jobSettings']['comsolRunMode'] == 'batch': # save the resulting file for manual inspection
-            comsolCommand = mpiPath + ' -n ' + str(numParallelJobs) + ' \"' + comsolExecPath +\
-            '\" -np ' + str(numCoresPerJob)+ ' -inputFile ' + comsolModelPath
-        else:
-            comsolCommand = mpiPath + ' -n ' + str(numParallelJobs) + ' \"' + comsolExecPath +\
-            '\" -nosave -np ' +str(numCoresPerJob)+ ' -inputFile ' + comsolModelPath
         comsolLogName = myModel.modelDict['pathSettings']['dirPath'] + '/comsolLog.txt'
-        comsolErrName = myModel.modelDict['pathSettings']['dirPath'] + '/comsolErr.txt'
+        comsolErrName = myModel.modelDict['pathSettings']['dirPath'] + '/comsolErr.txt'        
+        if not self.model.modelDict['jobSettings']['comsolRunMode'] == 'batch': # save the resulting file for manual inspection
+            if self.os == 'windows':
+                comsolCommand = mpiPath + ' -n ' + str(numParallelJobs) + ' \"' + comsolExecPath +\
+                '\" -np ' + str(numCoresPerJob)+ ' -inputFile ' + comsolModelPath
+            elif self.os == 'linux':
+                comsolCommand = comsolExecPath+' batch -nn '+str(numNodes)+' -nnhost '+str(numJobsPerNode)+\
+                                ' -np '+str(numCoresPerJob)+' -inputFile '+comsolModelPath+' -batchlog '+comsolLogName
+        else:
+            if self.os == 'windows':
+                comsolCommand = mpiPath + ' -n ' + str(numParallelJobs) + ' \"' + comsolExecPath +\
+                '\" -nosave -np ' +str(numCoresPerJob)+ ' -inputFile ' + comsolModelPath
+            elif self.os == 'linux':
+                comsolCommand = comsolExecPath+' batch -nn '+str(numNodes)+' -nnhost '+str(numJobsPerNode)+\
+                                ' -nosave -np '+str(numCoresPerJob)+' -inputFile '+comsolModelPath+' -batchlog '+comsolLogName            
+        if hostFile is not None:
+            comsolCommand += ' -f '+hostFile
         # Log file for COMSOL run:
-        comsolLog = open(comsolLogName, 'w')
-        comsolErr = open(comsolErrName, 'w')
-
-        print('Running {}...'.format(comsolCommand))
-        comsolRun = subprocess.Popen(comsolCommand, stdout=comsolLog, stderr=comsolErr)
-        print('Starting COMSOL run...')
-        # Determine the number of voltages we are expecting.
-        numVoltages = myModel.modelDict['physicsSweep']['length']
-        resultFileBase = '{}/{}_export'.format(comsolSolsPath,
-                                               myModel.modelDict['comsolInfo']['fileName'])
-        eigenFileBase = '{}/{}_eigvals'.format(comsolSolsPath,
-                                               myModel.modelDict['comsolInfo']['fileName'])
-        while True:
-            if comsolRun.poll() != None:  # If the run is done, tag it as complete
-                print('COMSOL run finshed!')
-                break
-            else:
-                fracComplete = 1.0
-                if 'electrostatics' in self.model.modelDict['comsolInfo']['physics']:
-                    solsList = glob.glob(resultFileBase + '*.txt')
-                    fracComplete = min(len(solsList) / float(numVoltages),fracComplete)
-                if ('schrodinger' in self.model.modelDict['comsolInfo']['physics']) or ('bdg' in self.model.modelDict['comsolInfo']['physics']):
-                    eigenList = glob.glob(eigenFileBase + '*.txt')
-                    fracComplete = min(len(eigenList) / float(numVoltages),fracComplete)
-                print('... ' + str(fracComplete))
-                time.sleep(5.)
-                if fracComplete >= 1.0:  # we are done!
-                    print('COMSOL run finished, but failed to exit!')
-                    print('Closing it in 120 seconds...')
-                    sys.stdout.flush()
-                    time.sleep(120.)
-                    comsolRun.terminate()
+        if self.os == 'windows':
+            comsolLog = open(comsolLogName, 'w')
+            comsolErr = open(comsolErrName, 'w')
+            print('Running {}...'.format(comsolCommand))
+            comsolRun = subprocess.Popen(comsolCommand, stdout=comsolLog, stderr=comsolErr)
+            print('Starting COMSOL run...')
+            # Determine the number of voltages we are expecting.
+            numVoltages = myModel.modelDict['physicsSweep']['length']
+            resultFileBase = '{}/{}_export'.format(comsolSolsPath,
+                                                   myModel.modelDict['comsolInfo']['fileName'])
+            eigenFileBase = '{}/{}_eigvals'.format(comsolSolsPath,
+                                                   myModel.modelDict['comsolInfo']['fileName'])
+            while True:
+                if comsolRun.poll() != None:  # If the run is done, tag it as complete
+                    print('COMSOL run finshed!')
                     break
-        comsolLog.close()
-        comsolErr.close()
-
+                else:
+                    fracComplete = 1.0
+                    if 'electrostatics' in self.model.modelDict['comsolInfo']['physics']:
+                        solsList = glob.glob(resultFileBase + '*.txt')
+                        fracComplete = min(len(solsList) / float(numVoltages),fracComplete)
+                    if ('schrodinger' in self.model.modelDict['comsolInfo']['physics']) or ('bdg' in self.model.modelDict['comsolInfo']['physics']):
+                        eigenList = glob.glob(eigenFileBase + '*.txt')
+                        fracComplete = min(len(eigenList) / float(numVoltages),fracComplete)
+                    print('... ' + str(fracComplete))
+                    time.sleep(5.)
+                    if fracComplete >= 1.0:  # we are done!
+                        print('COMSOL run finished, but failed to exit!')
+                        print('Closing it in 120 seconds...')
+                        sys.stdout.flush()
+                        time.sleep(120.)
+                        comsolRun.terminate()
+                        break
+            comsolLog.close()
+            comsolErr.close()
+        elif self.os == 'linux':
+            print('Running {} ...'.format(comsolCommand))
+            comsolRun = subprocess.check_call(comsolCommand,shell=True)
+                    
     def runBatchPostProc(self, modelFilePath):
         ''' Run batch post-processing. This requires proprietary components
         to be installed.
