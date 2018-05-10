@@ -43,13 +43,17 @@ def aux_two_cycle_sketch( a=( 20, 20, 0), b=(-30, 20, 0), c=(-30,-10, 0), d=( 20
     sketch.addGeometry(Part.LineSegment(vec(*g),vec(*e)),False)
     return sketch
 
+
 def test_deepRemove():
     '''Test deep (recursive) removal by all parameters.'''
+
+    # very simple deletion
     sketch = aux_two_cycle_sketch()
     part = qmt.freecad.extrude(sketch, 10)
     deepRemove(part)
     assert len(myDoc.Objects) == 0
 
+    # copied object deletion
     sketch = aux_two_cycle_sketch()
     part = qmt.freecad.extrude(sketch, 10)
     part2 = myDoc.copyObject(part, False)
@@ -59,10 +63,12 @@ def test_deepRemove():
     deepRemove(label=part.Label)
     assert len(myDoc.Objects) == 0
 
+    # check input sanitation
     with pytest.raises(RuntimeError) as err:
         deepRemove(None)
     assert 'No object selected' in str(err.value)
 
+    # compound object deletion
     box1 = myDoc.addObject("Part::Box","Box1")
     box2 = myDoc.addObject("Part::Box","Box2")
     box3 = myDoc.addObject("Part::Box","Box3")
@@ -72,10 +78,9 @@ def test_deepRemove():
     inter2 = myDoc.addObject("Part::MultiCommon","inter2")
     inter2.Shapes = [inter1, box3,]
     myDoc.recompute()
+    FreeCAD.ActiveDocument.removeObject(box1.Name) # annoying interjected delete
     deepRemove(inter2)
-
-
-manual_testing(test_deepRemove)
+    assert len(myDoc.Objects) == 0
 
 
 def test_findSegments():
@@ -84,10 +89,13 @@ def test_findSegments():
     d = ( 20,-10, 0)
     sketch = aux_two_cycle_sketch(b=b, d=d)
 
+    print(sketch.Shape.Edges)
     segL = findSegments(sketch)
-    assert (segL[0][1] == [b]).all()
-    assert (segL[2][1] == [d]).all()
+    print(segL)
+    # ~ assert (segL[0][1] == [b]).all()
+    # ~ assert (segL[2][1] == [d]).all()
 
+manual_testing(test_findSegments)
 
 def test_nextSegment():
     '''Test if nextSegment correctly increments.'''

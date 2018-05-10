@@ -13,13 +13,35 @@ import numpy as np
 from copy import deepcopy
 
 
+def deepRemove_impl(obj):
+    for child in obj.OutList:
+        deepRemove_impl(child)
+    FreeCAD.ActiveDocument.removeObject(obj.Name)
+
+
+def deepRemove(obj=None, name=None, label=None):
+    ''' Remove a targeted object and recursively delete all sub-objects it contains.
+    '''
+    doc = FreeCAD.ActiveDocument
+    if obj is not None:
+        pass
+    elif name is not None:
+        obj = doc.getObject(name)
+    elif label is not None:
+        obj = doc.getObjectsByLabel(label)[0]
+    else:
+        raise RuntimeError('No object selected!')
+    deepRemove_impl(obj)
+    doc.recompute()
+
+
 def delete(obj):
     doc = FreeCAD.ActiveDocument
     doc.removeObject(obj.Name)
     doc.recompute()
-    
 
-def deepRemove(obj=None, name=None, label=None):
+
+def deepRemove_OLD(obj=None, name=None, label=None):
     ''' Remove a targeted object and recursively delete all sub-objects it contains.
     '''
     doc = FreeCAD.ActiveDocument
@@ -66,6 +88,7 @@ def findSegments(mySketch):
     # for seg in mySketch.Geometry:
     #     lineSegments += [[[seg.StartPoint[0], seg.StartPoint[1], seg.StartPoint[2]], \
     #                       [seg.EndPoint[0], seg.EndPoint[1], seg.EndPoint[2]]]]
+    print(mySketch.Shape.Edges)
     for edge in mySketch.Shape.Edges:
         lineSegments.append([tuple(edge.Vertexes[0].Point), tuple(edge.Vertexes[1].Point)])
     lineSegments = np.array(lineSegments)

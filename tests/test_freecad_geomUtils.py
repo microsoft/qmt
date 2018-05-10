@@ -74,9 +74,12 @@ def test_extrude():
     '''Test if extrusion produces PartDesign parts.'''
     sketch = aux_two_cycle_sketch()
     pad = extrude(sketch, 50, name = "pad", reversed=True)
-    assert pad.Length.Value == 50
-    assert pad.TypeId == 'PartDesign::Pad'
+    # ~ assert pad.Length.Value == 50
+    # ~ assert pad.TypeId == 'PartDesign::Pad'
+    assert pad.LengthFwd.Value == 50
+    assert pad.TypeId == 'Part::Extrusion'
 
+# ~ manual_testing(test_extrude)
 
 def test_copy():
     '''Test copy. TODO: warning.'''
@@ -90,7 +93,7 @@ def test_copy():
 def test_makeHexFace():
     '''Test wire face positioning. TODO: has /0 warning for given line'''
     sketch = myDoc.addObject('Sketcher::SketchObject','wireline')
-    sketch.addGeometry(Part.Line(FreeCAD.Vector(0,0,0),FreeCAD.Vector(0,2,0)),False)
+    sketch.addGeometry(Part.LineSegment(vec(0,0,0),vec(0,2,0)),False)
     myDoc.recompute()
     face = makeHexFace(sketch, 0, 15)
     assert np.isclose(face.Shape.BoundBox.ZLength, 15)
@@ -98,7 +101,6 @@ def test_makeHexFace():
     assert np.isclose(face.Shape.BoundBox.YMin, 0)
     assert np.isclose(face.Shape.BoundBox.YMax, 0)
     assert np.isclose(face.Shape.BoundBox.ZMin, 0)
-
 
 def test_genUnion():
     '''Test union via bounding box.'''
