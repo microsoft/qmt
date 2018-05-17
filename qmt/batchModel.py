@@ -688,6 +688,7 @@ class Model:
                 Path to mpiexec
             jdkPath : str, default None
                 Path to the jdk installation
+            nodeFile : 
         '''
         self.modelDict['pathSettings']['COMSOLExecPath'] = COMSOLExecPath
         self.modelDict['pathSettings']['COMSOLCompilePath'] = COMSOLCompilePath

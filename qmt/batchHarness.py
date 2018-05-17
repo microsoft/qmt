@@ -141,6 +141,7 @@ class Harness:
         ''' Run batch COMSOL run. This requires proprietary components to be 
         installed.
         '''
+        import qms
         from qms import comsol
         myModel = QMT.Model(modelPath=modelFilePath)
         myModel.loadModel()
@@ -166,6 +167,15 @@ class Harness:
         print('Running '+' '.join(compileList))         
         subprocess.check_call(compileList)  
         
+        #If we are in Linux, we need to set the following environmental variable:
+        if self.os == 'linux':
+            launcherPath = os.path.dirname(qms.__file__)+'/launch.py'        
+            my_env = os.environ.copy()
+            my_env['I_MPI_HYDRA_BOOTSTRAP_EXEC']=launcherPath # for Intel MPI
+            my_env['HYDRA_LAUNCHER_EXEC']=launcherPath # for MPICH            
+        elif self.os == 'windows':
+            my_env = os.environ.copy()
+        
         # Make the export directory if it doesn't exist:
         comsolSolsPath = myModel.modelDict['pathSettings']['dirPath'] + \
                          '/' + myModel.modelDict['comsolInfo']['exportDir']
@@ -187,75 +197,86 @@ class Harness:
         # the MPI -n flag should be the number of computational nodes, not the number of total
         # cores.'
         comsolLogName = myModel.modelDict['pathSettings']['dirPath'] + '/comsolLog.txt'
-        comsolErrName = myModel.modelDict['pathSettings']['dirPath'] + '/comsolErr.txt'        
+        stdOutLogName = myModel.modelDict['pathSettings']['dirPath'] + '/comsolStdOut.txt'
+        stdErrLogName = myModel.modelDict['pathSettings']['dirPath'] + '/comsolStdErr.txt'        
         if not self.model.modelDict['jobSettings']['comsolRunMode'] == 'batch': # save the resulting file for manual inspection
             if self.os == 'windows':
                 comsolCommand = mpiPath + ' -n ' + str(numParallelJobs) + ' \"' + comsolExecPath +\
                 '\" -np ' + str(numCoresPerJob)+ ' -inputFile ' + comsolModelPath
             elif self.os == 'linux':
-                comsolCommand = comsolExecPath+' batch -nn '+str(numNodes)+' -nnhost '+str(numJobsPerNode)+\
-                                ' -np '+str(numCoresPerJob)+' -inputFile '+comsolModelPath+' -batchlog '+comsolLogName
+                comsolCommand = comsolExecPath+' batch -nn '+str(numParallelJobs)+' -nnhost '+str(numJobsPerNode)+\
+                                ' -np '+str(numCoresPerJob)+' -inputFile '+comsolModelPath+' -batchlog '+\
+                                comsolLogName+' -mpifabrics tcp'
         else:
             if self.os == 'windows':
                 comsolCommand = mpiPath + ' -n ' + str(numParallelJobs) + ' \"' + comsolExecPath +\
                 '\" -nosave -np ' +str(numCoresPerJob)+ ' -inputFile ' + comsolModelPath
             elif self.os == 'linux':
-                comsolCommand = comsolExecPath+' batch -nn '+str(numNodes)+' -nnhost '+str(numJobsPerNode)+\
-                                ' -nosave -np '+str(numCoresPerJob)+' -inputFile '+comsolModelPath+' -batchlog '+comsolLogName            
+                comsolCommand = comsolExecPath+' batch -nn '+str(numParallelJobs)+' -nnhost '+str(numJobsPerNode)+\
+                                ' -nosave -np '+str(numCoresPerJob)+' -inputFile '+comsolModelPath+' -batchlog '+\
+                                comsolLogName+' -mpifabrics tcp -mpiarg -verbose'
+                                    
         if hostFile is not None:
             comsolCommand += ' -f '+hostFile
-        # Log file for COMSOL run:
-        if self.os == 'windows':
-            comsolLog = open(comsolLogName, 'w')
-            comsolErr = open(comsolErrName, 'w')
-            print('Running {}...'.format(comsolCommand))
-            comsolRun = subprocess.Popen(comsolCommand, stdout=comsolLog, stderr=comsolErr)
-            print('Starting COMSOL run...')
-            # Determine the number of voltages we are expecting.
-            numVoltages = myModel.modelDict['physicsSweep']['length']
-            resultFileBase = '{}/{}_export'.format(comsolSolsPath,
-                                                   myModel.modelDict['comsolInfo']['fileName'])
-            eigenFileBase = '{}/{}_eigvals'.format(comsolSolsPath,
-                                                   myModel.modelDict['comsolInfo']['fileName'])
-            while True:
-                if comsolRun.poll() != None:  # If the run is done, tag it as complete
-                    print('COMSOL run finshed!')
+        comsolLog = open(stdOutLogName, 'w')
+        comsolErr = open(stdErrLogName, 'w')
+        print('Running {} ...'.format(comsolCommand))
+        comsolRun = subprocess.Popen(comsolCommand, stdout=comsolLog, stderr=comsolErr,shell=True,env=my_env)
+        print('Starting COMSOL run...')
+        # Determine the number of voltages we are expecting.
+        numVoltages = myModel.modelDict['physicsSweep']['length']
+        resultFileBase = '{}/{}_export'.format(comsolSolsPath,
+                                               myModel.modelDict['comsolInfo']['fileName'])
+        eigenFileBase = '{}/{}_eigvals'.format(comsolSolsPath,
+                                               myModel.modelDict['comsolInfo']['fileName'])
+        while True:
+            if comsolRun.poll() != None:  # If the run is done, tag it as complete
+                print('COMSOL run finshed!')
+                break
+            else:
+                fracComplete = 1.0
+                if 'electrostatics' in self.model.modelDict['comsolInfo']['physics']:
+                    solsList = glob.glob(resultFileBase + '*.txt')
+                    fracComplete = min(len(solsList) / float(numVoltages),fracComplete)
+                if ('schrodinger' in self.model.modelDict['comsolInfo']['physics']) or ('bdg' in self.model.modelDict['comsolInfo']['physics']):
+                    eigenList = glob.glob(eigenFileBase + '*.txt')
+                    fracComplete = min(len(eigenList) / float(numVoltages),fracComplete)
+                print('... ' + str(fracComplete))
+                time.sleep(5.)
+                if fracComplete >= 1.0:  # we are done!
+                    print('COMSOL run finished, but failed to exit!')
+                    print('Closing it in 120 seconds...')
+                    sys.stdout.flush()
+                    time.sleep(120.)
+                    comsolRun.terminate()
                     break
-                else:
-                    fracComplete = 1.0
-                    if 'electrostatics' in self.model.modelDict['comsolInfo']['physics']:
-                        solsList = glob.glob(resultFileBase + '*.txt')
-                        fracComplete = min(len(solsList) / float(numVoltages),fracComplete)
-                    if ('schrodinger' in self.model.modelDict['comsolInfo']['physics']) or ('bdg' in self.model.modelDict['comsolInfo']['physics']):
-                        eigenList = glob.glob(eigenFileBase + '*.txt')
-                        fracComplete = min(len(eigenList) / float(numVoltages),fracComplete)
-                    print('... ' + str(fracComplete))
-                    time.sleep(5.)
-                    if fracComplete >= 1.0:  # we are done!
-                        print('COMSOL run finished, but failed to exit!')
-                        print('Closing it in 120 seconds...')
-                        sys.stdout.flush()
-                        time.sleep(120.)
-                        comsolRun.terminate()
-                        break
-            comsolLog.close()
-            comsolErr.close()
-        elif self.os == 'linux':
-            print('Running {} ...'.format(comsolCommand))
-            comsolRun = subprocess.check_call(comsolCommand,shell=True)
+        comsolLog.close()
+        comsolErr.close()
                     
     def runBatchPostProc(self, modelFilePath):
         ''' Run batch post-processing. This requires proprietary components
         to be installed.
         '''
-        import qms as QMTP
-        numCores = self.model.modelDict['jobSettings']['numCoresPerJob'] \
-                   * self.model.modelDict['jobSettings']['numParallelJobs']
+        import qms
+        numJobsPerNode = self.model.modelDict['jobSettings']['numJobsPerNode']
+        numNodes = self.model.modelDict['jobSettings']['numNodes']
+        numCores = numNodes*numJobsPerNode                
         mpiexecName = self.model.modelDict['pathSettings']['mpiPath']
         pythonName = self.model.modelDict['pathSettings']['pythonPath']
-        batchPostProcpath = QMTP.postProcessing.__file__.rstrip('__init__.pyc') + 'batchPostProc.py'
-        mpiCmd = [mpiexecName, '-n', str(numCores)]
+        hostFile = self.model.modelDict['jobSettings']['hostFile']
+        
+        #If we are in Linux, we need to set the following environmental variable:
+        if self.os == 'linux':
+            launcherPath = os.path.dirname(qms.__file__)+'/launch.py'        
+            my_env = os.environ.copy()
+            my_env['I_MPI_HYDRA_BOOTSTRAP_EXEC']=launcherPath # for Intel MPI            
+            my_env['HYDRA_LAUNCHER_EXEC']=launcherPath # for MPICH
+        elif self.os == 'windows':
+            my_env = os.environ.copy()
+            
+        batchPostProcpath = qms.postProcessing.__file__.rstrip('__init__.pyc') + 'batchPostProc.py'
+        mpiCmd = [mpiexecName, '-n', str(numCores),'-f',hostFile]
         pythonCmd = [pythonName, batchPostProcpath, '\"' + modelFilePath + '\"']
         print('Running {}...'.format(mpiCmd + pythonCmd))
-        subprocess.check_call(mpiCmd + pythonCmd)
+        subprocess.check_call(mpiCmd + pythonCmd,env=my_env)
         # subprocess.check_call(' '.join(mpiCmd + pythonCmd))
