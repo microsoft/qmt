@@ -167,14 +167,13 @@ class Harness:
         print('Running '+' '.join(compileList))         
         subprocess.check_call(compileList)  
         
-        #If we are in Linux, we need to set the following environmental variable:
-        if self.os == 'linux':
+        # If we are on the Linux cluster and not run by SLURM, we need to enable the launcher hack
+        slurmRun = self.os == 'linux' and 'SLURM_JOB_NODELIST' in os.environ
+        my_env = os.environ.copy()
+        if self.os == 'linux' and not slurmRun:
             launcherPath = os.path.dirname(qms.__file__)+'/launch.py'        
-            my_env = os.environ.copy()
             my_env['I_MPI_HYDRA_BOOTSTRAP_EXEC']=launcherPath # for Intel MPI
             my_env['HYDRA_LAUNCHER_EXEC']=launcherPath # for MPICH            
-        elif self.os == 'windows':
-            my_env = os.environ.copy()
         
         # Make the export directory if it doesn't exist:
         comsolSolsPath = myModel.modelDict['pathSettings']['dirPath'] + \
@@ -215,6 +214,9 @@ class Harness:
                 comsolCommand = comsolExecPath+' batch -nn '+str(numParallelJobs)+' -nnhost '+str(numJobsPerNode)+\
                                 ' -nosave -np '+str(numCoresPerJob)+' -inputFile '+comsolModelPath+' -batchlog '+\
                                 comsolLogName+' -mpifabrics tcp -mpiarg -verbose'
+        # Intel MPI on SLURM needs an extra bootstrap argument
+        if slurmRun:
+            comsolCommand += ' -mpibootstrap slurm'
                                     
         if hostFile is not None:
             comsolCommand += ' -f '+hostFile
@@ -265,14 +267,12 @@ class Harness:
         pythonName = self.model.modelDict['pathSettings']['pythonPath']
         hostFile = self.model.modelDict['jobSettings']['hostFile']
         
-        #If we are in Linux, we need to set the following environmental variable:
-        if self.os == 'linux':
+        # If we are on the Linux cluster and not run by SLURM, we need to enable the launcher hack
+        my_env = os.environ.copy()
+        if self.os == 'linux' and 'SLURM_JOB_NODELIST' not in os.environ:
             launcherPath = os.path.dirname(qms.__file__)+'/launch.py'        
-            my_env = os.environ.copy()
             my_env['I_MPI_HYDRA_BOOTSTRAP_EXEC']=launcherPath # for Intel MPI            
             my_env['HYDRA_LAUNCHER_EXEC']=launcherPath # for MPICH
-        elif self.os == 'windows':
-            my_env = os.environ.copy()
             
         batchPostProcpath = qms.postProcessing.__file__.rstrip('__init__.pyc') + 'batchPostProc.py'
         mpiCmd = [mpiexecName, '-n', str(numCores),'-f',hostFile]
