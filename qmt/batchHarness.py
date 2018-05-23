@@ -275,7 +275,9 @@ class Harness:
             my_env['HYDRA_LAUNCHER_EXEC']=launcherPath # for MPICH
             
         batchPostProcpath = qms.postProcessing.__file__.rstrip('__init__.pyc') + 'batchPostProc.py'
-        mpiCmd = [mpiexecName, '-n', str(numCores),'-f',hostFile]
+        mpiCmd = [mpiexecName, '-n', str(numCores)]
+        if hostFile:
+            mpiCmd += ['-f', hostFile]
         pythonCmd = [pythonName, batchPostProcpath, '\"' + modelFilePath + '\"']
         print('Running {}...'.format(mpiCmd + pythonCmd))
         subprocess.check_call(mpiCmd + pythonCmd,env=my_env)
