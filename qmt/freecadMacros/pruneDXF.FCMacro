@@ -10,7 +10,7 @@
 from PySide import QtGui, QtCore
 import numpy as np 
 import Draft
-from qmt.freecad import isNonempty,intersect,delete,findEdgeCycles,addCycleSketch
+from qmt.freecad import isNonempty,intersect,delete,findEdgeCycles,addCycleSketch,copy
 
 
 class GuiClass(QtGui.QDialog):
@@ -85,9 +85,10 @@ for layerName in dxfLayerNames:
     survivingLayerDict[layerName] = {}
     for j,obj in enumerate(objsInLayer):
         try: # Try to convert to a face
-            faceObj = Draft.upgrade(obj,delete=False)[0][0] # convert to a face
+            print thisIsBroken
+#             faceObj = Draft.upgrade(obj,delete=False)[0][0] # convert to a face
         except: # If we couldn't convert to face, just skip the shape
-            continue
+            faceObj = copy(obj)
         intObj = intersect([mask,faceObj]) # intersect with mask
         delete(faceObj) # Delte the face
         if isNonempty(intObj): # If we have a finite intersection with the mask
