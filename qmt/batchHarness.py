@@ -213,7 +213,7 @@ class Harness:
             elif self.os == 'linux':
                 comsolCommand = comsolExecPath+' batch -nn '+str(numParallelJobs)+' -nnhost '+str(numJobsPerNode)+\
                                 ' -nosave -np '+str(numCoresPerJob)+' -inputFile '+comsolModelPath+' -batchlog '+\
-                                comsolLogName+' -mpifabrics tcp -mpiarg -verbose'
+                                comsolLogName+' -mpifabrics tcp'  # + ' -mpiarg -verbose'
         # Intel MPI on SLURM needs an extra bootstrap argument
         if slurmRun:
             comsolCommand += ' -mpibootstrap slurm'
