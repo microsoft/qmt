@@ -79,7 +79,6 @@ def test_extrude():
     assert pad.LengthFwd.Value == 50
     assert pad.TypeId == 'Part::Extrusion'
 
-manual_testing(test_extrude)
 
 def test_copy():
     '''Test copy. TODO: warning.'''

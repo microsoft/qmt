@@ -172,6 +172,13 @@ def test_addCycleSketch():
         addCycleSketch('cyclesketch', myDoc, cycles[0], segArr[0:4])
     assert 'already exists' in str(err.value)
 
+
+def test_addPolyLineSketch():
+    '''Test if polylines are correctly added.'''
+    pass
+    #TODO
+
+
 def test_findEdgeCycles():
     '''Test multiple cycle ordering.'''
     sketch = aux_two_cycle_sketch()
