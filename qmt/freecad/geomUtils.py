@@ -124,7 +124,11 @@ def genUnion(objList, consumeInputs=False):
         return returnObj
     else:
         union = doc.addObject("Part::MultiFuse")
-        union.Shapes = objList
+        nonZeroList = []
+        for obj in objList:
+            if isNonempty(obj):
+                nonZeroList += [obj]
+        union.Shapes = nonZeroList
         doc.recompute()
         unionDupe = copy(union)
         doc.removeObject(union.Name)
@@ -225,6 +229,14 @@ def checkOverlap(objList):
         overlap = True
     delete(intObj)
     return overlap
+
+def isNonempty(obj):
+    ''' Checks if an object is nonempty (returns True) or empty (returns False).
+    '''
+    if len(obj.Shape.Vertexes) == 0:
+        return False
+    else:
+        return True
 
 
 def extrudeBetween(sketch, zMin, zMax):
