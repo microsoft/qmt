@@ -48,10 +48,10 @@ def aux_unit_square_sketch():
 
     sketch = FreeCAD.activeDocument().addObject('Sketcher::SketchObject','Sketch')
     geoList = []
-    geoList.append(Part.Line(FreeCAD.Vector(*a),FreeCAD.Vector(*b)))
-    geoList.append(Part.Line(FreeCAD.Vector(*b),FreeCAD.Vector(*c)))
-    geoList.append(Part.Line(FreeCAD.Vector(*c),FreeCAD.Vector(*d)))
-    geoList.append(Part.Line(FreeCAD.Vector(*d),FreeCAD.Vector(*a)))
+    geoList.append(Part.LineSegment(FreeCAD.Vector(*a),FreeCAD.Vector(*b)))
+    geoList.append(Part.LineSegment(FreeCAD.Vector(*b),FreeCAD.Vector(*c)))
+    geoList.append(Part.LineSegment(FreeCAD.Vector(*c),FreeCAD.Vector(*d)))
+    geoList.append(Part.LineSegment(FreeCAD.Vector(*d),FreeCAD.Vector(*a)))
     FreeCAD.ActiveDocument.Sketch.addGeometry(geoList,False)
     FreeCAD.ActiveDocument.recompute()
     return sketch
@@ -63,8 +63,8 @@ def test_buildWire():
     '''
     sketch = myDoc.addObject('Sketcher::SketchObject','Sketch')
     geoList = []
-    geoList.append(Part.Line(FreeCAD.Vector(0,0,0),FreeCAD.Vector(1,2,0)))
-    geoList.append(Part.Line(FreeCAD.Vector(1,2,0),FreeCAD.Vector(3,3,0)))
+    geoList.append(Part.LineSegment(FreeCAD.Vector(0,0,0),FreeCAD.Vector(1,2,0)))
+    geoList.append(Part.LineSegment(FreeCAD.Vector(1,2,0),FreeCAD.Vector(3,3,0)))
     sketch.addGeometry(geoList,False)
     myDoc.recompute()
     wire = buildWire(sketch, 0, 1)

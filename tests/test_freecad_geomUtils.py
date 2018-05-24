@@ -187,6 +187,7 @@ def test_extrudeBetween():
 def test_liftObject():
     '''Test sweeping lift for sketches. TODO: why do we have to make union with the lifted sketch?.'''
     sketch = aux_unit_square_sketch()
+    # TODO
     #~ vol = liftObject(sketch, 42, consumeInputs=False)
     #~ assert vol.Shape.Volume == 42
 
