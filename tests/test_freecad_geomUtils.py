@@ -81,7 +81,8 @@ def test_extrude():
 
 
 def test_copy():
-    '''Test copy. TODO: warning.'''
+    '''Test copy.'''
+    # TODO: warning.
     #~ sketch = aux_two_cycle_sketch() # WARNING: multi-cycle sketches don't get moved correctly -> need sanitation
     sketch = aux_hexagon_sketch()
     sketch2 = copy(sketch, FreeCAD.Vector(0,0,20), copy=True)
@@ -90,7 +91,8 @@ def test_copy():
 
 
 def test_makeHexFace():
-    '''Test wire face positioning. TODO: has /0 warning for given line'''
+    '''Test wire face positioning.'''
+    # TODO: has /0 warning for given line
     sketch = myDoc.addObject('Sketcher::SketchObject','wireline')
     sketch.addGeometry(Part.LineSegment(vec(0,0,0),vec(0,2,0)),False)
     myDoc.recompute()
@@ -143,8 +145,8 @@ def test_subtract():
 
 def test_subtractParts():
     '''Test subtract by checking volume.
-       TODO: the FC v0.16 Draft requires UiLoader, which doesn't work from the cli.
     '''
+    #   TODO: the FC v0.16 Draft requires UiLoader, which doesn't work from the cli.
     box1 = myDoc.addObject("Part::Box","Box1")
     box2 = myDoc.addObject("Part::Box","Box2")
     box3 = myDoc.addObject("Part::Box","Box3")
@@ -184,15 +186,16 @@ def test_extrudeBetween():
 
 
 def test_liftObject():
-    '''Test sweeping lift for sketches. TODO: why do we have to make union with the lifted sketch?.'''
+    '''Test sweeping lift for sketches.'''
+    # TODO: why do we have to make union with the lifted sketch?.
     sketch = aux_unit_square_sketch()
-    # TODO
     #~ vol = liftObject(sketch, 42, consumeInputs=False)
     #~ assert vol.Shape.Volume == 42
 
 
 def test_centerObjects():
-    '''Check centering of boxes. TODO: centering or snapping to zero?'''
+    '''Check centering of boxes.'''
+    # TODO: centering or snapping to zero?
     box1 = myDoc.addObject("Part::Box","Box1")
     box2 = myDoc.addObject("Part::Box","Box2")
     box2.Placement = FreeCAD.Placement(FreeCAD.Vector(1.5,3.5,2.5),FreeCAD.Rotation(FreeCAD.Vector(0,0,1),0))
