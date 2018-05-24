@@ -29,8 +29,10 @@ def manual_testing(function):
 def aux_two_cycle_sketch( a=( 20, 20, 0), b=(-30, 20, 0), c=(-30,-10, 0), d=( 20,-10, 0),
                           e=( 50, 50, 0), f=( 60, 50, 0), g=( 55, 60, 0) ):
     '''Helper function to drop a simple multi-cycle sketch.
-       The segments are carefully ordered.
+       The segments are carefully ordered into one rectangle and one triangle.
     '''
+    # Note: the z-component is zero, as sketches are plane objects.
+    #       Adjust orientation with Sketch.Placement(Normal, Rotation)
 
     sketch = FreeCAD.activeDocument().addObject('Sketcher::SketchObject','Sketch')
     geoList = []
@@ -41,32 +43,33 @@ def aux_two_cycle_sketch( a=( 20, 20, 0), b=(-30, 20, 0), c=(-30,-10, 0), d=( 20
     sketch.addGeometry(Part.LineSegment(vec(*e),vec(*f)),False)
     sketch.addGeometry(Part.LineSegment(vec(*f),vec(*g)),False)
     sketch.addGeometry(Part.LineSegment(vec(*g),vec(*e)),False)
+    myDoc.recompute()
     return sketch
 
 
 def test_deepRemove():
     '''Test deep (recursive) removal by all parameters.'''
 
-    # very simple deletion
-    sketch = aux_two_cycle_sketch()
-    part = qmt.freecad.extrude(sketch, 10)
-    deepRemove(part)
-    assert len(myDoc.Objects) == 0
-
-    # copied object deletion
-    sketch = aux_two_cycle_sketch()
-    part = qmt.freecad.extrude(sketch, 10)
-    part2 = myDoc.copyObject(part, False)
-    deepRemove(name=part2.Name)
-    assert len(part.OutList) == 0  # part2 steals sketch from part1
-
-    deepRemove(label=part.Label)
-    assert len(myDoc.Objects) == 0
-
     # check input sanitation
     with pytest.raises(RuntimeError) as err:
         deepRemove(None)
     assert 'No object selected' in str(err.value)
+
+    # simple deletion
+    sketch = aux_two_cycle_sketch()
+    part1 = qmt.freecad.extrude(sketch, 10)
+    deepRemove(part1)
+    assert len(myDoc.Objects) == 0
+
+    # copied object deletion
+    sketch = aux_two_cycle_sketch()
+    part1 = qmt.freecad.extrude(sketch, 10)
+    part2 = myDoc.copyObject(part1, False)
+    deepRemove(name=part2.Name)  # part2 refs to sketch from part1
+    assert len(part1.OutList) == 0
+
+    deepRemove(label=part1.Label)
+    assert len(myDoc.Objects) == 0
 
     # compound object deletion
     box1 = myDoc.addObject("Part::Box","Box1")
@@ -78,49 +81,56 @@ def test_deepRemove():
     inter2 = myDoc.addObject("Part::MultiCommon","inter2")
     inter2.Shapes = [inter1, box3,]
     myDoc.recompute()
-    FreeCAD.ActiveDocument.removeObject(box1.Name) # annoying interjected delete
+    myDoc.removeObject(box1.Name) # annoying interjected delete
     deepRemove(inter2)
     assert len(myDoc.Objects) == 0
 
 
 def test_findSegments():
     '''Test if segment finding is ordered correctly.'''
-    b = (-30, 20, 0)
-    d = ( 20,-10, 0)
+    b = (-33, 22, 0)
+    d = ( 22,-11, 0)
     sketch = aux_two_cycle_sketch(b=b, d=d)
-
-    print(sketch.Shape.Edges)
-    segL = findSegments(sketch)
-    print(segL)
-    # ~ assert (segL[0][1] == [b]).all()
-    # ~ assert (segL[2][1] == [d]).all()
-
-manual_testing(test_findSegments)
+    segArr = findSegments(sketch)
+    assert (segArr[0][1] == [b]).all()
+    assert (segArr[2][1] == [d]).all()
 
 def test_nextSegment():
     '''Test if nextSegment correctly increments.'''
     sketch = aux_two_cycle_sketch()  # trivial case
-    lineSegments = findSegments(sketch)
-    assert nextSegment(lineSegments, 0) == 1
-    assert nextSegment(lineSegments, 1) == 2
-    assert nextSegment(lineSegments, 2) == 3
-    assert nextSegment(lineSegments, 3) == 0  # a square cycle
+    segArr = findSegments(sketch)
+    assert nextSegment(segArr, 0) == 1
+    assert nextSegment(segArr, 1) == 2
+    assert nextSegment(segArr, 2) == 3
+    assert nextSegment(segArr, 3) == 0  # a square cycle
 
     deepRemove(sketch)
     a=( 20, 20, 0)
-    sketch = aux_two_cycle_sketch(a=a, e=a)
-    lineSegments = findSegments(sketch)
+    sketch = aux_two_cycle_sketch(a=a, g=a)
+    segArr = findSegments(sketch)
     with pytest.raises(ValueError) as err:
-        nextSegment(lineSegments, 3)  # e is ambiguous
-    assert 'possible paths found' in str(err.value)
+        nextSegment(segArr, 3)  # g is ambiguous
+    assert 'Multiple possible paths found' in str(err.value)
 
+    segArr = np.array([ [[0,0,0],[1,0,0]] , [[1,0,0],[2,0,0]] ])
+    with pytest.raises(ValueError) as err:
+        findCycle(segArr, 1, range(segArr.shape[0]))
+    assert 'No paths found' in str(err.value)
+
+    # TODO: fixorder check
 
 def test_findCycle():
     '''Test cycle ordering.'''
     sketch = aux_two_cycle_sketch()
-    lineSegments = findSegments(sketch)
-    c0 = findCycle(lineSegments, 0, range(lineSegments.shape[0]))
-    assert c0 == [ 1, 2, 3, 0 ]
+    segArr = findSegments(sketch)
+    ref1 = [ 0, 1, 2, 3 ]  # square cycle indices
+    ref2 = [ 4, 5, 6 ]     # triangular cycle indices
+    for i in range(4):
+        c = findCycle(segArr, i, range(segArr.shape[0]))  # update starting point
+        assert c == ref1[i:] + ref1[:i]  # advancing rotation
+    for i in range(3):
+        c = findCycle(segArr, i+4, range(segArr.shape[0]))
+        assert c == ref2[i:] + ref2[:i]
 
 
 def test_addCycleSketch():
@@ -128,23 +138,22 @@ def test_addCycleSketch():
     b = (-30, 20, 0)
     d = ( 20,-10, 0)
     sketch = aux_two_cycle_sketch(b=b, d=d)
-    lineSegments, cycles = findEdgeCycles(sketch)
-    addCycleSketch('cyclesketch', myDoc, cycles[0], lineSegments[0:4])
-    segL = findSegments(myDoc.cyclesketch)
-    assert (segL[0][0] == [b]).all()  # note: added cycle is shifted  (TODO: intentionally?)
-    assert (segL[2][0] == [d]).all()
-    
-    with pytest.raises(ValueError) as err:
-        addCycleSketch('cyclesketch', myDoc, cycles[0], lineSegments[0:4])
-    assert 'already exists' in str(err.value)
+    segArr, cycles = findEdgeCycles(sketch)
+    addCycleSketch('cyclesketch', myDoc, cycles[0], segArr[0:4])
+    segArr = findSegments(myDoc.cyclesketch)
+    assert (segArr[0][1] == [b]).all()
+    assert (segArr[2][1] == [d]).all()
 
+    with pytest.raises(ValueError) as err:
+        addCycleSketch('cyclesketch', myDoc, cycles[0], segArr[0:4])
+    assert 'already exists' in str(err.value)
 
 def test_findEdgeCycles():
     '''Test multiple cycle ordering.'''
     sketch = aux_two_cycle_sketch()
     seg, cycles = findEdgeCycles(sketch)
-    assert cycles[0] == [ 1, 2, 3, 0 ]
-    assert cycles[1] == [ 5, 6, 4 ]
+    assert cycles[0] == [ 0, 1, 2, 3 ]
+    assert cycles[1] == [ 4, 5, 6 ]
 
 
 def test_splitSketch():
@@ -166,20 +175,20 @@ def test_extendSketch():
     '''Test unconnected sketch extension, all cases.'''
     sketch = myDoc.addObject('Sketcher::SketchObject','Sketch')
     geoList = []
-    geoList.append(Part.Line(FreeCAD.Vector(0,0,0),FreeCAD.Vector(0,2,0)))
-    geoList.append(Part.Line(FreeCAD.Vector(0,2,0),FreeCAD.Vector(-2,2,0)))
+    geoList.append(Part.LineSegment(vec(0,0,0),vec(0,2,0)))
+    geoList.append(Part.LineSegment(vec(0,2,0),vec(-2,2,0)))
     sketch.addGeometry(geoList,False)
     myDoc.recompute()
     ext = extendSketch(sketch, 1)
-    assert ext.Shape.Vertexes[0].Point == FreeCAD.Vector(0,-1,0)
-    assert ext.Shape.Vertexes[2].Point == FreeCAD.Vector(-3,2,0)
+    assert ext.Shape.Vertexes[0].Point == vec(0,-1,0)
+    assert ext.Shape.Vertexes[2].Point == vec(-3,2,0)
 
     deepRemove(sketch)
     deepRemove(ext)
     sketch = myDoc.addObject('Sketcher::SketchObject','Sketch')
     geoList = []
-    geoList.append(Part.Line(FreeCAD.Vector(0,0,0),FreeCAD.Vector(2,0,0)))
-    geoList.append(Part.Line(FreeCAD.Vector(2,0,0),FreeCAD.Vector(2,-2,0)))
+    geoList.append(Part.LineSegment(vec(0,0,0),vec(2,0,0)))
+    geoList.append(Part.LineSegment(vec(2,0,0),vec(2,-2,0)))
     sketch.addGeometry(geoList,False)
     myDoc.recompute()
     ext = extendSketch(sketch, 1)
@@ -189,7 +198,8 @@ def test_extendSketch():
 def test_draftOffset():
     '''Check if draft offset resizes the object. TODO: edge cases'''
     pl=FreeCAD.Placement()
-    pl.Base=FreeCAD.Vector(1,1,0)
+    pl.Base=vec(1,1,0)
     draft = Draft.makeRectangle(length=2,height=2,placement=pl,face=False,support=None)
     draft2 = draftOffset(draft, 20)
     assert draft.Height.Value + 40 == draft2.Height.Value
+

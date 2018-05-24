@@ -20,7 +20,7 @@ def deepRemove_impl(obj):
 
 
 def deepRemove(obj=None, name=None, label=None):
-    ''' Remove a targeted object and recursively delete all sub-objects it contains.
+    ''' Remove a targeted object and recursively delete all its sub-objects.
     '''
     doc = FreeCAD.ActiveDocument
     if obj is not None:
@@ -42,7 +42,7 @@ def delete(obj):
 
 
 def deepRemove_OLD(obj=None, name=None, label=None):
-    ''' Remove a targeted object and recursively delete all sub-objects it contains.
+    ''' Remove a targeted object and recursively delete all its sub-objects.
     '''
     doc = FreeCAD.ActiveDocument
     if obj is not None:
@@ -79,33 +79,36 @@ def deepRemove_OLD(obj=None, name=None, label=None):
                 parentName = breadCrumbs.pop()  # reset the current parent to one level up
                 parent = doc.getObject(parentName)
                 children = parent.OutList  # update the children
-                
-def findSegments(mySketch):
-    '''Compute the line segments in a sketch
+
+def findSegments(sketch):
+    '''Return the line segments in a sketch as a numpy array.
     '''
     lineSegments = []
     # The old way would also discover guide segments, which we probably don't want to do...
-    # for seg in mySketch.Geometry:
+    # for seg in sketch.Geometry:
     #     lineSegments += [[[seg.StartPoint[0], seg.StartPoint[1], seg.StartPoint[2]], \
     #                       [seg.EndPoint[0], seg.EndPoint[1], seg.EndPoint[2]]]]
-    print(mySketch.Shape.Edges)
-    for edge in mySketch.Shape.Edges:
-        lineSegments.append([tuple(edge.Vertexes[0].Point), tuple(edge.Vertexes[1].Point)])
-    lineSegments = np.array(lineSegments)
-    return lineSegments
+    # ~ for edge in sketch.Shape.Edges:
+        # ~ lineSegments.append([tuple(edge.Vertexes[0].Point), tuple(edge.Vertexes[1].Point)])
+    for wire in sketch.Shape.Wires:  # fc17: wires should be defined for all sketches
+        for edge in wire.Edges:
+            lineSegments.append([tuple(edge.Vertexes[0].Point), tuple(edge.Vertexes[1].Point)])
+    # TODO: reuse list of wires for cycles
+    return np.array(lineSegments)
 
 
 def nextSegment(lineSegments, segIndex, tol=1e-8, fixOrder=True):
-    '''Function to compute the next line segment in a collection of tuples
-    defining several cycles. 
+    '''Return the next line segment index in a collection of tuples defining
+    several cycles.
 
+    Args:
         lineSegments: ndarray with [lineSegmentIndex,start/end point,coordinate]
-        segIndex: the index to consider
-        tol: repair tolerance for matching
-        fixOrder: whether the order lineSegments should be repaired on the fly
+        segIndex:     the index to consider
+        tol:          repair tolerance for matching
+        fixOrder:     whether the order lineSegments should be repaired on the fly
     '''
-    diffList0 = np.sum(np.abs(lineSegments[segIndex, 1, :] - lineSegments[:, 0, :]), axis=1)
-    diffList1 = np.sum(np.abs(lineSegments[segIndex, 1, :] - lineSegments[:, 1, :]), axis=1)
+    diffList0 = np.sum(np.abs(lineSegments[segIndex, 1, :] - lineSegments[:, 0, :]), axis=1) # initial end point - all other segment starts
+    diffList1 = np.sum(np.abs(lineSegments[segIndex, 1, :] - lineSegments[:, 1, :]), axis=1) # initial end point - all other segment ends
     diffList0[segIndex] = 1000.
     diffList1[segIndex] = 1000.
     nextList0 = np.where(diffList0 <= tol)[0]
@@ -126,7 +129,7 @@ def nextSegment(lineSegments, segIndex, tol=1e-8, fixOrder=True):
         return nextList1[0]
 
 
-def findCycle(lineSegments, startingIndex, availSegIDs):
+def findCycle_OLD(lineSegments, startingIndex, availSegIDs):
     '''Function to find a cycle in a collection of line segments given a starting
     line segment.
     '''
@@ -141,20 +144,35 @@ def findCycle(lineSegments, startingIndex, availSegIDs):
     return segList
 
 
+def findCycle(lineSegments, startingIndex, availSegIDs):
+    '''Find a cycle in a collection of line segments given a starting index.
+    Return the list of indices in the cycle.
+    '''
+    currentIndex = startingIndex
+    segList = [startingIndex]
+    for i in availSegIDs:
+        currentIndex = nextSegment(lineSegments, currentIndex)  # throws eventually if not in cycle
+        if currentIndex in segList:
+            break
+        else:
+            segList += [currentIndex]
+    return segList
+
+
 def addCycleSketch(name, fcDoc, cycleSegIndList, lineSegments):
-    ''' Function to add a sketch of a cycle to a FC document.
+    ''' Add a sketch of a cycle to a FC document.
     '''
     if (fcDoc.getObject(name) != None):  # this name already exists
         raise ValueError("Error: sketch " + name + " already exists.")
     obj = fcDoc.addObject('Sketcher::SketchObject', name)
+    vec = FreeCAD.Vector
     # obj.MapMode = 'FlatFace'
     obj = fcDoc.getObject(name)
     cnt = 0
     for segIndex in cycleSegIndList:
         startPoint = lineSegments[segIndex, 0, :]
         endPoint = lineSegments[segIndex, 1, :]
-
-        obj.addGeometry(Part.Line(FreeCAD.Vector(tuple(startPoint)), FreeCAD.Vector(tuple(endPoint))))
+        obj.addGeometry(Part.LineSegment(vec(tuple(startPoint)), vec(tuple(endPoint))))
         cnt += 1
         if cnt <= 1:
             continue
@@ -173,7 +191,7 @@ def addPolyLineSketch(name, fcDoc, segmentOrder, lineSegments):
     for segIndex, segment in enumerate(lineSegments):
         startPoint = segment[0, :]
         endPoint = segment[1, :]
-        obj.addGeometry(Part.Line(FreeCAD.Vector(tuple(startPoint)), FreeCAD.Vector(tuple(endPoint))))
+        obj.addGeometry(Part.LineSegment(FreeCAD.Vector(tuple(startPoint)), FreeCAD.Vector(tuple(endPoint))))
     for i in range(len(lineSegments)):
         connectIndex = segmentOrder[i]
         if connectIndex < len(lineSegments):
@@ -197,26 +215,27 @@ def findEdgeCycles(sketch):
     return lineSegments, cycles
 
 
-def splitSketch(mySketch):
+def splitSketch(sketch):
     '''Splits a sketch into several, returning a list of names of the new sketches.
     '''
-    lineSegments, cycles = findEdgeCycles(mySketch)
+    lineSegments, cycles = findEdgeCycles(sketch)
     # Finally, add new sketches based on the cycles:
     myDoc = FreeCAD.ActiveDocument
-    currentSketchName = mySketch.Name
+    currentSketchName = sketch.Name
     cycleObjList = []
     for i, cycle in enumerate(cycles):
-        cycleObj = addCycleSketch(currentSketchName + '_' + str(i), myDoc, cycle, lineSegments)
+        cycleObj = addCycleSketch(currentSketchName + '_' + str(i),
+                                  myDoc, cycle, lineSegments)
         cycleObjList += [cycleObj]
     return cycleObjList
 
 
-def extendSketch(mySketch, d):
+def extendSketch(sketch, d):
     ''' For a disconnected polyline, extends the last points of the sketch by 
     a distance d. 
     '''
     doc = FreeCAD.ActiveDocument
-    segments = findSegments(mySketch)
+    segments = findSegments(sketch)
     connections = []
     for i in range(len(segments)):
         try:
@@ -264,7 +283,7 @@ def extendSketch(mySketch, d):
     segments[seg1Index][1][0] = x1p
     segments[seg1Index][1][1] = y1p
 
-    myNewLine = addPolyLineSketch(mySketch.Name + '_extension', doc, connections, segments)
+    myNewLine = addPolyLineSketch(sketch.Name + '_extension', doc, connections, segments)
     return myNewLine
 
 

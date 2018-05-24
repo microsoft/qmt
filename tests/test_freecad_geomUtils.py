@@ -39,7 +39,7 @@ def aux_two_cycle_sketch( a=( 20, 20, 0), b=(-30, 20, 0), c=(-30,-10, 0), d=( 20
     sketch.addGeometry(Part.LineSegment(vec(*e),vec(*f)),False)
     sketch.addGeometry(Part.LineSegment(vec(*f),vec(*g)),False)
     sketch.addGeometry(Part.LineSegment(vec(*g),vec(*e)),False)
-    FreeCAD.ActiveDocument.recompute()
+    myDoc.recompute()
     return sketch
 
 
@@ -79,7 +79,7 @@ def test_extrude():
     assert pad.LengthFwd.Value == 50
     assert pad.TypeId == 'Part::Extrusion'
 
-# ~ manual_testing(test_extrude)
+manual_testing(test_extrude)
 
 def test_copy():
     '''Test copy. TODO: warning.'''
@@ -181,7 +181,10 @@ def test_extrudeBetween():
     '''Test if extrusion bounding box is within z interval.'''
     sketch = aux_hexagon_sketch()
     pad = extrudeBetween(sketch, 10, 20)
+    print(getBB(pad))
     assert getBB(pad)[-2:] == (10, 20)
+
+manual_testing(test_extrudeBetween)
 
 
 def test_liftObject():

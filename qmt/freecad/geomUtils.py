@@ -232,11 +232,16 @@ def extrudeBetween(sketch, zMin, zMax):
     '''
     doc = FreeCAD.ActiveDocument
     tempExt = extrude(sketch, zMax - zMin)
-    ext = copy(tempExt, moveVec=(0., 0., zMin))
+
+    vec = FreeCAD.Vector
+    tempExt.Placement = FreeCAD.Placement(vec(0,0,zMin),FreeCAD.Rotation(vec(0,0,1),0))
+    # ~ ext = copy(tempExt, moveVec=(0., 0., zMin))
+    # ~ doc.recompute()
+    # ~ doc.removeObject(tempExt.Name)
     doc.recompute()
-    doc.removeObject(tempExt.Name)
-    doc.recompute()
-    return ext
+    print(getBB(tempExt))
+    # ~ return ext
+    return tempExt
 
 
 def liftObject(obj, d, consumeInputs=False):
