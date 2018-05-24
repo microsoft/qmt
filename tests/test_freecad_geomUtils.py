@@ -73,7 +73,7 @@ def aux_hexagon_sketch(r=1):
 def test_extrude():
     '''Test if extrusion produces PartDesign parts.'''
     sketch = aux_two_cycle_sketch()
-    pad = extrude(sketch, 50, name = "pad", reversed=True)
+    pad = extrude(sketch, 50, name = "pad", reverse=True)
     # ~ assert pad.Length.Value == 50
     # ~ assert pad.TypeId == 'PartDesign::Pad'
     assert pad.LengthFwd.Value == 50
@@ -181,10 +181,7 @@ def test_extrudeBetween():
     '''Test if extrusion bounding box is within z interval.'''
     sketch = aux_hexagon_sketch()
     pad = extrudeBetween(sketch, 10, 20)
-    print(getBB(pad))
     assert getBB(pad)[-2:] == (10, 20)
-
-manual_testing(test_extrudeBetween)
 
 
 def test_liftObject():
