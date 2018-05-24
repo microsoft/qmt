@@ -47,6 +47,14 @@ def aux_two_cycle_sketch( a=( 20, 20, 0), b=(-30, 20, 0), c=(-30,-10, 0), d=( 20
     return sketch
 
 
+def test_delete():
+    sketch = aux_two_cycle_sketch()
+    part = qmt.freecad.extrude(sketch, 10)
+    delete(sketch)
+    delete(part)
+    assert len(myDoc.Objects) == 0
+
+
 def test_deepRemove():
     '''Test deep (recursive) removal by all parameters.'''
 
@@ -95,29 +103,45 @@ def test_findSegments():
     assert (segArr[0][1] == [b]).all()
     assert (segArr[2][1] == [d]).all()
 
+
 def test_nextSegment():
     '''Test if nextSegment correctly increments.'''
+
+    # Match the cycle segments
     sketch = aux_two_cycle_sketch()  # trivial case
     segArr = findSegments(sketch)
-    assert nextSegment(segArr, 0) == 1
+
+    assert nextSegment(segArr, 0) == 1 # square cycle
     assert nextSegment(segArr, 1) == 2
     assert nextSegment(segArr, 2) == 3
-    assert nextSegment(segArr, 3) == 0  # a square cycle
+    assert nextSegment(segArr, 3) == 0
 
-    deepRemove(sketch)
+    assert nextSegment(segArr, 4) == 5 # triangle cycle
+    assert nextSegment(segArr, 5) == 6
+    assert nextSegment(segArr, 6) == 4
+
+    # Test order fixing
+    segArr = np.array([ [[0,0,0],[1,0,0]] , [[1,1,0],[1,0,0]] , [[1,1,0],[0,0,0]] ])
+    assert ( segArr[1] == np.array([[1,1,0],[1,0,0]]) ).all()
+    seg = nextSegment(segArr, 0, fixOrder=False)
+    assert ( segArr[1] == np.array([[1,1,0],[1,0,0]]) ).all()
+    seg = nextSegment(segArr, 0, fixOrder=True)
+    assert ( segArr[1] == np.array([[1,0,0],[1,1,0]]) ).all()
+
+    # Ambiguous cycles
     a=( 20, 20, 0)
     sketch = aux_two_cycle_sketch(a=a, g=a)
     segArr = findSegments(sketch)
     with pytest.raises(ValueError) as err:
-        nextSegment(segArr, 3)  # g is ambiguous
+        nextSegment(segArr, 3)
     assert 'Multiple possible paths found' in str(err.value)
 
+    # Open cycles
     segArr = np.array([ [[0,0,0],[1,0,0]] , [[1,0,0],[2,0,0]] ])
     with pytest.raises(ValueError) as err:
-        findCycle(segArr, 1, range(segArr.shape[0]))
+        nextSegment(segArr, 1)
     assert 'No paths found' in str(err.value)
 
-    # TODO: fixorder check
 
 def test_findCycle():
     '''Test cycle ordering.'''

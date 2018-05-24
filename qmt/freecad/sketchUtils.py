@@ -41,45 +41,6 @@ def delete(obj):
     doc.recompute()
 
 
-def deepRemove_OLD(obj=None, name=None, label=None):
-    ''' Remove a targeted object and recursively delete all its sub-objects.
-    '''
-    doc = FreeCAD.ActiveDocument
-    if obj is not None:
-        pass
-    elif name is not None:
-        obj = doc.getObject(name)
-    elif label is not None:
-        obj = doc.getObjectsByLabel(label)[0]
-    else:
-        raise RuntimeError('No object selected!')
-    parentName = obj.Name  # Initialize the parent to be obj
-    parent = obj
-    children = obj.OutList  # it's children are obj.OutList
-    stillWorking = True  # Trip this once we are done
-    breadCrumbs = []
-    while stillWorking:  # We are still deleting stuff
-        for child in children:  # Loop through the children of parent
-            grandchildren = child.OutList  # for each child, determine if it has children
-            if len(grandchildren) > 0:  # If it does, go down the tree
-                breadCrumbs += [parentName]  # Store where we came from
-                parentName = child.Name  # set new parent to be the child
-                parent = doc.getObject(parentName)
-                children = parent.OutList  # and update the children list
-                break  # break out of the children loop
-            else:  # there are no children
-                delete(child)  # delete the child
-                break  # break since we modified the childrenList
-        children = parent.OutList  # Check the children list
-        if len(children) == 0:  # If there are no more at this level
-            if obj.Name == parentName:  # Check to see if we are at the top
-                delete(parent)  # delete the parent, which is obj
-                stillWorking = False  # if yes, then stop looping
-            else:  # otherwise we are no longer at the top
-                parentName = breadCrumbs.pop()  # reset the current parent to one level up
-                parent = doc.getObject(parentName)
-                children = parent.OutList  # update the children
-
 def findSegments(sketch):
     '''Return the line segments in a sketch as a numpy array.
     '''
@@ -100,6 +61,7 @@ def findSegments(sketch):
 def nextSegment(lineSegments, segIndex, tol=1e-8, fixOrder=True):
     '''Return the next line segment index in a collection of tuples defining
     several cycles.
+    WARNING: this will by default fixOrder, i.e. side effects on the caller.
 
     Args:
         lineSegments: ndarray with [lineSegmentIndex,start/end point,coordinate]
@@ -127,21 +89,6 @@ def nextSegment(lineSegments, segIndex, tol=1e-8, fixOrder=True):
             lineSegments[nextList1[0], 0, :] = nextPoint1
             lineSegments[nextList1[0], 1, :] = nextPoint0
         return nextList1[0]
-
-
-def findCycle_OLD(lineSegments, startingIndex, availSegIDs):
-    '''Function to find a cycle in a collection of line segments given a starting
-    line segment.
-    '''
-    currentIndex = startingIndex
-    segList = []
-    for i in availSegIDs:
-        currentIndex = nextSegment(lineSegments, currentIndex)
-        if currentIndex in segList:
-            break
-        else:
-            segList += [currentIndex]
-    return segList
 
 
 def findCycle(lineSegments, startingIndex, availSegIDs):
