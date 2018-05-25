@@ -192,7 +192,7 @@ class Model:
                 z0=None,thickness=None,targetWire=None,shellVerts=None,depoZone=None,etchZone=None,\
                 zMiddle=None,tIn=None,tOut=None,layerNum=None,lithoBase=[],\
                 fillLitho=True,meshMaxSize=None,meshGrowthRate=None, meshScaleVector=None,\
-                boundaryCondition = None,subtractList=[]):
+                boundaryCondition = None,subtractList=[],Ns=None):
         ''' Add a geometric part to the model. 
             @param partName: The descriptive name of this new part.
             @param fcName: The name of the 2D freeCAD object that this is built from.
@@ -251,6 +251,8 @@ class Model:
                                  current part when forming the final 3D objects. This
                                  subtraction is carried out in 3D using the COMSOL parasolid
                                  kernel or using shapely in 2D. 
+            @param Ns:           Volume charge density of a part, applicable to semiconductor
+                                 and dielectric parts. The units for this are 1/cm^3.
         '''
         # First, run checks to make sure the input is valid:
         if partName in self.modelDict['3DParts']:
@@ -285,8 +287,10 @@ class Model:
         partDict['meshScaleVector'] = meshScaleVector
         partDict['boundaryCondition'] = boundaryCondition
         partDict['subtractList'] = subtractList
+        partDict['Ns'] = Ns
         self.modelDict['buildOrder'][len(self.modelDict['buildOrder'])] = partName
         self.modelDict['3DParts'][partName] = partDict
+        
 
     def addCrossSection(self, sliceName, axis, distance):
         """
