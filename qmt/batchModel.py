@@ -192,7 +192,7 @@ class Model:
                 z0=None,thickness=None,targetWire=None,shellVerts=None,depoZone=None,etchZone=None,\
                 zMiddle=None,tIn=None,tOut=None,layerNum=None,lithoBase=[],\
                 fillLitho=True,meshMaxSize=None,meshGrowthRate=None, meshScaleVector=None,\
-                boundaryCondition = None,subtractList=[],Ns=None):
+                boundaryCondition = None,subtractList=[],Ns=None,Phi_NL=None,Ds=None):
         ''' Add a geometric part to the model. 
             @param partName: The descriptive name of this new part.
             @param fcName: The name of the 2D freeCAD object that this is built from.
@@ -253,6 +253,9 @@ class Model:
                                  kernel or using shapely in 2D. 
             @param Ns:           Volume charge density of a part, applicable to semiconductor
                                  and dielectric parts. The units for this are 1/cm^3.
+            @param Phi_NL:       The neutral level for interface traps, measured in units of
+                                 eV above the valence band maximum (semiconductor only).
+            @param Ds:           Density of interface traps; units are 1/(cm^2*eV).
         '''
         # First, run checks to make sure the input is valid:
         if partName in self.modelDict['3DParts']:
@@ -288,6 +291,8 @@ class Model:
         partDict['boundaryCondition'] = boundaryCondition
         partDict['subtractList'] = subtractList
         partDict['Ns'] = Ns
+        partDict['Phi_NL'] = Phi_NL
+        partDict['Ds'] = Ds                
         self.modelDict['buildOrder'][len(self.modelDict['buildOrder'])] = partName
         self.modelDict['3DParts'][partName] = partDict
         
