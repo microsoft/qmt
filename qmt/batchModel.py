@@ -58,6 +58,10 @@ class Model:
         @param symbol: Variable name for the quantity used in the COMSOL model.
         @param dense: Whether to do a dense/filled sweep (True) or a sparse one (False).
         """
+        # we allow 'V' as a shorthand for 'voltage'
+        if quantity == 'V':
+            symbol = 'V'
+            quantity = 'voltage'
         sweep = {}
         sweep['part'] = partName
         sweep['quantity'] = quantity
@@ -107,33 +111,88 @@ class Model:
         self.modelDict['comsolInfo']['volumeIntegrals'][partName] = quantities
 
     def setSimZero(self,partName,property='workFunction'):
-        ''' Sets the zero level for the electric potential in COMSOL simulations. This doesn't 
-        impact any of the physics, but makes the results much easier to look at.
+        ''' Sets the zero level for the electric potential.
+
+        For self-consistent electrostatics solves, this doesn't impact any of the physics, but makes
+        the results much easier to look at.
         @param partName: Target partName to use
         @param property: The property to use as the zero level.
         '''
         self.modelDict['comsolInfo']['zeroLevel'] = [partName,property]
 
+
+    def getSimZero(self, parts=None):
+        '''Retrieve the zero level for the electric potential [in Volts].'''
+        zeroLevelPart, zeroLevelProp = self.modelDict['comsolInfo']['zeroLevel']
+        if zeroLevelPart is None:
+            return 0.0
+        matLib = qmt.Materials(matDict=self.modelDict['materials'])
+        if parts is None:
+            parts = self.modelDict['3DParts']
+        zeroLevelMatName = parts[zeroLevelPart]['material']
+        mat_dict = matLib.find(zeroLevelMatName, eunit='eV')
+        return mat_dict[zeroLevelProp]
+
+
     def genComsolInfo(self, meshExport=None, fileName='comsolModel', exportDir='solutions',
-                      repairTolerance=None):
+                      repairTolerance=None,physics=['electrostatics'],exportDomains=[],exportScalingVec=[5.,5.,5.]):
         '''
         Generate meta information required by COSMOL
         @param meshExport: string with name for the exported mesh. None means no mesh is exported
         @param repairTolerance: float with the repair tolerance for building the geometry in COMSOl
         @param fileName: string with the name of the resulting COMSOL file
         @param exportDir: string with directory to which results are exported
+        @param physics: which physics interfaces to allow. The options are 'electrostatics',
+            'bdg', and 'schrodinger'.
+        @param exportDomains: Domains used to form the bounding box for the solution export.
+            An empty list will use all domains.
+        @param exportScalingVec: Increase the resolution along x, y, and z axes. Higher numbers
+            are higher resolutions.
         '''
         self.modelDict['comsolInfo']['meshExport'] = meshExport
         self.modelDict['comsolInfo']['repairTolerance'] = repairTolerance
         self.modelDict['comsolInfo']['fileName'] = fileName
         self.modelDict['comsolInfo']['exportDir'] = exportDir
+        self.modelDict['comsolInfo']['physics'] = physics
+        self.modelDict['comsolInfo']['exportDomains'] = exportDomains
+        self.modelDict['comsolInfo']['exportScalingVec'] = exportScalingVec
+    
+    def setComsolQuantumParams(self,quantumDomain,alpha=[0.,0.,0.],alphaUnit='meV*nm',
+                               B=[0.,0.,0.],BUnit='T',g=-2.0,Delta=0.0,DeltaUnit='meV',
+                               numEigVals=10,eigValSearch=0.0):
+        '''
+        Set the physics parameters needed for quantum solves in COMSOL.
+        @param quantumDomain: the name of the part on which we want to perform quantum
+            solves.
+        @param alpha: vector defining the SOC field alphax,alphay,alphaz. The expected
+            units.
+        @param alphaUnit: The string (COMSOL-readable) corresponding to the units of alpha.
+        @param B: The magnetic field vector.
+        @param BUnit: The string (COMSOL-readable) corresponding to the units of B.
+        @param Delta: The superconducting pairing potential.
+        @param DeltaUnit: The string (COMSOL-readable) corresponding to the units of Delta.
+        @param numEigVals: The number of eigenvalues to find.
+        @param eigValSearch: The energy around which to search for eigenvalues.
+        '''
+        self.modelDict['comsolInfo']['quantumParams'] = {}
+        self.modelDict['comsolInfo']['quantumParams']['domain'] = quantumDomain
+        self.modelDict['comsolInfo']['quantumParams']['alpha'] = alpha
+        self.modelDict['comsolInfo']['quantumParams']['alphaUnit'] = alphaUnit
+        self.modelDict['comsolInfo']['quantumParams']['B'] = B
+        self.modelDict['comsolInfo']['quantumParams']['BUnit'] = BUnit
+        self.modelDict['comsolInfo']['quantumParams']['Delta'] = Delta  
+        self.modelDict['comsolInfo']['quantumParams']['DeltaUnit'] = DeltaUnit
+        self.modelDict['comsolInfo']['quantumParams']['gFactor'] = g
+        self.modelDict['comsolInfo']['quantumParams']['numEigVals'] = numEigVals        
+        self.modelDict['comsolInfo']['quantumParams']['eigValSearch'] = eigValSearch           
+
 
 
     def addPart(self,partName,fcName,directive,domainType,material=None,\
                 z0=None,thickness=None,targetWire=None,shellVerts=None,depoZone=None,etchZone=None,\
                 zMiddle=None,tIn=None,tOut=None,layerNum=None,lithoBase=[],\
-                fillLitho=True,meshMaxSize=None,meshGrowthRate=None,boundaryCondition = None,\
-                subtractList=[]):
+                fillLitho=True,meshMaxSize=None,meshGrowthRate=None, meshScaleVector=None,\
+                boundaryCondition = None,subtractList=[]):
         ''' Add a geometric part to the model. 
             @param partName: The descriptive name of this new part.
             @param fcName: The name of the 2D freeCAD object that this is built from.
@@ -181,8 +240,9 @@ class Model:
                                 and subsequent lithography layers, but this can sometimes 
                                 fail in opencascade. COMSOL takes care of this using 
                                 parasolid if left to True.
-            @param maxMeshSize: The maximum allowable mesh size for this part, in microns.
+            @param meshMaxSize: The maximum allowable mesh size for this part, in microns.
             @param meshGrowthRate: The maximum allowable mesh growth rate for this part
+            @param meshScaleVector: 3D list with scaling factors for the mesh in x, y, z direction
             @param boundaryCondition: One or more boundary conditions, if applicable, of the form of
                                 a type -> value mapping. For example, this could be {'voltage':1.0}
                                 or, more explicitly, {'voltage': {'type': 'dirichlet', 'value': 1.0,
@@ -222,6 +282,7 @@ class Model:
         partDict['fillLitho'] = fillLitho
         partDict['meshMaxSize'] = meshMaxSize
         partDict['meshGrowthRate'] = meshGrowthRate
+        partDict['meshScaleVector'] = meshScaleVector
         partDict['boundaryCondition'] = boundaryCondition
         partDict['subtractList'] = subtractList
         self.modelDict['buildOrder'][len(self.modelDict['buildOrder'])] = partName
@@ -308,7 +369,8 @@ class Model:
         sliceParts[partName] = slicePart
         self.modelDict['buildOrder'][len(self.modelDict['buildOrder'])] = partName
 
-    def addThomasFermi2dTask(self, region, grid, slice_name, name=None, temperature=0.):
+    def addThomasFermi2dTask(self, region, grid, slice_name, name=None, write_data=True,
+                             plot_data=True, temperature=0.):
         """Add a 2D Thomas-Fermi postprocessing task.
 
         @param region: 2D region to simulate. May simply be the name of a 2DPart (i.e. an entry in
@@ -319,9 +381,26 @@ class Model:
         @param slice_name: Name of the slice (a key in the model's slices dict) to be simulated.
         @param name: Custom name for this task. Defaults to 'thomasFermi2d' concatenated with an
             integer ID.
+        @param write_data: (bool|list(str)) Which of the following quantities are to be written to
+            disk: 'density', 'electrostatic_potential', 'potential_energy', 'effective_mass'. A
+            boolean value corresponds to all or none of these.
+        @param plot_data: (bool|list(str)) Which of the following quantities are to be plotted:
+            'density', 'electrostatic_potential', 'potential_energy', 'effective_mass',
+            'bare_bands'. A boolean value corresponds to all or none of these.
         @param temperature: Temperature [in K] for the simulation.
         """
-        task = {'task': 'thomasFermi2d', 'slice': slice_name}
+        if write_data is True:
+            write_data = ['density', 'electrostatic_potential', 'potential_energy',
+                          'effective_mass']
+        elif write_data is False:
+            write_data = []
+        if plot_data is True:
+            plot_data = ['density', 'electrostatic_potential', 'potential_energy', 'effective_mass',
+                         'bare_bands']
+        elif plot_data is False:
+            plot_data = []
+        task = {'task': 'thomasFermi2d', 'slice': slice_name, 'write_data': write_data,
+                'plot_data': plot_data}
         grid_spec = {'region': region}
         if np.isscalar(grid):
             grid_spec['step_size'] = grid
@@ -340,7 +419,8 @@ class Model:
 
     def addSchrodinger2dTask(self, region, grid, slice_name, eigenvalues=1, target_energy=None,
                              solver=None, name=None, write_wavefunctions=True,
-                             plot_wavefunctions=True, temperature=0.):
+                             plot_wavefunctions=True, write_data=True, plot_data=True,
+                             temperature=0.):
         """Add a 2D Schrodinger postprocessing task.
 
         @param region: 2D region to simulate. May simply be the name of a 2DPart (i.e. an entry in
@@ -355,15 +435,40 @@ class Model:
         @param str solver: ('sparse'|'dense') for sparse or dense eigensolver.
         @param name: Custom name for this task. Defaults to 'schrodinger2d' concatenated with an
             integer ID.
-        @param bool write_wavefunctions: Whether wave functions of eigenstates are to be written to
-            disk.
-        @param bool plot_wavefunctions: Whether wave functions of eigenstates are to be plotted.
+        @param write_wavefunctions: (bool|list(int)) Whether wave functions of eigenstates are to be
+            written to disk. If a list, only states whose index appears in the list are written.
+        @param plot_wavefunctions: (bool|list(int)) Whether wave functions of eigenstates are to be
+            plotted. If a list, only states whose index appears in the list are plotted.
+        @param write_data: (bool|list(str)) Which of the following quantities are to be written to
+            disk: 'energies', 'density', 'electrostatic_potential', 'potential_energy'. A boolean
+            value corresponds to all or none of these.
+        @param plot_data: (bool|list(str)) Which of the following quantities are to be plotted:
+            'density', 'electrostatic_potential', 'potential_energy'. A boolean value corresponds to
+            all or none of these.
         @param temperature: Temperature [in K] for the calculation of densities.
         """
+        if write_wavefunctions is True:
+            write_wavefunctions = list(range(eigenvalues))
+        elif write_wavefunctions is False:
+            write_wavefunctions = []
+        if plot_wavefunctions is True:
+            plot_wavefunctions = list(range(eigenvalues))
+        elif plot_wavefunctions is False:
+            plot_wavefunctions = []
+        if write_data is True:
+            write_data = ['energies', 'density', 'electrostatic_potential', 'potential_energy']
+        elif write_data is False:
+            write_data = []
+        if plot_data is True:
+            plot_data = ['density', 'electrostatic_potential', 'potential_energy']
+        elif plot_data is False:
+            plot_data = []
         task = {'task': 'schrodinger2d',
                 'slice': slice_name,
                 'spectrum': {'eigenvalues': eigenvalues, 'target energy': target_energy},
-                'wave functions': {'write': write_wavefunctions, 'plot': plot_wavefunctions}
+                'write_data': write_data,
+                'plot_data': plot_data,
+                'wave_functions': {'write': write_wavefunctions, 'plot': plot_wavefunctions}
                 }
         grid_spec = {'region': region}
         if np.isscalar(grid):
@@ -383,7 +488,8 @@ class Model:
         assert name not in self.modelDict['postProcess']['tasks']
         self.modelDict['postProcess']['tasks'][name] = task
 
-    def addPlotPotential2dTask(self, region, grid, slice_name, name=None):
+    def addPlotPotential2dTask(self, region, grid, slice_name, name=None, write_data=True,
+                               plot_data=True):
         """Add a 2D Schrodinger postprocessing task.
 
         @param region: 2D region to plot. May simply be the name of a 2DPart (i.e. an entry in
@@ -394,8 +500,23 @@ class Model:
         @param slice_name: Name of the slice (a key in the model's slices dict) to be plotted.
         @param name: Custom name for this task. Defaults to 'schrodinger2d' concatenated with an
             integer ID.
+        @param write_data: (bool|list(str)) Which of the following quantities are to be written to
+            disk: 'electrostatic_potential', 'potential_energy'. A boolean value corresponds to all
+            or none of these.
+        @param plot_data: (bool|list(str)) Which of the following quantities are to be plotted:
+            'electrostatic_potential', 'potential_energy'. A boolean value corresponds to all or
+            none of these.
         """
-        task = {'task': 'plotPotential2d', 'slice': slice_name}
+        if write_data is True:
+            write_data = ['electrostatic_potential', 'potential_energy']
+        elif write_data is False:
+            write_data = []
+        if plot_data is True:
+            plot_data = ['electrostatic_potential', 'potential_energy']
+        elif plot_data is False:
+            plot_data = []
+        task = {'task': 'plotPotential2d', 'slice': slice_name, 'write_data': write_data,
+                'plot_data': plot_data}
         grid_spec = {'region': region}
         if np.isscalar(grid):
             grid_spec['step_size'] = grid

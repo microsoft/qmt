@@ -45,7 +45,9 @@ units = SimpleNamespace(
     volt=spu.volt,
     V=spu.volt,
     K=spu.K,
-    mK=spu.K / 1e3
+    mK=spu.K / 1e3,
+    amp = spu.coulomb / spu.s,
+    nA = 1e-9 * spu.coulomb / spu.s,
 )
 
 
