@@ -10,15 +10,16 @@ import numpy as np
 import os
 
 # Path information -- change this to your configuration!
-rootPath = 'C:/Users/jogambl/Documents/repositories/qmt/examples/1_3D_2DEG'
+rootPath = 'C:/Users/kevanhoo/OneDrive - Microsoft/Development/qmt/examples/1_3D_2DEG'
 freeCADPath = os.path.join(rootPath, '2DEGFCDoc.FCStd')
 
 # These are necessary for running MS Proprietary components, but are not needed for building the model
-COMSOLExecPath = '\\\\gcr\\scratch\\rr1\\jogambl\\apps\\COMSOL\\COMSOL53\\Multiphysics\\bin\\win64\\comsolclusterbatch'
-COMSOLCompilePath = '\\\\gcr\\scratch\\rr1\\jogambl\\apps\\COMSOL\\COMSOL53\\Multiphysics\\bin\\win64\\comsolcompile'
+COMSOLExecPath = 'C:\\Program Files\\COMSOL\\COMSOL53a\\MultiphysicsROZ\\bin\\win64\\comsolclusterbatch'
+COMSOLCompilePath = 'C:\Program Files\COMSOL\COMSOL53a\MultiphysicsROZ\\bin\\win64\\comsolcompile'
 mpiPath = 'mpiexec'
-pythonPath = '\\\\gcr\\scratch\\rr1\\jogambl\\apps\\Anaconda2\\python'
-jdkPath = '\\\\gcr\\scratch\\rr1\\jogambl\\java_portable'
+pythonPath = 'C:\\Users\\kevanhoo\\AppData\\Local\\Continuum\\Anaconda3\\envs\\qmt\\python'
+jdkPath = 'C:\\Program Files\\Java\\jdk1.8.0_144'
+
 
 ####################
 ####################
@@ -61,48 +62,17 @@ runModel.addPart('vacuum','Rectangle','extrude','dielectric',
                  material = 'air',z0=0.051,
                  thickness=0.5,meshMaxSize=0.2)                   
 
-runModel.addPart('AlFilm','i_AlEtch_Polyline003_sketch','extrude','dielectric',
-                 material = 'Al',z0=0.011,thickness=0.0087,meshMaxSize=0.2)
+runModel.addPart('AlFilm','i_AlEtch_Polyline003_sketch','extrude','metalGate',
+                 material = 'Al',z0=0.011,thickness=0.0087,meshMaxSize=0.2, boundaryCondition={'voltage' : 0.0})
 
-runModel.addPart('tunnelGate','i_TopGate1_Polyline007_sketch','extrude','dielectric',
-                 material = 'Au',z0=0.051,thickness=0.03,meshMaxSize=0.2)
+runModel.addPart('tunnelGate','i_TopGate1_Polyline007_sketch','extrude','metalGate',
+                 material = 'Au',z0=0.051,thickness=0.03,meshMaxSize=0.2, boundaryCondition={'voltage' : 0.0})
 
-runModel.addPart('wireGate','i_TopGate1_Polyline008_sketch','extrude','semiconductor',
-                 material = 'Au',z0=0.051,thickness=0.03,meshMaxSize=0.2)
-
-# Define a cut in the xz-plane for 2D postprocessing
-# cross_section = {'crossSection': {'axis': (0, 1, 0), 'd': 0.}}
-# runModel.modelDict['freeCADInfo']['crossSec1'] = cross_section
-
-# Geometry sweeps are represented in two distinct ways:
-# runModel.genGeomSweep('d',[0.0,0.05],type='freeCAD') # variables defined in the FreeCAD GUI
-# runModel.genGeomSweep('Lz',[0.030,0.04],type='python') # Variables defined in the script above
+runModel.addPart('wireGate','i_TopGate1_Polyline008_sketch','extrude','metalGate',
+                 material = 'Au',z0=0.051,thickness=0.03,meshMaxSize=0.2, boundaryCondition={'voltage' : 0.0})
 
 # To perform a voltage sweep, we assign it to one of our geometry objects like so:
 runModel.genPhysicsSweep('tunnelGate','V',np.linspace(0.0, -1.0, 3),unit='V') 
-# We can also sweep other physical quantities connected to geometry objects:
-runModel.genPhysicsSweep('quantumWell', 'bandOffset', [0., 0.1,0.3], unit='eV', dense=True)
-
-# # Alternatively, this would do a sparse sweep:
-# runModel.genPhysicsSweep('Rectangle_quantumWell', 'bandOffset', [0., 0.1, 0.2], unit='eV', dense=False)
-
-# Next, let's set up some postprocessing tasks:
-# qwell = 'stlParts/Rectangle_quantumWell.stl'
-# x = {'min': {'bbox': qwell, 'anchor': 'left', 'offset': 0.2},
-#      'max': {'bbox': qwell, 'anchor': 'right', 'offset': -0.2},
-#      'steps': 400}
-# y = {'min': {'bbox': qwell, 'anchor': 'left', 'offset': 0.2},
-#      'max': {'bbox': qwell, 'anchor': 'right', 'offset': -0.2},
-#      'steps': 400}
-# # Plot the potential at the top boundary of the well
-# z = {'value': {'bbox': qwell, 'anchor': 'right'}}
-# runModel.addPlotPotentialTask(x, y, z, name=None, plot_format=None)
-
-# # 2D cross section: simulation region should include the named parts
-# cut_region = {'boundingBox': {'regions': ['Rectangle_quantumWell_section_0',
-#                                           'i_TopGate1_Polyline007_sketch_0_section_0',
-#                                           'Rectangle_backBarrier_section_0']}}
-# runModel.addThomasFermi2dTask(cut_region, grid={'steps': 200})  # 200 steps in x and y direction
 
 # # Finalize the model:
 runModel.setPaths(COMSOLExecPath = COMSOLExecPath,\
@@ -112,13 +82,11 @@ runModel.setPaths(COMSOLExecPath = COMSOLExecPath,\
                   jdkPath=jdkPath,\
                   freeCADPath = freeCADPath)
 
-runModel.genComsolInfo(meshExport=None, fileName='comsolModel')
-# Comment this in to run with proprietary components:
-# runModel.addJob(rootPath,\
-#                 jobSequence=['geoGen','comsolRun','postProc'],numCores=1)
+runModel.genComsolInfo(meshExport=None, fileName='comsolModel',physics=['electrostatics'],exportScalingVec=[0.5,5.,5.])
 
-runModel.addJob(rootPath,\
-                jobSequence=['geoGen'])
+runModel.addJob(rootPath, \
+                jobSequence=['geoGen', 'comsolRun'], numParallelJobs=numParallelJobs,
+                numCoresPerJob=4, comsolRunMode='debug')
 
 # Save and execute the model:
 runModel.saveModel()
