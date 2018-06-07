@@ -237,7 +237,7 @@ class Harness:
                                                myModel.modelDict['comsolInfo']['fileName'])
         while True:
             if comsolRun.poll() != None:  # If the run is done, tag it as complete
-                print('COMSOL run finshed!')
+                print('COMSOL run finshed with exit code {}!'.format(comsolRun.returncode))
                 break
             else:
                 fracComplete = 1.0
