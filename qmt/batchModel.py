@@ -58,6 +58,8 @@ class Model:
         @param symbol: Variable name for the quantity used in the COMSOL model.
         @param dense: Whether to do a dense/filled sweep (True) or a sparse one (False).
         """
+        if partName not in self.modelDict['3DParts']:
+            raise RuntimeError("Part '{}' does not exist.".format(partName))
         # we allow 'V' as a shorthand for 'voltage'
         if quantity == 'V':
             symbol = 'V'
@@ -619,10 +621,12 @@ class Model:
         '''
         fileExists = os.path.isfile(self.modelPath)
         if fileExists:
+            print('Loading model file {}.'.format(self.modelPath))
             myFile = open(self.modelPath, 'r')
             modelDict = json.load(myFile)
             myFile.close()
         else:
+            print('Could not load: Model file {} does not exist.'.format(self.modelPath))
             modelDict = self.genEmptyModelDict()
         if updateModel:
             for subDictKey in self.modelDict:
@@ -697,7 +701,6 @@ class Model:
                 Path to mpiexec
             jdkPath : str, default None
                 Path to the jdk installation
-            nodeFile : 
         '''
         self.modelDict['pathSettings']['COMSOLExecPath'] = COMSOLExecPath
         self.modelDict['pathSettings']['COMSOLCompilePath'] = COMSOLCompilePath

@@ -19,7 +19,7 @@ import time
 
 
 class Harness:
-    def __init__(self, jsonPath,os='linux'):
+    def __init__(self, jsonPath, os=None):
         ''' Class to run a batch 3D job on the cluster. 
 
             Parameters
@@ -27,7 +27,7 @@ class Harness:
             jsonPath : str
                 Path to the model json file used to build the run
             os : str
-                Either 'linux' or 'windows'
+                Either 'linux' or 'windows'. The default None detects the OS from sys.platform.
         '''
         try:
             self.jsonPath = os.path.abspath(jsonPath)
@@ -36,6 +36,13 @@ class Harness:
         self.model = QMT.Model(self.jsonPath)
         self.modelFilePaths = []
         self.model.loadModel()
+        if os is None:
+            if 'linux' in sys.platform:
+                os = 'linux'
+            elif 'win' in sys.platform:
+                os = 'windows'
+            else:
+                raise RuntimeError('Operating system {} is not supported.'.format(sys.platform))
         if os not in ['linux','windows']:
             raise ValueError('os must be either "windows" or "linux"!')
         self.os = os
