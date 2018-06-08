@@ -59,7 +59,13 @@ class Model:
         @param dense: Whether to do a dense/filled sweep (True) or a sparse one (False).
         """
         if partName not in self.modelDict['3DParts']:
-            raise RuntimeError("Part '{}' does not exist.".format(partName))
+            found = False
+            for cut in itervalues(self.modelDict['slices']):
+                if partName in cut['parts']:
+                    found = True
+                    break
+            if not found:
+                raise RuntimeError("Part '{}' does not exist.".format(partName))
         # we allow 'V' as a shorthand for 'voltage'
         if quantity == 'V':
             symbol = 'V'
