@@ -182,6 +182,14 @@ class Harness:
             my_env['I_MPI_HYDRA_BOOTSTRAP_EXEC']=launcherPath # for Intel MPI
             my_env['HYDRA_LAUNCHER_EXEC']=launcherPath # for MPICH            
         
+        # Convert any unicode entries in the environment
+        for key, value in my_env.iteritems():
+            if isinstance(key, unicode) or isinstance(value, unicode):
+                newkey = key.encode('ascii','ignore')
+                newvalue = value.encode('ascii','ignore')
+                del my_env[key]
+                my_env[newkey] = newvalue
+
         # Make the export directory if it doesn't exist:
         comsolSolsPath = myModel.modelDict['pathSettings']['dirPath'] + \
                          '/' + myModel.modelDict['comsolInfo']['exportDir']
@@ -230,6 +238,7 @@ class Harness:
         comsolLog = open(stdOutLogName, 'w')
         comsolErr = open(stdErrLogName, 'w')
         print('Running {} ...'.format(comsolCommand))
+        
         comsolRun = subprocess.Popen(comsolCommand, stdout=comsolLog, stderr=comsolErr,shell=True,env=my_env)
         print('Starting COMSOL run...')
         # Determine the number of voltages we are expecting.
@@ -290,7 +299,15 @@ class Harness:
             launcherPath = os.path.dirname(qms.__file__)+'/launch.py'        
             my_env['I_MPI_HYDRA_BOOTSTRAP_EXEC']=launcherPath # for Intel MPI            
             my_env['HYDRA_LAUNCHER_EXEC']=launcherPath # for MPICH
-            
+        
+        # Get rid of possible unicode entries in the environment
+        for key, value in my_env.iteritems():
+            if isinstance(key, unicode) or isinstance(value, unicode):
+                newkey = key.encode('ascii','ignore')
+                newvalue = value.encode('ascii','ignore')
+                del my_env[key]
+                my_env[newkey] = newvalue
+
         batchPostProcpath = qms.postProcessing.__file__.rstrip('__init__.pyc') + 'batchPostProc.py'
         mpiCmd = [mpiexecName, '-n', str(numCores)]
         if hostFile:
