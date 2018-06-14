@@ -86,10 +86,15 @@ for layerName in dxfLayerNames:
     survivingLayerDict[layerName] = {}
     for j,obj in enumerate(objsInLayer):
         faceObj = copy(obj)
+        if faceObj.Shape.ShapeType=='Wire' and not faceObj.Shape.isClosed():
+            delete(faceObj)
+            continue
         try: # Try to convert to a face
             faceObj.Shape = Part.Face(obj.Shape)
         except: # If we couldn't convert to face, print warning
             print 'WARNING: Not all DXF objects are recognized as complete.'
+            delete(faceObj)
+            continue
         intObj = intersect([mask,faceObj]) # intersect with mask
         delete(faceObj) # Delte the face
         if isNonempty(intObj): # If we have a finite intersection with the mask
