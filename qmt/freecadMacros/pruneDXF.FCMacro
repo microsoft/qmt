@@ -10,6 +10,8 @@
 from PySide import QtGui, QtCore
 import numpy as np 
 import Draft
+import Part
+from qmt.freecad import isNonempty,intersect,delete,findEdgeCycles,addCycleSketch,copy
 
 
 class GuiClass(QtGui.QDialog):
@@ -77,30 +79,64 @@ else:
 
 survivingLayerDict = {}
 
+mask = App.ActiveDocument.getObjectsByLabel(maskLabel)[0]
 for layerName in dxfLayerNames:
     layerGroup = App.activeDocument().getObject(layerName)
     objsInLayer = layerGroup.OutList
     survivingLayerDict[layerName] = {}
-    for obj in objsInLayer:
-        objLabel = obj.Label
-        mergedName = layerName+'_'+objLabel
-        draftLabel = mergedName+'_draft'
-        maskCopyLabel = mergedName+'_mask'
-        App.ActiveDocument.addObject('Part::Feature',maskCopyLabel).Shape=App.ActiveDocument.getObjectsByLabel(maskLabel)[0].Shape
-        Draft.makeSketch(obj,autoconstraints=True,name='tempSketch')
-        Draft.draftify(App.ActiveDocument.tempSketch,delete=True)
-        App.ActiveDocument.ActiveObject.Label = draftLabel
-        App.ActiveDocument.addObject("Part::MultiCommon",mergedName)
-        App.ActiveDocument.getObject(mergedName).Shapes = \
-        [App.ActiveDocument.getObjectsByLabel(draftLabel)[0],\
-         App.ActiveDocument.getObjectsByLabel(maskCopyLabel)[0]]
-        App.ActiveDocument.recompute()
-        vertLen = len(App.ActiveDocument.getObjectsByLabel(mergedName)[0].Shape.Vertexes)
-        if vertLen >0:
-            survivingLayerDict[layerName] = mergedName
-        else:
-            draftName = App.ActiveDocument.getObjectsByLabel(draftLabel)[0].Name
-            maskCopyName = App.ActiveDocument.getObjectsByLabel(maskCopyLabel)[0].Name
-            App.ActiveDocument.removeObject(mergedName)
-            App.ActiveDocument.removeObject(draftName)
-            App.ActiveDocument.removeObject(maskCopyName)
+    for j,obj in enumerate(objsInLayer):
+        faceObj = copy(obj)
+        if faceObj.Shape.ShapeType=='Wire' and not faceObj.Shape.isClosed():
+            delete(faceObj)
+            continue
+        try: # Try to convert to a face
+            faceObj.Shape = Part.Face(obj.Shape)
+        except: # If we couldn't convert to face, print warning
+            print 'WARNING: Not all DXF objects are recognized as complete.'
+            delete(faceObj)
+            continue
+        intObj = intersect([mask,faceObj]) # intersect with mask
+        delete(faceObj) # Delte the face
+        if isNonempty(intObj): # If we have a finite intersection with the mask
+            lineSegments, cycles = findEdgeCycles(intObj) # See what cycles are in the intersection object
+            for i,cycle in enumerate(cycles): # For each cycle
+                addCycleSketch(layerName+'_'+str(j)+'_'+str(i),App.ActiveDocument,cycle,lineSegments) # Make a new sketch
+        delete(intObj) # Get rid of the intermediate intersection object. This cleans up spurious splines.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

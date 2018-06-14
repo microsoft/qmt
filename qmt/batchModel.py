@@ -58,6 +58,14 @@ class Model:
         @param symbol: Variable name for the quantity used in the COMSOL model.
         @param dense: Whether to do a dense/filled sweep (True) or a sparse one (False).
         """
+        if partName not in self.modelDict['3DParts']:
+            found = False
+            for cut in itervalues(self.modelDict['slices']):
+                if partName in cut['parts']:
+                    found = True
+                    break
+            if not found:
+                raise RuntimeError("Part '{}' does not exist.".format(partName))
         # we allow 'V' as a shorthand for 'voltage'
         if quantity == 'V':
             symbol = 'V'
@@ -192,7 +200,7 @@ class Model:
                 z0=None,thickness=None,targetWire=None,shellVerts=None,depoZone=None,etchZone=None,\
                 zMiddle=None,tIn=None,tOut=None,layerNum=None,lithoBase=[],\
                 fillLitho=True,meshMaxSize=None,meshGrowthRate=None, meshScaleVector=None,\
-                boundaryCondition = None,subtractList=[]):
+                boundaryCondition = None,subtractList=[],Ns=None,Phi_NL=None,Ds=None):
         ''' Add a geometric part to the model. 
             @param partName: The descriptive name of this new part.
             @param fcName: The name of the 2D freeCAD object that this is built from.
@@ -251,6 +259,11 @@ class Model:
                                  current part when forming the final 3D objects. This
                                  subtraction is carried out in 3D using the COMSOL parasolid
                                  kernel or using shapely in 2D. 
+            @param Ns:           Volume charge density of a part, applicable to semiconductor
+                                 and dielectric parts. The units for this are 1/cm^3.
+            @param Phi_NL:       The neutral level for interface traps, measured in units of
+                                 eV above the valence band maximum (semiconductor only).
+            @param Ds:           Density of interface traps; units are 1/(cm^2*eV).
         '''
         # First, run checks to make sure the input is valid:
         if partName in self.modelDict['3DParts']:
@@ -285,8 +298,12 @@ class Model:
         partDict['meshScaleVector'] = meshScaleVector
         partDict['boundaryCondition'] = boundaryCondition
         partDict['subtractList'] = subtractList
+        partDict['Ns'] = Ns
+        partDict['Phi_NL'] = Phi_NL
+        partDict['Ds'] = Ds                
         self.modelDict['buildOrder'][len(self.modelDict['buildOrder'])] = partName
         self.modelDict['3DParts'][partName] = partDict
+        
 
     def addCrossSection(self, sliceName, axis, distance):
         """
@@ -610,10 +627,12 @@ class Model:
         '''
         fileExists = os.path.isfile(self.modelPath)
         if fileExists:
+            print('Loading model file {}.'.format(self.modelPath))
             myFile = open(self.modelPath, 'r')
             modelDict = json.load(myFile)
             myFile.close()
         else:
+            print('Could not load: Model file {} does not exist.'.format(self.modelPath))
             modelDict = self.genEmptyModelDict()
         if updateModel:
             for subDictKey in self.modelDict:
@@ -622,9 +641,8 @@ class Model:
         else:
             self.modelDict = modelDict
 
-    def addJob(self, rootPath, jobSequence=None, numParallelJobs=1,numCoresPerJob=1,
-               geoGenArgs={}, comsolRunMode='batch',
-               postProcArgs={}):
+    def addJob(self, rootPath, jobSequence=None, numNodes=1,numJobsPerNode=1,numCoresPerJob=1,hostFile=None,
+               geoGenArgs={}, comsolRunMode='batch',postProcArgs={}):
         '''Add a job to the model.
 
             Parameters
@@ -646,10 +664,14 @@ class Model:
                     postProc : run post-processing routines.
                 If left as None, this degaults to:
                 ['geoGen','comsolRun','postProc']
-            numParallelJobs : int, default 1
-                Number of parallel jobs to run.
+            numNodes : int, default 1
+                Number of physical nodes to use.
+            numJobsPerNode : int, default 1
+                Number of jobs to run in parallel on each node.
             numCoresPerJob : int, default 1
-                Number of cores to use per job.
+                Number of cores to use for each job
+            hostFile : str, default None
+                File containing the list of node names
             geoGenArgs : dict, default {}
                 Arguments for use by the geoGen nodes.        
             comsolRunArgs : dict, default {}
@@ -662,8 +684,10 @@ class Model:
             self.modelDict['jobSettings']['jobSequence'] = ['geoGen']
         else:
             self.modelDict['jobSettings']['jobSequence'] = jobSequence
-        self.modelDict['jobSettings']['numParallelJobs'] = numParallelJobs
+        self.modelDict['jobSettings']['numNodes'] = numNodes
+        self.modelDict['jobSettings']['numJobsPerNode'] = numJobsPerNode
         self.modelDict['jobSettings']['numCoresPerJob'] = numCoresPerJob
+        self.modelDict['jobSettings']['hostFile'] = hostFile        
         self.modelDict['jobSettings']['geoGenArgs'] = geoGenArgs
         self.modelDict['jobSettings']['comsolRunMode'] = comsolRunMode
         self.modelDict['jobSettings']['postProcArgs'] = postProcArgs
