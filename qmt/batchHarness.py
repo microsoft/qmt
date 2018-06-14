@@ -47,6 +47,19 @@ class Harness:
             raise ValueError('os must be either "windows" or "linux"!')
         self.os = os
 
+    @staticmethod
+    def convert_unicode_to_ascii(dic):
+        '''
+        Convert any unicode entries in the dict dic
+        '''
+        for key, value in dic.iteritems():
+            if isinstance(key, unicode) or isinstance(value, unicode):
+                newkey = key.encode('ascii','ignore')
+                newvalue = value.encode('ascii','ignore')
+                del dic[key]
+                dic[newkey] = newvalue
+        return dic
+
     def setupRun(self, genModelFiles=True):
         ''' Set up the folder structure of a run, broken out by the geomSweep
             specified in the json file.
@@ -182,13 +195,8 @@ class Harness:
             my_env['I_MPI_HYDRA_BOOTSTRAP_EXEC']=launcherPath # for Intel MPI
             my_env['HYDRA_LAUNCHER_EXEC']=launcherPath # for MPICH            
         
-        # Convert any unicode entries in the environment
-        for key, value in my_env.iteritems():
-            if isinstance(key, unicode) or isinstance(value, unicode):
-                newkey = key.encode('ascii','ignore')
-                newvalue = value.encode('ascii','ignore')
-                del my_env[key]
-                my_env[newkey] = newvalue
+        # Convert any unicode entries in the env
+        my_env = self.convert_unicode_to_ascii(my_env)
 
         # Make the export directory if it doesn't exist:
         comsolSolsPath = myModel.modelDict['pathSettings']['dirPath'] + \
@@ -300,13 +308,8 @@ class Harness:
             my_env['I_MPI_HYDRA_BOOTSTRAP_EXEC']=launcherPath # for Intel MPI            
             my_env['HYDRA_LAUNCHER_EXEC']=launcherPath # for MPICH
         
-        # Get rid of possible unicode entries in the environment
-        for key, value in my_env.iteritems():
-            if isinstance(key, unicode) or isinstance(value, unicode):
-                newkey = key.encode('ascii','ignore')
-                newvalue = value.encode('ascii','ignore')
-                del my_env[key]
-                my_env[newkey] = newvalue
+        # Convert any unicode entries in the env
+        my_env = self.convert_unicode_to_ascii(my_env)
 
         batchPostProcpath = qms.postProcessing.__file__.rstrip('__init__.pyc') + 'batchPostProc.py'
         mpiCmd = [mpiexecName, '-n', str(numCores)]
