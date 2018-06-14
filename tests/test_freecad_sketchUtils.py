@@ -76,9 +76,6 @@ def test_deepRemove():
     deepRemove(inter2)
 
 
-manual_testing(test_deepRemove)
-
-
 def test_findSegments():
     '''Test if segment finding is ordered correctly.'''
     b = (-30, 20, 0)
