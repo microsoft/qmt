@@ -33,6 +33,8 @@ def test_genEmptyModelDict():
 
 def test_genPhysicsSweep():
     '''Test generation of physics sweeps.'''
+    model.addPart('dummyPart','dummySketch','extrude','dielectric',
+                  material = 'SiO2',z0=-0.2,thickness=0.2,meshMaxSize=0.2)
     model.genPhysicsSweep('dummyPart', 'param1', [1.1, 1.2, 1.3])
     assert model.modelDict['physicsSweep']['sweepParts']['param1_dummyPart']['part'] == "dummyPart"
     assert model.modelDict['physicsSweep']['sweepParts']['param1_dummyPart']['values'] == [1.1, 1.2, 1.3]

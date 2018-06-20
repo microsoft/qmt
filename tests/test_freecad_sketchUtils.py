@@ -54,6 +54,11 @@ def test_delete():
     delete(part)
     assert len(myDoc.Objects) == 0
 
+    sketch = aux_two_cycle_sketch()
+    part = qmt.freecad.extrude(sketch, 10)
+    part2 = myDoc.copyObject(part, False)
+    deepRemove(name=part2.Name)
+    assert len(part.OutList) == 0  # part2 steals sketch from part1
 
 def test_deepRemove():
     '''Test deep (recursive) removal by all parameters.'''
