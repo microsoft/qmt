@@ -86,18 +86,18 @@ class Model:
             assert len(part_info['values']) == len(list(values)), "Lengths of the different sweeps must match, only sparse sweeps supported."
         self.modelDict['physicsSweep']['type'] = 'dense' if dense else 'sparse'
 
-    def genGeomSweep(self, param, vals, type='freeCAD'):
+    def genGeomSweep(self, param, vals, sweepType='freeCAD'):
         """ Generate a parametric sweep and add it to modelDict. The units need to
         be whatever is accepted by FreeCAD.
         @param param: string with the name of the parameter to sweep over
         @param vals: list or numpy array with the values to sweep over
-        @param type: type of geometric parameter. Legal values are "freeCAD", denoting
-        parameters that are varied through FreeCAD spreadsheets, and "python", which
-        are declared in build sequences in the run construction script.
+        @param sweepType: type of geometric parameter. Legal values are "freeCAD",
+        denoting parameters that are varied through FreeCAD spreadsheets, and "python",
+        which are declared in build sequences in the run construction script.
         """
         sweep = {}
         sweep['vals'] = ', '.join(str(e) for e in vals)
-        sweep['type'] = type
+        sweep['type'] = sweepType
         self.modelDict['geomSweep'][param] = sweep
 
     def genSurfaceIntegral(self, partName, quantities=['V']):

@@ -53,7 +53,8 @@ def test_setupRun():
     shutil.rmtree(os.path.join(jobPath, 'geo_0'))
     shutil.rmtree(os.path.join(jobPath, 'geo_1'))
     shutil.rmtree(os.path.join(jobPath, 'geo_2'))
-    os.rmdir(jobPath)  # safety if jobPath == rootPath
+    os.rmdir(jobPath)  # use os.ramdir for safety if jobPath == rootPath
+
 
 def test_runJob():
     '''Check results of run: here only geoGen (generated FreeCAD model files).
@@ -66,6 +67,8 @@ def test_runJob():
     m.genGeomSweep('d', [0.1, 0.2, 0.3])
     m.setPaths(freeCADPath = os.path.join(
                testDir,'..','examples','1_3D_2DEG','2DEGFCDoc.FCStd'))
+    # ~ m.addPart('tunnelGate','i_TopGate1_Polyline007_sketch','extrude','metalGate',
+                 # ~ material = 'Au',z0=0.051,thickness=0.03,meshMaxSize=0.05, boundaryCondition={'voltage' : 0.0})
     m.saveModel()
 
     harn = qmt.Harness(modelPath)
@@ -76,6 +79,7 @@ def test_runJob():
     myDoc2 = FreeCAD.newDocument('testDoc2')
     myDoc2.load(fc_job2)
     assert myDoc2.modelParams.d == 0.3
+    # TODO: assert that d-parametrised objects have been touched
 
     # Check for illegal steps
     m.addJob(jobPath,jobSequence=['wrongStep'],numCoresPerJob=1)
@@ -90,5 +94,6 @@ def test_runJob():
     shutil.rmtree(os.path.join(jobPath, 'geo_0'))
     shutil.rmtree(os.path.join(jobPath, 'geo_1'))
     shutil.rmtree(os.path.join(jobPath, 'geo_2'))
-    os.rmdir(jobPath)  # safety if jobPath == rootPath
+    os.rmdir(jobPath)  # use os.ramdir for safety if jobPath == rootPath
 
+# ~ manual_testing(test_runJob)

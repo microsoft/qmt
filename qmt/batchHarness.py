@@ -93,7 +93,7 @@ class Harness:
                 paramVal = paramValsList[paramValIndex]
                 tempModel.modelDict['geometricParams'][paramName] = (paramVal, paramType)
                 # Populate the geo sweep (just one point, for bookkeeping purposes):
-                tempModel.genGeomSweep(paramName, [paramVal], type=paramType)
+                tempModel.genGeomSweep(paramName, [paramVal], sweepType=paramType)
             tempModel.modelDict['pathSettings']['dirPath'] = runPath
             if genModelFiles:
                 tempModel.saveModel()
@@ -154,6 +154,12 @@ class Harness:
             sliceData['parts'] = parts
 
         myModel.saveModel()
+        myDoc = FreeCAD.ActiveDocument
+        for obj in myDoc.Objects:
+            obj.touch()
+            print(obj.Name)
+        myDoc.recompute()
+        myDoc.save()
 
 
 
