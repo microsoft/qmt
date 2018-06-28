@@ -10,7 +10,7 @@ from qmt.freecad.objectConstruction import *
 from qmt.freecad.fileIO import setupModelFile
 
 
-def setup_function(function):
+def setup_function():
     global myDoc
     myDoc = FreeCAD.newDocument('testDoc')
     repo_path = os.path.join(os.path.dirname(qmt.__file__), os.pardir)
@@ -21,15 +21,15 @@ def setup_function(function):
     setupModelFile(modelFilePath)
 
 
-def teardown_function(function):
+def teardown_function():
     os.remove(modelFilePath)
     FreeCAD.closeDocument('testDoc')
 
 
 def manual_testing(function):
-    setup_function(function)
+    setup_function()
     function()
-    teardown_function(function)
+    teardown_function()
 
 
 def repo_path():
