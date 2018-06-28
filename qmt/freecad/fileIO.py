@@ -69,6 +69,7 @@ def updateParams(passModel=None):
     ''' Update the parameters in the modelParams spreadsheet to reflect the 
         current value in the model file.
     '''
+    doc = FreeCAD.ActiveDocument
     if passModel is None:
         myModel = getModel()
     else:
@@ -79,29 +80,23 @@ def updateParams(passModel=None):
     # in the FreeCAD file, they won't get wiped out if we comment out
     # a geometry sweep in the model script.
     if len(paramDict) > 0:
-        # First, determine if we already have a spreadsheet:
-        objList = FreeCAD.ActiveDocument.Objects
-        objNames = [x.Name for x in objList]
-        # If we do, delete it (we will rebuild from the json)
-        if 'modelParams' in objNames:
-            FreeCAD.ActiveDocument.removeObject('modelParams')
-        FreeCAD.ActiveDocument.recompute()
-        FreeCAD.ActiveDocument.addObject('Spreadsheet::Sheet', 'modelParams')
-        spreadSheet = FreeCAD.ActiveDocument.modelParams
+        # Internal: do not removeObject the spreadsheet, param dependencies will break.
+        try: spreadSheet = doc.modelParams
+        except: spreadSheet = doc.addObject('Spreadsheet::Sheet', 'modelParams')
+        spreadSheet.clearAll()  # delete existing spreadsheet
         spreadSheet.set('A1', 'paramName')
         spreadSheet.set('B1', 'paramValue')
         spreadSheet.setColumnWidth('A', 200)
         spreadSheet.setStyle('A1:B1', 'bold', 'add')
-        for i in range(len(paramDict)):
-            key = paramDict.keys()[i]
+        for i, key in enumerate(paramDict):
             paramType = paramDict[key][1]
             if paramType == 'freeCAD':
-                valStr = str(paramDict[key][0])
-                spreadSheet.set('A' + str(i + 2), key)
-                spreadSheet.set('B' + str(i + 2), valStr)
-                spreadSheet.setAlias('B' + str(i + 2), str(key))
+                idx = str(i + 2)
+                spreadSheet.set('A' + idx, key)
+                spreadSheet.set('B' + idx, paramDict[key][0])
+                spreadSheet.setAlias('B' + idx, str(key))
             elif paramType == 'python':
                 pass
             else:
                 raise ValueError('Unknown geometric parameter type.')
-        FreeCAD.ActiveDocument.recompute()
+        doc.recompute()

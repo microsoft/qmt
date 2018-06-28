@@ -154,12 +154,6 @@ class Harness:
             sliceData['parts'] = parts
 
         myModel.saveModel()
-        myDoc = FreeCAD.ActiveDocument
-        for obj in myDoc.Objects:
-            obj.touch()
-            # ~ print(obj.Name)
-        myDoc.recompute()
-        myDoc.save()
 
     def runBatchCOMSOLRun(self, modelFilePath):
         ''' Run batch COMSOL run. This requires proprietary components to be

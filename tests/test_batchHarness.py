@@ -6,6 +6,7 @@
 
 import os
 import shutil
+import numpy as np
 import pytest
 import FreeCAD
 import qmt
@@ -66,7 +67,7 @@ def test_runJob(fix_testDir, fix_modelPath, fix_FCDoc):
     myDoc2 = FreeCAD.newDocument('testDoc2')
     myDoc2.load(fc_job2)
     assert myDoc2.modelParams.d == 0.3
-    # TODO: assert that d-parametrised objects have been touched
+    assert np.isclose(myDoc2.getObject("i_TopGate1_Polyline007_sketch").Constraints[11].Value, 0.475642)
 
     # Check for illegal steps
     m.addJob(jobPath, jobSequence=['wrongStep'], numCoresPerJob=1)
@@ -82,5 +83,3 @@ def test_runJob(fix_testDir, fix_modelPath, fix_FCDoc):
     shutil.rmtree(os.path.join(jobPath, 'geo_1'))
     shutil.rmtree(os.path.join(jobPath, 'geo_2'))
     os.rmdir(jobPath)  # use os.ramdir for safety if jobPath == rootPath
-
-# ~ manual_testing(test_runJob)
