@@ -78,6 +78,8 @@ def test_updateParams(fix_modelPath, fix_FCDoc):
     setupModelFile(fix_modelPath)
     model = qmt.Model(modelPath=fix_modelPath)
 
+    objList = fix_FCDoc.Objects
+    objNames = [x.Name for x in objList]
     dummy = fix_FCDoc.addObject("Part::Box", "modelParams")
     model.modelDict['geometricParams']['length1'] = (2, 'freeCAD')
     updateParams()
@@ -97,6 +99,6 @@ def test_updateParams(fix_modelPath, fix_FCDoc):
     assert myDoc2.modelParams.length1 == 2
     assert myDoc2.modelParams.length2 == 3
 
+    FreeCAD.closeDocument('testDoc2')
     os.remove(fcFilePath)
     os.remove(fix_modelPath)
-    FreeCAD.closeDocument('testDoc2')

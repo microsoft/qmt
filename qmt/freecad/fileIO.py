@@ -79,11 +79,14 @@ def updateParams(passModel=None):
     # in the model. This means that if we have old parameters sitting
     # in the FreeCAD file, they won't get wiped out if we comment out
     # a geometry sweep in the model script.
-    if len(paramDict) > 0:
-        # Internal: do not removeObject the spreadsheet, param dependencies will break.
-        try: spreadSheet = doc.modelParams
-        except: spreadSheet = doc.addObject('Spreadsheet::Sheet', 'modelParams')
-        spreadSheet.clearAll()  # delete existing spreadsheet
+    if paramDict:
+        # Internal: unconditional removeObject on spreadSheet breaks param dependencies.
+        try:
+            spreadSheet = doc.modelParams
+            spreadSheet.clearAll()  # clear existing spreadsheet
+        except:
+            doc.removeObject('modelParams')  # otherwise it was not a good spreadsheet
+            spreadSheet = doc.addObject('Spreadsheet::Sheet', 'modelParams')
         spreadSheet.set('A1', 'paramName')
         spreadSheet.set('B1', 'paramValue')
         spreadSheet.setColumnWidth('A', 200)
@@ -93,7 +96,7 @@ def updateParams(passModel=None):
             if paramType == 'freeCAD':
                 idx = str(i + 2)
                 spreadSheet.set('A' + idx, key)
-                spreadSheet.set('B' + idx, paramDict[key][0])
+                spreadSheet.set('B' + idx, str(paramDict[key][0]))
                 spreadSheet.setAlias('B' + idx, str(key))
             elif paramType == 'python':
                 pass
