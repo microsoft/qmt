@@ -1,0 +1,6 @@
+scipy
+sympy
+matplotlib
+pytest
+future
+pytablewriter
