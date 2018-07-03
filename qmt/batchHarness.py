@@ -308,12 +308,11 @@ class Harness:
         print('Running {}...'.format(mpiCmd + pythonCmd))
         subprocess.check_call(mpiCmd + pythonCmd,env=my_env)
 
-
-        basePath = os.path.dirname('/'.join(modelFilePath.split('/')[:-1]))
+        basePath = os.path.dirname(modelFilePath)
         solutionsPath = os.path.join(basePath,self.model.modelDict['comsolInfo']['exportDir'])
         solutionsPattern = os.path.join(solutionsPath,self.model.modelDict['comsolInfo']['fileName']+'_export*')
 
         print('Deleting text solutions files...')
-        print(solutionsPath)
+        print(solutionsPattern)
         for f in glob.glob(solutionsPattern):
             os.remove(f)
