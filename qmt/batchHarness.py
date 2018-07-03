@@ -308,16 +308,12 @@ class Harness:
         print('Running {}...'.format(mpiCmd + pythonCmd))
         subprocess.check_call(mpiCmd + pythonCmd,env=my_env)
 
-        def purge(dir, pattern):
-            for f in os.listdir(dir):
-                if re.search(pattern, f):
-                    os.remove(os.path.join(dir, f))
 
-        basePath = '/'.join(modelFilePath.split('/')[:-1])
-        solutionsPath = basePath+'/'+\
-                        self.model.modelDict['comsolInfo']['exportDir']
+        basePath = os.path.dirname('/'.join(modelFilePath.split('/')[:-1]))
+        solutionsPath = os.path.join(basePath,self.model.modelDict['comsolInfo']['exportDir'])
+        solutionsPattern = os.path.join(solutionsPath,self.model.modelDict['comsolInfo']['fileName']+'_export*')
 
         print('Deleting text solutions files...')
         print(solutionsPath)
-        purge(solutionsPath,self.model.modelDict['comsolInfo']['fileName']+'_export*')
-#         subprocess.check_call(' '.join(mpiCmd + pythonCmd))
+        for f in glob.glob(solutionsPattern):
+            os.remove(f)
