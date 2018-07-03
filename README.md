@@ -5,12 +5,14 @@ Welcome to our qubit modeling tools (qmt)! This package is designed to automate
 the setup of complex geometries appropriate to physical qubit simulations. This 
 package is licensed with an MIT open source license.
 
-To set up your python environment, see the environment.yml file. If you are 
-running Anaconda, simply run
+To set up your Python environment, see the `environment.yml` file. If you use
+`conda`, simply run
 
     conda env create -f environment.yml
 
-Or with pip in the current directory
+or only install `pyside` in your current environment with `conda install pyside`
+
+and then use `pip` inside this repository
 
     pip install .
 
