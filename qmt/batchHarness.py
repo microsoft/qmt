@@ -16,6 +16,7 @@ import subprocess
 import itertools
 from copy import deepcopy
 import time
+import re
 
 
 class Harness:
@@ -163,6 +164,8 @@ class Harness:
         '''
         import qms
         from qms import comsol
+        from qms.postProcessing import dataProcessing
+        
         myModel = QMT.Model(modelPath=modelFilePath)
         myModel.loadModel()
         numNodes = myModel.modelDict['jobSettings']['numNodes']
@@ -288,6 +291,12 @@ class Harness:
                     break
         comsolLog.close()
         comsolErr.close()
+        
+        # Now that we have run COMSOL, import the data as a binary:
+        myData = dataProcessing.SimData(modelFilePath) # initialize the bulk data
+        myData.batch_import_solutions() # gather up the data
+        
+
                     
     def runBatchPostProc(self, modelFilePath):
         ''' Run batch post-processing. This requires proprietary components
@@ -318,4 +327,12 @@ class Harness:
         pythonCmd = [pythonName, batchPostProcpath, '\"' + modelFilePath + '\"']
         print('Running {}...'.format(mpiCmd + pythonCmd))
         subprocess.check_call(mpiCmd + pythonCmd,env=my_env)
-        # subprocess.check_call(' '.join(mpiCmd + pythonCmd))
+
+        basePath = os.path.dirname(modelFilePath)
+        solutionsPath = os.path.join(basePath,self.model.modelDict['comsolInfo']['exportDir'])
+        solutionsPattern = os.path.join(solutionsPath,self.model.modelDict['comsolInfo']['fileName']+'_export*')
+
+        print('Deleting text solutions files...')
+        print(solutionsPattern)
+        for f in glob.glob(solutionsPattern):
+            os.remove(f)
