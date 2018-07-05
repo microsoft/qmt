@@ -125,10 +125,13 @@ def makeSAG(sketch, zBot, zMid, zTop, tIn, tOut, offset=0.):
     c = a + 2 * offset  # height of the top part including the offset
     d = c / np.tan(alpha)  # horizontal width of the trianglular part of the top after offset
     f = offset / np.sin(alpha)  # horizontal shift in the triangular part of the top after an offset
-
+    
     sketchList = splitSketch(sketch)
     returnParts = []
     for tempSketch in sketchList:
+        #TODO: right now, if we try to taper the top of the SAG wire to a point, this
+        # breaks, since the offset of topSketch is empty. We should detect and handle this.
+        # For now, just make sure that the wire has a small flat top.
         botSketch = draftOffset(tempSketch, offset)  # the base of the wire
         midSketch = draftOffset(tempSketch, f + d - tIn)  # the base of the cap
         topSketch = draftOffset(tempSketch, -tIn + f)  # the top of the cap
