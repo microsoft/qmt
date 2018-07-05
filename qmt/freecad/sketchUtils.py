@@ -255,9 +255,10 @@ def makeIntoSketch(inputObj, sketchName=None):
     FreeCAD.ActiveDocument.recompute()
     return returnSketch
 
-def draftOffset(inputSketch,t):
+def draftOffset(inputSketch,t,tol=1e-8):
     ''' Attempt to offset the draft figure by a thickness t. Positive t is an
-    inflation, while negative t is a deflation.
+    inflation, while negative t is a deflation. tol sets how strict we should be when
+    checking if the offset worked.
     '''
     from qmt.freecad import extrude,copy,subtract,delete    
 
@@ -311,6 +312,8 @@ def draftOffset(inputSketch,t):
         returnSketch = copy(littleSketch)
     elif t>0 and bigSketch is not None:
         returnSketch = copy(bigSketch)
+    elif abs(t)<tol:
+        returnSketch = copy(inputSketch)
     else:
         raise ValueError('Failed to offset the sketch '+str(inputSketch.Name)+' by amount '+str(t))
     
