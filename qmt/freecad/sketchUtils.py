@@ -76,7 +76,7 @@ def findSegments(mySketch):
 
 def nextSegment(lineSegments, segIndex, tol=1e-8, fixOrder=True):
     '''Function to compute the next line segment in a collection of tuples
-    defining several cycles. 
+    defining several cycles.
 
         lineSegments: ndarray with [lineSegmentIndex,start/end point,coordinate]
         segIndex: the index to consider
@@ -126,7 +126,7 @@ def findCycle(lineSegments, startingIndex, availSegIDs):
 def addCycleSketch(name, fcDoc, cycleSegIndList, lineSegments):
     ''' Function to add a sketch of a cycle to a FC document.
     '''
-    if (fcDoc.getObject(name) != None):  # this name already exists
+    if (fcDoc.getObject(name) is not None):  # this name already exists
         raise ValueError("Error: sketch " + name + " already exists.")
     obj = fcDoc.addObject('Sketcher::SketchObject', name)
     # obj.MapMode = 'FlatFace'
@@ -151,7 +151,7 @@ def addCycleSketch(name, fcDoc, cycleSegIndList, lineSegments):
 def addPolyLineSketch(name, fcDoc, segmentOrder, lineSegments):
     ''' Add a sketch given segment order and line segments
     '''
-    if (fcDoc.getObject(name) != None):  # this name already exists
+    if (fcDoc.getObject(name) is not None):  # this name already exists
         raise ValueError("Error: sketch " + name + " already exists.")
     obj = fcDoc.addObject('Sketcher::SketchObject', name)
     for segIndex, segment in enumerate(lineSegments):
@@ -200,8 +200,8 @@ def splitSketch(mySketch):
 
 
 def extendSketch(mySketch, d):
-    ''' For a disconnected polyline, extends the last points of the sketch by 
-    a distance d. 
+    ''' For a disconnected polyline, extends the last points of the sketch by
+    a distance d.
     '''
     doc = FreeCAD.ActiveDocument
     segments = findSegments(mySketch)
@@ -209,7 +209,7 @@ def extendSketch(mySketch, d):
     for i in range(len(segments)):
         try:
             connecting = nextSegment(segments, i)
-        except:
+        except BaseException:
             connecting = len(segments)
         connections += [connecting]
     # Find the first and last segments:
@@ -294,11 +294,11 @@ def draftOffset(inputSketch, t, tol=1e-8):
     V0 = solid0.Shape.Volume
     try:
         V1 = solid1.Shape.Volume
-    except:
+    except BaseException:
         V1 = None
     try:
         V2 = solid2.Shape.Volume
-    except:
+    except BaseException:
         V2 = None
 
     # If everything worked properly, these should either be ordered as
@@ -337,7 +337,7 @@ def draftOffset(inputSketch, t, tol=1e-8):
         returnSketch = copy(inputSketch)
     else:
         raise ValueError('Failed to offset the sketch ' +
-                         str(inputSketch.Name)+' by amount '+str(t))
+                         str(inputSketch.Name) + ' by amount ' + str(t))
 
     # # now that we have the three solids, we need to figure out which is bigger
     # # and which is smaller.

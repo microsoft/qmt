@@ -114,7 +114,7 @@ def test_genUnion():
         10, 0, 0), FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), 0))
     box3 = myDoc.addObject("Part::Box", "Box2")
     myDoc.recompute()
-    assert genUnion([]) == None
+    assert genUnion([]) is None
     assert genUnion([box3]).Shape.CenterOfMass == box1.Shape.CenterOfMass
     assert genUnion(
         [box3], consumeInputs=True).Shape.CenterOfMass == box1.Shape.CenterOfMass
@@ -210,7 +210,7 @@ def test_centerObjects():
     box2.Placement = FreeCAD.Placement(FreeCAD.Vector(
         1.5, 3.5, 2.5), FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), 0))
     myDoc.recompute()
-    assert centerObjects(()) == None
+    assert centerObjects(()) is None
     #~ print(getBB(box1))
     #~ print(getBB(box2))
     centerObjects((box1, box2))

@@ -66,7 +66,7 @@ def exportCAD(obj, fileName):
 
 
 def updateParams(passModel=None):
-    ''' Update the parameters in the modelParams spreadsheet to reflect the 
+    ''' Update the parameters in the modelParams spreadsheet to reflect the
         current value in the model file.
     '''
     if passModel is None:

@@ -34,12 +34,14 @@ def test_bowing_parameters():
     inas = matlib.find('InAs', eunit='meV')
     insb = matlib.find('InSb', eunit='meV')
     alloy = matlib.find('InAs80Sb20', eunit='meV')
-    # band gap bowing for InAsSb is strong enough to push CBM in alloy below CBM in either binary
+    # band gap bowing for InAsSb is strong enough to push CBM in alloy below
+    # CBM in either binary
     assert matlib.conductionBandMinimum(
         alloy) < matlib.conductionBandMinimum(inas)
     assert matlib.conductionBandMinimum(
         inas) < matlib.conductionBandMinimum(insb)
-    # check that we have bowing parameters for m_* and E_g, which are significant for this alloy
+    # check that we have bowing parameters for m_* and E_g, which are
+    # significant for this alloy
     bow = matlib.bowingParameters[('InAs', 'InSb')]
     assert 'directBandGap' in bow and 'electronMass' in bow
     # check interpolation with bowing parameters
@@ -50,7 +52,8 @@ def test_bowing_parameters():
         - x * (1 - x) * bow['electronMass']
     assert alloy['directBandGap'] == approx(gap)
     assert alloy['electronMass'] == approx(mass)
-    # parameters for which we don't have bowing parameters should be linearly interpolated
+    # parameters for which we don't have bowing parameters should be linearly
+    # interpolated
     assert 'valenceBandOffset' not in bow
     vbo = (1 - x) * inas['valenceBandOffset'] + x * insb['valenceBandOffset']
     assert alloy['valenceBandOffset'] == approx(vbo)

@@ -12,5 +12,5 @@ except ImportError:
 from .materials import *
 try:
     from .physics_constants import *
-except:
+except BaseException:
     print('Could not import the units module, skipping.')

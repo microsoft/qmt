@@ -71,8 +71,8 @@ def test_setSimZero():
 
 def test_genComsolInfo():
     model.genComsolInfo()
-    assert model.modelDict['comsolInfo']['meshExport'] == None
-    assert model.modelDict['comsolInfo']['repairTolerance'] == None
+    assert model.modelDict['comsolInfo']['meshExport'] is None
+    assert model.modelDict['comsolInfo']['repairTolerance'] is None
     assert model.modelDict['comsolInfo']['fileName'] == 'comsolModel'
     assert model.modelDict['comsolInfo']['exportDir'] == 'solutions'
 

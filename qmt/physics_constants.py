@@ -58,7 +58,8 @@ def parseUnit(s):
             continue
         if u == s:
             return units.__dict__[u]
-    # if s is a sympy object we assume it has already been parsed and pass it through
+    # if s is a sympy object we assume it has already been parsed and pass it
+    # through
     if hasattr(s, 'subs'):
         return s
     raise RuntimeError('unknown unit: {}'.format(s))

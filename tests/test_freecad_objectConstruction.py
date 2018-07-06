@@ -85,7 +85,7 @@ def test_makeSAG():
 
 def test_modelBuilder_saveFreeCADState():
     mb = modelBuilder()
-    fcFilePath = os.path.splitext(modelFilePath)[0]+'.FCStd'
+    fcFilePath = os.path.splitext(modelFilePath)[0] + '.FCStd'
     mb.saveFreeCADState(fcFilePath)
     assert 'testModel.FCStd' in os.listdir(testDir)
     os.remove(fcFilePath)

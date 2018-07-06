@@ -11,7 +11,7 @@ import qmt
 
 class Model:
     def __init__(self, modelPath=None, load=True):
-        '''Class for creating, loading, and manipulating a json file that 
+        '''Class for creating, loading, and manipulating a json file that
            contains information about the model.
 
             Keyword arguments
@@ -56,7 +56,8 @@ class Model:
         modelDict['postProcess'] = {'sweeps': {}, 'tasks': {}}
         return modelDict
 
-    def genPhysicsSweep(self, partName, quantity, values, unit="", symbol=None, dense=False):
+    def genPhysicsSweep(self, partName, quantity, values,
+                        unit="", symbol=None, dense=False):
         """ Generate a parametric sweep and add it to modelDict.
         @param partName: name (str) of the solid whose property should be swept.
         @param quantity: name (str) of the quantity to be swept.
@@ -91,7 +92,8 @@ class Model:
         self.modelDict['physicsSweep']['length'] = len(list(values))
         self.modelDict['physicsSweep']['sweepParts'][key] = sweep
         # For now, only sparse sweeps are supported
-        for part_name, part_info in self.modelDict['physicsSweep']['sweepParts'].items():
+        for part_name, part_info in self.modelDict['physicsSweep']['sweepParts'].items(
+        ):
             assert len(part_info['values']) == len(list(
                 values)), "Lengths of the different sweeps must match, only sparse sweeps supported."
         self.modelDict['physicsSweep']['type'] = 'dense' if dense else 'sparse'
@@ -207,10 +209,10 @@ class Model:
                 zMiddle=None, tIn=None, tOut=None, layerNum=None, lithoBase=[],
                 fillLitho=True, meshMaxSize=None, meshGrowthRate=None, meshScaleVector=None,
                 boundaryCondition=None, subtractList=[], Ns=None, Phi_NL=None, Ds=None):
-        ''' Add a geometric part to the model. 
+        ''' Add a geometric part to the model.
             @param partName: The descriptive name of this new part.
             @param fcName: The name of the 2D freeCAD object that this is built from.
-            @param directive: The freeCAD directive is used to construct this part. 
+            @param directive: The freeCAD directive is used to construct this part.
                                 Valid options for this are:
                                     extrude -- simple extrusion
                                     wire -- hexagonal nanowire about a polyline
@@ -224,7 +226,7 @@ class Model:
                                     metalGate -- an electrode
                                     virtual -- a part just used for selection (ignores material)
                                     dielectric -- no charge accumulation allowed
-            @param z0:          The starting z coordinate. Required for extrude, 
+            @param z0:          The starting z coordinate. Required for extrude,
                                 wire, SAG, and lithography directives.
             @param thickness:   The total thickness. Required for all
                                 directives. On wireShell, this is interpreted
@@ -239,20 +241,20 @@ class Model:
                                                 of a wire coating. Note that only one of depoZone or
                                                 etchZone may be used.
             @param zMiddle:     The location for the "flare out" of the SAG directive.
-            @param tIN:         The lateral distance from the 2D profile to the 
+            @param tIN:         The lateral distance from the 2D profile to the
                                 edge of the top bevel for the SAG directive.
-            @param tOut:        The lateral distance from the 2D profile to the 
+            @param tOut:        The lateral distance from the 2D profile to the
                                 furtheset "flare out" location for the SAG directive.
             @param layerNum:    The layer (int) number used by the lithography directive.
-                                Lower numbers go down first, with higher numbers 
+                                Lower numbers go down first, with higher numbers
                                 deposited last.
             @param lithoBase:   The base partNames to use for the lithography directive.
                                 For multi-step lithography, the bases are just all merged,
                                 so there is no need to list this more than once.
             @param fillLitho:   Bool, defaulting to true. If set to false, will attempt
                                 to hollow out lithography steps by subtracting the base
-                                and subsequent lithography layers, but this can sometimes 
-                                fail in opencascade. COMSOL takes care of this using 
+                                and subsequent lithography layers, but this can sometimes
+                                fail in opencascade. COMSOL takes care of this using
                                 parasolid if left to True.
             @param meshMaxSize: The maximum allowable mesh size for this part, in microns.
             @param meshGrowthRate: The maximum allowable mesh growth rate for this part
@@ -264,7 +266,7 @@ class Model:
             @param subtractList: A list of partNames that should be subtracted from the
                                  current part when forming the final 3D objects. This
                                  subtraction is carried out in 3D using the COMSOL parasolid
-                                 kernel or using shapely in 2D. 
+                                 kernel or using shapely in 2D.
             @param Ns:           Volume charge density of a part, applicable to semiconductor
                                  and dielectric parts. The units for this are 1/cm^3.
             @param Phi_NL:       The neutral level for interface traps, measured in units of
@@ -273,12 +275,17 @@ class Model:
         '''
         # First, run checks to make sure the input is valid:
         if partName in self.modelDict['3DParts']:
-            raise NameError('Error - partName '+partName+' was duplicated!')
-        if directive not in ['extrude', 'wire', 'wireShell', 'SAG', 'lithography']:
-            raise NameError('Error - directive '+directive +
+            raise NameError(
+                'Error - partName ' +
+                partName +
+                ' was duplicated!')
+        if directive not in ['extrude', 'wire',
+                             'wireShell', 'SAG', 'lithography']:
+            raise NameError('Error - directive ' + directive +
                             ' is not a valid directive!')
-        if domainType not in ['semiconductor', 'metalGate', 'virtual', 'dielectric']:
-            raise NameError('Error - domainType '+domainType+' not valid!')
+        if domainType not in ['semiconductor',
+                              'metalGate', 'virtual', 'dielectric']:
+            raise NameError('Error - domainType ' + domainType + ' not valid!')
         if (etchZone is not None) and (depoZone is not None):
             raise NameError(
                 'Error - etchZone and depoZone cannot both be set!')
@@ -350,7 +357,8 @@ class Model:
         # Establish the index of the current slice:
         if sliceName is None:
             sliceName = '0'
-            if len(twoDParts) > 1 or len(twoDParts) == 1 and sliceName not in twoDParts:
+            if len(twoDParts) > 1 or len(
+                    twoDParts) == 1 and sliceName not in twoDParts:
                 raise RuntimeError(
                     'sliceName cannot be unspecified if there are several slices')
         if sliceName not in twoDParts:
@@ -622,7 +630,7 @@ class Model:
         '''Save the current model to disk.
 
             Keyword arguments
-            ----------        
+            ----------
             customPath: str, default None
                 If set, this overrides the path in self.modelPath.
         '''
@@ -668,13 +676,13 @@ class Model:
             Parameters
             ----------
             rootPath : str
-                Directory for the root of the job, where all sub-folders will 
+                Directory for the root of the job, where all sub-folders will
                 be written.
 
             Keyword arguments
             ----------
             jobSequence : list, default None
-                Add a specified job sequence to the model. The valid sequence 
+                Add a specified job sequence to the model. The valid sequence
                 nodes are:
                     geoGen : make geometries using FreeCAD.
                     mesh : mesh the geometries using COMSOL.
@@ -693,11 +701,11 @@ class Model:
             hostFile : str, default None
                 File containing the list of node names
             geoGenArgs : dict, default {}
-                Arguments for use by the geoGen nodes.        
+                Arguments for use by the geoGen nodes.
             comsolRunArgs : dict, default {}
-                Arguments for use by the run nodes.                
+                Arguments for use by the run nodes.
             postProcArgs : dict, default {}
-                Arguments for use by the postProc nodes.                
+                Arguments for use by the postProc nodes.
         '''
         self.modelDict['jobSettings']['rootPath'] = rootPath
         if jobSequence is None:
@@ -719,8 +727,8 @@ class Model:
             Keword Arguments
             ----------
             COMSOLExecPath : str, default None
-                Path to the COMSOL command to be run, typically 
-                comsolclusterbatch.            
+                Path to the COMSOL command to be run, typically
+                comsolclusterbatch.
             COMSOLCompilePath : str, default None
                 Path to the COMSOL Java compiler
             mpiPath : str, default None

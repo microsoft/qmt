@@ -109,7 +109,7 @@ def test_updateParams():
         updateParams()
     assert 'Unknown geometric parameter' in str(err.value)
 
-    fcFilePath = os.path.splitext(filePath)[0]+'.FCStd'
+    fcFilePath = os.path.splitext(filePath)[0] + '.FCStd'
     myDoc.saveAs(fcFilePath)
     myDoc2 = FreeCAD.newDocument('testDoc2')
     myDoc2.load(fcFilePath)

@@ -13,7 +13,8 @@ import os
 rootPath = 'PATH_TO_QMT/qmt/examples/1_3D_2DEG'
 freeCADPath = os.path.join(rootPath, '2DEGFCDoc.FCStd')
 
-# These are necessary for running MS Proprietary components, but are not needed for building the model
+# These are necessary for running MS Proprietary components, but are not
+# needed for building the model
 COMSOLExecPath = 'PATH_TO_COMSOL/Multiphysics/bin/win64/comsolclusterbatch'
 COMSOLCompilePath = 'PATH_TO_COMSOL/Multiphysics/bin/win64/comsolcompile'
 mpiPath = 'mpiexec'
@@ -66,7 +67,8 @@ runModel.addPart('tunnelGate', 'i_TopGate1_Polyline007_sketch', 'extrude', 'meta
 runModel.addPart('wireGate', 'i_TopGate1_Polyline008_sketch', 'extrude', 'metalGate',
                  material='Au', z0=0.051, thickness=0.03, meshMaxSize=0.05, boundaryCondition={'voltage': 0.0})
 
-# To perform a voltage sweep, we assign it to one of our geometry objects like so:
+# To perform a voltage sweep, we assign it to one of our geometry objects
+# like so:
 runModel.genPhysicsSweep(
     'tunnelGate', 'V', np.linspace(0.0, -1.0, 3), unit='V')
 

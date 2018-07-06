@@ -44,7 +44,7 @@ def buildAlShell(sketch, zBottom, width, verts, thickness, depoZone=None, etchZo
     '''Builds a shell on a nanowire parameterized by sketch, zBottom, and width.
     Here, verts describes the vertices that are covered, and thickness describes
     the thickness of the shell. depoZone, if given, is extruded and intersected
-    with the shell (for an etch). Note that offset here *is not* a real offset - 
+    with the shell (for an etch). Note that offset here *is not* a real offset -
     for simplicity we keep this a thin shell that lies cleanly on top of the
     bigger wire offset. There's no need to include the bottom portion since that's
     already taken up by the wire.
@@ -180,7 +180,8 @@ class modelBuilder:
         self._buildPartsDict = {}
         self.lithoSetup = False  # Has the litho setup routine been run?
         self.trash = []  # trash for garbage collection at the end
-        # Update the FreeCAD model to reflect the current value of any model parameters:
+        # Update the FreeCAD model to reflect the current value of any model
+        # parameters:
         updateParams(passModel=self.model)
 
     def buildPart(self, partName):
@@ -324,7 +325,7 @@ class modelBuilder:
         ''' Fetch the numerical value of a geometric parameter, which might be
         either a string or a float.
         '''
-        if type(param) is str or type(param) is unicode:
+        if isinstance(param, str) or isinstance(param, unicode):
             returnParam = float(
                 self.model.modelDict['geometricParams'][param][0])
         else:
@@ -332,7 +333,7 @@ class modelBuilder:
         return returnParam
 
     def _gen_offset(self, obj, offsetVal):
-        ''' Generates an offset non-destructively. 
+        ''' Generates an offset non-destructively.
         '''
         # First, we need to check if the object needs special treatment:
         treatment = 'standard'
@@ -469,13 +470,14 @@ class modelBuilder:
                 self.lithoDict['layers'][layerNum]['objIDs'][objID]['HDict'] = {}
 
     def _screened_H_union_list(self, obj, m, j, offsetTuple, checkOffsetTuple):
-        ''' Foremd the "screened union list" of obj with the layer m, objID j H object that has 
-        been offset according to offsetTuple. The screened union list is defined by checking 
-        first whether the object intersects with the components of the checkOffset version 
+        ''' Foremd the "screened union list" of obj with the layer m, objID j H object that has
+        been offset according to offsetTuple. The screened union list is defined by checking
+        first whether the object intersects with the components of the checkOffset version
         of the H object. Then, for each component that would intersect, we return the a list
         of the offsetTuple version of the object.
         '''
-        # First, we need to check to see if we need to compute either of the underlying H obj lists:
+        # First, we need to check to see if we need to compute either of the
+        # underlying H obj lists:
         HDict = self.lithoDict['layers'][m]['objIDs'][j]['HDict']
         # HDict stores a collection of H object component lists for each (layerNum,objID)
         # pair. The index of this dictionary is a tuple: () indicates no
@@ -493,12 +495,13 @@ class modelBuilder:
         HObjList = HDict[offsetTuple]
         returnList = []
         for i, HObjPart in enumerate(HObjCheckList):
-            if checkOverlap([obj, HObjPart]):  # if we need to include an overlap
+            if checkOverlap(
+                    [obj, HObjPart]):  # if we need to include an overlap
                 returnList += [HObjList[i]]
         return returnList
 
     def _screened_A_UnionList(self, obj, t, ti, offsetTuple, checkOffsetTuple):
-        ''' Foremd the "screened union list" of obj with the substrate A that has 
+        ''' Foremd the "screened union list" of obj with the substrate A that has
         been offset according to offsetTuple.
         '''
         # First, we need to see if we have built the objects before:
@@ -516,7 +519,8 @@ class modelBuilder:
                 self.lithoDict['substrate'][offsetTuple] += [AObj]
 
         returnList = []
-        for i, ACheck in enumerate(self.lithoDict['substrate'][checkOffsetTuple]):
+        for i, ACheck in enumerate(
+                self.lithoDict['substrate'][checkOffsetTuple]):
             if checkOverlap([obj, ACheck]):
                 returnList += [self.lithoDict['substrate'][offsetTuple][i]]
         return returnList
@@ -526,7 +530,7 @@ class modelBuilder:
             H_{n,i}(t) = C_{n,i}(t) \cap [ B_{n,i}(t) \cup (\cup_{m<n;j} H_{m,j}(t_i+t)) \cup (\cup_k A_k(t_i + t))],
             where A_k is from the base substrate list. This is computed recursively. The list of integers
             tList determines the offset t; t = the sum of all layer thicknesses ti that appear
-            in tList. For example, tList = [1,2,3] -> t = t1+t2+t3. 
+            in tList. For example, tList = [1,2,3] -> t = t1+t2+t3.
 
             Note: this object is returned as a list of objects that need to be unioned together
             in order to form the full H.
@@ -629,7 +633,7 @@ class modelBuilder:
         for obj in self.trash:
             try:
                 delete(obj)
-            except:
+            except BaseException:
                 pass
 
 
@@ -676,7 +680,8 @@ def buildCrossSection(sliceInfo, passModel=None):
 def build2DGeo(passModel=None):
     ''' Construct the 2D geometry entities defined in the json file.
     '''
-    # TODO: THIS FUNCTION NEEDS TO BE UPDATED AFTER modelRevision RESTRUCTURING!
+    # TODO: THIS FUNCTION NEEDS TO BE UPDATED AFTER modelRevision
+    # RESTRUCTURING!
     if passModel is None:
         myModel = getModel()
     else:

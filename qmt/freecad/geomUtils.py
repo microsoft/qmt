@@ -172,7 +172,8 @@ def subtractParts(domainObj, partList):
         FreeCAD.ActiveDocument.recompute()
         diffObj = copy(diffObjTemp)
         delete(diffObjTemp)
-    # TODO : This routine is leaving some nuisance objects around that should be deleted.
+    # TODO : This routine is leaving some nuisance objects around that should
+    # be deleted.
     return diffObj
 
 
@@ -229,8 +230,8 @@ def extrudeBetween(sketch, zMin, zMax):
 
 
 def liftObject(obj, d, consumeInputs=False):
-    ''' Create a new solid by lifting an object by a distance d along z, filling 
-    in the space swept out. 
+    ''' Create a new solid by lifting an object by a distance d along z, filling
+    in the space swept out.
     '''
     objBB = getBB(obj)
     liftedObj = copy(obj, moveVec=(0., 0., d))  # lift up the original sketch
@@ -244,7 +245,7 @@ def liftObject(obj, d, consumeInputs=False):
 
 
 def centerObjects(objsList):
-    ''' Move all the objects in the list in the x-y plane so that they are 
+    ''' Move all the objects in the list in the x-y plane so that they are
     centered about the origin.
     '''
     if len(objsList) == 0:
@@ -261,7 +262,7 @@ def centerObjects(objsList):
 def crossSection(obj, axis=(1., 0., 0.), d=1.0, name=None):
     doc = FreeCAD.ActiveDocument
     if name is None:
-        name = obj.Name+'_section'
+        name = obj.Name + '_section'
     wires = list()
     shape = obj.Shape
     for i in shape.slice(FreeCAD.Vector(axis[0], axis[1], axis[2]), d):

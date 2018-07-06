@@ -21,7 +21,7 @@ import re
 
 class Harness:
     def __init__(self, jsonPath, os=None):
-        ''' Class to run a batch 3D job on the cluster. 
+        ''' Class to run a batch 3D job on the cluster.
 
             Parameters
             ----------
@@ -86,7 +86,8 @@ class Harness:
             self.modelFilePaths += [runPath + '/model.json']
             tempModel.modelDict = deepcopy(self.model.modelDict)
             tempModel.modelDict['geomSweep'] = {}  # Also reset this
-            for index, name in zip(prodInstance, self.model.modelDict['geomSweep'].keys()):
+            for index, name in zip(
+                    prodInstance, self.model.modelDict['geomSweep'].keys()):
                 # Populate the geo parameter names:
                 paramName = name
                 # freeCAD or python
@@ -97,7 +98,8 @@ class Harness:
                 paramVal = paramValsList[paramValIndex]
                 tempModel.modelDict['geometricParams'][paramName] = (
                     paramVal, paramType)
-                # Populate the geo sweep (just one point, for bookkeeping purposes):
+                # Populate the geo sweep (just one point, for bookkeeping
+                # purposes):
                 tempModel.genGeomSweep(paramName, [paramVal], type=paramType)
             tempModel.modelDict['pathSettings']['dirPath'] = runPath
             if genModelFiles:
@@ -138,18 +140,18 @@ class Harness:
         for i in range(len(myModel.modelDict['buildOrder'])):
             partName = myModel.modelDict['buildOrder'][str(i)]
             totalParts = len(myModel.modelDict['buildOrder'])
-            print('('+str(i+1)+'/'+str(totalParts) +
-                  ') building part '+partName+'...')
+            print('(' + str(i + 1) + '/' + str(totalParts) +
+                  ') building part ' + partName + '...')
             buildModel.buildPart(partName)
         cadDirPath = dirPath + '/cadParts'
-        stlDirPath = dirPath+'/stlParts'
+        stlDirPath = dirPath + '/stlParts'
         if not os.path.isdir(cadDirPath):
             os.mkdir(cadDirPath)
         if not os.path.isdir(stlDirPath):
             os.mkdir(stlDirPath)
         buildModel.exportBuiltParts(
-            stepFileDir=dirPath + '/cadParts', stlFileDir=dirPath+'/stlParts')
-        buildModel.saveFreeCADState(dirPath+'/freeCADModel.FCStd')
+            stepFileDir=dirPath + '/cadParts', stlFileDir=dirPath + '/stlParts')
+        buildModel.saveFreeCADState(dirPath + '/freeCADModel.FCStd')
 
         # Now that we have rendered the 3D objects, we want to draw any
         # necessary 2D cross sections as 2D cuts:
@@ -164,7 +166,7 @@ class Harness:
         myModel.saveModel()
 
     def runBatchCOMSOLRun(self, modelFilePath):
-        ''' Run batch COMSOL run. This requires proprietary components to be 
+        ''' Run batch COMSOL run. This requires proprietary components to be
         installed.
         '''
         import qms
@@ -176,7 +178,7 @@ class Harness:
         numNodes = myModel.modelDict['jobSettings']['numNodes']
         numJobsPerNode = myModel.modelDict['jobSettings']['numJobsPerNode']
         numCoresPerJob = myModel.modelDict['jobSettings']['numCoresPerJob']
-        numParallelJobs = numNodes*numJobsPerNode
+        numParallelJobs = numNodes * numJobsPerNode
         hostFile = myModel.modelDict['jobSettings']['hostFile']
         comsolExecPath = myModel.modelDict['pathSettings']['COMSOLExecPath']
         comsolCompilePath = myModel.modelDict['pathSettings']['COMSOLCompilePath']
@@ -195,14 +197,15 @@ class Harness:
         elif self.os == 'linux':
             compileList = [comsolExecPath, 'compile',
                            '{0}/{1}.java'.format(folder, name)]
-        print('Running '+' '.join(compileList))
+        print('Running ' + ' '.join(compileList))
         subprocess.check_call(compileList)
 
-        # If we are on the Linux cluster and not run by SLURM, we need to enable the launcher hack
+        # If we are on the Linux cluster and not run by SLURM, we need to
+        # enable the launcher hack
         slurmRun = self.os == 'linux' and 'SLURM_JOB_NODELIST' in os.environ
         my_env = os.environ.copy()
         if self.os == 'linux' and not slurmRun:
-            launcherPath = os.path.dirname(qms.__file__)+'/launch.py'
+            launcherPath = os.path.dirname(qms.__file__) + '/launch.py'
             my_env['I_MPI_HYDRA_BOOTSTRAP_EXEC'] = launcherPath  # for Intel MPI
             my_env['HYDRA_LAUNCHER_EXEC'] = launcherPath  # for MPICH
 
@@ -242,24 +245,24 @@ class Harness:
                     '\" -np ' + str(numCoresPerJob) + \
                     ' -inputFile ' + comsolModelPath
             elif self.os == 'linux':
-                comsolCommand = comsolExecPath+' batch -nn '+str(numParallelJobs)+' -nnhost '+str(numJobsPerNode) +\
-                    ' -np '+str(numCoresPerJob)+' -inputFile '+comsolModelPath+' -batchlog ' +\
-                    comsolLogName+' -mpifabrics shm:tcp'
+                comsolCommand = comsolExecPath + ' batch -nn ' + str(numParallelJobs) + ' -nnhost ' + str(numJobsPerNode) +\
+                    ' -np ' + str(numCoresPerJob) + ' -inputFile ' + comsolModelPath + ' -batchlog ' +\
+                    comsolLogName + ' -mpifabrics shm:tcp'
         else:
             if self.os == 'windows':
                 comsolCommand = mpiPath + ' -n ' + str(numParallelJobs) + ' \"' + comsolExecPath +\
                     '\" -nosave -np ' + \
                     str(numCoresPerJob) + ' -inputFile ' + comsolModelPath
             elif self.os == 'linux':
-                comsolCommand = comsolExecPath+' batch -nn '+str(numParallelJobs)+' -nnhost '+str(numJobsPerNode) +\
-                    ' -nosave -np '+str(numCoresPerJob)+' -inputFile '+comsolModelPath+' -batchlog ' +\
-                    comsolLogName+' -mpifabrics shm:tcp' + ' -mpiarg -verbose'
+                comsolCommand = comsolExecPath + ' batch -nn ' + str(numParallelJobs) + ' -nnhost ' + str(numJobsPerNode) +\
+                    ' -nosave -np ' + str(numCoresPerJob) + ' -inputFile ' + comsolModelPath + ' -batchlog ' +\
+                    comsolLogName + ' -mpifabrics shm:tcp' + ' -mpiarg -verbose'
         # Intel MPI on SLURM needs an extra bootstrap argument
         if slurmRun:
             comsolCommand += ' -mpibootstrap slurm'
 
         if hostFile is not None:
-            comsolCommand += ' -f '+hostFile
+            comsolCommand += ' -f ' + hostFile
         comsolLog = open(stdOutLogName, 'w')
         comsolErr = open(stdErrLogName, 'w')
         print('Running {} ...'.format(comsolCommand))
@@ -278,7 +281,7 @@ class Harness:
         volIntFileBase = '{}/{}_vol_integrals'.format(comsolSolsPath,
                                                       myModel.modelDict['comsolInfo']['fileName'])
         while True:
-            if comsolRun.poll() != None:  # If the run is done, tag it as complete
+            if comsolRun.poll() is not None:  # If the run is done, tag it as complete
                 print('COMSOL run finshed with exit code {}!'.format(
                     comsolRun.returncode))
                 break
@@ -288,7 +291,8 @@ class Harness:
                     solsList = glob.glob(resultFileBase + '*.txt')
                     fracComplete = min(
                         len(solsList) / float(numVoltages), fracComplete)
-                if ('schrodinger' in self.model.modelDict['comsolInfo']['physics']) or ('bdg' in self.model.modelDict['comsolInfo']['physics']):
+                if ('schrodinger' in self.model.modelDict['comsolInfo']['physics']) or (
+                        'bdg' in self.model.modelDict['comsolInfo']['physics']):
                     eigenList = glob.glob(eigenFileBase + '*.txt')
                     fracComplete = min(
                         len(eigenList) / float(numVoltages), fracComplete)
@@ -324,15 +328,16 @@ class Harness:
         import qms
         numJobsPerNode = self.model.modelDict['jobSettings']['numJobsPerNode']
         numNodes = self.model.modelDict['jobSettings']['numNodes']
-        numCores = numNodes*numJobsPerNode
+        numCores = numNodes * numJobsPerNode
         mpiexecName = self.model.modelDict['pathSettings']['mpiPath']
         pythonName = self.model.modelDict['pathSettings']['pythonPath']
         hostFile = self.model.modelDict['jobSettings']['hostFile']
 
-        # If we are on the Linux cluster and not run by SLURM, we need to enable the launcher hack
+        # If we are on the Linux cluster and not run by SLURM, we need to
+        # enable the launcher hack
         my_env = os.environ.copy()
         if self.os == 'linux' and 'SLURM_JOB_NODELIST' not in os.environ:
-            launcherPath = os.path.dirname(qms.__file__)+'/launch.py'
+            launcherPath = os.path.dirname(qms.__file__) + '/launch.py'
             my_env['I_MPI_HYDRA_BOOTSTRAP_EXEC'] = launcherPath  # for Intel MPI
             my_env['HYDRA_LAUNCHER_EXEC'] = launcherPath  # for MPICH
 
@@ -353,7 +358,7 @@ class Harness:
         solutionsPath = os.path.join(
             basePath, self.model.modelDict['comsolInfo']['exportDir'])
         solutionsPattern = os.path.join(
-            solutionsPath, self.model.modelDict['comsolInfo']['fileName']+'_export*')
+            solutionsPath, self.model.modelDict['comsolInfo']['fileName'] + '_export*')
 
         print('Deleting text solutions files...')
         print(solutionsPattern)
