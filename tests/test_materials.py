@@ -14,12 +14,12 @@ def test_band_offsets():
     mat3 = matlib.find('GaAs', eunit='eV')
     assert matlib.conductionBandMinimum(mat1) - mat1['directBandGap'] == \
         approx(matlib.valenceBandMaximum(mat1))
-    assert matlib.conductionBandMinimum(mat1) - matlib.conductionBandMinimum(mat2) == \
-        approx(materials.conduction_band_offset(mat1, mat2))
+    assert matlib.conductionBandMinimum(mat1) - matlib.conductionBandMinimum(
+        mat2) == approx(materials.conduction_band_offset(mat1, mat2))
     assert matlib.valenceBandMaximum(mat1) + mat1['directBandGap'] == \
         approx(matlib.conductionBandMinimum(mat1))
-    assert matlib.valenceBandMaximum(mat1) - matlib.valenceBandMaximum(mat2) == \
-        approx(materials.valence_band_offset(mat1, mat2))
+    assert matlib.valenceBandMaximum(mat1) - matlib.valenceBandMaximum(
+        mat2) == approx(materials.valence_band_offset(mat1, mat2))
     assert materials.conduction_band_offset(mat1, mat2) + \
         materials.conduction_band_offset(mat2, mat3) == \
         approx(materials.conduction_band_offset(mat1, mat3))
@@ -71,12 +71,12 @@ def test_band_offsets_fallback():
     mat3 = matlib.find('GaAs', eunit='eV')
     assert matlib.conductionBandMinimum(mat1) - mat1['directBandGap'] == \
         approx(matlib.valenceBandMaximum(mat1))
-    assert matlib.conductionBandMinimum(mat1) - matlib.conductionBandMinimum(mat2) == \
-        approx(materials.conduction_band_offset(mat1, mat2))
+    assert matlib.conductionBandMinimum(mat1) - matlib.conductionBandMinimum(
+        mat2) == approx(materials.conduction_band_offset(mat1, mat2))
     assert matlib.valenceBandMaximum(mat1) + mat1['directBandGap'] == \
         approx(matlib.conductionBandMinimum(mat1))
-    assert matlib.valenceBandMaximum(mat1) - matlib.valenceBandMaximum(mat2) == \
-        approx(materials.valence_band_offset(mat1, mat2))
+    assert matlib.valenceBandMaximum(mat1) - matlib.valenceBandMaximum(
+        mat2) == approx(materials.valence_band_offset(mat1, mat2))
     assert materials.conduction_band_offset(mat1, mat2) + \
         materials.conduction_band_offset(mat2, mat3) == \
         approx(materials.conduction_band_offset(mat1, mat3))

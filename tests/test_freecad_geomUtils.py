@@ -23,8 +23,14 @@ def manual_testing(function):
     teardown_function(function)
 
 
-def aux_two_cycle_sketch(a=(20, 20, 0), b=(-30, 20, 0), c=(-30, -10, 0), d=(20, -10, 0),
-                         e=(50, 50, 0), f=(60, 50, 0), g=(55, 60, 0)):
+def aux_two_cycle_sketch(
+        a=(20, 20, 0),
+        b=(-30, 20, 0),
+        c=(-30, -10, 0),
+        d=(20, -10, 0),
+        e=(50, 50, 0),
+        f=(60, 50, 0),
+        g=(55, 60, 0)):
     '''Helper function to drop a simple multi-cycle sketch.
        The segments are carefully ordered.
     '''
@@ -69,7 +75,9 @@ def aux_hexagon_sketch(r=1):
     sketch = FreeCAD.activeDocument().addObject(
         'Sketcher::SketchObject', 'HexSketch')
     ProfileLib.RegularPolygon.makeRegularPolygon(
-        'HexSketch', 6, FreeCAD.Vector(10, 10, 0), FreeCAD.Vector(20, 20, 0), False)
+        'HexSketch', 6, FreeCAD.Vector(
+            10, 10, 0), FreeCAD.Vector(
+            20, 20, 0), False)
     FreeCAD.ActiveDocument.recompute()
     return sketch
 
@@ -117,7 +125,8 @@ def test_genUnion():
     assert genUnion([]) is None
     assert genUnion([box3]).Shape.CenterOfMass == box1.Shape.CenterOfMass
     assert genUnion(
-        [box3], consumeInputs=True).Shape.CenterOfMass == box1.Shape.CenterOfMass
+        [box3],
+        consumeInputs=True).Shape.CenterOfMass == box1.Shape.CenterOfMass
     union = genUnion([box1, box2], consumeInputs=True)
     assert union.Shape.BoundBox.XLength == 20
 

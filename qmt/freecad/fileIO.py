@@ -61,7 +61,9 @@ def exportCAD(obj, fileName):
     if (fileName[-5:] == '.step') or (fileName[-4:] == '.stp'):
         Part.export([obj], fileName)
     else:
-        raise ValueError('The file path' + fileName + ' does not end in .step or .stp. \
+        raise ValueError(
+            'The file path' + fileName +
+            ' does not end in .step or .stp. \
                           Please fix this and try your export again.')
 
 

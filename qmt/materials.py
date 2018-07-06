@@ -65,8 +65,10 @@ class Material(collections.Mapping):
         except KeyError:
             raise KeyError(
                 "KeyError: material '{}' has no '{}'".format(self.name, key))
-        if key in ('workFunction', 'electronAffinity', 'directBandGap', 'valenceBandOffset',
-                   'chargeNeutralityLevel', 'interbandMatrixElement', 'spinOrbitSplitting'):
+        if key in (
+            'workFunction', 'electronAffinity', 'directBandGap',
+            'valenceBandOffset', 'chargeNeutralityLevel',
+                'interbandMatrixElement', 'spinOrbitSplitting'):
             value *= self.energyUnit
         return value
 
@@ -550,24 +552,21 @@ def write_database_to_markdown(out_file, mat_lib):
         '''), file=out_file)
 
     print('## Semiconductors', file=out_file)
-    semi_props = [('relativePermittivity', 'relative permittivity'),
-                  ('electronMass', r'electron mass [m_e]'),
-                  ('electronAffinity', r'electron affinity $\chi$ [eV]'),
-                  ('directBandGap', r'direct band gap $E_g(\Gamma)$ [eV]'),
-                  ('valenceBandOffset',
-                   r'valence band offset w.r.t. InSb [eV]'),
-                  ('spinOrbitSplitting',
-                   r'spin-orbit splitting $\Delta_{so}$ [eV]'),
-                  ('interbandMatrixElement',
-                   r'interband matrix element $E_P$ [eV]'),
-                  ('luttingerGamma1', r'Luttinger parameter $\gamma_1$'),
-                  ('luttingerGamma2', r'Luttinger parameter $\gamma_2$'),
-                  ('luttingerGamma3', r'Luttinger parameter $\gamma_3$'),
-                  ('chargeNeutralityLevel',
-                   r'charge neutrality level [from VB edge, in eV]'),
-                  ('surfaceChargeDensity',
-                   r'density of surface states [10$^{12}$ cm$^{-2}$ eV$^(-1)$]')
-                  ]
+    semi_props = [
+        ('relativePermittivity', 'relative permittivity'),
+        ('electronMass', r'electron mass [m_e]'),
+        ('electronAffinity', r'electron affinity $\chi$ [eV]'),
+        ('directBandGap', r'direct band gap $E_g(\Gamma)$ [eV]'),
+        ('valenceBandOffset', r'valence band offset w.r.t. InSb [eV]'),
+        ('spinOrbitSplitting', r'spin-orbit splitting $\Delta_{so}$ [eV]'),
+        ('interbandMatrixElement', r'interband matrix element $E_P$ [eV]'),
+        ('luttingerGamma1', r'Luttinger parameter $\gamma_1$'),
+        ('luttingerGamma2', r'Luttinger parameter $\gamma_2$'),
+        ('luttingerGamma3', r'Luttinger parameter $\gamma_3$'),
+        ('chargeNeutralityLevel',
+         r'charge neutrality level [from VB edge, in eV]'),
+        ('surfaceChargeDensity',
+         r'density of surface states [10$^{12}$ cm$^{-2}$ eV$^(-1)$]')]
     scale_factors = dict(surfaceChargeDensity=1e-12)
     table = [[desc] for desc in list(zip(*semi_props))[1]]
     semi_names = [name for name, mat in sorted(
@@ -603,9 +602,14 @@ def write_database_to_markdown(out_file, mat_lib):
             $O(A_{1-x} B_x) = (1-x) O(A) + x O(B) - x(1-x) O_{AB}$,
         with the bowing parameter $O_{AB}$.
         '''), file=out_file)
-    scale_factors = dict((p, 1e-3) for p in ('workFunction', 'electronAffinity', 'directBandGap',
-                                             'valenceBandOffset', 'chargeNeutralityLevel',
-                                             'interbandMatrixElement', 'spinOrbitSplitting'))
+    scale_factors = dict((p,
+                          1e-3) for p in ('workFunction',
+                                          'electronAffinity',
+                                          'directBandGap',
+                                          'valenceBandOffset',
+                                          'chargeNeutralityLevel',
+                                          'interbandMatrixElement',
+                                          'spinOrbitSplitting'))
     table = []
     bowing_mats = sorted(mat_lib.bowingParameters.keys())
     bowing_props = []
@@ -791,14 +795,31 @@ if __name__ == '__main__':
                      spinOrbitSplitting=44.)
 
     # bowing parameters from Vurgaftman et al. (2001)
-    materials.setBowingParameters('GaAs', 'InAs', 'semi', electronMass=0.0091,
-                                  directBandGap=477., valenceBandOffset=-380.,
-                                  spinOrbitSplitting=150., interbandMatrixElement=-1480.)
+    materials.setBowingParameters(
+        'GaAs',
+        'InAs',
+        'semi',
+        electronMass=0.0091,
+        directBandGap=477.,
+        valenceBandOffset=-380.,
+        spinOrbitSplitting=150.,
+        interbandMatrixElement=-1480.)
     materials.setBowingParameters('AlAs', 'GaAs', 'semi', electronMass=0.)
-    materials.setBowingParameters('AlAs', 'InAs', 'semi', electronMass=0.049, directBandGap=700.,
-                                  valenceBandOffset=-640., spinOrbitSplitting=150.)
-    materials.setBowingParameters('GaSb', 'InSb', 'semi', electronMass=0.0092, directBandGap=425.,
-                                  spinOrbitSplitting=100.)
+    materials.setBowingParameters(
+        'AlAs',
+        'InAs',
+        'semi',
+        electronMass=0.049,
+        directBandGap=700.,
+        valenceBandOffset=-640.,
+        spinOrbitSplitting=150.)
+    materials.setBowingParameters(
+        'GaSb',
+        'InSb',
+        'semi',
+        electronMass=0.0092,
+        directBandGap=425.,
+        spinOrbitSplitting=100.)
     materials.setBowingParameters('InAs', 'InSb', 'semi', electronMass=0.035, directBandGap=670.0,
                                   # the bowing of the spinOrbitSplitting seems
                                   # to be closer to zero for some

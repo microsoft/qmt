@@ -44,7 +44,8 @@ class Harness:
                 os = 'windows'
             else:
                 raise RuntimeError(
-                    'Operating system {} is not supported.'.format(sys.platform))
+                    'Operating system {} is not supported.'.format(
+                        sys.platform))
         if os not in ['linux', 'windows']:
             raise ValueError('os must be either "windows" or "linux"!')
         self.os = os
@@ -93,7 +94,8 @@ class Harness:
                 # freeCAD or python
                 paramType = self.model.modelDict['geomSweep'][name]['type']
                 paramValIndex = index
-                paramValsStr = self.model.modelDict['geomSweep'][paramName]['vals']
+                paramValsStr = self.model.modelDict['geomSweep'][paramName][
+                    'vals']
                 paramValsList = paramValsStr.split(',')
                 paramVal = paramValsList[paramValIndex]
                 tempModel.modelDict['geometricParams'][paramName] = (
@@ -150,7 +152,8 @@ class Harness:
         if not os.path.isdir(stlDirPath):
             os.mkdir(stlDirPath)
         buildModel.exportBuiltParts(
-            stepFileDir=dirPath + '/cadParts', stlFileDir=dirPath + '/stlParts')
+            stepFileDir=dirPath + '/cadParts',
+            stlFileDir=dirPath + '/stlParts')
         buildModel.saveFreeCADState(dirPath + '/freeCADModel.FCStd')
 
         # Now that we have rendered the 3D objects, we want to draw any
@@ -181,13 +184,15 @@ class Harness:
         numParallelJobs = numNodes * numJobsPerNode
         hostFile = myModel.modelDict['jobSettings']['hostFile']
         comsolExecPath = myModel.modelDict['pathSettings']['COMSOLExecPath']
-        comsolCompilePath = myModel.modelDict['pathSettings']['COMSOLCompilePath']
+        comsolCompilePath = myModel.modelDict['pathSettings'][
+            'COMSOLCompilePath']
         jdkPath = myModel.modelDict['pathSettings']['jdkPath']
         mpiPath = myModel.modelDict['pathSettings']['mpiPath']
         folder = myModel.modelDict['pathSettings']['dirPath']
         name = myModel.modelDict['comsolInfo']['fileName']
         myComsolModel = comsol.ComsolModel(
-            modelFilePath, run_mode=self.model.modelDict['jobSettings']['comsolRunMode'])
+            modelFilePath, run_mode=self.model.modelDict['jobSettings']
+            ['comsolRunMode'])
 
         print('Compiling COMSOL java file...')
         myComsolModel._write()
@@ -268,18 +273,22 @@ class Harness:
         print('Running {} ...'.format(comsolCommand))
 
         comsolRun = subprocess.Popen(
-            comsolCommand, stdout=comsolLog, stderr=comsolErr, shell=True, env=my_env)
+            comsolCommand,
+            stdout=comsolLog,
+            stderr=comsolErr,
+            shell=True,
+            env=my_env)
         print('Starting COMSOL run...')
         # Determine the number of voltages we are expecting.
         numVoltages = myModel.modelDict['physicsSweep']['length']
-        resultFileBase = '{}/{}_export'.format(comsolSolsPath,
-                                               myModel.modelDict['comsolInfo']['fileName'])
-        eigenFileBase = '{}/{}_eigvals'.format(comsolSolsPath,
-                                               myModel.modelDict['comsolInfo']['fileName'])
-        surIntFileBase = '{}/{}_sur_integrals'.format(comsolSolsPath,
-                                                      myModel.modelDict['comsolInfo']['fileName'])
-        volIntFileBase = '{}/{}_vol_integrals'.format(comsolSolsPath,
-                                                      myModel.modelDict['comsolInfo']['fileName'])
+        resultFileBase = '{}/{}_export'.format(
+            comsolSolsPath, myModel.modelDict['comsolInfo']['fileName'])
+        eigenFileBase = '{}/{}_eigvals'.format(
+            comsolSolsPath, myModel.modelDict['comsolInfo']['fileName'])
+        surIntFileBase = '{}/{}_sur_integrals'.format(
+            comsolSolsPath, myModel.modelDict['comsolInfo']['fileName'])
+        volIntFileBase = '{}/{}_vol_integrals'.format(
+            comsolSolsPath, myModel.modelDict['comsolInfo']['fileName'])
         while True:
             if comsolRun.poll() is not None:  # If the run is done, tag it as complete
                 print('COMSOL run finshed with exit code {}!'.format(
@@ -287,7 +296,8 @@ class Harness:
                 break
             else:
                 fracComplete = 1.0
-                if 'electrostatics' in self.model.modelDict['comsolInfo']['physics']:
+                if 'electrostatics' in self.model.modelDict['comsolInfo'][
+                        'physics']:
                     solsList = glob.glob(resultFileBase + '*.txt')
                     fracComplete = min(
                         len(solsList) / float(numVoltages), fracComplete)
@@ -358,7 +368,9 @@ class Harness:
         solutionsPath = os.path.join(
             basePath, self.model.modelDict['comsolInfo']['exportDir'])
         solutionsPattern = os.path.join(
-            solutionsPath, self.model.modelDict['comsolInfo']['fileName'] + '_export*')
+            solutionsPath,
+            self.model.modelDict['comsolInfo']['fileName'] +
+            '_export*')
 
         print('Deleting text solutions files...')
         print(solutionsPattern)

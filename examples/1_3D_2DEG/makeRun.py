@@ -58,14 +58,41 @@ runModel.addPart('vacuum', 'Rectangle', 'extrude', 'dielectric',
                  material='air', z0=0.051,
                  thickness=0.5, meshMaxSize=0.2)
 
-runModel.addPart('AlFilm', 'i_AlEtch_Polyline003_sketch', 'extrude', 'metalGate',
-                 material='Al', z0=0.011, thickness=0.0087, meshMaxSize=0.05, boundaryCondition={'voltage': 0.0})
+runModel.addPart(
+    'AlFilm',
+    'i_AlEtch_Polyline003_sketch',
+    'extrude',
+    'metalGate',
+    material='Al',
+    z0=0.011,
+    thickness=0.0087,
+    meshMaxSize=0.05,
+    boundaryCondition={
+        'voltage': 0.0})
 
-runModel.addPart('tunnelGate', 'i_TopGate1_Polyline007_sketch', 'extrude', 'metalGate',
-                 material='Au', z0=0.051, thickness=0.03, meshMaxSize=0.05, boundaryCondition={'voltage': 0.0})
+runModel.addPart(
+    'tunnelGate',
+    'i_TopGate1_Polyline007_sketch',
+    'extrude',
+    'metalGate',
+    material='Au',
+    z0=0.051,
+    thickness=0.03,
+    meshMaxSize=0.05,
+    boundaryCondition={
+        'voltage': 0.0})
 
-runModel.addPart('wireGate', 'i_TopGate1_Polyline008_sketch', 'extrude', 'metalGate',
-                 material='Au', z0=0.051, thickness=0.03, meshMaxSize=0.05, boundaryCondition={'voltage': 0.0})
+runModel.addPart(
+    'wireGate',
+    'i_TopGate1_Polyline008_sketch',
+    'extrude',
+    'metalGate',
+    material='Au',
+    z0=0.051,
+    thickness=0.03,
+    meshMaxSize=0.05,
+    boundaryCondition={
+        'voltage': 0.0})
 
 # To perform a voltage sweep, we assign it to one of our geometry objects
 # like so:

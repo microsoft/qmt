@@ -135,8 +135,10 @@ def makeBB(BB):
     xMin, xMax, yMin, yMax, zMin, zMax = BB
     box = doc.addObject("Part::Box")
     centerVector = FreeCAD.Vector(xMin, yMin, zMin)
-    box.Placement = FreeCAD.Placement(centerVector,
-                                      FreeCAD.Rotation(FreeCAD.Vector(0., 0., 0.), 0.))
+    box.Placement = FreeCAD.Placement(
+        centerVector, FreeCAD.Rotation(
+            FreeCAD.Vector(
+                0., 0., 0.), 0.))
     box.Length = xMax - xMin
     box.Width = yMax - yMin
     box.Height = zMax - zMin

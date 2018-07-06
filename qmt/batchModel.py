@@ -92,8 +92,8 @@ class Model:
         self.modelDict['physicsSweep']['length'] = len(list(values))
         self.modelDict['physicsSweep']['sweepParts'][key] = sweep
         # For now, only sparse sweeps are supported
-        for part_name, part_info in self.modelDict['physicsSweep']['sweepParts'].items(
-        ):
+        for part_name, part_info in self.modelDict['physicsSweep'][
+                'sweepParts'].items():
             assert len(part_info['values']) == len(list(
                 values)), "Lengths of the different sweeps must match, only sparse sweeps supported."
         self.modelDict['physicsSweep']['type'] = 'dense' if dense else 'sparse'
@@ -142,7 +142,8 @@ class Model:
 
     def getSimZero(self, parts=None):
         '''Retrieve the zero level for the electric potential [in Volts].'''
-        zeroLevelPart, zeroLevelProp = self.modelDict['comsolInfo']['zeroLevel']
+        zeroLevelPart, zeroLevelProp = self.modelDict['comsolInfo'][
+            'zeroLevel']
         if zeroLevelPart is None:
             return 0.0
         matLib = qmt.Materials(matDict=self.modelDict['materials'])
@@ -152,8 +153,12 @@ class Model:
         mat_dict = matLib.find(zeroLevelMatName, eunit='eV')
         return mat_dict[zeroLevelProp]
 
-    def genComsolInfo(self, meshExport=None, fileName='comsolModel', exportDir='solutions',
-                      repairTolerance=None, physics=['electrostatics'], exportDomains=[], exportScalingVec=[5., 5., 5.]):
+    def genComsolInfo(
+            self, meshExport=None, fileName='comsolModel',
+            exportDir='solutions', repairTolerance=None,
+            physics=['electrostatics'],
+            exportDomains=[],
+            exportScalingVec=[5., 5., 5.]):
         '''
         Generate meta information required by COSMOL
         @param meshExport: string with name for the exported mesh. None means no mesh is exported
@@ -175,9 +180,11 @@ class Model:
         self.modelDict['comsolInfo']['exportDomains'] = exportDomains
         self.modelDict['comsolInfo']['exportScalingVec'] = exportScalingVec
 
-    def setComsolQuantumParams(self, quantumDomain, alpha=[0., 0., 0.], alphaUnit='meV*nm',
-                               B=[0., 0., 0.], BUnit='T', g=-2.0, Delta=0.0, DeltaUnit='meV',
-                               numEigVals=10, eigValSearch=0.0):
+    def setComsolQuantumParams(
+            self, quantumDomain, alpha=[0., 0., 0.],
+            alphaUnit='meV*nm', B=[0., 0., 0.],
+            BUnit='T', g=-2.0, Delta=0.0, DeltaUnit='meV', numEigVals=10,
+            eigValSearch=0.0):
         '''
         Set the physics parameters needed for quantum solves in COMSOL.
         @param quantumDomain: the name of the part on which we want to perform quantum
@@ -204,11 +211,14 @@ class Model:
         self.modelDict['comsolInfo']['quantumParams']['numEigVals'] = numEigVals
         self.modelDict['comsolInfo']['quantumParams']['eigValSearch'] = eigValSearch
 
-    def addPart(self, partName, fcName, directive, domainType, material=None,
-                z0=None, thickness=None, targetWire=None, shellVerts=None, depoZone=None, etchZone=None,
-                zMiddle=None, tIn=None, tOut=None, layerNum=None, lithoBase=[],
-                fillLitho=True, meshMaxSize=None, meshGrowthRate=None, meshScaleVector=None,
-                boundaryCondition=None, subtractList=[], Ns=None, Phi_NL=None, Ds=None):
+    def addPart(
+            self, partName, fcName, directive, domainType, material=None,
+            z0=None, thickness=None, targetWire=None, shellVerts=None,
+            depoZone=None, etchZone=None, zMiddle=None, tIn=None, tOut=None,
+            layerNum=None, lithoBase=[],
+            fillLitho=True, meshMaxSize=None, meshGrowthRate=None,
+            meshScaleVector=None, boundaryCondition=None, subtractList=[],
+            Ns=None, Phi_NL=None, Ds=None):
         ''' Add a geometric part to the model.
             @param partName: The descriptive name of this new part.
             @param fcName: The name of the 2D freeCAD object that this is built from.
@@ -383,8 +393,9 @@ class Model:
         else:
             slicePart['type'] = objType
         # Set domainType:
-        if domainType not in ['semiconductor', 'metalFloating', 'metalGate', 'virtual',
-                              'dielectric', None]:
+        if domainType not in [
+            'semiconductor', 'metalFloating', 'metalGate', 'virtual',
+                'dielectric', None]:
             raise ValueError('domainType not in list of known types.')
         else:
             slicePart['domainType'] = domainType
@@ -407,8 +418,9 @@ class Model:
         self.modelDict['buildOrder'][len(
             self.modelDict['buildOrder'])] = partName
 
-    def addThomasFermi2dTask(self, region, grid, slice_name, name=None, write_data=True,
-                             plot_data=True, temperature=0.):
+    def addThomasFermi2dTask(
+            self, region, grid, slice_name, name=None, write_data=True,
+            plot_data=True, temperature=0.):
         """Add a 2D Thomas-Fermi postprocessing task.
 
         @param region: 2D region to simulate. May simply be the name of a 2DPart (i.e. an entry in
@@ -428,17 +440,27 @@ class Model:
         @param temperature: Temperature [in K] for the simulation.
         """
         if write_data is True:
-            write_data = ['density', 'electrostatic_potential', 'potential_energy',
-                          'effective_mass']
+            write_data = [
+                'density',
+                'electrostatic_potential',
+                'potential_energy',
+                'effective_mass']
         elif write_data is False:
             write_data = []
         if plot_data is True:
-            plot_data = ['density', 'electrostatic_potential', 'potential_energy', 'effective_mass',
-                         'bare_bands']
+            plot_data = [
+                'density',
+                'electrostatic_potential',
+                'potential_energy',
+                'effective_mass',
+                'bare_bands']
         elif plot_data is False:
             plot_data = []
-        task = {'task': 'thomasFermi2d', 'slice': slice_name, 'write_data': write_data,
-                'plot_data': plot_data}
+        task = {
+            'task': 'thomasFermi2d',
+            'slice': slice_name,
+            'write_data': write_data,
+            'plot_data': plot_data}
         grid_spec = {'region': region}
         if np.isscalar(grid):
             grid_spec['step_size'] = grid
@@ -456,10 +478,11 @@ class Model:
         assert name not in self.modelDict['postProcess']['tasks']
         self.modelDict['postProcess']['tasks'][name] = task
 
-    def addSchrodinger2dTask(self, region, grid, slice_name, eigenvalues=1, target_energy=None,
-                             solver=None, name=None, write_wavefunctions=True,
-                             plot_wavefunctions=True, write_data=True, plot_data=True,
-                             temperature=0.):
+    def addSchrodinger2dTask(
+            self, region, grid, slice_name, eigenvalues=1, target_energy=None,
+            solver=None, name=None, write_wavefunctions=True,
+            plot_wavefunctions=True, write_data=True, plot_data=True,
+            temperature=0.):
         """Add a 2D Schrodinger postprocessing task.
 
         @param region: 2D region to simulate. May simply be the name of a 2DPart (i.e. an entry in
@@ -504,13 +527,17 @@ class Model:
                          'electrostatic_potential', 'potential_energy']
         elif plot_data is False:
             plot_data = []
-        task = {'task': 'schrodinger2d',
-                'slice': slice_name,
-                'spectrum': {'eigenvalues': eigenvalues, 'target energy': target_energy},
-                'write_data': write_data,
-                'plot_data': plot_data,
-                'wave_functions': {'write': write_wavefunctions, 'plot': plot_wavefunctions}
-                }
+        task = {
+            'task': 'schrodinger2d',
+            'slice': slice_name,
+            'spectrum': {
+                'eigenvalues': eigenvalues,
+                'target energy': target_energy},
+            'write_data': write_data,
+            'plot_data': plot_data,
+            'wave_functions': {
+                'write': write_wavefunctions,
+                'plot': plot_wavefunctions}}
         grid_spec = {'region': region}
         if np.isscalar(grid):
             grid_spec['step_size'] = grid
@@ -530,8 +557,9 @@ class Model:
         assert name not in self.modelDict['postProcess']['tasks']
         self.modelDict['postProcess']['tasks'][name] = task
 
-    def addPlotPotential2dTask(self, region, grid, slice_name, name=None, write_data=True,
-                               plot_data=True):
+    def addPlotPotential2dTask(
+            self, region, grid, slice_name, name=None, write_data=True,
+            plot_data=True):
         """Add a 2D Schrodinger postprocessing task.
 
         @param region: 2D region to plot. May simply be the name of a 2DPart (i.e. an entry in
@@ -557,8 +585,11 @@ class Model:
             plot_data = ['electrostatic_potential', 'potential_energy']
         elif plot_data is False:
             plot_data = []
-        task = {'task': 'plotPotential2d', 'slice': slice_name, 'write_data': write_data,
-                'plot_data': plot_data}
+        task = {
+            'task': 'plotPotential2d',
+            'slice': slice_name,
+            'write_data': write_data,
+            'plot_data': plot_data}
         grid_spec = {'region': region}
         if np.isscalar(grid):
             grid_spec['step_size'] = grid
@@ -575,19 +606,27 @@ class Model:
         assert name not in self.modelDict['postProcess']['tasks']
         self.modelDict['postProcess']['tasks'][name] = task
 
-    def addSchrodingerTask(self, x, y, z, eigenvalues, target_energy=None, solver=None, name=None,
-                           write_spectrum=True, write_wavefunctions=True, write_density=True,
-                           plot_format=None, plot=True, plot_wavefunctions=True, efermi=0.):
+    def addSchrodingerTask(
+            self, x, y, z, eigenvalues, target_energy=None, solver=None,
+            name=None, write_spectrum=True, write_wavefunctions=True,
+            write_density=True, plot_format=None, plot=True,
+            plot_wavefunctions=True, efermi=0.):
         # instructions for Schrodinger solve
         task = {
             'task': 'schrodinger',
-            'grid': {'x': x, 'y': y, 'z': z},
-            'spectrum': {'eigenvalues': eigenvalues, 'target energy': target_energy,
-                         'write': write_spectrum},
-            'wave functions': {'write': write_wavefunctions},
-            'density': {'write': write_density},
-            'Fermi energy': efermi
-        }
+            'grid': {
+                'x': x,
+                'y': y,
+                'z': z},
+            'spectrum': {
+                'eigenvalues': eigenvalues,
+                'target energy': target_energy,
+                'write': write_spectrum},
+            'wave functions': {
+                'write': write_wavefunctions},
+            'density': {
+                'write': write_density},
+            'Fermi energy': efermi}
         if solver is not None:
             assert solver in ('sparse', 'dense')
             task['solver'] = solver
@@ -669,8 +708,10 @@ class Model:
         else:
             self.modelDict = modelDict
 
-    def addJob(self, rootPath, jobSequence=None, numNodes=1, numJobsPerNode=1, numCoresPerJob=1, hostFile=None,
-               geoGenArgs={}, comsolRunMode='batch', postProcArgs={}):
+    def addJob(
+            self, rootPath, jobSequence=None, numNodes=1, numJobsPerNode=1,
+            numCoresPerJob=1, hostFile=None, geoGenArgs={},
+            comsolRunMode='batch', postProcArgs={}):
         '''Add a job to the model.
 
             Parameters

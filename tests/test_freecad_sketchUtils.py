@@ -24,8 +24,14 @@ def manual_testing(function):
     teardown_function(function)
 
 
-def aux_two_cycle_sketch(a=(20, 20, 0), b=(-30, 20, 0), c=(-30, -10, 0), d=(20, -10, 0),
-                         e=(50, 50, 0), f=(60, 50, 0), g=(55, 60, 0)):
+def aux_two_cycle_sketch(
+        a=(20, 20, 0),
+        b=(-30, 20, 0),
+        c=(-30, -10, 0),
+        d=(20, -10, 0),
+        e=(50, 50, 0),
+        f=(60, 50, 0),
+        g=(55, 60, 0)):
     '''Helper function to drop a simple multi-cycle sketch.
        The segments are carefully ordered.
     '''

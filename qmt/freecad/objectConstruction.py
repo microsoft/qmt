@@ -39,8 +39,8 @@ def buildWire(sketch, zBottom, width, faceOverride=None, offset=0.0):
     return mySweep
 
 
-def buildAlShell(sketch, zBottom, width, verts, thickness, depoZone=None, etchZone=None,
-                 offset=0.0):
+def buildAlShell(sketch, zBottom, width, verts, thickness,
+                 depoZone=None, etchZone=None, offset=0.0):
     '''Builds a shell on a nanowire parameterized by sketch, zBottom, and width.
     Here, verts describes the vertices that are covered, and thickness describes
     the thickness of the shell. depoZone, if given, is extruded and intersected
@@ -288,8 +288,15 @@ class modelBuilder:
             etchZone = self.doc.getObject(etchZoneName)
         else:
             etchZone = None
-        shell = buildAlShell(wireSketch, zBottom, width, shellVerts, thickness, depoZone=depoZone,
-                             etchZone=etchZone, offset=offset)
+        shell = buildAlShell(
+            wireSketch,
+            zBottom,
+            width,
+            shellVerts,
+            thickness,
+            depoZone=depoZone,
+            etchZone=etchZone,
+            offset=offset)
         shell.Label = partName
         return [shell]
 
@@ -317,7 +324,8 @@ class modelBuilder:
         layerNum = partDict['layerNum']
         returnObjs = []
         for objID in self.lithoDict['layers'][layerNum]['objIDs']:
-            if partName == self.lithoDict['layers'][layerNum]['objIDs'][objID]['partName']:
+            if partName == self.lithoDict['layers'][layerNum]['objIDs'][
+                    objID]['partName']:
                 returnObjs += [self._gen_G(layerNum, objID)]
         return returnObjs
 
@@ -420,8 +428,8 @@ class modelBuilder:
         # Now convert the part names for the substrate into 3D freeCAD objects, which
         # should have already been rendered.
         for baseSubstratePartName in baseSubstratePartNames:
-            for baseSubstrateObjName in self.model.modelDict['3DParts'][baseSubstratePartName][
-                    'fileNames'].keys():
+            for baseSubstrateObjName in self.model.modelDict['3DParts'][
+                    baseSubstratePartName]['fileNames'].keys():
                 self.lithoDict['substrate'][(
                 )] += [self.doc.getObject(baseSubstrateObjName)]
         # Now that we have ordered the primitives, we need to compute a few
@@ -467,7 +475,8 @@ class modelBuilder:
                 # In addition, add a hook for the HDict, which will contain the "H"
                 # constructions for this object, but offset to thicknesses of various
                 # layers, according to the keys.
-                self.lithoDict['layers'][layerNum]['objIDs'][objID]['HDict'] = {}
+                self.lithoDict['layers'][layerNum]['objIDs'][objID][
+                    'HDict'] = {}
 
     def _screened_H_union_list(self, obj, m, j, offsetTuple, checkOffsetTuple):
         ''' Foremd the "screened union list" of obj with the layer m, objID j H object that has
@@ -540,8 +549,10 @@ class modelBuilder:
         # This is a tuple that encodes the total offset t_i+t:
         offsetTuple = tuple(sorted(tList + [layerNum]))
         # First, check if we have to do anything:
-        if checkOffsetTuple in self.lithoDict['layers'][layerNum]['objIDs'][objID]['HDict']:
-            return self.lithoDict['layers'][layerNum]['objIDs'][objID]['HDict'][checkOffsetTuple]
+        if checkOffsetTuple in self.lithoDict['layers'][layerNum]['objIDs'][
+                objID]['HDict']:
+            return self.lithoDict['layers'][layerNum]['objIDs'][objID][
+                'HDict'][checkOffsetTuple]
         # First, compute t:
         t = 0.0
         for tIndex in tList:
@@ -563,8 +574,8 @@ class modelBuilder:
             if m < layerNum:  # then this is a lower layer
                 for j in self.lithoDict['layers'][m]['objIDs'].keys():
                     HDict = self.lithoDict['layers'][m]['objIDs'][j]['HDict']
-                    HOffsetList += self._screened_H_union_list(C_t, m, j, offsetTuple,
-                                                               checkOffsetTuple)
+                    HOffsetList += self._screened_H_union_list(
+                        C_t, m, j, offsetTuple, checkOffsetTuple)
                     # Next, build up the original substrate list:
         AOffsetList = []
         AOffsetList += self._screened_A_UnionList(
@@ -575,7 +586,8 @@ class modelBuilder:
             intObj = intersect([C_t, obj])
             self.trash += [intObj]
             returnList += [intObj]
-        self.lithoDict['layers'][layerNum]['objIDs'][objID]['HDict'][checkOffsetTuple] = returnList
+        self.lithoDict['layers'][layerNum]['objIDs'][objID]['HDict'][
+            checkOffsetTuple] = returnList
         return returnList
 
     def _gen_U(self, layerNum, objID):
@@ -592,7 +604,8 @@ class modelBuilder:
         for m in self.lithoDict['layers'].keys():
             if m < layerNum:  # then this is a lower layer
                 for j in self.lithoDict['layers'][m].keys():
-                    if 'G' not in self.lithoDict['layers'][layerNum]['objIDs'][objID]:
+                    if 'G' not in self.lithoDict['layers'][layerNum][
+                            'objIDs'][objID]:
                         self._gen_G(m, j)
                     G = self.lithoDict['layers'][layerNum]['objIDs'][objID]['G']
                     if checkOverlap([B, G]):
@@ -610,10 +623,12 @@ class modelBuilder:
         '''
         if 'G' not in self.lithoDict['layers'][layerNum]['objIDs'][objID]:
             if () not in self.lithoDict['layers'][layerNum]['objIDs'][objID]['HDict']:
-                self.lithoDict['layers'][layerNum]['objIDs'][objID]['HDict'][()] = self._H_offset(
-                    layerNum, objID)
-            H = genUnion(self.lithoDict['layers'][layerNum]['objIDs'][objID]['HDict'][()],
-                         consumeInputs=False)
+                self.lithoDict['layers'][layerNum]['objIDs'][objID][
+                    'HDict'][()] = self._H_offset(layerNum, objID)
+            H = genUnion(
+                self.lithoDict['layers'][layerNum]['objIDs'][objID]
+                ['HDict'][()],
+                consumeInputs=False)
             self.trash += [H]
             if self.fillShells:
                 G = copy(H)
@@ -623,7 +638,8 @@ class modelBuilder:
                 delete(U)
             self.lithoDict['layers'][layerNum]['objIDs'][objID]['G'] = G
         G = self.lithoDict['layers'][layerNum]['objIDs'][objID]['G']
-        partName = self.lithoDict['layers'][layerNum]['objIDs'][objID]['partName']
+        partName = self.lithoDict['layers'][layerNum]['objIDs'][objID][
+            'partName']
         G.Label = partName
         return G
 
