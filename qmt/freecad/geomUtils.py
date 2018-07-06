@@ -2,7 +2,7 @@
 # Licensed under the MIT License.
 
 ###
-### Utilities to work with general geometries
+# Utilities to work with general geometries
 ###
 
 import FreeCAD
@@ -18,8 +18,7 @@ def delete(obj):
     doc.recompute()
 
 
-
-def extrude(sketch, length,reversed=False,name=None):
+def extrude(sketch, length, reversed=False, name=None):
     '''
     Extrude sketch up to given length. Optional name (default: append '_extr').
     Return handle to extrude.
@@ -27,7 +26,7 @@ def extrude(sketch, length,reversed=False,name=None):
     if name is None:
         f = FreeCAD.ActiveDocument.addObject('PartDesign::Pad')
     else:
-        f = FreeCAD.ActiveDocument.addObject('PartDesign::Pad',name)
+        f = FreeCAD.ActiveDocument.addObject('PartDesign::Pad', name)
     f.Sketch = sketch
     f.Length = length
     if reversed:
@@ -41,9 +40,10 @@ def copy(obj, moveVec=(0., 0., 0.), copy=True):
     Create a duplciate of the object using a draft move operation.
     '''
 
-    f = Draft.move([obj], FreeCAD.Vector(moveVec[0], moveVec[1], moveVec[2]), copy=copy)
-    if len(f.Shape.Vertexes)>0:
-        f.Shape = f.Shape.removeSplitter() # get rid of redundant lines
+    f = Draft.move([obj], FreeCAD.Vector(
+        moveVec[0], moveVec[1], moveVec[2]), copy=copy)
+    if len(f.Shape.Vertexes) > 0:
+        f.Shape = f.Shape.removeSplitter()  # get rid of redundant lines
     FreeCAD.ActiveDocument.recompute()
     return f
 
@@ -56,11 +56,11 @@ def makeHexFace(sketch, zBottom, width):
     doc = FreeCAD.ActiveDocument
     lineSegments = findSegments(sketch)
     lineSegment = lineSegments[0]
-    x0, y0, z0 = lineSegment[0];
+    x0, y0, z0 = lineSegment[0]
     x1, y1, z1 = lineSegment[1]
-    dx = x1 - x0;
+    dx = x1 - x0
     dy = y1 - y0
-    xBar = 0.5 * (x0 + x1);
+    xBar = 0.5 * (x0 + x1)
     yBar = 0.5 * (y0 + y1)
     # First, make the initial face:
     face = Draft.makePolygon(6, radius=width * 0.5, inscribed=False, face=True)
@@ -135,7 +135,7 @@ def makeBB(BB):
     xMin, xMax, yMin, yMax, zMin, zMax = BB
     box = doc.addObject("Part::Box")
     centerVector = FreeCAD.Vector(xMin, yMin, zMin)
-    box.Placement = FreeCAD.Placement(centerVector, \
+    box.Placement = FreeCAD.Placement(centerVector,
                                       FreeCAD.Rotation(FreeCAD.Vector(0., 0., 0.), 0.))
     box.Length = xMax - xMin
     box.Width = yMax - yMin
@@ -196,7 +196,7 @@ def intersect(objList, consumeInputs=False):
 def checkOverlap(objList):
     ''' Checks if a list of objects, when intersected, contains a finite volume.abs
     Returns true if it does, returns false if the intersection is empty.
-    
+
     '''
     intObj = intersect(objList)
     if len(intObj.Shape.Vertexes) == 0:
@@ -205,6 +205,7 @@ def checkOverlap(objList):
         overlap = True
     delete(intObj)
     return overlap
+
 
 def isNonempty(obj):
     ''' Checks if an object is nonempty (returns True) or empty (returns False).
@@ -256,14 +257,15 @@ def centerObjects(objsList):
         copy(obj, moveVec=(-x0, -y0, 0.), copy=False)
     delete(wholeObj)
 
-def crossSection(obj,axis=(1.,0.,0.),d=1.0,name=None):
+
+def crossSection(obj, axis=(1., 0., 0.), d=1.0, name=None):
     doc = FreeCAD.ActiveDocument
     if name is None:
         name = obj.Name+'_section'
-    wires=list()
-    shape=obj.Shape
-    for i in shape.slice(FreeCAD.Vector(axis[0],axis[1],axis[2]),d):
+    wires = list()
+    shape = obj.Shape
+    for i in shape.slice(FreeCAD.Vector(axis[0], axis[1], axis[2]), d):
         wires.append(i)
-    returnObj=doc.addObject("Part::Feature",name)
-    returnObj.Shape=Part.Compound(wires)
+    returnObj = doc.addObject("Part::Feature", name)
+    returnObj.Shape = Part.Compound(wires)
     return returnObj

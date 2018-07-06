@@ -24,22 +24,22 @@ def manual_testing(function):
     teardown_function(function)
 
 
-def aux_two_cycle_sketch( a=( 20, 20, 0), b=(-30, 20, 0), c=(-30,-10, 0), d=( 20,-10, 0),
-                          e=( 50, 50, 0), f=( 60, 50, 0), g=( 55, 60, 0) ):
+def aux_two_cycle_sketch(a=(20, 20, 0), b=(-30, 20, 0), c=(-30, -10, 0), d=(20, -10, 0),
+                         e=(50, 50, 0), f=(60, 50, 0), g=(55, 60, 0)):
     '''Helper function to drop a simple multi-cycle sketch.
        The segments are carefully ordered.
     '''
 
-    sketch = FreeCAD.activeDocument().addObject('Sketcher::SketchObject','Sketch')
+    sketch = FreeCAD.activeDocument().addObject('Sketcher::SketchObject', 'Sketch')
     geoList = []
-    geoList.append(Part.Line(FreeCAD.Vector(*a),FreeCAD.Vector(*b)))
-    geoList.append(Part.Line(FreeCAD.Vector(*b),FreeCAD.Vector(*c)))
-    geoList.append(Part.Line(FreeCAD.Vector(*c),FreeCAD.Vector(*d)))
-    geoList.append(Part.Line(FreeCAD.Vector(*d),FreeCAD.Vector(*a)))
-    geoList.append(Part.Line(FreeCAD.Vector(*e),FreeCAD.Vector(*f)))
-    geoList.append(Part.Line(FreeCAD.Vector(*f),FreeCAD.Vector(*g)))
-    geoList.append(Part.Line(FreeCAD.Vector(*g),FreeCAD.Vector(*e)))
-    FreeCAD.ActiveDocument.Sketch.addGeometry(geoList,False)
+    geoList.append(Part.Line(FreeCAD.Vector(*a), FreeCAD.Vector(*b)))
+    geoList.append(Part.Line(FreeCAD.Vector(*b), FreeCAD.Vector(*c)))
+    geoList.append(Part.Line(FreeCAD.Vector(*c), FreeCAD.Vector(*d)))
+    geoList.append(Part.Line(FreeCAD.Vector(*d), FreeCAD.Vector(*a)))
+    geoList.append(Part.Line(FreeCAD.Vector(*e), FreeCAD.Vector(*f)))
+    geoList.append(Part.Line(FreeCAD.Vector(*f), FreeCAD.Vector(*g)))
+    geoList.append(Part.Line(FreeCAD.Vector(*g), FreeCAD.Vector(*e)))
+    FreeCAD.ActiveDocument.Sketch.addGeometry(geoList, False)
     FreeCAD.ActiveDocument.recompute()
     return sketch
 
@@ -64,14 +64,14 @@ def test_deepRemove():
         deepRemove(None)
     assert 'No object selected' in str(err.value)
 
-    box1 = myDoc.addObject("Part::Box","Box1")
-    box2 = myDoc.addObject("Part::Box","Box2")
-    box3 = myDoc.addObject("Part::Box","Box3")
-    inter1 = myDoc.addObject("Part::MultiCommon","inter1")
-    inter1.Shapes = [box1, box2,]
+    box1 = myDoc.addObject("Part::Box", "Box1")
+    box2 = myDoc.addObject("Part::Box", "Box2")
+    box3 = myDoc.addObject("Part::Box", "Box3")
+    inter1 = myDoc.addObject("Part::MultiCommon", "inter1")
+    inter1.Shapes = [box1, box2, ]
     myDoc.recompute()
-    inter2 = myDoc.addObject("Part::MultiCommon","inter2")
-    inter2.Shapes = [inter1, box3,]
+    inter2 = myDoc.addObject("Part::MultiCommon", "inter2")
+    inter2.Shapes = [inter1, box3, ]
     myDoc.recompute()
     deepRemove(inter2)
 
@@ -79,7 +79,7 @@ def test_deepRemove():
 def test_findSegments():
     '''Test if segment finding is ordered correctly.'''
     b = (-30, 20, 0)
-    d = ( 20,-10, 0)
+    d = (20, -10, 0)
     sketch = aux_two_cycle_sketch(b=b, d=d)
 
     segL = findSegments(sketch)
@@ -97,7 +97,7 @@ def test_nextSegment():
     assert nextSegment(lineSegments, 3) == 0  # a square cycle
 
     deepRemove(sketch)
-    a=( 20, 20, 0)
+    a = (20, 20, 0)
     sketch = aux_two_cycle_sketch(a=a, e=a)
     lineSegments = findSegments(sketch)
     with pytest.raises(ValueError) as err:
@@ -110,20 +110,21 @@ def test_findCycle():
     sketch = aux_two_cycle_sketch()
     lineSegments = findSegments(sketch)
     c0 = findCycle(lineSegments, 0, range(lineSegments.shape[0]))
-    assert c0 == [ 1, 2, 3, 0 ]
+    assert c0 == [1, 2, 3, 0]
 
 
 def test_addCycleSketch():
     '''Test if cycles are correctly added.'''
     b = (-30, 20, 0)
-    d = ( 20,-10, 0)
+    d = (20, -10, 0)
     sketch = aux_two_cycle_sketch(b=b, d=d)
     lineSegments, cycles = findEdgeCycles(sketch)
     addCycleSketch('cyclesketch', myDoc, cycles[0], lineSegments[0:4])
     segL = findSegments(myDoc.cyclesketch)
-    assert (segL[0][0] == [b]).all()  # note: added cycle is shifted  (TODO: intentionally?)
+    # note: added cycle is shifted  (TODO: intentionally?)
+    assert (segL[0][0] == [b]).all()
     assert (segL[2][0] == [d]).all()
-    
+
     with pytest.raises(ValueError) as err:
         addCycleSketch('cyclesketch', myDoc, cycles[0], lineSegments[0:4])
     assert 'already exists' in str(err.value)
@@ -133,8 +134,8 @@ def test_findEdgeCycles():
     '''Test multiple cycle ordering.'''
     sketch = aux_two_cycle_sketch()
     seg, cycles = findEdgeCycles(sketch)
-    assert cycles[0] == [ 1, 2, 3, 0 ]
-    assert cycles[1] == [ 5, 6, 4 ]
+    assert cycles[0] == [1, 2, 3, 0]
+    assert cycles[1] == [5, 6, 4]
 
 
 def test_splitSketch():
@@ -154,23 +155,25 @@ def test_splitSketch():
 
 def test_extendSketch():
     '''Test unconnected sketch extension, all cases.'''
-    sketch = myDoc.addObject('Sketcher::SketchObject','Sketch')
+    sketch = myDoc.addObject('Sketcher::SketchObject', 'Sketch')
     geoList = []
-    geoList.append(Part.Line(FreeCAD.Vector(0,0,0),FreeCAD.Vector(0,2,0)))
-    geoList.append(Part.Line(FreeCAD.Vector(0,2,0),FreeCAD.Vector(-2,2,0)))
-    sketch.addGeometry(geoList,False)
+    geoList.append(Part.Line(FreeCAD.Vector(0, 0, 0), FreeCAD.Vector(0, 2, 0)))
+    geoList.append(Part.Line(FreeCAD.Vector(
+        0, 2, 0), FreeCAD.Vector(-2, 2, 0)))
+    sketch.addGeometry(geoList, False)
     myDoc.recompute()
     ext = extendSketch(sketch, 1)
-    assert ext.Shape.Vertexes[0].Point == FreeCAD.Vector(0,-1,0)
-    assert ext.Shape.Vertexes[2].Point == FreeCAD.Vector(-3,2,0)
+    assert ext.Shape.Vertexes[0].Point == FreeCAD.Vector(0, -1, 0)
+    assert ext.Shape.Vertexes[2].Point == FreeCAD.Vector(-3, 2, 0)
 
     deepRemove(sketch)
     deepRemove(ext)
-    sketch = myDoc.addObject('Sketcher::SketchObject','Sketch')
+    sketch = myDoc.addObject('Sketcher::SketchObject', 'Sketch')
     geoList = []
-    geoList.append(Part.Line(FreeCAD.Vector(0,0,0),FreeCAD.Vector(2,0,0)))
-    geoList.append(Part.Line(FreeCAD.Vector(2,0,0),FreeCAD.Vector(2,-2,0)))
-    sketch.addGeometry(geoList,False)
+    geoList.append(Part.Line(FreeCAD.Vector(0, 0, 0), FreeCAD.Vector(2, 0, 0)))
+    geoList.append(Part.Line(FreeCAD.Vector(
+        2, 0, 0), FreeCAD.Vector(2, -2, 0)))
+    sketch.addGeometry(geoList, False)
     myDoc.recompute()
     ext = extendSketch(sketch, 1)
     assert ext.Shape.Length == 2 + sketch.Shape.Length
@@ -178,8 +181,9 @@ def test_extendSketch():
 
 def test_draftOffset():
     '''Check if draft offset resizes the object. TODO: edge cases'''
-    pl=FreeCAD.Placement()
-    pl.Base=FreeCAD.Vector(1,1,0)
-    draft = Draft.makeRectangle(length=2,height=2,placement=pl,face=False,support=None)
+    pl = FreeCAD.Placement()
+    pl.Base = FreeCAD.Vector(1, 1, 0)
+    draft = Draft.makeRectangle(
+        length=2, height=2, placement=pl, face=False, support=None)
     draft2 = draftOffset(draft, 20)
     assert draft.Height.Value + 40 == draft2.Height.Value

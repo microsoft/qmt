@@ -35,17 +35,24 @@ class Model:
         '''
         modelDict = {}
         modelDict['geometricParams'] = {}  # Geometric parameters for FreeCAD
-        modelDict['3DParts'] = {}  # Information about the 3D parts of our model 
-        modelDict['buildOrder'] = {} # The build order of the model
-        modelDict['slices'] = {} # 2D slices that are used in physics processing.
-        modelDict['materials'] = {}  # Information about the materials used in the structure
+        # Information about the 3D parts of our model
+        modelDict['3DParts'] = {}
+        modelDict['buildOrder'] = {}  # The build order of the model
+        # 2D slices that are used in physics processing.
+        modelDict['slices'] = {}
+        # Information about the materials used in the structure
+        modelDict['materials'] = {}
         # Information about the voltage sweep to execute
-        modelDict['physicsSweep'] = {'type': 'sparse', 'sweepParts': {}, 'length': 1}
-        modelDict['geomSweep'] = {}  # Information about the geometry sweep to execute
-        modelDict['meshInfo'] = {} # Information about mesh refinement
-        modelDict['comsolInfo'] = {'surfaceIntegrals': {}, 'volumeIntegrals': {},'zeroLevel':[None,None]}  # Information for COMSOL
+        modelDict['physicsSweep'] = {
+            'type': 'sparse', 'sweepParts': {}, 'length': 1}
+        # Information about the geometry sweep to execute
+        modelDict['geomSweep'] = {}
+        modelDict['meshInfo'] = {}  # Information about mesh refinement
+        modelDict['comsolInfo'] = {'surfaceIntegrals': {}, 'volumeIntegrals': {
+        }, 'zeroLevel': [None, None]}  # Information for COMSOL
         modelDict['jobSettings'] = {}  # Information on the job
-        modelDict['pathSettings'] = {}  # Information on the paths to executables
+        # Information on the paths to executables
+        modelDict['pathSettings'] = {}
         modelDict['postProcess'] = {'sweeps': {}, 'tasks': {}}
         return modelDict
 
@@ -65,7 +72,8 @@ class Model:
                     found = True
                     break
             if not found:
-                raise RuntimeError("Part '{}' does not exist.".format(partName))
+                raise RuntimeError(
+                    "Part '{}' does not exist.".format(partName))
         # we allow 'V' as a shorthand for 'voltage'
         if quantity == 'V':
             symbol = 'V'
@@ -78,12 +86,14 @@ class Model:
         sweep['symbol'] = symbol
         sweep['values'] = list(values)
         sweep['unit'] = unit
-        key = '{0}_{1}'.format(quantity, partName)  # This is how the parameters are build in comsol
+        # This is how the parameters are build in comsol
+        key = '{0}_{1}'.format(quantity, partName)
         self.modelDict['physicsSweep']['length'] = len(list(values))
         self.modelDict['physicsSweep']['sweepParts'][key] = sweep
         # For now, only sparse sweeps are supported
         for part_name, part_info in self.modelDict['physicsSweep']['sweepParts'].items():
-            assert len(part_info['values']) == len(list(values)), "Lengths of the different sweeps must match, only sparse sweeps supported."
+            assert len(part_info['values']) == len(list(
+                values)), "Lengths of the different sweeps must match, only sparse sweeps supported."
         self.modelDict['physicsSweep']['type'] = 'dense' if dense else 'sparse'
 
     def genGeomSweep(self, param, vals, type='freeCAD'):
@@ -118,7 +128,7 @@ class Model:
         '''
         self.modelDict['comsolInfo']['volumeIntegrals'][partName] = quantities
 
-    def setSimZero(self,partName,property='workFunction'):
+    def setSimZero(self, partName, property='workFunction'):
         ''' Sets the zero level for the electric potential.
 
         For self-consistent electrostatics solves, this doesn't impact any of the physics, but makes
@@ -126,8 +136,7 @@ class Model:
         @param partName: Target partName to use
         @param property: The property to use as the zero level.
         '''
-        self.modelDict['comsolInfo']['zeroLevel'] = [partName,property]
-
+        self.modelDict['comsolInfo']['zeroLevel'] = [partName, property]
 
     def getSimZero(self, parts=None):
         '''Retrieve the zero level for the electric potential [in Volts].'''
@@ -141,9 +150,8 @@ class Model:
         mat_dict = matLib.find(zeroLevelMatName, eunit='eV')
         return mat_dict[zeroLevelProp]
 
-
     def genComsolInfo(self, meshExport=None, fileName='comsolModel', exportDir='solutions',
-                      repairTolerance=None,physics=['electrostatics'],exportDomains=[],exportScalingVec=[5.,5.,5.]):
+                      repairTolerance=None, physics=['electrostatics'], exportDomains=[], exportScalingVec=[5., 5., 5.]):
         '''
         Generate meta information required by COSMOL
         @param meshExport: string with name for the exported mesh. None means no mesh is exported
@@ -164,10 +172,10 @@ class Model:
         self.modelDict['comsolInfo']['physics'] = physics
         self.modelDict['comsolInfo']['exportDomains'] = exportDomains
         self.modelDict['comsolInfo']['exportScalingVec'] = exportScalingVec
-    
-    def setComsolQuantumParams(self,quantumDomain,alpha=[0.,0.,0.],alphaUnit='meV*nm',
-                               B=[0.,0.,0.],BUnit='T',g=-2.0,Delta=0.0,DeltaUnit='meV',
-                               numEigVals=10,eigValSearch=0.0):
+
+    def setComsolQuantumParams(self, quantumDomain, alpha=[0., 0., 0.], alphaUnit='meV*nm',
+                               B=[0., 0., 0.], BUnit='T', g=-2.0, Delta=0.0, DeltaUnit='meV',
+                               numEigVals=10, eigValSearch=0.0):
         '''
         Set the physics parameters needed for quantum solves in COMSOL.
         @param quantumDomain: the name of the part on which we want to perform quantum
@@ -188,19 +196,17 @@ class Model:
         self.modelDict['comsolInfo']['quantumParams']['alphaUnit'] = alphaUnit
         self.modelDict['comsolInfo']['quantumParams']['B'] = B
         self.modelDict['comsolInfo']['quantumParams']['BUnit'] = BUnit
-        self.modelDict['comsolInfo']['quantumParams']['Delta'] = Delta  
+        self.modelDict['comsolInfo']['quantumParams']['Delta'] = Delta
         self.modelDict['comsolInfo']['quantumParams']['DeltaUnit'] = DeltaUnit
         self.modelDict['comsolInfo']['quantumParams']['gFactor'] = g
-        self.modelDict['comsolInfo']['quantumParams']['numEigVals'] = numEigVals        
-        self.modelDict['comsolInfo']['quantumParams']['eigValSearch'] = eigValSearch           
+        self.modelDict['comsolInfo']['quantumParams']['numEigVals'] = numEigVals
+        self.modelDict['comsolInfo']['quantumParams']['eigValSearch'] = eigValSearch
 
-
-
-    def addPart(self,partName,fcName,directive,domainType,material=None,\
-                z0=None,thickness=None,targetWire=None,shellVerts=None,depoZone=None,etchZone=None,\
-                zMiddle=None,tIn=None,tOut=None,layerNum=None,lithoBase=[],\
-                fillLitho=True,meshMaxSize=None,meshGrowthRate=None, meshScaleVector=None,\
-                boundaryCondition = None,subtractList=[],Ns=None,Phi_NL=None,Ds=None):
+    def addPart(self, partName, fcName, directive, domainType, material=None,
+                z0=None, thickness=None, targetWire=None, shellVerts=None, depoZone=None, etchZone=None,
+                zMiddle=None, tIn=None, tOut=None, layerNum=None, lithoBase=[],
+                fillLitho=True, meshMaxSize=None, meshGrowthRate=None, meshScaleVector=None,
+                boundaryCondition=None, subtractList=[], Ns=None, Phi_NL=None, Ds=None):
         ''' Add a geometric part to the model. 
             @param partName: The descriptive name of this new part.
             @param fcName: The name of the 2D freeCAD object that this is built from.
@@ -230,8 +236,8 @@ class Model:
                                 of a wire coating. Note that only one of depoZone or
                                 etchZone may be used
             @param etchZone:	Sketch defining the (negative) amsek for the depostion
-            					of a wire coating. Note that only one of depoZone or
-            					etchZone may be used.
+                                                of a wire coating. Note that only one of depoZone or
+                                                etchZone may be used.
             @param zMiddle:     The location for the "flare out" of the SAG directive.
             @param tIN:         The lateral distance from the 2D profile to the 
                                 edge of the top bevel for the SAG directive.
@@ -268,12 +274,14 @@ class Model:
         # First, run checks to make sure the input is valid:
         if partName in self.modelDict['3DParts']:
             raise NameError('Error - partName '+partName+' was duplicated!')
-        if directive not in ['extrude','wire','wireShell','SAG','lithography']:
-            raise NameError('Error - directive '+directive+' is not a valid directive!')
-        if domainType not in ['semiconductor','metalGate','virtual','dielectric']:
+        if directive not in ['extrude', 'wire', 'wireShell', 'SAG', 'lithography']:
+            raise NameError('Error - directive '+directive +
+                            ' is not a valid directive!')
+        if domainType not in ['semiconductor', 'metalGate', 'virtual', 'dielectric']:
             raise NameError('Error - domainType '+domainType+' not valid!')
         if (etchZone is not None) and (depoZone is not None):
-            raise NameError('Error - etchZone and depoZone cannot both be set!')
+            raise NameError(
+                'Error - etchZone and depoZone cannot both be set!')
         # Next, construct the dictionary entry:
         partDict = {}
         partDict['fileNames'] = {}
@@ -300,10 +308,10 @@ class Model:
         partDict['subtractList'] = subtractList
         partDict['Ns'] = Ns
         partDict['Phi_NL'] = Phi_NL
-        partDict['Ds'] = Ds                
-        self.modelDict['buildOrder'][len(self.modelDict['buildOrder'])] = partName
+        partDict['Ds'] = Ds
+        self.modelDict['buildOrder'][len(
+            self.modelDict['buildOrder'])] = partName
         self.modelDict['3DParts'][partName] = partDict
-        
 
     def addCrossSection(self, sliceName, axis, distance):
         """
@@ -314,17 +322,19 @@ class Model:
         @param distance: Scalar distance of the cross section from the origin.
         """
         if sliceName in self.modelDict['slices']:
-            raise RuntimeError("Error - sliceName", sliceName, "was duplicated!")
-        info = {'sliceName': sliceName, 'crossSection': True, 'axis': axis, 'distance': distance}
+            raise RuntimeError("Error - sliceName",
+                               sliceName, "was duplicated!")
+        info = {'sliceName': sliceName, 'crossSection': True,
+                'axis': axis, 'distance': distance}
         self.modelDict['slices'][sliceName] = {'sliceInfo': info}
 
-    def registerCadPart(self, partName,fcName,fileName,reset=False):
+    def registerCadPart(self, partName, fcName, fileName, reset=False):
         '''Register a 3D CAD part on disk that is associated with the freeCAD 3D part fcName.
         The idea here is that the partName knows what 3D entities were generated from it, what
         those parts are called on disk, and what they are called in the freeCAD file.
         '''
-        if reset: # reset the file listing if we want to
-            self.modelDict['3DParts'][partName]['fileNames']  = {} 
+        if reset:  # reset the file listing if we want to
+            self.modelDict['3DParts'][partName]['fileNames'] = {}
         self.modelDict['3DParts'][partName]['fileNames'][fcName] = fileName
 
     def genPart2D(self, partName, geometry, sliceName=None, material=None,
@@ -332,7 +342,7 @@ class Model:
                   descriptors=None, bandOffset=None, surfaceChargeDensity=None,
                   bulkDoping=None, subtractList=None):
         '''Generate a 2D slice part and add it to the modelDict.
-            
+
             sliceName: simulation slice that the part belongs to.
 
         '''
@@ -341,9 +351,11 @@ class Model:
         if sliceName is None:
             sliceName = '0'
             if len(twoDParts) > 1 or len(twoDParts) == 1 and sliceName not in twoDParts:
-                raise RuntimeError('sliceName cannot be unspecified if there are several slices')
+                raise RuntimeError(
+                    'sliceName cannot be unspecified if there are several slices')
         if sliceName not in twoDParts:
-            twoDParts[sliceName] = {'sliceInfo': {'sliceName': sliceName}, 'parts': {}}
+            twoDParts[sliceName] = {'sliceInfo': {
+                'sliceName': sliceName}, 'parts': {}}
         sliceParts = twoDParts[sliceName]['parts']
         # Load in materials if we need them...
         matLib = qmt.Materials()
@@ -384,7 +396,8 @@ class Model:
         slicePart['descriptors'] = descriptors
         slicePart['geometry'] = geometry
         sliceParts[partName] = slicePart
-        self.modelDict['buildOrder'][len(self.modelDict['buildOrder'])] = partName
+        self.modelDict['buildOrder'][len(
+            self.modelDict['buildOrder'])] = partName
 
     def addThomasFermi2dTask(self, region, grid, slice_name, name=None, write_data=True,
                              plot_data=True, temperature=0.):
@@ -429,7 +442,8 @@ class Model:
         if 'tasks' not in self.modelDict['postProcess']:
             self.modelDict['postProcess']['tasks'] = {}
         if name is None:
-            name = '%s%s' % (task['task'], len(self.modelDict['postProcess']['tasks']))
+            name = '%s%s' % (task['task'], len(
+                self.modelDict['postProcess']['tasks']))
         task['name'] = name
         assert name not in self.modelDict['postProcess']['tasks']
         self.modelDict['postProcess']['tasks'][name] = task
@@ -473,11 +487,13 @@ class Model:
         elif plot_wavefunctions is False:
             plot_wavefunctions = []
         if write_data is True:
-            write_data = ['energies', 'density', 'electrostatic_potential', 'potential_energy']
+            write_data = ['energies', 'density',
+                          'electrostatic_potential', 'potential_energy']
         elif write_data is False:
             write_data = []
         if plot_data is True:
-            plot_data = ['density', 'electrostatic_potential', 'potential_energy']
+            plot_data = ['density',
+                         'electrostatic_potential', 'potential_energy']
         elif plot_data is False:
             plot_data = []
         task = {'task': 'schrodinger2d',
@@ -500,7 +516,8 @@ class Model:
         if 'tasks' not in self.modelDict['postProcess']:
             self.modelDict['postProcess']['tasks'] = {}
         if name is None:
-            name = '%s%s' % (task['task'], len(self.modelDict['postProcess']['tasks']))
+            name = '%s%s' % (task['task'], len(
+                self.modelDict['postProcess']['tasks']))
         task['name'] = name
         assert name not in self.modelDict['postProcess']['tasks']
         self.modelDict['postProcess']['tasks'][name] = task
@@ -544,7 +561,8 @@ class Model:
         if 'tasks' not in self.modelDict['postProcess']:
             self.modelDict['postProcess']['tasks'] = {}
         if name is None:
-            name = '%s%s' % (task['task'], len(self.modelDict['postProcess']['tasks']))
+            name = '%s%s' % (task['task'], len(
+                self.modelDict['postProcess']['tasks']))
         task['name'] = name
         assert name not in self.modelDict['postProcess']['tasks']
         self.modelDict['postProcess']['tasks'][name] = task
@@ -569,7 +587,8 @@ class Model:
         if 'tasks' not in self.modelDict['postProcess']:
             self.modelDict['postProcess']['tasks'] = {}
         if name is None:
-            name = 'schrodinger%s' % len(self.modelDict['postProcess']['tasks'])
+            name = 'schrodinger%s' % len(
+                self.modelDict['postProcess']['tasks'])
         # plots
         plots = {}
         if plot:
@@ -601,7 +620,7 @@ class Model:
 
     def saveModel(self, customPath=None):
         '''Save the current model to disk.
-            
+
             Keyword arguments
             ----------        
             customPath: str, default None
@@ -632,7 +651,8 @@ class Model:
             modelDict = json.load(myFile)
             myFile.close()
         else:
-            print('Could not load: Model file {} does not exist.'.format(self.modelPath))
+            print('Could not load: Model file {} does not exist.'.format(
+                self.modelPath))
             modelDict = self.genEmptyModelDict()
         if updateModel:
             for subDictKey in self.modelDict:
@@ -641,8 +661,8 @@ class Model:
         else:
             self.modelDict = modelDict
 
-    def addJob(self, rootPath, jobSequence=None, numNodes=1,numJobsPerNode=1,numCoresPerJob=1,hostFile=None,
-               geoGenArgs={}, comsolRunMode='batch',postProcArgs={}):
+    def addJob(self, rootPath, jobSequence=None, numNodes=1, numJobsPerNode=1, numCoresPerJob=1, hostFile=None,
+               geoGenArgs={}, comsolRunMode='batch', postProcArgs={}):
         '''Add a job to the model.
 
             Parameters
@@ -687,7 +707,7 @@ class Model:
         self.modelDict['jobSettings']['numNodes'] = numNodes
         self.modelDict['jobSettings']['numJobsPerNode'] = numJobsPerNode
         self.modelDict['jobSettings']['numCoresPerJob'] = numCoresPerJob
-        self.modelDict['jobSettings']['hostFile'] = hostFile        
+        self.modelDict['jobSettings']['hostFile'] = hostFile
         self.modelDict['jobSettings']['geoGenArgs'] = geoGenArgs
         self.modelDict['jobSettings']['comsolRunMode'] = comsolRunMode
         self.modelDict['jobSettings']['postProcArgs'] = postProcArgs

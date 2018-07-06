@@ -2,7 +2,7 @@
 # Licensed under the MIT License.
 
 ###
-### Functions that deal with file i/o
+# Functions that deal with file i/o
 ###
 
 import FreeCAD

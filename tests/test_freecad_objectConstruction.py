@@ -34,25 +34,25 @@ def manual_testing(function):
 
 def repo_path():
     """Retrieve path to the directory containing the qmt repository."""
-    return 
+    return
 
 
 def aux_unit_square_sketch():
     '''Helper function to drop a simple unit square sketch.
        The segments are carefully ordered.
     '''
-    a = (0,0,0)
-    b = (1,0,0)
-    c = (1,1,0)
-    d = (0,1,0)
+    a = (0, 0, 0)
+    b = (1, 0, 0)
+    c = (1, 1, 0)
+    d = (0, 1, 0)
 
-    sketch = FreeCAD.activeDocument().addObject('Sketcher::SketchObject','Sketch')
+    sketch = FreeCAD.activeDocument().addObject('Sketcher::SketchObject', 'Sketch')
     geoList = []
-    geoList.append(Part.Line(FreeCAD.Vector(*a),FreeCAD.Vector(*b)))
-    geoList.append(Part.Line(FreeCAD.Vector(*b),FreeCAD.Vector(*c)))
-    geoList.append(Part.Line(FreeCAD.Vector(*c),FreeCAD.Vector(*d)))
-    geoList.append(Part.Line(FreeCAD.Vector(*d),FreeCAD.Vector(*a)))
-    FreeCAD.ActiveDocument.Sketch.addGeometry(geoList,False)
+    geoList.append(Part.Line(FreeCAD.Vector(*a), FreeCAD.Vector(*b)))
+    geoList.append(Part.Line(FreeCAD.Vector(*b), FreeCAD.Vector(*c)))
+    geoList.append(Part.Line(FreeCAD.Vector(*c), FreeCAD.Vector(*d)))
+    geoList.append(Part.Line(FreeCAD.Vector(*d), FreeCAD.Vector(*a)))
+    FreeCAD.ActiveDocument.Sketch.addGeometry(geoList, False)
     FreeCAD.ActiveDocument.recompute()
     return sketch
 
@@ -61,16 +61,16 @@ def test_buildWire():
     '''Test wire via bounding box for default offsets/zBottom.
        TODO: all cases
     '''
-    sketch = myDoc.addObject('Sketcher::SketchObject','Sketch')
+    sketch = myDoc.addObject('Sketcher::SketchObject', 'Sketch')
     geoList = []
-    geoList.append(Part.Line(FreeCAD.Vector(0,0,0),FreeCAD.Vector(1,2,0)))
-    geoList.append(Part.Line(FreeCAD.Vector(1,2,0),FreeCAD.Vector(3,3,0)))
-    sketch.addGeometry(geoList,False)
+    geoList.append(Part.Line(FreeCAD.Vector(0, 0, 0), FreeCAD.Vector(1, 2, 0)))
+    geoList.append(Part.Line(FreeCAD.Vector(1, 2, 0), FreeCAD.Vector(3, 3, 0)))
+    sketch.addGeometry(geoList, False)
     myDoc.recompute()
     wire = buildWire(sketch, 0, 1)
     print(getBB(wire))
     assert wire.TypeId == 'Part::Feature'
-    assert np.allclose(getBB(wire)[4:6], (0,1))  # z direction constrained
+    assert np.allclose(getBB(wire)[4:6], (0, 1))  # z direction constrained
 
 
 def test_makeSAG():

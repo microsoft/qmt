@@ -7,6 +7,7 @@ import pytest
 import shutil
 from qmt.freecad.fileIO import *
 
+
 def setup_function(function):
     global myDoc
     global testDir
@@ -34,7 +35,7 @@ def test_setupRun():
 
     m = getModel()
     jobPath = os.path.join(testDir, 'testJob')
-    m.addJob(jobPath,jobSequence=['geoGen'],numCoresPerJob=1)
+    m.addJob(jobPath, jobSequence=['geoGen'], numCoresPerJob=1)
     m.genGeomSweep('param1', [0.1, 0.2, 0.3])
     # TODO: agree to start counting with geo_0 even if we don't sweep
     m.saveModel()
@@ -55,6 +56,7 @@ def test_setupRun():
     shutil.rmtree(os.path.join(jobPath, 'geo_2'))
     os.rmdir(jobPath)  # safety if jobPath == rootPath
 
+
 def test_runJob():
     '''Check results of run: here only geoGen (generated FreeCAD model files).
     '''
@@ -62,10 +64,10 @@ def test_runJob():
 
     m = getModel()
     jobPath = os.path.join(testDir, 'testJob')
-    m.addJob(jobPath,jobSequence=['geoGen'],numCoresPerJob=1)
+    m.addJob(jobPath, jobSequence=['geoGen'], numCoresPerJob=1)
     m.genGeomSweep('d', [0.1, 0.2, 0.3])
-    m.setPaths(freeCADPath = os.path.join(
-               testDir,'..','examples','1_3D_2DEG','2DEGFCDoc.FCStd'))
+    m.setPaths(freeCADPath=os.path.join(
+               testDir, '..', 'examples', '1_3D_2DEG', '2DEGFCDoc.FCStd'))
     m.saveModel()
 
     harn = qmt.Harness(modelPath)
@@ -78,7 +80,7 @@ def test_runJob():
     assert myDoc2.modelParams.d == 0.3
 
     # Check for illegal steps
-    m.addJob(jobPath,jobSequence=['wrongStep'],numCoresPerJob=1)
+    m.addJob(jobPath, jobSequence=['wrongStep'], numCoresPerJob=1)
     m.saveModel()
     harn = qmt.Harness(modelPath)
     harn.setupRun()
@@ -91,4 +93,3 @@ def test_runJob():
     shutil.rmtree(os.path.join(jobPath, 'geo_1'))
     shutil.rmtree(os.path.join(jobPath, 'geo_2'))
     os.rmdir(jobPath)  # safety if jobPath == rootPath
-

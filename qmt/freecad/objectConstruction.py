@@ -2,7 +2,7 @@
 # Licensed under the MIT License.
 
 ###
-### Functions that perform composite executions based on json file contents
+# Functions that perform composite executions based on json file contents
 ###
 
 import FreeCAD
@@ -55,7 +55,8 @@ def buildAlShell(sketch, zBottom, width, verts, thickness, depoZone=None, etchZo
     dx = x1 - x0
     dy = y1 - y0
     rAxis = np.array([-dy, dx, 0])
-    rAxis /= np.sqrt(np.sum(rAxis ** 2))  # axis perpendicular to the wire in the xy plane
+    # axis perpendicular to the wire in the xy plane
+    rAxis /= np.sqrt(np.sum(rAxis ** 2))
     zAxis = np.array([0, 0, 1.])
     doc = FreeCAD.ActiveDocument
     shellList = []
@@ -67,14 +68,17 @@ def buildAlShell(sketch, zBottom, width, verts, thickness, depoZone=None, etchZo
         dirVec = rAxis * np.cos(angle) + zAxis * np.sin(angle)
         shiftVec = (thickness) * dirVec
         transVec = FreeCAD.Vector(tuple(shiftVec))
-        face = makeHexFace(sketch, zBottom - offset, width + 2 * offset)  # make the bigger face
+        face = makeHexFace(sketch, zBottom - offset, width +
+                           2 * offset)  # make the bigger face
         shiftedFace = Draft.move(face, transVec, copy=False)
         extendedSketch = extendSketch(sketch, offset)
         # The shell offset is handled manually since we are using faceOverride to
         # input a shifted starting face:
-        shiftedWire = buildWire(extendedSketch, zBottom, width, faceOverride=shiftedFace)
+        shiftedWire = buildWire(extendedSketch, zBottom,
+                                width, faceOverride=shiftedFace)
         delete(extendedSketch)
-        shellCut = doc.addObject("Part::Cut", sketch.Name + "_cut_" + str(vert))
+        shellCut = doc.addObject(
+            "Part::Cut", sketch.Name + "_cut_" + str(vert))
         shellCut.Base = shiftedWire
         shellCut.Tool = originalWire
         doc.recompute()
@@ -85,7 +89,8 @@ def buildAlShell(sketch, zBottom, width, verts, thickness, depoZone=None, etchZo
         delete(shiftedWire)
         shellList += [shell]
     if len(shellList) > 1:
-        coatingUnion = doc.addObject("Part::MultiFuse", sketch.Name + "_coating")
+        coatingUnion = doc.addObject(
+            "Part::MultiFuse", sketch.Name + "_coating")
         coatingUnion.Shapes = shellList
         doc.recompute()
         coatingUnionClone = copy(coatingUnion)
@@ -102,17 +107,19 @@ def buildAlShell(sketch, zBottom, width, verts, thickness, depoZone=None, etchZo
 
     elif depoZone is not None:
         coatingBB = getBB(coatingUnionClone)
-        zMin = coatingBB[4];
+        zMin = coatingBB[4]
         zMax = coatingBB[5]
         depoVol = extrudeBetween(depoZone, zMin, zMax)
-        etchedCoatingUnionClone = intersect([depoVol, coatingUnionClone], consumeInputs=True)
+        etchedCoatingUnionClone = intersect(
+            [depoVol, coatingUnionClone], consumeInputs=True)
         return etchedCoatingUnionClone
     else:  # etchZone instead
         coatingBB = getBB(coatingUnionClone)
-        zMin = coatingBB[4];
+        zMin = coatingBB[4]
         zMax = coatingBB[5]
         etchVol = extrudeBetween(etchZone, zMin, zMax)
-        etchedCoatingUnionClone = subtract(coatingUnionClone, etchVol, consumeInputs=True)
+        etchedCoatingUnionClone = subtract(
+            coatingUnionClone, etchVol, consumeInputs=True)
         return etchedCoatingUnionClone
 
 
@@ -123,13 +130,15 @@ def makeSAG(sketch, zBot, zMid, zTop, tIn, tOut, offset=0.):
     b = tOut + tIn  # width of one of the trianglular pieces of the top
     alpha = np.abs(np.arctan(a / np.float(b)))  # lower angle of the top part
     c = a + 2 * offset  # height of the top part including the offset
-    d = c / np.tan(alpha)  # horizontal width of the trianglular part of the top after offset
-    f = offset / np.sin(alpha)  # horizontal shift in the triangular part of the top after an offset
-    
+    # horizontal width of the trianglular part of the top after offset
+    d = c / np.tan(alpha)
+    # horizontal shift in the triangular part of the top after an offset
+    f = offset / np.sin(alpha)
+
     sketchList = splitSketch(sketch)
     returnParts = []
     for tempSketch in sketchList:
-        #TODO: right now, if we try to taper the top of the SAG wire to a point, this
+        # TODO: right now, if we try to taper the top of the SAG wire to a point, this
         # breaks, since the offset of topSketch is empty. We should detect and handle this.
         # For now, just make sure that the wire has a small flat top.
         botSketch = draftOffset(tempSketch, offset)  # the base of the wire
@@ -141,7 +150,8 @@ def makeSAG(sketch, zBot, zMid, zTop, tIn, tOut, offset=0.):
         rectPart = copy(rectPartTemp, moveVec=(0., 0., zBot - offset))
         delete(rectPartTemp)
         # make the cap of the wire:
-        topSketchTemp = copy(topSketch, moveVec=(0., 0., zTop - zMid + 2 * offset))
+        topSketchTemp = copy(topSketch, moveVec=(
+            0., 0., zTop - zMid + 2 * offset))
         capPartTemp = doc.addObject('Part::Loft', sketch.Name + '_cap')
         capPartTemp.Sections = [midSketch, topSketchTemp]
         capPartTemp.Solid = True
@@ -187,13 +197,14 @@ class modelBuilder:
         elif directive == 'lithography':
             objs = self._build_litho(partName)
         else:
-            raise ValueError('Directive ' + directive + ' is not a recognized directive type.')
+            raise ValueError('Directive ' + directive +
+                             ' is not a recognized directive type.')
         self._buildPartsDict[partName] = objs
         for obj in objs:
             self.model.registerCadPart(partName, obj.Name, None)
 
     def exportBuiltParts(self, stepFileDir=None, stlFileDir=None):
-        # Now that we are ready to export, we first want to merge all of the 
+        # Now that we are ready to export, we first want to merge all of the
         # 3D renders corresponding to a single shape into one entity:
         totalObjsDict = {}
         for partName in self._buildPartsDict.keys():
@@ -204,7 +215,7 @@ class modelBuilder:
             mergedObj = genUnion(objsList, consumeInputs=True)
             mergedObj.Label = partName
             totalObjsDict[partName] = mergedObj
-        # Now that we have merged the objects, we want to center them  in the x-y 
+        # Now that we have merged the objects, we want to center them  in the x-y
         # plane so the distances aren't ridiculous:
         centerObjects(totalObjsDict.values())
         # Finally, we go through the dictionary and export:
@@ -214,7 +225,8 @@ class modelBuilder:
             if stepFileDir is not None:
                 filePath = stepFileDir + '/' + partName + '.step'
                 exportCAD(obj, filePath)
-                self.model.registerCadPart(partName, objFCName, filePath, reset=True)
+                self.model.registerCadPart(
+                    partName, objFCName, filePath, reset=True)
             if stlFileDir is not None:
                 filePath = stlFileDir + '/' + partName + '.stl'
                 exportMeshed(obj, filePath)
@@ -313,7 +325,8 @@ class modelBuilder:
         either a string or a float.
         '''
         if type(param) is str or type(param) is unicode:
-            returnParam = float(self.model.modelDict['geometricParams'][param][0])
+            returnParam = float(
+                self.model.modelDict['geometricParams'][param][0])
         else:
             returnParam = param
         return returnParam
@@ -331,7 +344,8 @@ class modelBuilder:
         if treatment == 'extrude' or treatment == 'lithography':
             treatment = 'standard'
         if treatment == 'standard':
-            if offsetVal < 1e-5:  # Apparently the offset function is buggy for very small offsets...
+            # Apparently the offset function is buggy for very small offsets...
+            if offsetVal < 1e-5:
                 offsetDupe = copy(obj)
             else:
                 offset = self.doc.addObject("Part::Offset")
@@ -354,7 +368,7 @@ class modelBuilder:
 
     def _initialize_lithography(self, fillShells=True):
         self.fillShells = fillShells
-        # The lithography step requires some infrastructure to track things 
+        # The lithography step requires some infrastructure to track things
         # throughout.
         self.lithoDict = {}  # dictionary containing objects for the lithography step
         self.lithoDict['layers'] = {}
@@ -362,11 +376,12 @@ class modelBuilder:
         # and subsequent tuples are offset by t_i for each index in the tuple.
         self.lithoDict['substrate'] = {(): []}
         # To start, we need to collect up all the lithography directives, and
-        # organize them by layerNum and objectIDs within layers.   
+        # organize them by layerNum and objectIDs within layers.
         baseSubstratePartNames = []
         for partName in self.model.modelDict['3DParts'].keys():
             partDict = self.model.modelDict['3DParts'][partName]
-            if 'lithography' == partDict['directive']:  # If this part is a litho step
+            # If this part is a litho step
+            if 'lithography' == partDict['directive']:
                 layerNum = partDict['layerNum']  # layerNum of this part
                 # Add the layerNum to the layer dictionary:
                 if layerNum not in self.lithoDict['layers']:
@@ -405,8 +420,9 @@ class modelBuilder:
         # should have already been rendered.
         for baseSubstratePartName in baseSubstratePartNames:
             for baseSubstrateObjName in self.model.modelDict['3DParts'][baseSubstratePartName][
-                'fileNames'].keys():
-                self.lithoDict['substrate'][()] += [self.doc.getObject(baseSubstrateObjName)]
+                    'fileNames'].keys():
+                self.lithoDict['substrate'][(
+                )] += [self.doc.getObject(baseSubstrateObjName)]
         # Now that we have ordered the primitives, we need to compute a few
         # aux quantities that we will need. First, we compute the total bounding
         # box of the lithography procedure:
@@ -418,7 +434,7 @@ class modelBuilder:
         bottom = min(bases)
         totalThickness = sum(thicknesses)
         assert len(self.lithoDict['substrate'][
-                       ()]) > 0  # Otherwise, we don't have a reference for the lateral BB
+            ()]) > 0  # Otherwise, we don't have a reference for the lateral BB
         substrateUnion = genUnion(self.lithoDict['substrate'][()],
                                   consumeInputs=False)  # total substrate
         BB = list(getBB(substrateUnion))  # bounding box
@@ -429,12 +445,12 @@ class modelBuilder:
         self.lithoDict['boundingBox'] = [BB, constructionZone]
         delete(substrateUnion)  # not needed for next steps
         delete(constructionZone)  # not needed for next steps
-        # Next, we add two prisms for each sketch. The first, which we denote "B", 
-        # is bounded by the base from the bottom and the layer thickness on the top. 
+        # Next, we add two prisms for each sketch. The first, which we denote "B",
+        # is bounded by the base from the bottom and the layer thickness on the top.
         # These serve as "stencils" that would be the deposited shape if no other.
-        # objects got in the way. The second set of prisms, denoted "C", covers the 
-        # base of the layer to the top of the entire domain box. This is used for 
-        # forming the volumes occupied when substrate objects are offset and 
+        # objects got in the way. The second set of prisms, denoted "C", covers the
+        # base of the layer to the top of the entire domain box. This is used for
+        # forming the volumes occupied when substrate objects are offset and
         # checking for overlaps.
         for layerNum in self.lithoDict['layers'].keys():
             base = self.lithoDict['layers'][layerNum]['base']
@@ -448,7 +464,7 @@ class modelBuilder:
                 self.trash += [B]
                 self.trash += [C]
                 # In addition, add a hook for the HDict, which will contain the "H"
-                # constructions for this object, but offset to thicknesses of various 
+                # constructions for this object, but offset to thicknesses of various
                 # layers, according to the keys.
                 self.lithoDict['layers'][layerNum]['objIDs'][objID]['HDict'] = {}
 
@@ -462,15 +478,16 @@ class modelBuilder:
         # First, we need to check to see if we need to compute either of the underlying H obj lists:
         HDict = self.lithoDict['layers'][m]['objIDs'][j]['HDict']
         # HDict stores a collection of H object component lists for each (layerNum,objID)
-        # pair. The index of this dictionary is a tuple: () indicates no 
+        # pair. The index of this dictionary is a tuple: () indicates no
         # offset, while other indices indicate an offset by summing the thicknesses
-        # from corresponding layers.        
+        # from corresponding layers.
         if checkOffsetTuple not in HDict:  # If we haven't computed this yet
             HDict[checkOffsetTuple] = self._H_offset(m, j, tList=list(
                 checkOffsetTuple))  # list of H parts
             self.trash += HDict[checkOffsetTuple]
         if offsetTuple not in HDict:  # If we haven't computed this yet
-            HDict[offsetTuple] = self._H_offset(m, j, tList=list(offsetTuple))  # list of H parts
+            HDict[offsetTuple] = self._H_offset(
+                m, j, tList=list(offsetTuple))  # list of H parts
             self.trash += HDict[offsetTuple]
         HObjCheckList = HDict[checkOffsetTuple]
         HObjList = HDict[offsetTuple]
@@ -510,13 +527,13 @@ class modelBuilder:
             where A_k is from the base substrate list. This is computed recursively. The list of integers
             tList determines the offset t; t = the sum of all layer thicknesses ti that appear
             in tList. For example, tList = [1,2,3] -> t = t1+t2+t3. 
-            
+
             Note: this object is returned as a list of objects that need to be unioned together
             in order to form the full H.
         '''
-        # This is a tuple that encodes the check offset t:        
+        # This is a tuple that encodes the check offset t:
         checkOffsetTuple = tuple(sorted(tList))
-        # This is a tuple that encodes the total offset t_i+t:        
+        # This is a tuple that encodes the total offset t_i+t:
         offsetTuple = tuple(sorted(tList + [layerNum]))
         # First, check if we have to do anything:
         if checkOffsetTuple in self.lithoDict['layers'][layerNum]['objIDs'][objID]['HDict']:
@@ -525,7 +542,8 @@ class modelBuilder:
         t = 0.0
         for tIndex in tList:
             t += self.lithoDict['layers'][tIndex]['thickness']
-        ti = self.lithoDict['layers'][layerNum]['thickness']  # thickness of this layer
+        # thickness of this layer
+        ti = self.lithoDict['layers'][layerNum]['thickness']
         # Set the aux. thickness t:
         B = self.lithoDict['layers'][layerNum]['objIDs'][objID][
             'B']  # B prism for this layer & objID
@@ -545,7 +563,8 @@ class modelBuilder:
                                                                checkOffsetTuple)
                     # Next, build up the original substrate list:
         AOffsetList = []
-        AOffsetList += self._screened_A_UnionList(C_t, t, ti, offsetTuple, checkOffsetTuple)
+        AOffsetList += self._screened_A_UnionList(
+            C_t, t, ti, offsetTuple, checkOffsetTuple)
         unionList = HOffsetList + AOffsetList
         returnList = [B_t]
         for obj in unionList:
@@ -673,7 +692,8 @@ def build2DGeo(passModel=None):
             returnDict.update(objControlDict['physicsProps'])
             returnDict['type'] = objControlDict['type']
             if objControlDict['type'] == 'boundary':
-                points = [tuple(v.Point) for v in doc.getObject(fcName).Shape.Vertexes]
+                points = [tuple(v.Point)
+                          for v in doc.getObject(fcName).Shape.Vertexes]
                 twoDObjs[fcName] = (points, returnDict)
             else:
                 lineSegments, cycles = findEdgeCycles(doc.getObject(fcName))

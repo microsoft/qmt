@@ -2,7 +2,7 @@
 # Licensed under the MIT License.
 
 ###
-### Functions that work with sketches
+# Functions that work with sketches
 ###
 
 import FreeCAD
@@ -17,7 +17,7 @@ def delete(obj):
     doc = FreeCAD.ActiveDocument
     doc.removeObject(obj.Name)
     doc.recompute()
-    
+
 
 def deepRemove(obj=None, name=None, label=None):
     ''' Remove a targeted object and recursively delete all sub-objects it contains.
@@ -57,7 +57,8 @@ def deepRemove(obj=None, name=None, label=None):
                 parentName = breadCrumbs.pop()  # reset the current parent to one level up
                 parent = doc.getObject(parentName)
                 children = parent.OutList  # update the children
-                
+
+
 def findSegments(mySketch):
     '''Compute the line segments in a sketch
     '''
@@ -67,7 +68,8 @@ def findSegments(mySketch):
     #     lineSegments += [[[seg.StartPoint[0], seg.StartPoint[1], seg.StartPoint[2]], \
     #                       [seg.EndPoint[0], seg.EndPoint[1], seg.EndPoint[2]]]]
     for edge in mySketch.Shape.Edges:
-        lineSegments.append([tuple(edge.Vertexes[0].Point), tuple(edge.Vertexes[1].Point)])
+        lineSegments.append([tuple(edge.Vertexes[0].Point),
+                             tuple(edge.Vertexes[1].Point)])
     lineSegments = np.array(lineSegments)
     return lineSegments
 
@@ -81,21 +83,24 @@ def nextSegment(lineSegments, segIndex, tol=1e-8, fixOrder=True):
         tol: repair tolerance for matching
         fixOrder: whether the order lineSegments should be repaired on the fly
     '''
-    diffList0 = np.sum(np.abs(lineSegments[segIndex, 1, :] - lineSegments[:, 0, :]), axis=1)
-    diffList1 = np.sum(np.abs(lineSegments[segIndex, 1, :] - lineSegments[:, 1, :]), axis=1)
+    diffList0 = np.sum(
+        np.abs(lineSegments[segIndex, 1, :] - lineSegments[:, 0, :]), axis=1)
+    diffList1 = np.sum(
+        np.abs(lineSegments[segIndex, 1, :] - lineSegments[:, 1, :]), axis=1)
     diffList0[segIndex] = 1000.
     diffList1[segIndex] = 1000.
     nextList0 = np.where(diffList0 <= tol)[0]
     nextList1 = np.where(diffList1 <= tol)[0]
     if len(nextList0) + len(nextList1) > 1:
-        raise ValueError('Multiple possible paths found while parsing cycles in sketch.')
+        raise ValueError(
+            'Multiple possible paths found while parsing cycles in sketch.')
     elif len(nextList0) + len(nextList1) < 1:
         raise ValueError('No paths found while parsing cycles in sketch.')
     elif len(nextList0) == 1:
         return nextList0[0]
     else:
         if fixOrder:
-            # the points were out of order, so they need to be switched            
+            # the points were out of order, so they need to be switched
             nextPoint0 = deepcopy(lineSegments[nextList1[0], 0, :])
             nextPoint1 = deepcopy(lineSegments[nextList1[0], 1, :])
             lineSegments[nextList1[0], 0, :] = nextPoint1
@@ -131,11 +136,13 @@ def addCycleSketch(name, fcDoc, cycleSegIndList, lineSegments):
         startPoint = lineSegments[segIndex, 0, :]
         endPoint = lineSegments[segIndex, 1, :]
 
-        obj.addGeometry(Part.Line(FreeCAD.Vector(tuple(startPoint)), FreeCAD.Vector(tuple(endPoint))))
+        obj.addGeometry(Part.Line(FreeCAD.Vector(
+            tuple(startPoint)), FreeCAD.Vector(tuple(endPoint))))
         cnt += 1
         if cnt <= 1:
             continue
-        obj.addConstraint(Sketcher.Constraint('Coincident', cnt - 2, 2, cnt - 1, 1))
+        obj.addConstraint(Sketcher.Constraint(
+            'Coincident', cnt - 2, 2, cnt - 1, 1))
     obj.addConstraint(Sketcher.Constraint('Coincident', cnt - 1, 2, 0, 1))
     fcDoc.recompute()
     return obj
@@ -150,11 +157,13 @@ def addPolyLineSketch(name, fcDoc, segmentOrder, lineSegments):
     for segIndex, segment in enumerate(lineSegments):
         startPoint = segment[0, :]
         endPoint = segment[1, :]
-        obj.addGeometry(Part.Line(FreeCAD.Vector(tuple(startPoint)), FreeCAD.Vector(tuple(endPoint))))
+        obj.addGeometry(Part.Line(FreeCAD.Vector(
+            tuple(startPoint)), FreeCAD.Vector(tuple(endPoint))))
     for i in range(len(lineSegments)):
         connectIndex = segmentOrder[i]
         if connectIndex < len(lineSegments):
-            obj.addConstraint(Sketcher.Constraint('Coincident', i, 2, connectIndex, 1))
+            obj.addConstraint(Sketcher.Constraint(
+                'Coincident', i, 2, connectIndex, 1))
     fcDoc.recompute()
     return obj
 
@@ -170,7 +179,8 @@ def findEdgeCycles(sketch):
             startingIndex = availSegIDs[0]
             newCycle = findCycle(lineSegments, startingIndex, availSegIDs)
             cycles += [newCycle]
-            availSegIDs = [item for item in availSegIDs if item not in newCycle]
+            availSegIDs = [
+                item for item in availSegIDs if item not in newCycle]
     return lineSegments, cycles
 
 
@@ -183,7 +193,8 @@ def splitSketch(mySketch):
     currentSketchName = mySketch.Name
     cycleObjList = []
     for i, cycle in enumerate(cycles):
-        cycleObj = addCycleSketch(currentSketchName + '_' + str(i), myDoc, cycle, lineSegments)
+        cycleObj = addCycleSketch(
+            currentSketchName + '_' + str(i), myDoc, cycle, lineSegments)
         cycleObjList += [cycleObj]
     return cycleObjList
 
@@ -206,11 +217,11 @@ def extendSketch(mySketch, d):
     seg1Index = connections.index(len(segments))
     segIndices = [seg0Index, seg1Index]
 
-    # Since we automatically reorder these, we know the orientation. 
+    # Since we automatically reorder these, we know the orientation.
     seg0 = segments[seg0Index]
-    x0, y0, z0 = seg0[0];
+    x0, y0, z0 = seg0[0]
     x1, y1, z1 = seg0[1]
-    dx = x1 - x0;
+    dx = x1 - x0
     dy = y1 - y0
     alpha = np.abs(np.arctan(dy / dx))
     if x0 < x1:
@@ -225,9 +236,9 @@ def extendSketch(mySketch, d):
     segments[seg0Index][0][1] = y0p
 
     seg1 = segments[seg1Index]
-    x0, y0, z0 = seg1[0];
+    x0, y0, z0 = seg1[0]
     x1, y1, z1 = seg1[1]
-    dx = x1 - x0;
+    dx = x1 - x0
     dy = y1 - y0
     alpha = np.abs(np.arctan(dy / dx))
     if x1 < x0:
@@ -241,7 +252,8 @@ def extendSketch(mySketch, d):
     segments[seg1Index][1][0] = x1p
     segments[seg1Index][1][1] = y1p
 
-    myNewLine = addPolyLineSketch(mySketch.Name + '_extension', doc, connections, segments)
+    myNewLine = addPolyLineSketch(
+        mySketch.Name + '_extension', doc, connections, segments)
     return myNewLine
 
 
@@ -250,31 +262,33 @@ def makeIntoSketch(inputObj, sketchName=None):
     '''
     if sketchName is None:
         sketchName = inputObj.Name + '_sketch'
-    returnSketch = Draft.makeSketch(inputObj, autoconstraints=True, name=sketchName)
+    returnSketch = Draft.makeSketch(
+        inputObj, autoconstraints=True, name=sketchName)
     deepRemove(obj=inputObj)
     FreeCAD.ActiveDocument.recompute()
     return returnSketch
 
-def draftOffset(inputSketch,t,tol=1e-8):
+
+def draftOffset(inputSketch, t, tol=1e-8):
     ''' Attempt to offset the draft figure by a thickness t. Positive t is an
     inflation, while negative t is a deflation. tol sets how strict we should be when
     checking if the offset worked.
     '''
-    from qmt.freecad import extrude,copy,subtract,delete    
+    from qmt.freecad import extrude, copy, subtract, delete
 
     if t == 0.:
         return copy(inputSketch)
     deltaT = np.abs(t)
-    offsetVec1 =FreeCAD.Vector(-deltaT,-deltaT,0.)
-    offsetVec2 = FreeCAD.Vector(deltaT,deltaT,0.)
-    
-    offset0 = copy(inputSketch)
-    offset1 = Draft.offset(inputSketch,offsetVec1,copy=True)
-    offset2 = Draft.offset(inputSketch,offsetVec2,copy=True)
+    offsetVec1 = FreeCAD.Vector(-deltaT, -deltaT, 0.)
+    offsetVec2 = FreeCAD.Vector(deltaT, deltaT, 0.)
 
-    solid0 = extrude(offset0,10.0)
-    solid1 = extrude(offset1,10.0)
-    solid2 = extrude(offset2,10.0)
+    offset0 = copy(inputSketch)
+    offset1 = Draft.offset(inputSketch, offsetVec1, copy=True)
+    offset2 = Draft.offset(inputSketch, offsetVec2, copy=True)
+
+    solid0 = extrude(offset0, 10.0)
+    solid1 = extrude(offset1, 10.0)
+    solid2 = extrude(offset2, 10.0)
 
     # Compute the volumes of these solids:
     V0 = solid0.Shape.Volume
@@ -289,34 +303,42 @@ def draftOffset(inputSketch,t,tol=1e-8):
 
     # If everything worked properly, these should either be ordered as
     # V1<V0<V2 or V2<V0<V1:
-    if V2>V0 and V0>V1:
-        bigSketch = offset2; littleSketch = offset1
-    elif V1>V0 and V0>V2:
-        bigSketch = offset1; littleSketch = offset2
-    elif V2>V1 and V1>V0:
-        bigSketch = offset2; littleSketch = None
+    if V2 > V0 and V0 > V1:
+        bigSketch = offset2
+        littleSketch = offset1
+    elif V1 > V0 and V0 > V2:
+        bigSketch = offset1
+        littleSketch = offset2
+    elif V2 > V1 and V1 > V0:
+        bigSketch = offset2
+        littleSketch = None
     # If we aren't in correct case, we still might be able to salvage things
     # for certain values of t:
-    elif V1>V2 and V2>V0:
-        bigSketch = offset1; littleSketch = None
-    elif V2<V1 and V1<V0:
-        bigSketch = None; littleSketch = offset2
-    elif V1<V2 and V2<V0:
-        bigSketch = None; littleSketch = offset1
+    elif V1 > V2 and V2 > V0:
+        bigSketch = offset1
+        littleSketch = None
+    elif V2 < V1 and V1 < V0:
+        bigSketch = None
+        littleSketch = offset2
+    elif V1 < V2 and V2 < V0:
+        bigSketch = None
+        littleSketch = offset1
     else:
-        bigSketch = None; littleSketch = None
+        bigSketch = None
+        littleSketch = None
     delete(solid0)
     delete(solid1)
     delete(solid2)
-    if t<0 and littleSketch is not None:
+    if t < 0 and littleSketch is not None:
         returnSketch = copy(littleSketch)
-    elif t>0 and bigSketch is not None:
+    elif t > 0 and bigSketch is not None:
         returnSketch = copy(bigSketch)
-    elif abs(t)<tol:
+    elif abs(t) < tol:
         returnSketch = copy(inputSketch)
     else:
-        raise ValueError('Failed to offset the sketch '+str(inputSketch.Name)+' by amount '+str(t))
-    
+        raise ValueError('Failed to offset the sketch ' +
+                         str(inputSketch.Name)+' by amount '+str(t))
+
     # # now that we have the three solids, we need to figure out which is bigger
     # # and which is smaller.
     # diff10 = subtract(solid1,solid0)
@@ -348,4 +370,3 @@ def draftOffset(inputSketch,t,tol=1e-8):
     delete(offset1)
     delete(offset2)
     return returnSketch
-

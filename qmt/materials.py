@@ -2,7 +2,7 @@
 # Licensed under the MIT License.
 
 #
-# This defines the physical material specification format, which is stored as 
+# This defines the physical material specification format, which is stored as
 # a json file. To add to the json or regenerate it, run this module as a script.
 #
 
@@ -26,7 +26,8 @@ try:
 except ImportError:  # to avoid problems if we are using FreeCAD
     pass
 
-__all__ = ['Material', 'Materials', 'conduction_band_offset', 'valence_band_offset']
+__all__ = ['Material', 'Materials',
+           'conduction_band_offset', 'valence_band_offset']
 
 
 class Material(collections.Mapping):
@@ -62,7 +63,8 @@ class Material(collections.Mapping):
         try:
             value = self.properties[key]
         except KeyError:
-            raise KeyError("KeyError: material '{}' has no '{}'".format(self.name, key))
+            raise KeyError(
+                "KeyError: material '{}' has no '{}'".format(self.name, key))
         if key in ('workFunction', 'electronAffinity', 'directBandGap', 'valenceBandOffset',
                    'chargeNeutralityLevel', 'interbandMatrixElement', 'spinOrbitSplitting'):
             value *= self.energyUnit
@@ -99,7 +101,8 @@ class Material(collections.Mapping):
                     self.holeMass('light', direction)**1.5)**(2/3.)
 
         # Retrieve Luttinger parameters
-        gamma1, gamma2, gamma3 = (self['luttingerGamma%s' % i] for i in (1, 2, 3))
+        gamma1, gamma2, gamma3 = (
+            self['luttingerGamma%s' % i] for i in (1, 2, 3))
         if band == 'heavy':
             sign = -1
         elif band == 'light':
@@ -118,9 +121,9 @@ class Material(collections.Mapping):
             gamma_bar = np.sqrt(2 * (gamma2**2 + gamma3**2))
             # anisotropy factor for heavy or light hole
             gamma_hl = -sign * 6 * (gamma3**2 - gamma2**2) / \
-                       (gamma_bar * (gamma1 + sign * gamma_bar))
+                (gamma_bar * (gamma1 + sign * gamma_bar))
             return 1. / (gamma1 + sign * gamma_bar) * \
-                   (1 + 0.05 * gamma_hl + 0.0164 * gamma_hl**2)**(2/3.)
+                (1 + 0.05 * gamma_hl + 0.0164 * gamma_hl**2)**(2/3.)
             # The following expression would hold if the band was circularly symmetric in xy-plane
             # return (self.holeMass(band, '001') * self.holeMass(band, '110')**2)**(1 / 3.)
 
@@ -162,7 +165,8 @@ class Materials(collections.Mapping):
         if matPath is not None:
             self.load()
         if matDict is not None:
-            self.bowingParameters.update(matDict.pop('__bowing_parameters', {}))
+            self.bowingParameters.update(
+                matDict.pop('__bowing_parameters', {}))
             self.matDict = matDict
 
     def __iter__(self):
@@ -180,7 +184,8 @@ class Materials(collections.Mapping):
 
     def setBowingParameters(self, nameA, nameB, matType, **kwargs):
         '''Generate a bowing parameter set and add it to the bowingParameters dict.'''
-        self.bowingParameters[(nameA, nameB)] = self._makeMaterial(matType, **kwargs)
+        self.bowingParameters[(nameA, nameB)] = self._makeMaterial(
+            matType, **kwargs)
 
     def _makeMaterial(self, matType, **kwargs):
         material = {}
@@ -197,16 +202,20 @@ class Materials(collections.Mapping):
         if matType == 'semi':
             set_property('electronAffinity')  # Electron affinity \chi [in meV]
             set_property('directBandGap')  # E_g(\Gamma) [in meV]
-            set_property('valenceBandOffset')  # wrt InSb valence band maximum [in meV]
-            set_property('spinOrbitSplitting') # [in meV]
-            set_property('interbandMatrixElement') # describes coupling of s and p states [in meV]
+            # wrt InSb valence band maximum [in meV]
+            set_property('valenceBandOffset')
+            set_property('spinOrbitSplitting')  # [in meV]
+            # describes coupling of s and p states [in meV]
+            set_property('interbandMatrixElement')
             # Luttinger parameters \gamma_{1,2,3}
             set_property('luttingerGamma1')
             set_property('luttingerGamma2')
             set_property('luttingerGamma3')
-            set_property('chargeNeutralityLevel')  # Charge neutrality level, measured from the VB edge [in meV].
-            set_property('surfaceChargeDensity')  # Density of surface states [in cm-2 eV-1]
-            
+            # Charge neutrality level, measured from the VB edge [in meV].
+            set_property('chargeNeutralityLevel')
+            # Density of surface states [in cm-2 eV-1]
+            set_property('surfaceChargeDensity')
+
             # Unused so far
             # set_property('holeMass')  # Hole mass [in units of bare electron mass]
             # set_property('valenceBandMaximum')  # Position of valence band maximum [in meV]
@@ -283,7 +292,8 @@ class Materials(collections.Mapping):
         if (nameB, nameA) in self.bowingParameters:
             nameA, nameB = nameB, nameA
             x = 1. - x
-        matA, matB = self.find(nameA, eunit='meV'), self.find(nameB, eunit='meV')
+        matA, matB = self.find(
+            nameA, eunit='meV'), self.find(nameB, eunit='meV')
         bow = self.bowingParameters.get((nameA, nameB), {})
         alloy = {}
         for key, valA in iteritems(matA):
@@ -363,13 +373,15 @@ class Materials(collections.Mapping):
         try:
             cbo = mat['valenceBandOffset'] + mat['directBandGap']
             ref = self.matDict[ref_name]
-            ref_level = -(ref['electronAffinity'] + ref['directBandGap'] + ref['valenceBandOffset'])
+            ref_level = -(ref['electronAffinity'] +
+                          ref['directBandGap'] + ref['valenceBandOffset'])
             ref_level *= mat.energyUnit
             return cbo + ref_level
         except KeyError:
             # fall back to Anderson's rule
             if 'cbo' not in locals():
-                msg = "Material '{}' misses valenceBandOffset or directBandGap.".format(mat.name)
+                msg = "Material '{}' misses valenceBandOffset or directBandGap.".format(
+                    mat.name)
             elif 'ref' not in locals():
                 msg = "Reference material '" + ref_name + "' missing from materials library."
             else:
@@ -402,7 +414,8 @@ class Materials(collections.Mapping):
         try:
             vbo = mat['valenceBandOffset']
             ref = self.matDict[ref_name]
-            ref_level = -(ref['electronAffinity'] + ref['directBandGap'] + ref['valenceBandOffset'])
+            ref_level = -(ref['electronAffinity'] +
+                          ref['directBandGap'] + ref['valenceBandOffset'])
             ref_level *= mat.energyUnit
             return vbo + ref_level
         except KeyError:
@@ -439,7 +452,8 @@ def conduction_band_offset(mat, ref_mat):
     except KeyError:
         # fall back to Anderson's rule
         if 'cbo' not in locals():
-            msg = "Material '{}' misses valenceBandOffset or directBandGap.".format(mat.name)
+            msg = "Material '{}' misses valenceBandOffset or directBandGap.".format(
+                mat.name)
         else:
             msg = "Reference material '" + ref_mat.name + \
                   "' misses valenceBandOffset or directBandGap."
@@ -537,18 +551,24 @@ def write_database_to_markdown(out_file, mat_lib):
                   ('electronMass', r'electron mass [m_e]'),
                   ('electronAffinity', r'electron affinity $\chi$ [eV]'),
                   ('directBandGap', r'direct band gap $E_g(\Gamma)$ [eV]'),
-                  ('valenceBandOffset', r'valence band offset w.r.t. InSb [eV]'),
-                  ('spinOrbitSplitting', r'spin-orbit splitting $\Delta_{so}$ [eV]'),
-                  ('interbandMatrixElement', r'interband matrix element $E_P$ [eV]'),
+                  ('valenceBandOffset',
+                   r'valence band offset w.r.t. InSb [eV]'),
+                  ('spinOrbitSplitting',
+                   r'spin-orbit splitting $\Delta_{so}$ [eV]'),
+                  ('interbandMatrixElement',
+                   r'interband matrix element $E_P$ [eV]'),
                   ('luttingerGamma1', r'Luttinger parameter $\gamma_1$'),
                   ('luttingerGamma2', r'Luttinger parameter $\gamma_2$'),
                   ('luttingerGamma3', r'Luttinger parameter $\gamma_3$'),
-                  ('chargeNeutralityLevel', r'charge neutrality level [from VB edge, in eV]'),
-                  ('surfaceChargeDensity', r'density of surface states [10$^{12}$ cm$^{-2}$ eV$^(-1)$]')
-                 ]
+                  ('chargeNeutralityLevel',
+                   r'charge neutrality level [from VB edge, in eV]'),
+                  ('surfaceChargeDensity',
+                   r'density of surface states [10$^{12}$ cm$^{-2}$ eV$^(-1)$]')
+                  ]
     scale_factors = dict(surfaceChargeDensity=1e-12)
     table = [[desc] for desc in list(zip(*semi_props))[1]]
-    semi_names = [name for name, mat in sorted(iteritems(mat_lib)) if mat['type'] == 'semi']
+    semi_names = [name for name, mat in sorted(
+        iteritems(mat_lib)) if mat['type'] == 'semi']
     for name in semi_names:
         mat = mat_lib.find(name, eunit='eV')
         for i, (p, _) in enumerate(semi_props):
@@ -623,12 +643,12 @@ if __name__ == '__main__':
     materials.genMat('Au', 'metal', relativePermittivity=1000,
                      # source- Wikipedia quotes it as 5.1-5.47; this is the average.
                      workFunction=5285.)
-    materials.genMat('degenDopedSi','metal',relativePermittivity=1000,
-                      # source - Ioffe Institute, http://www.ioffe.ru/SVA/NSM/Semicond/Si/basic.html
-                      workFunction=4050.)
-    materials.genMat('NbTiN','metal',relativePermittivity=1000,
-                      # Unknown; just setting it to Al for now.
-                      workFunction=4280.)                      
+    materials.genMat('degenDopedSi', 'metal', relativePermittivity=1000,
+                     # source - Ioffe Institute, http://www.ioffe.ru/SVA/NSM/Semicond/Si/basic.html
+                     workFunction=4050.)
+    materials.genMat('NbTiN', 'metal', relativePermittivity=1000,
+                     # Unknown; just setting it to Al for now.
+                     workFunction=4280.)
 
     # === Dielectrics ===
     # Sources:
@@ -647,7 +667,8 @@ if __name__ == '__main__':
     # [Robertson]: eps=7.
     # [Yota]: eps=6.5 for PECVD Si3N4
     # [???]: eps=7.9
-    materials.genMat('Si3N4', 'dielectric', relativePermittivity=7.)  # Robertson
+    materials.genMat('Si3N4', 'dielectric',
+                     relativePermittivity=7.)  # Robertson
 
     # SiO2
     # [Robertson]: eps=3.9
@@ -659,25 +680,28 @@ if __name__ == '__main__':
     # [Yota] eps=18.7 for ALD HfO2
     # NB: Dielectric constant of ALD HfO2 seems to depend strongly on growth conditions like
     # temperature.
-    materials.genMat('HfO2', 'dielectric', relativePermittivity=25.)  # Robertson
+    materials.genMat('HfO2', 'dielectric',
+                     relativePermittivity=25.)  # Robertson
 
     # ZrO2
     # [Robertson] eps=25
     # [Biercuk] eps=20-29 for ALD ZrO2
-    materials.genMat('ZrO2', 'dielectric', relativePermittivity=25.)  # Robertson
+    materials.genMat('ZrO2', 'dielectric',
+                     relativePermittivity=25.)  # Robertson
 
     # Al2O3
     # [Robertson] eps=9
     # [Biercuk] eps=8-9 for ALD Al2O3
     # [Yota] eps=10.3 for ALD Al2O3
-    materials.genMat('Al2O3', 'dielectric', relativePermittivity=9.)  # Robertson
+    materials.genMat('Al2O3', 'dielectric',
+                     relativePermittivity=9.)  # Robertson
 
     # === Semiconductors ===
     # Sources:
     # - [ioffe.ru] http://www.ioffe.ru/SVA/NSM/Semicond
     # - [Vurgaftman] Vurgaftman et al., APR 89, 5815 (2001): Band parameters for III-V compound
     #   semiconductors and their alloys,  https://doi.org/10.1063/1.1368156
-    # - [Heedt] Heedt, et al. Resolving ambiguities in nanowire field-effect transistor 
+    # - [Heedt] Heedt, et al. Resolving ambiguities in nanowire field-effect transistor
     #   characterization. Nanoscale 7, 18188-18197, 2015. https://doi.org/10.1039/c5nr03608a
     # - [Monch] Monch, Semiconductor Surfaces and Interfaces, 3rd Edition, Springer (2001).
     materials.genMat('GaAs', 'semi',
@@ -708,7 +732,7 @@ if __name__ == '__main__':
                      # ioffe.ru:
                      electronAffinity=4900.,
                      # Heedt:
-                     chargeNeutralityLevel=417.+160.,surfaceChargeDensity=3e12)
+                     chargeNeutralityLevel=417.+160., surfaceChargeDensity=3e12)
     materials.genMat('GaSb', 'semi',
                      # 300 K, http://www.ioffe.ru/SVA/NSM/Semicond/GaSb/basic.html
                      relativePermittivity=15.7, electronAffinity=4060.,
@@ -734,7 +758,7 @@ if __name__ == '__main__':
                      # Monch has some values for this, but I don't think we have too
                      # good an idea. For now, I'll use mid-gap states of density equal to
                      # InAs. TODO: experimentally determine this!
-                     chargeNeutralityLevel = 0.5*235.,surfaceChargeDensity=3e12)
+                     chargeNeutralityLevel=0.5*235., surfaceChargeDensity=3e12)
     materials.genMat('InP', 'semi',
                      # 300 K, http://www.ioffe.ru/SVA/NSM/Semicond/InP/basic.html
                      relativePermittivity=12.5, electronAffinity=4380.,
@@ -745,11 +769,11 @@ if __name__ == '__main__':
     materials.genMat('Si', 'semi',
                      # 300 K, http://www.ioffe.ru/SVA/NSM/Semicond/Si/basic.html
                      relativePermittivity=11.7, electronAffinity=4050.,
-                     electronMass=(0.98+0.19*2)**(1./3.), # DOS mass
+                     electronMass=(0.98+0.19*2)**(1./3.),  # DOS mass
                      # Yu & Cardona
                      directBandGap=3480.,
                      luttingerGamma1=4.28, luttingerGamma2=0.339, luttingerGamma3=1.446,
-                     spinOrbitSplitting=44.)                     
+                     spinOrbitSplitting=44.)
 
     # bowing parameters from Vurgaftman et al. (2001)
     materials.setBowingParameters('GaAs', 'InAs', 'semi', electronMass=0.0091,
