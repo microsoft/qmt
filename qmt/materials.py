@@ -31,25 +31,23 @@ __all__ = ['Material', 'Materials',
 
 
 class Material(collections.Mapping):
-    '''
-    Wrapper for an entry in the materials database.
+    """Wrapper for an entry in the materials database.
 
     Allows for the retrieval of a material's properties. Adds units awareness on top of a plain
     dict containing the properties.
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     name: str
-    Material name.
-
+        Material name.
     properties: dict
-    Collection of material properties.
-
+        Collection of material properties.
     eunit: str, default None
-    Unit of energy. If specified, all queries for band parameters that have the dimension of an
-    energy return floats with respect to this energy unit. With the default (None), such queries
-    return sympy quantities that have the dimension of an energy.
-    '''
+        Unit of energy. If specified, all queries for band parameters
+        that have the dimension of an energy return floats with respect
+        to this energy unit. With the default (None), such queries
+        return sympy quantities that have the dimension of an energy.
+    """
 
     def __init__(self, name, properties, eunit=None):
         self.name = name
@@ -83,13 +81,11 @@ class Material(collections.Mapping):
             self.name, self.properties, self.energyUnit)
 
     def serializeDict(self):
-        '''Return a dict with the material properties that can be dumped to json.
-        '''
+        """Return a dict with the material properties that can be dumped to json."""
         return self.properties
 
     def holeMass(self, band, direction):
-        """
-        Determine effective mass for a valence band.
+        """Determine effective mass for a valence band.
 
         :param str band: Which valence band: 'heavy' or 'light' for a specific band. Also 'dos' for
             a density-of-states mass corresponding to both bands.
@@ -144,22 +140,21 @@ class Material(collections.Mapping):
 
 
 class Materials(collections.Mapping):
-    '''Class for creating, loading, and manipulating a json file that
-        contains information about materials.
+    """Class for creating, loading, and manipulating a json file that
+    contains information about materials.
 
-        The default constructor (matPath=None, matDict=None) sets matPath to the module's
-        materials.json and loads it. If both matPath and matDict are specified, the Materials
-        database is initialized from the given path and then updated with the supplied dict.
+    The default constructor (matPath=None, matDict=None) sets matPath to the module's
+    materials.json and loads it. If both matPath and matDict are specified, the Materials
+    database is initialized from the given path and then updated with the supplied dict.
 
-        Keyword arguments
-        ----------
-        matPath : str, default None
+    Parameters
+    ----------
+    matPath : str, default None
         Path to the mat json file. If initialized with None, should be set
         manually before loading/saving.
-
-        matDict : dict, default None
+    matDict : dict, default None
         Dictionary of materials to fill the database.
-    '''
+    """
 
     def __init__(self, matPath=None, matDict=None):
         self.matDict = {}
@@ -181,14 +176,14 @@ class Materials(collections.Mapping):
         return len(self.matDict)
 
     def genMat(self, name, matType, **kwargs):
-        '''Generate a material and add it to the matDict.
-        '''
+        """Generate a material and add it to the matDict.
+        """
         if matType in ('metal', 'dielectric'):
             kwargs['electronMass'] = kwargs.get('electronMass', 1.)
         self.matDict[name] = self._makeMaterial(matType, **kwargs)
 
     def setBowingParameters(self, nameA, nameB, matType, **kwargs):
-        '''Generate a bowing parameter set and add it to the bowingParameters dict.'''
+        """Generate a bowing parameter set and add it to the bowingParameters dict."""
         self.bowingParameters[(nameA, nameB)] = self._makeMaterial(
             matType, **kwargs)
 
@@ -235,20 +230,18 @@ class Materials(collections.Mapping):
         return self.find(key)
 
     def find(self, name, eunit=None):
-        '''
-        Retrieve a named material from the database.
+        """Retrieve a named material from the database.
 
-        If the material is not found directly, an attempt is made to construct it by mixing two
-        known materials. If that also fails, a KeyError is raised.
+        If the material is not found directly, an attempt is made to construct
+        it by mixing two known materials. If that also fails, a KeyError is raised.
 
-        Arguments
-        ---------
+        Parameters
+        ----------
         name: str
-        Name of the desired material.
-
+            Name of the desired material.
         eunit: str
-        Unit of energy. This is passed on to the Material constructor.
-        '''
+            Unit of energy. This is passed on to the Material constructor.
+        """
         if name in self.matDict:
             properties = self.matDict[name]
         else:
@@ -282,7 +275,7 @@ class Materials(collections.Mapping):
         return Material(name, properties, eunit=eunit)
 
     def _makeBinaryAlloy(self, nameA, nameB, x):
-        '''Interpolate properties of binary alloy A_{1-x} B_x.
+        """Interpolate properties of binary alloy A_{1-x} B_x.
 
         The material database must contain properties for the two named materials.
         Properties of the alloy are computed by quadratic interpolation between the endpoints if
@@ -292,7 +285,7 @@ class Materials(collections.Mapping):
         uses the convention
             O(A_{1-x} B_x) = (1-x) O(A) + x O(B) - x(1-x) O_{AB} ,
         with the bowing parameter O_{AB}.
-        '''
+        """
         assert x >= 0 and x <= 1
         if (nameB, nameA) in self.bowingParameters:
             nameA, nameB = nameB, nameA
@@ -330,15 +323,15 @@ class Materials(collections.Mapping):
             self.bowingParameters[literal_eval(k)] = v
 
     def save(self):
-        '''Save the current materials database to disk.
-        '''
+        """Save the current materials database to disk.
+        """
         db = self.serializeDict()
         with open(self.matPath, 'w') as myFile:
             json.dump(db, myFile, indent=4, sort_keys=True)
 
     def load(self):
-        '''Load the materials database from disk.
-        '''
+        """Load the materials database from disk.
+        """
         try:
             with open(self.matPath, 'r') as myFile:
                 db = json.load(myFile)
@@ -349,8 +342,7 @@ class Materials(collections.Mapping):
         self.deserializeDict(db)
 
     def conductionBandMinimum(self, mat):
-        '''
-        Calculate the energy of the conduction band minimum $E_c$ of a semiconductor material.
+        """Calculate the energy of the conduction band minimum $E_c$ of a semiconductor material.
 
         The reference energy E=0 is fixed to the vacuum level, as defined by the electron affinity
         of InSb. If Anderson's rule were exact, this method would return the (negative) electron
@@ -362,10 +354,10 @@ class Materials(collections.Mapping):
         If the material's valenceBandOffset is not known, we return `-mat[electronAffinity]`,
         effectively falling back on Anderson's rule.
 
-        Arguments
+        Parameters
         ---------
         mat: Material
-        Material whose conduction band position is to be determined.
+            Material whose conduction band position is to be determined.
 
         See also
         --------
@@ -373,7 +365,7 @@ class Materials(collections.Mapping):
           `self.conductionBandMinimum(mat) - mat['directBandGap']`
         - conduction_band_offset(mat1, mat2) is equivalent to
           `self.conductionBandMinimum(mat1) - self.conductionBandMinimum(mat2)`
-        '''
+        """
         ref_name = 'InSb'
         try:
             cbo = mat['valenceBandOffset'] + mat['directBandGap']
@@ -397,16 +389,15 @@ class Materials(collections.Mapping):
             return -mat['electronAffinity']
 
     def valenceBandMaximum(self, mat):
-        '''
-        Calculate the energy of the valence band maximum $E_v$ of a semiconductor material.
+        """Calculate the energy of the valence band maximum $E_v$ of a semiconductor material.
 
         The reference energy E=0 is fixed to the vacuum level, as defined by the electron affinity
         of InSb. See conductionBandMinimum for additional details.
 
-        Arguments
-        ---------
+        Parameters
+        ----------
         mat: Material
-        Material whose valence band position is to be determined.
+            Material whose valence band position is to be determined.
 
         See also
         --------
@@ -414,7 +405,7 @@ class Materials(collections.Mapping):
           `self.valenceBandMaximum(mat) + mat['directBandGap']`
         - valence_band_offset(mat1, mat2) is equivalent to
           `self.valenceBandMaximum(mat1) - self.valenceBandMaximum(mat2)`
-        '''
+        """
         ref_name = 'InSb'
         try:
             vbo = mat['valenceBandOffset']
@@ -438,17 +429,16 @@ class Materials(collections.Mapping):
 
 
 def conduction_band_offset(mat, ref_mat):
-    '''
+    """
     Calculate the conduction band offset $E_c - E_{c,ref}$ between two semiconductor materials.
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     mat: Material
-    Material whose conduction band position is to be determined.
-
+        Material whose conduction band position is to be determined.
     ref_mat: Material
-    Material whose conduction band minimum is used as reference energy.
-    '''
+        Material whose conduction band minimum is used as reference energy.
+    """
     assert mat.energyUnit == ref_mat.energyUnit
     try:
         cbo = mat['valenceBandOffset'] + mat['directBandGap']
@@ -469,17 +459,16 @@ def conduction_band_offset(mat, ref_mat):
 
 
 def valence_band_offset(mat, ref_mat):
-    '''
+    """
     Calculate the valence band offset $E_v - E_{v,ref}$ between two semiconductor materials.
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     mat: Material
-    Material whose valence band position is to be determined.
-
+        Material whose valence band position is to be determined.
     ref_mat: Material
-    Material whose valence band maximum is used as reference energy
-    '''
+        Material whose valence band maximum is used as reference energy
+    """
     assert mat.energyUnit == ref_mat.energyUnit
     try:
         vbo = mat['valenceBandOffset']
@@ -499,17 +488,16 @@ def valence_band_offset(mat, ref_mat):
 
 
 def write_database_to_markdown(out_file, mat_lib):
-    '''
+    """
     Write all materials parameters in mat_lib to a nicely formatted markdown file.
 
-    Arguments
-    ---------
+    Parameters
+    ----------
     out_file: stream
-    Output file handle.
-
+        Output file handle.
     mat_lib: Materials
-    Materials database to be written.
-    '''
+        Materials database to be written.
+    """
     import pytablewriter
     print('# Materials database', file=out_file)
     print(file=out_file)
@@ -525,11 +513,11 @@ def write_database_to_markdown(out_file, mat_lib):
     writer.header_list = ['metal', 'work function [eV]']
     writer.value_matrix = table
     writer.write_table()
-    print(textwrap.dedent('''\
+    print(textwrap.dedent("""\
         Sources:
         * Wikipedia
         * Ioffe Institute, http://www.ioffe.ru/SVA/NSM/Semicond/Si/basic.html
-        '''), file=out_file)
+        """), file=out_file)
 
     print('## Dielectrics', file=out_file)
     table = []
@@ -540,7 +528,7 @@ def write_database_to_markdown(out_file, mat_lib):
     writer.header_list = ['dielectric', 'relative permittivity']
     writer.value_matrix = table
     writer.write_table()
-    print(textwrap.dedent('''\
+    print(textwrap.dedent("""\
         Sources:
         * Robertson, EPJAP 28, 265 (2004): High dielectric constant oxides,
           https://doi.org/10.1051/epjap:2004206
@@ -549,7 +537,7 @@ def write_database_to_markdown(out_file, mat_lib):
         * Yota et al.,  JVSTA 31, 01A134 (2013), Characterization of atomic layer deposition HfO2,
           Al2O3, and plasma-enhanced chemical vapor deposition Si3N4 as metal-insulator-metal
           capacitor dielectric for GaAs HBT technology, https://doi.org/10.1116/1.4769207
-        '''), file=out_file)
+        """), file=out_file)
 
     print('## Semiconductors', file=out_file)
     semi_props = [
@@ -582,7 +570,7 @@ def write_database_to_markdown(out_file, mat_lib):
     writer.header_list = [''] + semi_names
     writer.value_matrix = table
     writer.write_table()
-    print(textwrap.dedent('''\
+    print(textwrap.dedent("""\
         Sources:
         * [Vurgaftman] Vurgaftman et al., APR 89, 5815 (2001): Band parameters for III-V compound
           semiconductors and their alloys,  https://doi.org/10.1063/1.1368156
@@ -590,9 +578,9 @@ def write_database_to_markdown(out_file, mat_lib):
           characterization. Nanoscale 7, 18188-18197, 2015. https://doi.org/10.1039/c5nr03608a
         * [Monch] Monch, Semiconductor Surfaces and Interfaces, 3rd Edition, Springer (2001).
         * [ioffe.ru] http://www.ioffe.ru/SVA/NSM/Semicond
-        '''), file=out_file)
+        """), file=out_file)
 
-    print(textwrap.dedent('''\
+    print(textwrap.dedent("""\
         ### Bowing parameters
 
         Properties of an alloy $A_{1-x} B_x$ are computed by quadratic interpolation between the
@@ -601,7 +589,7 @@ def write_database_to_markdown(out_file, mat_lib):
         convention
             $O(A_{1-x} B_x) = (1-x) O(A) + x O(B) - x(1-x) O_{AB}$,
         with the bowing parameter $O_{AB}$.
-        '''), file=out_file)
+        """), file=out_file)
     scale_factors = dict((p,
                           1e-3) for p in ('workFunction',
                                           'electronAffinity',
@@ -629,11 +617,11 @@ def write_database_to_markdown(out_file, mat_lib):
     writer.header_list = [''] + ['({}, {})'.format(*k) for k in bowing_mats]
     writer.value_matrix = table
     writer.write_table()
-    print(textwrap.dedent('''\
+    print(textwrap.dedent("""\
         Sources:
         * [Vurgaftman] Vurgaftman et al., APR 89, 5815 (2001): Band parameters for III-V compound
           semiconductors and their alloys,  https://doi.org/10.1063/1.1368156
-        '''), file=out_file)
+        """), file=out_file)
 
 
 # New physical materials go here:
