@@ -191,11 +191,11 @@ def test_checkOverlap():
     box2.Placement = FreeCAD.Placement(FreeCAD.Vector(
         9.9, 0, 0), FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), 0))
     myDoc.recompute()
-    assert checkOverlap((box1, box2)) == True
+    assert checkOverlap((box1, box2))
     box2.Placement = FreeCAD.Placement(FreeCAD.Vector(
         10.1, 0, 0), FreeCAD.Rotation(FreeCAD.Vector(0, 0, 1), 0))
     myDoc.recompute()
-    assert checkOverlap((box1, box2)) == False
+    assert not checkOverlap((box1, box2))
 
 
 def test_extrudeBetween():
