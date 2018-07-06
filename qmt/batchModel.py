@@ -30,8 +30,7 @@ class Model:
             self.modelDict = self.genEmptyModelDict()
 
     def genEmptyModelDict(self):
-        """Generate an empty modelDict (dictionary of dictionaries)
-        """
+        """Generate an empty modelDict (dictionary of dictionaries)"""
         modelDict = dict(
             # Geometric parameters for FreeCAD
             geometricParams={},
@@ -64,7 +63,7 @@ class Model:
 
     def genPhysicsSweep(self, partName, quantity, values,
                         unit="", symbol=None, dense=False):
-        """ Generate a parametric sweep and add it to modelDict.
+        """Generate a parametric sweep and add it to modelDict.
         @param partName: name (str) of the solid whose property should be swept.
         @param quantity: name (str) of the quantity to be swept.
         @param values: list or numpy array with the values to sweep over
@@ -105,7 +104,7 @@ class Model:
         self.modelDict['physicsSweep']['type'] = 'dense' if dense else 'sparse'
 
     def genGeomSweep(self, param, vals, type='freeCAD'):
-        """ Generate a parametric sweep and add it to modelDict. The units need to
+        """Generate a parametric sweep and add it to modelDict. The units need to
         be whatever is accepted by FreeCAD.
         @param param: string with the name of the parameter to sweep over
         @param vals: list or numpy array with the values to sweep over
@@ -177,13 +176,14 @@ class Model:
         @param exportScalingVec: Increase the resolution along x, y, and z axes. Higher numbers
             are higher resolutions.
         """
-        self.modelDict['comsolInfo']['meshExport'] = meshExport
-        self.modelDict['comsolInfo']['repairTolerance'] = repairTolerance
-        self.modelDict['comsolInfo']['fileName'] = fileName
-        self.modelDict['comsolInfo']['exportDir'] = exportDir
-        self.modelDict['comsolInfo']['physics'] = physics
-        self.modelDict['comsolInfo']['exportDomains'] = exportDomains
-        self.modelDict['comsolInfo']['exportScalingVec'] = exportScalingVec
+        comsol_info = self.modelDict['comsolInfo']
+        comsol_info = ['meshExport'] = meshExport
+        comsol_info = ['repairTolerance'] = repairTolerance
+        comsol_info = ['fileName'] = fileName
+        comsol_info = ['exportDir'] = exportDir
+        comsol_info = ['physics'] = physics
+        comsol_info = ['exportDomains'] = exportDomains
+        comsol_info = ['exportScalingVec'] = exportScalingVec
 
     def setComsolQuantumParams(
             self, quantumDomain, alpha=[0., 0., 0.],
@@ -204,17 +204,18 @@ class Model:
         @param numEigVals: The number of eigenvalues to find.
         @param eigValSearch: The energy around which to search for eigenvalues.
         """
-        self.modelDict['comsolInfo']['quantumParams'] = {}
-        self.modelDict['comsolInfo']['quantumParams']['domain'] = quantumDomain
-        self.modelDict['comsolInfo']['quantumParams']['alpha'] = alpha
-        self.modelDict['comsolInfo']['quantumParams']['alphaUnit'] = alphaUnit
-        self.modelDict['comsolInfo']['quantumParams']['B'] = B
-        self.modelDict['comsolInfo']['quantumParams']['BUnit'] = BUnit
-        self.modelDict['comsolInfo']['quantumParams']['Delta'] = Delta
-        self.modelDict['comsolInfo']['quantumParams']['DeltaUnit'] = DeltaUnit
-        self.modelDict['comsolInfo']['quantumParams']['gFactor'] = g
-        self.modelDict['comsolInfo']['quantumParams']['numEigVals'] = numEigVals
-        self.modelDict['comsolInfo']['quantumParams']['eigValSearch'] = eigValSearch
+        self.modelDict['comsolInfo']['quantumParams'] = {
+            'domain': quantumDomain,
+            'alpha': alpha,
+            'alphaUnit': alphaUnit,
+            'B': B,
+            'BUnit': BUnit,
+            'Delta': Delta,
+            'DeltaUnit': DeltaUnit,
+            'gFactor': g,
+            'numEigVals': numEigVals,
+            'eigValSearch': eigValSearch
+        }
 
     def addPart(
             self, partName, fcName, directive, domainType, material=None,
@@ -304,36 +305,36 @@ class Model:
         if (etchZone is not None) and (depoZone is not None):
             raise NameError(
                 'Error - etchZone and depoZone cannot both be set!')
-        # Next, construct the dictionary entry:
-        partDict = {}
-        partDict['fileNames'] = {}
-        partDict['fcName'] = fcName
-        partDict['directive'] = directive
-        partDict['material'] = material
-        partDict['domainType'] = domainType
-        partDict['z0'] = z0
-        partDict['thickness'] = thickness
-        partDict['targetWire'] = targetWire
-        partDict['shellVerts'] = shellVerts
-        partDict['depoZone'] = depoZone
-        partDict['etchZone'] = etchZone
-        partDict['zMiddle'] = zMiddle
-        partDict['tIn'] = tIn
-        partDict['tOut'] = tOut
-        partDict['layerNum'] = layerNum
-        partDict['lithoBase'] = lithoBase
-        partDict['fillLitho'] = fillLitho
-        partDict['meshMaxSize'] = meshMaxSize
-        partDict['meshGrowthRate'] = meshGrowthRate
-        partDict['meshScaleVector'] = meshScaleVector
-        partDict['boundaryCondition'] = boundaryCondition
-        partDict['subtractList'] = subtractList
-        partDict['Ns'] = Ns
-        partDict['Phi_NL'] = Phi_NL
-        partDict['Ds'] = Ds
-        self.modelDict['buildOrder'][len(
-            self.modelDict['buildOrder'])] = partName
-        self.modelDict['3DParts'][partName] = partDict
+        # Construct the dictionary entry:
+        self.modelDict['3DParts'][partName] = {
+            'fileNames': {},
+            'fcName': fcName,
+            'directive': directive,
+            'material': material,
+            'domainType': domainType,
+            'z0': z0,
+            'thickness': thickness,
+            'targetWire': targetWire,
+            'shellVerts': shellVerts,
+            'depoZone': depoZone,
+            'etchZone': etchZone,
+            'zMiddle': zMiddle,
+            'tIn': tIn,
+            'tOut': tOut,
+            'layerNum': layerNum,
+            'lithoBase': lithoBase,
+            'fillLitho': fillLitho,
+            'meshMaxSize': meshMaxSize,
+            'meshGrowthRate': meshGrowthRate,
+            'meshScaleVector': meshScaleVector,
+            'boundaryCondition': boundaryCondition,
+            'subtractList': subtractList,
+            'Ns': Ns,
+            'Phi_NL': Phi_NL,
+            'Ds': Ds
+        }
+        build_order = self.modelDict['buildOrder']
+        build_order[len(build_order)] = partName
 
     def addCrossSection(self, sliceName, axis, distance):
         """
@@ -513,24 +514,15 @@ class Model:
             all or none of these.
         @param temperature: Temperature [in K] for the calculation of densities.
         """
-        if write_wavefunctions:
-            write_wavefunctions = list(range(eigenvalues))
-        else:
-            write_wavefunctions = []
-        if plot_wavefunctions:
-            plot_wavefunctions = list(range(eigenvalues))
-        else:
-            plot_wavefunctions = []
-        if write_data:
-            write_data = ['energies', 'density',
-                          'electrostatic_potential', 'potential_energy']
-        else:
-            write_data = []
-        if plot_data:
-            plot_data = ['density',
-                         'electrostatic_potential', 'potential_energy']
-        else:
-            plot_data = []
+        write_wavefunctions = list(range(eigenvalues)) if write_wavefunctions else []
+        plot_wavefunctions = list(range(eigenvalues)) if plot_wavefunctions else []
+        write_data = ['energies',
+                      'density',
+                      'electrostatic_potential',
+                      'potential_energy'] if write_data else []
+        plot_data = ['density',
+                     'electrostatic_potential',
+                     'potential_energy'] if plot_data else []
         task = {
             'task': 'schrodinger2d',
             'slice': slice_name,
@@ -581,19 +573,15 @@ class Model:
             'electrostatic_potential', 'potential_energy'. A boolean value corresponds to all or
             none of these.
         """
-        if write_data:
-            write_data = ['electrostatic_potential', 'potential_energy']
-        else:
-            write_data = []
-        if plot_data:
-            plot_data = ['electrostatic_potential', 'potential_energy']
-        else:
-            plot_data = []
+        data_keys = ['electrostatic_potential', 'potential_energy']
+        write_data = data_keys if write_data else []
+        plot_data = data_keys if plot_data else []
         task = {
             'task': 'plotPotential2d',
             'slice': slice_name,
             'write_data': write_data,
-            'plot_data': plot_data}
+            'plot_data': plot_data
+        }
         grid_spec = {'region': region}
         if np.isscalar(grid):
             grid_spec['step_size'] = grid
@@ -618,19 +606,15 @@ class Model:
         # instructions for Schrodinger solve
         task = {
             'task': 'schrodinger',
-            'grid': {
-                'x': x,
-                'y': y,
-                'z': z},
+            'grid': {'x': x, 'y': y, 'z': z},
             'spectrum': {
                 'eigenvalues': eigenvalues,
                 'target energy': target_energy,
                 'write': write_spectrum},
-            'wave functions': {
-                'write': write_wavefunctions},
-            'density': {
-                'write': write_density},
-            'Fermi energy': efermi}
+            'wave functions': {'write': write_wavefunctions},
+            'density': {'write': write_density},
+            'Fermi energy': efermi
+        }
         if solver is not None:
             assert solver in ('sparse', 'dense')
             task['solver'] = solver
@@ -749,15 +733,16 @@ class Model:
         postProcArgs : dict, default {}
             Arguments for use by the postProc nodes.
         """
-        self.modelDict['jobSettings']['rootPath'] = rootPath
-        self.modelDict['jobSettings']['jobSequence'] = jobSequence or ['geoGen']
-        self.modelDict['jobSettings']['numNodes'] = numNodes
-        self.modelDict['jobSettings']['numJobsPerNode'] = numJobsPerNode
-        self.modelDict['jobSettings']['numCoresPerJob'] = numCoresPerJob
-        self.modelDict['jobSettings']['hostFile'] = hostFile
-        self.modelDict['jobSettings']['geoGenArgs'] = geoGenArgs
-        self.modelDict['jobSettings']['comsolRunMode'] = comsolRunMode
-        self.modelDict['jobSettings']['postProcArgs'] = postProcArgs
+        job_settings = self.modelDict['jobSettings']
+        job_settings = ['rootPath'] = rootPath
+        job_settings = ['jobSequence'] = jobSequence or ['geoGen']
+        job_settings = ['numNodes'] = numNodes
+        job_settings = ['numJobsPerNode'] = numJobsPerNode
+        job_settings = ['numCoresPerJob'] = numCoresPerJob
+        job_settings = ['hostFile'] = hostFile
+        job_settings = ['geoGenArgs'] = geoGenArgs
+        job_settings = ['comsolRunMode'] = comsolRunMode
+        job_settings = ['postProcArgs'] = postProcArgs
 
     def setPaths(self, COMSOLExecPath=None, COMSOLCompilePath=None,
                  mpiPath=None, pythonPath=None, jdkPath=None, freeCADPath=None):
@@ -775,9 +760,10 @@ class Model:
         jdkPath : str, default None
             Path to the jdk installation
         """
-        self.modelDict['pathSettings']['COMSOLExecPath'] = COMSOLExecPath
-        self.modelDict['pathSettings']['COMSOLCompilePath'] = COMSOLCompilePath
-        self.modelDict['pathSettings']['mpiPath'] = mpiPath
-        self.modelDict['pathSettings']['pythonPath'] = pythonPath
-        self.modelDict['pathSettings']['jdkPath'] = jdkPath
-        self.modelDict['pathSettings']['freeCADPath'] = freeCADPath
+        path_settings = self.modelDict['pathSettings']
+        path_settings['COMSOLExecPath'] = COMSOLExecPath
+        path_settings['COMSOLCompilePath'] = COMSOLCompilePath
+        path_settings['mpiPath'] = mpiPath
+        path_settings['pythonPath'] = pythonPath
+        path_settings['jdkPath'] = jdkPath
+        path_settings['freeCADPath'] = freeCADPath
