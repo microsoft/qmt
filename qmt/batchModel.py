@@ -151,8 +151,7 @@ class Model:
         if zeroLevelPart is None:
             return 0.0
         matLib = qmt.Materials(matDict=self.modelDict['materials'])
-        if parts is None:
-            parts = self.modelDict['3DParts']
+        parts = parts or self.modelDict['3DParts']
         zeroLevelMatName = parts[zeroLevelPart]['material']
         mat_dict = matLib.find(zeroLevelMatName, eunit='eV')
         return mat_dict[zeroLevelProp]
@@ -448,7 +447,7 @@ class Model:
                 'electrostatic_potential',
                 'potential_energy',
                 'effective_mass']
-        elif not write_data:
+        else:
             write_data = []
         if plot_data:
             plot_data = [
@@ -457,7 +456,7 @@ class Model:
                 'potential_energy',
                 'effective_mass',
                 'bare_bands']
-        elif not plot_data:
+        else:
             plot_data = []
         task = {
             'task': 'thomasFermi2d',
@@ -514,21 +513,21 @@ class Model:
         """
         if write_wavefunctions:
             write_wavefunctions = list(range(eigenvalues))
-        elif not write_wavefunctions:
+        else:
             write_wavefunctions = []
         if plot_wavefunctions:
             plot_wavefunctions = list(range(eigenvalues))
-        elif not plot_wavefunctions:
+        else:
             plot_wavefunctions = []
         if write_data:
             write_data = ['energies', 'density',
                           'electrostatic_potential', 'potential_energy']
-        elif not write_data:
+        else:
             write_data = []
         if plot_data:
             plot_data = ['density',
                          'electrostatic_potential', 'potential_energy']
-        elif not plot_data:
+        else:
             plot_data = []
         task = {
             'task': 'schrodinger2d',
@@ -582,11 +581,11 @@ class Model:
         """
         if write_data:
             write_data = ['electrostatic_potential', 'potential_energy']
-        elif not write_data:
+        else:
             write_data = []
         if plot_data:
             plot_data = ['electrostatic_potential', 'potential_energy']
-        elif not plot_data:
+        else:
             plot_data = []
         task = {
             'task': 'plotPotential2d',
@@ -749,10 +748,7 @@ class Model:
             Arguments for use by the postProc nodes.
         """
         self.modelDict['jobSettings']['rootPath'] = rootPath
-        if jobSequence is None:
-            self.modelDict['jobSettings']['jobSequence'] = ['geoGen']
-        else:
-            self.modelDict['jobSettings']['jobSequence'] = jobSequence
+        self.modelDict['jobSettings']['jobSequence'] = jobSequence or ['geoGen']
         self.modelDict['jobSettings']['numNodes'] = numNodes
         self.modelDict['jobSettings']['numJobsPerNode'] = numJobsPerNode
         self.modelDict['jobSettings']['numCoresPerJob'] = numCoresPerJob
