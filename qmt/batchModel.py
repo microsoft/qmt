@@ -177,13 +177,13 @@ class Model:
             are higher resolutions.
         """
         comsol_info = self.modelDict['comsolInfo']
-        comsol_info = ['meshExport'] = meshExport
-        comsol_info = ['repairTolerance'] = repairTolerance
-        comsol_info = ['fileName'] = fileName
-        comsol_info = ['exportDir'] = exportDir
-        comsol_info = ['physics'] = physics
-        comsol_info = ['exportDomains'] = exportDomains
-        comsol_info = ['exportScalingVec'] = exportScalingVec
+        comsol_info['meshExport'] = meshExport
+        comsol_info['repairTolerance'] = repairTolerance
+        comsol_info['fileName'] = fileName
+        comsol_info['exportDir'] = exportDir
+        comsol_info['physics'] = physics
+        comsol_info['exportDomains'] = exportDomains
+        comsol_info['exportScalingVec'] = exportScalingVec
 
     def setComsolQuantumParams(
             self, quantumDomain, alpha=[0., 0., 0.],
@@ -734,15 +734,15 @@ class Model:
             Arguments for use by the postProc nodes.
         """
         job_settings = self.modelDict['jobSettings']
-        job_settings = ['rootPath'] = rootPath
-        job_settings = ['jobSequence'] = jobSequence or ['geoGen']
-        job_settings = ['numNodes'] = numNodes
-        job_settings = ['numJobsPerNode'] = numJobsPerNode
-        job_settings = ['numCoresPerJob'] = numCoresPerJob
-        job_settings = ['hostFile'] = hostFile
-        job_settings = ['geoGenArgs'] = geoGenArgs
-        job_settings = ['comsolRunMode'] = comsolRunMode
-        job_settings = ['postProcArgs'] = postProcArgs
+        job_settings['rootPath'] = rootPath
+        job_settings['jobSequence'] = jobSequence or ['geoGen']
+        job_settings['numNodes'] = numNodes
+        job_settings['numJobsPerNode'] = numJobsPerNode
+        job_settings['numCoresPerJob'] = numCoresPerJob
+        job_settings['hostFile'] = hostFile
+        job_settings['geoGenArgs'] = geoGenArgs
+        job_settings['comsolRunMode'] = comsolRunMode
+        job_settings['postProcArgs'] = postProcArgs
 
     def setPaths(self, COMSOLExecPath=None, COMSOLCompilePath=None,
                  mpiPath=None, pythonPath=None, jdkPath=None, freeCADPath=None):
