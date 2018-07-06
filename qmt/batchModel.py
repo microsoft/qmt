@@ -32,11 +32,9 @@ class Model:
     def genEmptyModelDict(self):
         """Generate an empty modelDict (dictionary of dictionaries)
         """
-        return dict(
+        modelDict = dict(
             # Geometric parameters for FreeCAD
             geometricParams={},
-            # Information about the 3D parts of our model
-            3DParts={},
             # The build order of the model
             buildOrder={},
             # 2D slices that are used in physics processing.
@@ -59,6 +57,9 @@ class Model:
             # Information on the paths to executables
             pathSettings={},
             postProcess={'sweeps': {}, 'tasks': {}})
+        # Information about the 3D parts of our model
+        modelDict['3DParts'] = {}
+        return modelDict
 
     def genPhysicsSweep(self, partName, quantity, values,
                         unit="", symbol=None, dense=False):
