@@ -442,22 +442,22 @@ class Model:
             'bare_bands'. A boolean value corresponds to all or none of these.
         @param temperature: Temperature [in K] for the simulation.
         """
-        if write_data is True:
+        if write_data:
             write_data = [
                 'density',
                 'electrostatic_potential',
                 'potential_energy',
                 'effective_mass']
-        elif write_data is False:
+        elif not write_data:
             write_data = []
-        if plot_data is True:
+        if plot_data:
             plot_data = [
                 'density',
                 'electrostatic_potential',
                 'potential_energy',
                 'effective_mass',
                 'bare_bands']
-        elif plot_data is False:
+        elif not plot_data:
             plot_data = []
         task = {
             'task': 'thomasFermi2d',
@@ -512,23 +512,23 @@ class Model:
             all or none of these.
         @param temperature: Temperature [in K] for the calculation of densities.
         """
-        if write_wavefunctions is True:
+        if write_wavefunctions:
             write_wavefunctions = list(range(eigenvalues))
-        elif write_wavefunctions is False:
+        elif not write_wavefunctions:
             write_wavefunctions = []
-        if plot_wavefunctions is True:
+        if plot_wavefunctions:
             plot_wavefunctions = list(range(eigenvalues))
-        elif plot_wavefunctions is False:
+        elif not plot_wavefunctions:
             plot_wavefunctions = []
-        if write_data is True:
+        if write_data:
             write_data = ['energies', 'density',
                           'electrostatic_potential', 'potential_energy']
-        elif write_data is False:
+        elif not write_data:
             write_data = []
-        if plot_data is True:
+        if plot_data:
             plot_data = ['density',
                          'electrostatic_potential', 'potential_energy']
-        elif plot_data is False:
+        elif not plot_data:
             plot_data = []
         task = {
             'task': 'schrodinger2d',
@@ -580,13 +580,13 @@ class Model:
             'electrostatic_potential', 'potential_energy'. A boolean value corresponds to all or
             none of these.
         """
-        if write_data is True:
+        if write_data:
             write_data = ['electrostatic_potential', 'potential_energy']
-        elif write_data is False:
+        elif not write_data:
             write_data = []
-        if plot_data is True:
+        if plot_data:
             plot_data = ['electrostatic_potential', 'potential_energy']
-        elif plot_data is False:
+        elif not plot_data:
             plot_data = []
         task = {
             'task': 'plotPotential2d',
