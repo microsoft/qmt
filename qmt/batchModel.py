@@ -32,28 +32,33 @@ class Model:
     def genEmptyModelDict(self):
         """Generate an empty modelDict (dictionary of dictionaries)
         """
-        modelDict = {}
-        modelDict['geometricParams'] = {}  # Geometric parameters for FreeCAD
-        # Information about the 3D parts of our model
-        modelDict['3DParts'] = {}
-        modelDict['buildOrder'] = {}  # The build order of the model
-        # 2D slices that are used in physics processing.
-        modelDict['slices'] = {}
-        # Information about the materials used in the structure
-        modelDict['materials'] = {}
-        # Information about the voltage sweep to execute
-        modelDict['physicsSweep'] = {
-            'type': 'sparse', 'sweepParts': {}, 'length': 1}
-        # Information about the geometry sweep to execute
-        modelDict['geomSweep'] = {}
-        modelDict['meshInfo'] = {}  # Information about mesh refinement
-        modelDict['comsolInfo'] = {'surfaceIntegrals': {}, 'volumeIntegrals': {
-        }, 'zeroLevel': [None, None]}  # Information for COMSOL
-        modelDict['jobSettings'] = {}  # Information on the job
-        # Information on the paths to executables
-        modelDict['pathSettings'] = {}
-        modelDict['postProcess'] = {'sweeps': {}, 'tasks': {}}
-        return modelDict
+        return dict(
+            # Geometric parameters for FreeCAD
+            geometricParams={},
+            # Information about the 3D parts of our model
+            3DParts={},
+            # The build order of the model
+            buildOrder={},
+            # 2D slices that are used in physics processing.
+            slices={},
+            # Information about the materials used in the structure
+            materials={},
+            # Information about the voltage sweep to execute
+            physicsSweep={
+                'type': 'sparse', 'sweepParts': {}, 'length': 1},
+            # Information about the geometry sweep to execute
+            geomSweep={},
+            # Information about mesh refinement
+            meshInfo={},
+            # Information for COMSOL
+            comsolInfo={'surfaceIntegrals': {},
+                        'volumeIntegrals': {},
+                        'zeroLevel': [None, None]},
+            # Information on the job
+            jobSettings={},
+            # Information on the paths to executables
+            pathSettings={},
+            postProcess={'sweeps': {}, 'tasks': {}})
 
     def genPhysicsSweep(self, partName, quantity, values,
                         unit="", symbol=None, dense=False):
