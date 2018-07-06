@@ -42,8 +42,9 @@ class Model:
             # Information about the materials used in the structure
             materials={},
             # Information about the voltage sweep to execute
-            physicsSweep={
-                'type': 'sparse', 'sweepParts': {}, 'length': 1},
+            physicsSweep={'type': 'sparse',
+                          'sweepParts': {},
+                          'length': 1},
             # Information about the geometry sweep to execute
             geomSweep={},
             # Information about mesh refinement
