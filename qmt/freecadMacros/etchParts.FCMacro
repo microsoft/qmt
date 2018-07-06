@@ -42,7 +42,7 @@ class GuiClass(QtGui.QDialog):
         selObjs = Gui.Selection.getSelection()
         self.selObjNames = []
         for obj in selObjs:
-            self.selObjNames += [obj.Name]
+            self.selObjNames.append(obj.Name)
 
         self.maskLabelLabel = QtGui.QLabel('Enter etch domain label:',self)
         self.maskLabelLabel.setFont('Courier')
@@ -79,7 +79,7 @@ else:
 selObjs = [FreeCAD.ActiveDocument.getObject(name) for name in selObjNames]
 draftSelObjs = []
 for obj in selObjs:
-    draftSelObjs += [Draft.draftify(obj,delete=True)]
+    draftSelObjs.append(Draft.draftify(obj,delete=True))
 domainName = selObjNames[0]+'_buildZone'
 etchDomainObj = FreeCAD.ActiveDocument.getObjectsByLabel(etchDomainLabel)[0]
 etchedPart = subtractParts(etchDomainObj,draftSelObjs)

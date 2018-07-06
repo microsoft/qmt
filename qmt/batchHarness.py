@@ -76,7 +76,7 @@ class Harness:
             numInstances = len(
                 self.model.modelDict['geomSweep'][geoSweepKey]['vals'].split(','))
             valIDs = range(numInstances)
-            instanceLists += [valIDs]
+            instanceLists.append(valIDs)
         prodInstanceKeys = list(itertools.product(*instanceLists))
         for prodInstance in prodInstanceKeys:
             folderPath = 'geo_' + '_'.join(map(str, list(prodInstance)))

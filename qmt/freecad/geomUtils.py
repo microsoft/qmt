@@ -103,7 +103,7 @@ def genUnion(objList, consumeInputs=False):
         nonZeroList = []
         for obj in objList:
             if isNonempty(obj):
-                nonZeroList += [obj]
+                nonZeroList.append(obj)
         union.Shapes = nonZeroList
         doc.recompute()
         unionDupe = copy(union)
@@ -265,7 +265,7 @@ def crossSection(obj, axis=(1., 0., 0.), d=1.0, name=None):
     doc = FreeCAD.ActiveDocument
     if name is None:
         name = obj.Name + '_section'
-    wires = list()
+    wires = []
     shape = obj.Shape
     for i in shape.slice(FreeCAD.Vector(axis[0], axis[1], axis[2]), d):
         wires.append(i)

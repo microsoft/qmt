@@ -40,7 +40,7 @@ def deepRemove(obj=None, name=None, label=None):
         for child in children:  # Loop through the children of parent
             grandchildren = child.OutList  # for each child, determine if it has children
             if len(grandchildren) > 0:  # If it does, go down the tree
-                breadCrumbs += [parentName]  # Store where we came from
+                breadCrumbs.append(parentName)  # Store where we came from
                 parentName = child.Name  # set new parent to be the child
                 parent = doc.getObject(parentName)
                 children = parent.OutList  # and update the children list
@@ -119,7 +119,7 @@ def findCycle(lineSegments, startingIndex, availSegIDs):
         if currentIndex in segList:
             break
         else:
-            segList += [currentIndex]
+            segList.append(currentIndex)
     return segList
 
 
@@ -178,7 +178,7 @@ def findEdgeCycles(sketch):
         if len(availSegIDs) > 0:
             startingIndex = availSegIDs[0]
             newCycle = findCycle(lineSegments, startingIndex, availSegIDs)
-            cycles += [newCycle]
+            cycles.append(newCycle)
             availSegIDs = [
                 item for item in availSegIDs if item not in newCycle]
     return lineSegments, cycles
@@ -195,7 +195,7 @@ def splitSketch(mySketch):
     for i, cycle in enumerate(cycles):
         cycleObj = addCycleSketch(
             currentSketchName + '_' + str(i), myDoc, cycle, lineSegments)
-        cycleObjList += [cycleObj]
+        cycleObjList.append(cycleObj)
     return cycleObjList
 
 
@@ -211,7 +211,7 @@ def extendSketch(mySketch, d):
             connecting = nextSegment(segments, i)
         except BaseException:
             connecting = len(segments)
-        connections += [connecting]
+        connections.append(connecting)
     # Find the first and last segments:
     seg0Index = [i for i in range(len(segments)) if i not in connections][0]
     seg1Index = connections.index(len(segments))

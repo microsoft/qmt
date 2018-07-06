@@ -87,7 +87,7 @@ def buildAlShell(sketch, zBottom, width, verts, thickness,
         delete(shellCut)
         delete(originalWire)
         delete(shiftedWire)
-        shellList += [shell]
+        shellList.append(shell)
     if len(shellList) > 1:
         coatingUnion = doc.addObject(
             "Part::MultiFuse", sketch.Name + "_coating")
@@ -251,7 +251,7 @@ class modelBuilder:
         for mySplitSketch in splitSketches:
             extPart = extrudeBetween(mySplitSketch, z0, z0 + deltaz)
             extPart.Label = partName
-            extParts += [extPart]
+            extParts.append(extPart)
             delete(mySplitSketch)
         return extParts
 
@@ -326,7 +326,7 @@ class modelBuilder:
         for objID in self.lithoDict['layers'][layerNum]['objIDs']:
             if partName == self.lithoDict['layers'][layerNum]['objIDs'][
                     objID]['partName']:
-                returnObjs += [self._gen_G(layerNum, objID)]
+                returnObjs.append(self._gen_G(layerNum, objID))
         return returnObjs
 
     def _fetch_geo_param(self, param):
@@ -419,7 +419,7 @@ class modelBuilder:
                     objDict = {}
                     objDict['partName'] = partName
                     objDict['sketch'] = mySplitSketch
-                    self.trash += [mySplitSketch]
+                    self.trash.append(mySplitSketch)
                     self.lithoDict['layers'][layerNum]['objIDs'][objID] = objDict
                 # Add the base substrate to the appropriate dictionary
                 baseSubstratePartNames += partDict['lithoBase']
@@ -438,8 +438,8 @@ class modelBuilder:
         thicknesses = []
         bases = []
         for layerNum in self.lithoDict['layers'].keys():
-            thicknesses += [self.lithoDict['layers'][layerNum]['thickness']]
-            bases += [self.lithoDict['layers'][layerNum]['base']]
+            thicknesses.append(self.lithoDict['layers'][layerNum]['thickness'])
+            bases.append(self.lithoDict['layers'][layerNum]['base'])
         bottom = min(bases)
         totalThickness = sum(thicknesses)
         assert len(self.lithoDict['substrate'][
@@ -470,8 +470,8 @@ class modelBuilder:
                 C = extrudeBetween(sketch, base, BB[5])
                 self.lithoDict['layers'][layerNum]['objIDs'][objID]['B'] = B
                 self.lithoDict['layers'][layerNum]['objIDs'][objID]['C'] = C
-                self.trash += [B]
-                self.trash += [C]
+                self.trash.append(B)
+                self.trash.append(C)
                 # In addition, add a hook for the HDict, which will contain the "H"
                 # constructions for this object, but offset to thicknesses of various
                 # layers, according to the keys.
@@ -506,7 +506,7 @@ class modelBuilder:
         for i, HObjPart in enumerate(HObjCheckList):
             if checkOverlap(
                     [obj, HObjPart]):  # if we need to include an overlap
-                returnList += [HObjList[i]]
+                returnList.append(HObjList[i])
         return returnList
 
     def _screened_A_UnionList(self, obj, t, ti, offsetTuple, checkOffsetTuple):
@@ -518,20 +518,20 @@ class modelBuilder:
             self.lithoDict['substrate'][checkOffsetTuple] = []
             for A in self.lithoDict['substrate'][()]:
                 AObj = self._gen_offset(A, t)
-                self.trash += [AObj]
-                self.lithoDict['substrate'][checkOffsetTuple] += [AObj]
+                self.trash.append(AObj)
+                self.lithoDict['substrate'][checkOffsetTuple].append(AObj)
         if offsetTuple not in self.lithoDict['substrate']:
             self.lithoDict['substrate'][offsetTuple] = []
             for A in self.lithoDict['substrate'][()]:
                 AObj = self._gen_offset(A, t + ti)
-                self.trash += [AObj]
-                self.lithoDict['substrate'][offsetTuple] += [AObj]
+                self.trash.append(AObj)
+                self.lithoDict['substrate'][offsetTuple].append(AObj)
 
         returnList = []
         for i, ACheck in enumerate(
                 self.lithoDict['substrate'][checkOffsetTuple]):
             if checkOverlap([obj, ACheck]):
-                returnList += [self.lithoDict['substrate'][offsetTuple][i]]
+                returnList.append(self.lithoDict['substrate'][offsetTuple][i])
         return returnList
 
     def _H_offset(self, layerNum, objID, tList=[]):
@@ -566,8 +566,8 @@ class modelBuilder:
             'C']  # C prism for this layer & ObjID
         B_t = self._gen_offset(B, t)  # offset the B prism
         C_t = self._gen_offset(C, t)  # offset the C prism
-        self.trash += [B_t]
-        self.trash += [C_t]
+        self.trash.append(B_t)
+        self.trash.append(C_t)
         # Build up the substrate due to previously deposited gates
         HOffsetList = []
         for m in self.lithoDict['layers'].keys():
@@ -584,8 +584,8 @@ class modelBuilder:
         returnList = [B_t]
         for obj in unionList:
             intObj = intersect([C_t, obj])
-            self.trash += [intObj]
-            returnList += [intObj]
+            self.trash.append(intObj)
+            returnList.append(intObj)
         self.lithoDict['layers'][layerNum]['objIDs'][objID]['HDict'][
             checkOffsetTuple] = returnList
         return returnList
@@ -609,11 +609,11 @@ class modelBuilder:
                         self._gen_G(m, j)
                     G = self.lithoDict['layers'][layerNum]['objIDs'][objID]['G']
                     if checkOverlap([B, G]):
-                        GList += [G]
+                        GList.append(G)
         AList = []
         for A in self.lithoDict['substrate'][()]:
             if checkOverlap([B, A]):
-                AList += [A]
+                AList.append(A)
         unionList = GList + AList
         unionObj = genUnion(unionList, consumeInputs=False)
         return unionObj
@@ -629,7 +629,7 @@ class modelBuilder:
                 self.lithoDict['layers'][layerNum]['objIDs'][objID]
                 ['HDict'][()],
                 consumeInputs=False)
-            self.trash += [H]
+            self.trash.append(H)
             if self.fillShells:
                 G = copy(H)
             else:
