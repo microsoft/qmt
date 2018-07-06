@@ -21,15 +21,16 @@ import re
 
 class Harness:
     def __init__(self, jsonPath, os=None):
-        ''' Class to run a batch 3D job on the cluster.
+        """Class to run a batch 3D job on the cluster.
 
-            Parameters
-            ----------
-            jsonPath : str
-                Path to the model json file used to build the run
-            os : str
-                Either 'linux' or 'windows'. The default None detects the OS from sys.platform.
-        '''
+        Parameters
+        ----------
+        jsonPath : str
+            Path to the model json file used to build the run
+        os : str
+            Either 'linux' or 'windows'. The default None detects
+            the OS from sys.platform.
+        """
         try:
             self.jsonPath = os.path.abspath(jsonPath)
         except AttributeError:
@@ -52,9 +53,7 @@ class Harness:
 
     @staticmethod
     def convert_unicode_to_ascii(dic):
-        '''
-        Convert any unicode entries in the dict dic
-        '''
+        """Convert any unicode entries in the dict."""
         for key, value in dic.iteritems():
             if isinstance(key, unicode) or isinstance(value, unicode):
                 newkey = key.encode('ascii', 'ignore')
@@ -64,37 +63,37 @@ class Harness:
         return dic
 
     def setupRun(self, genModelFiles=True):
-        ''' Set up the folder structure of a run, broken out by the geomSweep
-            specified in the json file.
-        '''
-        self.rootPath = self.model.modelDict['jobSettings']['rootPath']
+        """Set up the folder structure of a run, broken out by the geomSweep
+        specified in the json file.
+        """
+        model_dict = self.model.modelDict
+        self.rootPath = model_dict['jobSettings']['rootPath']
         if not os.path.isdir(self.rootPath):
             os.mkdir(self.rootPath)
-        geoSweepKeys = self.model.modelDict['geomSweep'].keys()
+        geoSweepKeys = model_dict['geomSweep'].keys()
         instanceLists = []
         for geoSweepKey in geoSweepKeys:
             numInstances = len(
-                self.model.modelDict['geomSweep'][geoSweepKey]['vals'].split(','))
+                model_dict['geomSweep'][geoSweepKey]['vals'].split(','))
             valIDs = range(numInstances)
             instanceLists.append(valIDs)
-        prodInstanceKeys = list(itertools.product(*instanceLists))
-        for prodInstance in prodInstanceKeys:
+        for prodInstance in itertools.product(*instanceLists):
             folderPath = 'geo_' + '_'.join(map(str, list(prodInstance)))
             if not os.path.isdir(self.rootPath + '/' + folderPath):
                 os.mkdir(self.rootPath + '/' + folderPath)
             runPath = self.rootPath + '/' + folderPath
             tempModel = QMT.Model(runPath + '/model.json')
             self.modelFilePaths += [runPath + '/model.json']
-            tempModel.modelDict = deepcopy(self.model.modelDict)
+            tempModel.modelDict = deepcopy(model_dict)
             tempModel.modelDict['geomSweep'] = {}  # Also reset this
             for index, name in zip(
-                    prodInstance, self.model.modelDict['geomSweep'].keys()):
+                    prodInstance, model_dict['geomSweep'].keys()):
                 # Populate the geo parameter names:
                 paramName = name
                 # freeCAD or python
-                paramType = self.model.modelDict['geomSweep'][name]['type']
+                paramType = model_dict['geomSweep'][name]['type']
                 paramValIndex = index
-                paramValsStr = self.model.modelDict['geomSweep'][paramName][
+                paramValsStr = model_dict['geomSweep'][paramName][
                     'vals']
                 paramValsList = paramValsStr.split(',')
                 paramVal = paramValsList[paramValIndex]
@@ -108,8 +107,7 @@ class Harness:
                 tempModel.saveModel()
 
     def runJob(self):
-        ''' Run the batch job.
-        '''
+        """Run the batch job."""
         for modelFilePath in self.modelFilePaths:  # For now, this is the serial part
             for jobStep in self.model.modelDict['jobSettings']['jobSequence']:
                 if jobStep == 'geoGen':
@@ -125,8 +123,7 @@ class Harness:
                     raise ValueError('Job step is not defined!')
 
     def runBatchGeoGen(self, modelFilePath):
-        ''' Run batch geometry generation.
-        '''
+        """Run batch geometry generation."""
         # Import the FreeCAD functions we will need:
         import FreeCAD
         from qmt.freecad import modelBuilder, build2DGeo, buildCrossSection
@@ -169,27 +166,32 @@ class Harness:
         myModel.saveModel()
 
     def runBatchCOMSOLRun(self, modelFilePath):
-        ''' Run batch COMSOL run. This requires proprietary components to be
+        """Run batch COMSOL run. This requires proprietary components to be
         installed.
-        '''
+        """
         import qms
         from qms import comsol
         from qms.postProcessing import dataProcessing
 
         myModel = QMT.Model(modelPath=modelFilePath)
         myModel.loadModel()
-        numNodes = myModel.modelDict['jobSettings']['numNodes']
-        numJobsPerNode = myModel.modelDict['jobSettings']['numJobsPerNode']
-        numCoresPerJob = myModel.modelDict['jobSettings']['numCoresPerJob']
+
+        # Aliases
+        model_dict = myModel.modelDict
+        path_settings = model_dict['pathSettings']
+        job_settings = model_dict['jobSettings']
+
+        numNodes = model_dict['jobSettings']['numNodes']
+        numJobsPerNode = model_dict['jobSettings']['numJobsPerNode']
+        numCoresPerJob = model_dict['jobSettings']['numCoresPerJob']
         numParallelJobs = numNodes * numJobsPerNode
-        hostFile = myModel.modelDict['jobSettings']['hostFile']
-        comsolExecPath = myModel.modelDict['pathSettings']['COMSOLExecPath']
-        comsolCompilePath = myModel.modelDict['pathSettings'][
-            'COMSOLCompilePath']
-        jdkPath = myModel.modelDict['pathSettings']['jdkPath']
-        mpiPath = myModel.modelDict['pathSettings']['mpiPath']
-        folder = myModel.modelDict['pathSettings']['dirPath']
-        name = myModel.modelDict['comsolInfo']['fileName']
+        hostFile = model_dict['jobSettings']['hostFile']
+        comsolExecPath = path_settings['COMSOLExecPath']
+        comsolCompilePath = path_settings['COMSOLCompilePath']
+        jdkPath = path_settings['jdkPath']
+        mpiPath = path_settings['mpiPath']
+        folder = path_settings['dirPath']
+        name = model_dict['comsolInfo']['fileName']
         myComsolModel = comsol.ComsolModel(
             modelFilePath, run_mode=self.model.modelDict['jobSettings']
             ['comsolRunMode'])
@@ -218,16 +220,22 @@ class Harness:
         my_env = self.convert_unicode_to_ascii(my_env)
 
         # Make the export directory if it doesn't exist:
-        comsolSolsPath = myModel.modelDict['pathSettings']['dirPath'] + \
-            '/' + myModel.modelDict['comsolInfo']['exportDir']
+        comsolSolsPath = path_settings['dirPath'] + \
+            '/' + model_dict['comsolInfo']['exportDir']
         if not os.path.isdir(comsolSolsPath):
             os.mkdir(comsolSolsPath)
         if self.os == 'windows':
-            comsolModelPath = '\"' + myModel.modelDict['pathSettings'][
-                'dirPath'] + '/' + myComsolModel.name + '.class' + '\"'
+            comsolModelPath = ('\"'
+                               + path_settings['dirPath']
+                               + '/'
+                               + myComsolModel.name
+                               + '.class'
+                               + '\"')
         elif self.os == 'linux':
-            comsolModelPath = myModel.modelDict['pathSettings'][
-                'dirPath'] + '/' + myComsolModel.name + '.class'
+            comsolModelPath = (path_settings['dirPath']
+                               + '/'
+                               + myComsolModel.name
+                               + '.class')
         # Initiate the COMSOL run:
         # comsolCommand = [mpiPath, '-n', str(numCores), comsolExecPath, '-nosave', '-np', '1', '-inputFile', comsolModelPath]
         # The above doesn't work with double quotes in the path names
@@ -237,12 +245,9 @@ class Harness:
         # and it shouldn't exceed the number of physical cores on a machine. Apparently,
         # the MPI -n flag should be the number of computational nodes, not the number of total
         # cores.'
-        comsolLogName = myModel.modelDict['pathSettings']['dirPath'] + \
-            '/comsolLog.txt'
-        stdOutLogName = myModel.modelDict['pathSettings']['dirPath'] + \
-            '/comsolStdOut.txt'
-        stdErrLogName = myModel.modelDict['pathSettings']['dirPath'] + \
-            '/comsolStdErr.txt'
+        comsolLogName = path_settings['dirPath'] + '/comsolLog.txt'
+        stdOutLogName = path_settings['dirPath'] + '/comsolStdOut.txt'
+        stdErrLogName = path_settings['dirPath'] + '/comsolStdErr.txt'
         # save the resulting file for manual inspection
         if not self.model.modelDict['jobSettings']['comsolRunMode'] == 'batch':
             if self.os == 'windows':
@@ -280,15 +285,15 @@ class Harness:
             env=my_env)
         print('Starting COMSOL run...')
         # Determine the number of voltages we are expecting.
-        numVoltages = myModel.modelDict['physicsSweep']['length']
+        numVoltages = model_dict['physicsSweep']['length']
         resultFileBase = '{}/{}_export'.format(
-            comsolSolsPath, myModel.modelDict['comsolInfo']['fileName'])
+            comsolSolsPath, model_dict['comsolInfo']['fileName'])
         eigenFileBase = '{}/{}_eigvals'.format(
-            comsolSolsPath, myModel.modelDict['comsolInfo']['fileName'])
+            comsolSolsPath, model_dict['comsolInfo']['fileName'])
         surIntFileBase = '{}/{}_sur_integrals'.format(
-            comsolSolsPath, myModel.modelDict['comsolInfo']['fileName'])
+            comsolSolsPath, model_dict['comsolInfo']['fileName'])
         volIntFileBase = '{}/{}_vol_integrals'.format(
-            comsolSolsPath, myModel.modelDict['comsolInfo']['fileName'])
+            comsolSolsPath, model_dict['comsolInfo']['fileName'])
         while True:
             if comsolRun.poll() is not None:  # If the run is done, tag it as complete
                 print('COMSOL run finshed with exit code {}!'.format(
@@ -332,9 +337,9 @@ class Harness:
         myData.batch_import_solutions()  # gather up the data
 
     def runBatchPostProc(self, modelFilePath):
-        ''' Run batch post-processing. This requires proprietary components
+        """Run batch post-processing. This requires proprietary components
         to be installed.
-        '''
+        """
         import qms
         numJobsPerNode = self.model.modelDict['jobSettings']['numJobsPerNode']
         numNodes = self.model.modelDict['jobSettings']['numNodes']
