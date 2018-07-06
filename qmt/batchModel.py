@@ -11,19 +11,18 @@ import qmt
 
 class Model:
     def __init__(self, modelPath=None, load=True):
-        '''Class for creating, loading, and manipulating a json file that
-           contains information about the model.
+        """Class for creating, loading, and manipulating a json file that
+        contains information about the model.
 
-            Keyword arguments
-            ----------
-            modelPath : str, default None
+        Keyword arguments
+        -----------------
+        modelPath : str, default None
             Path to the model json file. If initialized with None, should be set
             manually before loading/saving.
-
-            load : bool, default True
+        load : bool, default True
             If True, the constructor attempts to load the model from the file at
             modelPath. If False, the model is initialized to an empty state.
-        '''
+        """
         self.modelPath = modelPath
         if load and modelPath is not None:
             self.loadModel(False)
@@ -31,8 +30,8 @@ class Model:
             self.modelDict = self.genEmptyModelDict()
 
     def genEmptyModelDict(self):
-        '''Generate an empty modelDict (dictionary of dictionaries)
-        '''
+        """Generate an empty modelDict (dictionary of dictionaries)
+        """
         modelDict = {}
         modelDict['geometricParams'] = {}  # Geometric parameters for FreeCAD
         # Information about the 3D parts of our model
@@ -113,35 +112,35 @@ class Model:
         self.modelDict['geomSweep'][param] = sweep
 
     def genSurfaceIntegral(self, partName, quantities=['V']):
-        '''
+        """
         @param partName: string with the name of the part on which the surface integral
         should be performed
         @param quantities: list of strings with the quantities that should be
         integrated over. Default integral is over V
-        '''
+        """
         self.modelDict['comsolInfo']['surfaceIntegrals'][partName] = quantities
 
     def genVolumeIntegral(self, partName, quantities=['V']):
-        '''
+        """
         @param partName: string with the name of the part on which the surface integral
         should be performed
         @param quantities: list of strings with the quantities that should be
         integrated over. Default integral is over V
-        '''
+        """
         self.modelDict['comsolInfo']['volumeIntegrals'][partName] = quantities
 
     def setSimZero(self, partName, property='workFunction'):
-        ''' Sets the zero level for the electric potential.
+        """ Sets the zero level for the electric potential.
 
         For self-consistent electrostatics solves, this doesn't impact any of the physics, but makes
         the results much easier to look at.
         @param partName: Target partName to use
         @param property: The property to use as the zero level.
-        '''
+        """
         self.modelDict['comsolInfo']['zeroLevel'] = [partName, property]
 
     def getSimZero(self, parts=None):
-        '''Retrieve the zero level for the electric potential [in Volts].'''
+        """Retrieve the zero level for the electric potential [in Volts]."""
         zeroLevelPart, zeroLevelProp = self.modelDict['comsolInfo'][
             'zeroLevel']
         if zeroLevelPart is None:
@@ -159,7 +158,7 @@ class Model:
             physics=['electrostatics'],
             exportDomains=[],
             exportScalingVec=[5., 5., 5.]):
-        '''
+        """
         Generate meta information required by COSMOL
         @param meshExport: string with name for the exported mesh. None means no mesh is exported
         @param repairTolerance: float with the repair tolerance for building the geometry in COMSOl
@@ -171,7 +170,7 @@ class Model:
             An empty list will use all domains.
         @param exportScalingVec: Increase the resolution along x, y, and z axes. Higher numbers
             are higher resolutions.
-        '''
+        """
         self.modelDict['comsolInfo']['meshExport'] = meshExport
         self.modelDict['comsolInfo']['repairTolerance'] = repairTolerance
         self.modelDict['comsolInfo']['fileName'] = fileName
@@ -185,7 +184,7 @@ class Model:
             alphaUnit='meV*nm', B=[0., 0., 0.],
             BUnit='T', g=-2.0, Delta=0.0, DeltaUnit='meV', numEigVals=10,
             eigValSearch=0.0):
-        '''
+        """
         Set the physics parameters needed for quantum solves in COMSOL.
         @param quantumDomain: the name of the part on which we want to perform quantum
             solves.
@@ -198,7 +197,7 @@ class Model:
         @param DeltaUnit: The string (COMSOL-readable) corresponding to the units of Delta.
         @param numEigVals: The number of eigenvalues to find.
         @param eigValSearch: The energy around which to search for eigenvalues.
-        '''
+        """
         self.modelDict['comsolInfo']['quantumParams'] = {}
         self.modelDict['comsolInfo']['quantumParams']['domain'] = quantumDomain
         self.modelDict['comsolInfo']['quantumParams']['alpha'] = alpha
@@ -219,70 +218,70 @@ class Model:
             fillLitho=True, meshMaxSize=None, meshGrowthRate=None,
             meshScaleVector=None, boundaryCondition=None, subtractList=[],
             Ns=None, Phi_NL=None, Ds=None):
-        ''' Add a geometric part to the model.
-            @param partName: The descriptive name of this new part.
-            @param fcName: The name of the 2D freeCAD object that this is built from.
-            @param directive: The freeCAD directive is used to construct this part.
-                                Valid options for this are:
-                                    extrude -- simple extrusion
-                                    wire -- hexagonal nanowire about a polyline
-                                    wireShell -- shell coating a specified nanowire
-                                    SAG -- SAG structure
-                                    lithography -- masked layer deposited on top
-            @param material:    The material of the resulting part
-            @param domainType: The type of domain this part represents:
-                                Valid options are:
-                                    semiconductor -- region permitted to self-consistently accumulate
-                                    metalGate -- an electrode
-                                    virtual -- a part just used for selection (ignores material)
-                                    dielectric -- no charge accumulation allowed
-            @param z0:          The starting z coordinate. Required for extrude,
-                                wire, SAG, and lithography directives.
-            @param thickness:   The total thickness. Required for all
-                                directives. On wireShell, this is interpreted
-                                as the layer thickness.
-            @param targetWire:  Target wire directive for a coating directive.
-            @param shellVerts:  Vertices to use when rendering the coating. Required
-                                for the shell directive.
-            @param depoZone:    Sketch defining the (positive) mask for the deposition
-                                of a wire coating. Note that only one of depoZone or
-                                etchZone may be used
-            @param etchZone:	Sketch defining the (negative) amsek for the depostion
-                                                of a wire coating. Note that only one of depoZone or
-                                                etchZone may be used.
-            @param zMiddle:     The location for the "flare out" of the SAG directive.
-            @param tIN:         The lateral distance from the 2D profile to the
-                                edge of the top bevel for the SAG directive.
-            @param tOut:        The lateral distance from the 2D profile to the
-                                furtheset "flare out" location for the SAG directive.
-            @param layerNum:    The layer (int) number used by the lithography directive.
-                                Lower numbers go down first, with higher numbers
-                                deposited last.
-            @param lithoBase:   The base partNames to use for the lithography directive.
-                                For multi-step lithography, the bases are just all merged,
-                                so there is no need to list this more than once.
-            @param fillLitho:   Bool, defaulting to true. If set to false, will attempt
-                                to hollow out lithography steps by subtracting the base
-                                and subsequent lithography layers, but this can sometimes
-                                fail in opencascade. COMSOL takes care of this using
-                                parasolid if left to True.
-            @param meshMaxSize: The maximum allowable mesh size for this part, in microns.
-            @param meshGrowthRate: The maximum allowable mesh growth rate for this part
-            @param meshScaleVector: 3D list with scaling factors for the mesh in x, y, z direction
-            @param boundaryCondition: One or more boundary conditions, if applicable, of the form of
-                                a type -> value mapping. For example, this could be {'voltage':1.0}
-                                or, more explicitly, {'voltage': {'type': 'dirichlet', 'value': 1.0,
-                                                                  'unit': 'V'}}.
-            @param subtractList: A list of partNames that should be subtracted from the
-                                 current part when forming the final 3D objects. This
-                                 subtraction is carried out in 3D using the COMSOL parasolid
-                                 kernel or using shapely in 2D.
-            @param Ns:           Volume charge density of a part, applicable to semiconductor
-                                 and dielectric parts. The units for this are 1/cm^3.
-            @param Phi_NL:       The neutral level for interface traps, measured in units of
-                                 eV above the valence band maximum (semiconductor only).
-            @param Ds:           Density of interface traps; units are 1/(cm^2*eV).
-        '''
+        """ Add a geometric part to the model.
+        @param partName: The descriptive name of this new part.
+        @param fcName: The name of the 2D freeCAD object that this is built from.
+        @param directive: The freeCAD directive is used to construct this part.
+                            Valid options for this are:
+                                extrude -- simple extrusion
+                                wire -- hexagonal nanowire about a polyline
+                                wireShell -- shell coating a specified nanowire
+                                SAG -- SAG structure
+                                lithography -- masked layer deposited on top
+        @param material:    The material of the resulting part
+        @param domainType: The type of domain this part represents:
+                            Valid options are:
+                                semiconductor -- region permitted to self-consistently accumulate
+                                metalGate -- an electrode
+                                virtual -- a part just used for selection (ignores material)
+                                dielectric -- no charge accumulation allowed
+        @param z0:          The starting z coordinate. Required for extrude,
+                            wire, SAG, and lithography directives.
+        @param thickness:   The total thickness. Required for all
+                            directives. On wireShell, this is interpreted
+                            as the layer thickness.
+        @param targetWire:  Target wire directive for a coating directive.
+        @param shellVerts:  Vertices to use when rendering the coating. Required
+                            for the shell directive.
+        @param depoZone:    Sketch defining the (positive) mask for the deposition
+                            of a wire coating. Note that only one of depoZone or
+                            etchZone may be used
+        @param etchZone:	Sketch defining the (negative) amsek for the depostion
+                                            of a wire coating. Note that only one of depoZone or
+                                            etchZone may be used.
+        @param zMiddle:     The location for the "flare out" of the SAG directive.
+        @param tIN:         The lateral distance from the 2D profile to the
+                            edge of the top bevel for the SAG directive.
+        @param tOut:        The lateral distance from the 2D profile to the
+                            furtheset "flare out" location for the SAG directive.
+        @param layerNum:    The layer (int) number used by the lithography directive.
+                            Lower numbers go down first, with higher numbers
+                            deposited last.
+        @param lithoBase:   The base partNames to use for the lithography directive.
+                            For multi-step lithography, the bases are just all merged,
+                            so there is no need to list this more than once.
+        @param fillLitho:   Bool, defaulting to true. If set to false, will attempt
+                            to hollow out lithography steps by subtracting the base
+                            and subsequent lithography layers, but this can sometimes
+                            fail in opencascade. COMSOL takes care of this using
+                            parasolid if left to True.
+        @param meshMaxSize: The maximum allowable mesh size for this part, in microns.
+        @param meshGrowthRate: The maximum allowable mesh growth rate for this part
+        @param meshScaleVector: 3D list with scaling factors for the mesh in x, y, z direction
+        @param boundaryCondition: One or more boundary conditions, if applicable, of the form of
+                            a type -> value mapping. For example, this could be {'voltage':1.0}
+                            or, more explicitly, {'voltage': {'type': 'dirichlet', 'value': 1.0,
+                                                              'unit': 'V'}}.
+        @param subtractList: A list of partNames that should be subtracted from the
+                             current part when forming the final 3D objects. This
+                             subtraction is carried out in 3D using the COMSOL parasolid
+                             kernel or using shapely in 2D.
+        @param Ns:           Volume charge density of a part, applicable to semiconductor
+                             and dielectric parts. The units for this are 1/cm^3.
+        @param Phi_NL:       The neutral level for interface traps, measured in units of
+                             eV above the valence band maximum (semiconductor only).
+        @param Ds:           Density of interface traps; units are 1/(cm^2*eV).
+        """
         # First, run checks to make sure the input is valid:
         if partName in self.modelDict['3DParts']:
             raise NameError(
@@ -346,10 +345,10 @@ class Model:
         self.modelDict['slices'][sliceName] = {'sliceInfo': info}
 
     def registerCadPart(self, partName, fcName, fileName, reset=False):
-        '''Register a 3D CAD part on disk that is associated with the freeCAD 3D part fcName.
+        """Register a 3D CAD part on disk that is associated with the freeCAD 3D part fcName.
         The idea here is that the partName knows what 3D entities were generated from it, what
         those parts are called on disk, and what they are called in the freeCAD file.
-        '''
+        """
         if reset:  # reset the file listing if we want to
             self.modelDict['3DParts'][partName]['fileNames'] = {}
         self.modelDict['3DParts'][partName]['fileNames'][fcName] = fileName
@@ -358,11 +357,10 @@ class Model:
                   objType=None, domainType=None, boundaryConditions=None,
                   descriptors=None, bandOffset=None, surfaceChargeDensity=None,
                   bulkDoping=None, subtractList=None):
-        '''Generate a 2D slice part and add it to the modelDict.
+        """Generate a 2D slice part and add it to the modelDict.
 
-            sliceName: simulation slice that the part belongs to.
-
-        '''
+        @param sliceName: simulation slice that the part belongs to.
+        """
         twoDParts = self.modelDict['slices']
         # Establish the index of the current slice:
         if sliceName is None:
@@ -666,13 +664,13 @@ class Model:
         self.modelDict['postProcess']['tasks'][name] = task
 
     def saveModel(self, customPath=None):
-        '''Save the current model to disk.
+        """Save the current model to disk.
 
-            Keyword arguments
-            ----------
-            customPath: str, default None
-                If set, this overrides the path in self.modelPath.
-        '''
+        Parameters
+        ----------
+        customPath: str, default None
+            If set, this overrides the path in self.modelPath.
+        """
         if customPath is None:
             myFile = open(self.modelPath, 'w')
         else:
@@ -681,16 +679,16 @@ class Model:
         myFile.close()
 
     def loadModel(self, updateModel=True):
-        '''Load the model from disk.
+        """Load the model from disk.
 
-            Keyword arguments
-            ----------
-            updateModel : bool, default True
-            If true, whatever is currently in the modelDict will be added to the
-            loaded model on import. Repeated settings are overwritten. If false,
-            the current state of modelDict will be wiped out and replaced by the
-            loaded file.
-        '''
+        Parameters
+        ----------
+        updateModel : bool, default True
+        If true, whatever is currently in the modelDict will be added to the
+        loaded model on import. Repeated settings are overwritten. If false,
+        the current state of modelDict will be wiped out and replaced by the
+        loaded file.
+        """
         fileExists = os.path.isfile(self.modelPath)
         if fileExists:
             print('Loading model file {}.'.format(self.modelPath))
@@ -712,42 +710,39 @@ class Model:
             self, rootPath, jobSequence=None, numNodes=1, numJobsPerNode=1,
             numCoresPerJob=1, hostFile=None, geoGenArgs={},
             comsolRunMode='batch', postProcArgs={}):
-        '''Add a job to the model.
+        """Add a job to the model.
 
-            Parameters
-            ----------
-            rootPath : str
-                Directory for the root of the job, where all sub-folders will
-                be written.
-
-            Keyword arguments
-            ----------
-            jobSequence : list, default None
-                Add a specified job sequence to the model. The valid sequence
-                nodes are:
-                    geoGen : make geometries using FreeCAD.
-                    mesh : mesh the geometries using COMSOL.
-                    preProc : generate an interpolation grid corresponding to
-                        a given density rule.
-                    run : run a non-linear Poisson solve using COMSOL.
-                    postProc : run post-processing routines.
-                If left as None, this degaults to:
-                ['geoGen','comsolRun','postProc']
-            numNodes : int, default 1
-                Number of physical nodes to use.
-            numJobsPerNode : int, default 1
-                Number of jobs to run in parallel on each node.
-            numCoresPerJob : int, default 1
-                Number of cores to use for each job
-            hostFile : str, default None
-                File containing the list of node names
-            geoGenArgs : dict, default {}
-                Arguments for use by the geoGen nodes.
-            comsolRunArgs : dict, default {}
-                Arguments for use by the run nodes.
-            postProcArgs : dict, default {}
-                Arguments for use by the postProc nodes.
-        '''
+        Parameters
+        ----------
+        rootPath : str
+            Directory for the root of the job, where all sub-folders will
+            be written.
+        jobSequence : list, default None
+            Add a specified job sequence to the model. The valid sequence
+            nodes are:
+                geoGen : make geometries using FreeCAD.
+                mesh : mesh the geometries using COMSOL.
+                preProc : generate an interpolation grid corresponding to
+                    a given density rule.
+                run : run a non-linear Poisson solve using COMSOL.
+                postProc : run post-processing routines.
+            If left as None, this degaults to:
+            ['geoGen','comsolRun','postProc']
+        numNodes : int, default 1
+            Number of physical nodes to use.
+        numJobsPerNode : int, default 1
+            Number of jobs to run in parallel on each node.
+        numCoresPerJob : int, default 1
+            Number of cores to use for each job
+        hostFile : str, default None
+            File containing the list of node names
+        geoGenArgs : dict, default {}
+            Arguments for use by the geoGen nodes.
+        comsolRunArgs : dict, default {}
+            Arguments for use by the run nodes.
+        postProcArgs : dict, default {}
+            Arguments for use by the postProc nodes.
+        """
         self.modelDict['jobSettings']['rootPath'] = rootPath
         if jobSequence is None:
             self.modelDict['jobSettings']['jobSequence'] = ['geoGen']
@@ -763,20 +758,20 @@ class Model:
 
     def setPaths(self, COMSOLExecPath=None, COMSOLCompilePath=None,
                  mpiPath=None, pythonPath=None, jdkPath=None, freeCADPath=None):
-        '''Set up paths to execuables.
+        """Set up paths to execuables.
 
-            Keword Arguments
-            ----------
-            COMSOLExecPath : str, default None
-                Path to the COMSOL command to be run, typically
-                comsolclusterbatch.
-            COMSOLCompilePath : str, default None
-                Path to the COMSOL Java compiler
-            mpiPath : str, default None
-                Path to mpiexec
-            jdkPath : str, default None
-                Path to the jdk installation
-        '''
+        Parameters
+        ----------
+        COMSOLExecPath : str, default None
+            Path to the COMSOL command to be run, typically
+            comsolclusterbatch.
+        COMSOLCompilePath : str, default None
+            Path to the COMSOL Java compiler
+        mpiPath : str, default None
+            Path to mpiexec
+        jdkPath : str, default None
+            Path to the jdk installation
+        """
         self.modelDict['pathSettings']['COMSOLExecPath'] = COMSOLExecPath
         self.modelDict['pathSettings']['COMSOLCompilePath'] = COMSOLCompilePath
         self.modelDict['pathSettings']['mpiPath'] = mpiPath
