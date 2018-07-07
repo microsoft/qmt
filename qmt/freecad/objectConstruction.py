@@ -568,7 +568,6 @@ class modelBuilder:
         for m in self.lithoDict['layers'].keys():
             if m < layerNum:  # then this is a lower layer
                 for j in self.lithoDict['layers'][m]['objIDs'].keys():
-                    HDict = self.lithoDict['layers'][m]['objIDs'][j]['HDict']
                     HOffsetList += self._screened_H_union_list(
                         C_t, m, j, offsetTuple, checkOffsetTuple)
                     # Next, build up the original substrate list:
