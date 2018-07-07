@@ -215,7 +215,6 @@ def extendSketch(mySketch, d):
     # Find the first and last segments:
     seg0Index = [i for i in range(len(segments)) if i not in connections][0]
     seg1Index = connections.index(len(segments))
-    segIndices = [seg0Index, seg1Index]
 
     # Since we automatically reorder these, we know the orientation.
     seg0 = segments[seg0Index]
@@ -274,7 +273,7 @@ def draftOffset(inputSketch, t, tol=1e-8):
     inflation, while negative t is a deflation. tol sets how strict we should be when
     checking if the offset worked.
     '''
-    from qmt.freecad import extrude, copy, subtract, delete
+    from qmt.freecad import extrude, copy, delete
 
     if t == 0.:
         return copy(inputSketch)
