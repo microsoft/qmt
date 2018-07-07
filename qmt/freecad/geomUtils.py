@@ -60,8 +60,6 @@ def makeHexFace(sketch, zBottom, width):
     x1, y1, z1 = lineSegment[1]
     dx = x1 - x0
     dy = y1 - y0
-    xBar = 0.5 * (x0 + x1)
-    yBar = 0.5 * (y0 + y1)
     # First, make the initial face:
     face = Draft.makePolygon(6, radius=width * 0.5, inscribed=False, face=True)
     doc.recompute()
@@ -171,7 +169,7 @@ def subtractParts(domainObj, partList):
     diffObj = copy(domainObj)
     for obj in partList:
         diffObjTemp = Draft.downgrade([diffObj, obj], delete=True)[0][0]
-        FreeCAD.ActiveDocument.recompute()
+        doc.recompute()
         diffObj = copy(diffObjTemp)
         delete(diffObjTemp)
     # TODO : This routine is leaving some nuisance objects around that should

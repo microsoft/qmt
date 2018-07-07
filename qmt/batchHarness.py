@@ -16,7 +16,6 @@ import subprocess
 import itertools
 from copy import deepcopy
 import time
-import re
 
 
 class Harness:
