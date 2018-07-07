@@ -19,10 +19,10 @@ def delete(obj):
 
 
 def extrude(sketch, length, reversed=False, name=None):
-    '''
-    Extrude sketch up to given length. Optional name (default: append '_extr').
+    """Extrude sketch up to given length. Optional name (default: append '_extr').
+
     Return handle to extrude.
-    '''
+    """
     if name is None:
         f = FreeCAD.ActiveDocument.addObject('PartDesign::Pad')
     else:
@@ -36,10 +36,7 @@ def extrude(sketch, length, reversed=False, name=None):
 
 
 def copy(obj, moveVec=(0., 0., 0.), copy=True):
-    '''
-    Create a duplciate of the object using a draft move operation.
-    '''
-
+    """Create a duplciate of the object using a draft move operation."""
     f = Draft.move([obj], FreeCAD.Vector(
         moveVec[0], moveVec[1], moveVec[2]), copy=copy)
     if len(f.Shape.Vertexes) > 0:
@@ -49,10 +46,10 @@ def copy(obj, moveVec=(0., 0., 0.), copy=True):
 
 
 def makeHexFace(sketch, zBottom, width):
-    ''' Given a sketch for a wire, make the first face. Also need to make sure it
+    """Given a sketch for a wire, make the first face. Also need to make sure it
     is placed normal to the initial line segment in the sketch. This will ensure
     that the wire and shell can be constructed with sweep operations.
-    '''
+    """
     doc = FreeCAD.ActiveDocument
     lineSegments = findSegments(sketch)
     lineSegment = lineSegments[0]
@@ -86,8 +83,7 @@ def makeHexFace(sketch, zBottom, width):
 
 
 def genUnion(objList, consumeInputs=False):
-    '''Generates a Union non-destructively.
-    '''
+    """Generates a Union non-destructively."""
     doc = FreeCAD.ActiveDocument
     if len(objList) == 0:
         return None
@@ -115,20 +111,13 @@ def genUnion(objList, consumeInputs=False):
 
 
 def getBB(obj):
-    '''Get the bounding box coords of an object.
-    '''
-    xMin = obj.Shape.BoundBox.XMin
-    xMax = obj.Shape.BoundBox.XMax
-    yMin = obj.Shape.BoundBox.YMin
-    yMax = obj.Shape.BoundBox.YMax
-    zMin = obj.Shape.BoundBox.ZMin
-    zMax = obj.Shape.BoundBox.ZMax
-    return (xMin, xMax, yMin, yMax, zMin, zMax)
+    """Get the bounding box coords of an object."""
+    bb = obj.Shape.BoundBox
+    return bb.XMin, bb.XMax, bb.YMin, bb.YMax, bb.ZMin, bb.ZMax
 
 
 def makeBB(BB):
-    '''Make a bounding box given BB tuple.
-    '''
+    """Make a bounding box given BB tuple."""
     doc = FreeCAD.ActiveDocument
     xMin, xMax, yMin, yMax, zMin, zMax = BB
     box = doc.addObject("Part::Box")
@@ -145,8 +134,7 @@ def makeBB(BB):
 
 
 def subtract(obj0, obj1, consumeInputs=False):
-    '''Subtract two objects, optionally deleting the input objects.
-    '''
+    """Subtract two objects, optionally deleting the input objects."""
     doc = FreeCAD.ActiveDocument
     tempObj = doc.addObject("Part::Cut")
     tempObj.Base = obj0
@@ -163,8 +151,7 @@ def subtract(obj0, obj1, consumeInputs=False):
 
 
 def subtractParts(domainObj, partList):
-    ''' Subtract given part objects from a domain.
-    '''
+    """Subtract given part objects from a domain."""
     doc = FreeCAD.ActiveDocument
     diffObj = copy(domainObj)
     for obj in partList:
@@ -178,8 +165,7 @@ def subtractParts(domainObj, partList):
 
 
 def intersect(objList, consumeInputs=False):
-    '''Intersect a list of objects, optionally deleting the input objects.
-    '''
+    """Intersect a list of objects, optionally deleting the input objects."""
     doc = FreeCAD.ActiveDocument
     intersectTemp = doc.addObject("Part::MultiCommon")
     intersectTemp.Shapes = objList
@@ -195,31 +181,24 @@ def intersect(objList, consumeInputs=False):
 
 
 def checkOverlap(objList):
-    ''' Checks if a list of objects, when intersected, contains a finite volume.abs
-    Returns true if it does, returns false if the intersection is empty.
+    """Checks if a list of objects, when intersected, contains a finite volume.abs.
 
-    '''
+    Returns true if it does, returns false if the intersection is empty.
+    """
     intObj = intersect(objList)
-    if len(intObj.Shape.Vertexes) == 0:
-        overlap = False
-    else:
-        overlap = True
+    overlap = len(intObj.Shape.Vertexes) != 0
     delete(intObj)
     return overlap
 
 
 def isNonempty(obj):
-    ''' Checks if an object is nonempty (returns True) or empty (returns False).
-    '''
-    if len(obj.Shape.Vertexes) == 0:
-        return False
-    else:
-        return True
+    """Checks if an object is nonempty (returns True) or empty (returns False).
+    """
+    return len(obj.Shape.Vertexes) != 0
 
 
 def extrudeBetween(sketch, zMin, zMax):
-    ''' Non-destructively extrude a sketch between zMin and zMax.
-    '''
+    """Non-destructively extrude a sketch between zMin and zMax."""
     doc = FreeCAD.ActiveDocument
     tempExt = extrude(sketch, zMax - zMin)
     ext = copy(tempExt, moveVec=(0., 0., zMin))
@@ -230,9 +209,9 @@ def extrudeBetween(sketch, zMin, zMax):
 
 
 def liftObject(obj, d, consumeInputs=False):
-    ''' Create a new solid by lifting an object by a distance d along z, filling
+    """Create a new solid by lifting an object by a distance d along z, filling
     in the space swept out.
-    '''
+    """
     objBB = getBB(obj)
     liftedObj = copy(obj, moveVec=(0., 0., d))  # lift up the original sketch
     fillBB = np.array(objBB)
@@ -245,9 +224,9 @@ def liftObject(obj, d, consumeInputs=False):
 
 
 def centerObjects(objsList):
-    ''' Move all the objects in the list in the x-y plane so that they are
+    """Move all the objects in the list in the x-y plane so that they are
     centered about the origin.
-    '''
+    """
     if len(objsList) == 0:
         return None
     wholeObj = genUnion(objsList)
