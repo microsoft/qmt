@@ -544,20 +544,21 @@ class modelBuilder:
         # This is a tuple that encodes the total offset t_i+t:
         offsetTuple = tuple(sorted(tList + [layerNum]))
         # First, check if we have to do anything:
-        if checkOffsetTuple in self.lithoDict['layers'][layerNum]['objIDs'][
+        layers = self.lithoDict['layers']
+        if checkOffsetTuple in layers[layerNum]['objIDs'][
                 objID]['HDict']:
-            return self.lithoDict['layers'][layerNum]['objIDs'][objID][
+            return layers[layerNum]['objIDs'][objID][
                 'HDict'][checkOffsetTuple]
         # First, compute t:
         t = 0.0
         for tIndex in tList:
-            t += self.lithoDict['layers'][tIndex]['thickness']
+            t += layers[tIndex]['thickness']
         # thickness of this layer
-        ti = self.lithoDict['layers'][layerNum]['thickness']
+        ti = layers[layerNum]['thickness']
         # Set the aux. thickness t:
-        B = self.lithoDict['layers'][layerNum]['objIDs'][objID][
+        B = layers[layerNum]['objIDs'][objID][
             'B']  # B prism for this layer & objID
-        C = self.lithoDict['layers'][layerNum]['objIDs'][objID][
+        C = layers[layerNum]['objIDs'][objID][
             'C']  # C prism for this layer & ObjID
         B_t = self._gen_offset(B, t)  # offset the B prism
         C_t = self._gen_offset(C, t)  # offset the C prism
@@ -565,9 +566,9 @@ class modelBuilder:
         self.trash.append(C_t)
         # Build up the substrate due to previously deposited gates
         HOffsetList = []
-        for m in self.lithoDict['layers'].keys():
+        for m in layers.keys():
             if m < layerNum:  # then this is a lower layer
-                for j in self.lithoDict['layers'][m]['objIDs'].keys():
+                for j in layers[m]['objIDs'].keys():
                     HOffsetList += self._screened_H_union_list(
                         C_t, m, j, offsetTuple, checkOffsetTuple)
                     # Next, build up the original substrate list:
@@ -580,7 +581,7 @@ class modelBuilder:
             intObj = intersect([C_t, obj])
             self.trash.append(intObj)
             returnList.append(intObj)
-        self.lithoDict['layers'][layerNum]['objIDs'][objID]['HDict'][
+        layers[layerNum]['objIDs'][objID]['HDict'][
             checkOffsetTuple] = returnList
         return returnList
 
@@ -592,16 +593,17 @@ class modelBuilder:
         where the inner union terms are not included if their intersection
         with B_i is empty.
         """
-        B = self.lithoDict['layers'][layerNum]['objIDs'][objID][
+        layers = self.lithoDict['layers']
+        B = layers[layerNum]['objIDs'][objID][
             'B']  # B prism for this layer & objID
         GList = []
-        for m in self.lithoDict['layers'].keys():
+        for m in layers.keys():
             if m < layerNum:  # then this is a lower layer
-                for j in self.lithoDict['layers'][m].keys():
-                    if 'G' not in self.lithoDict['layers'][layerNum][
+                for j in layers[m].keys():
+                    if 'G' not in layers[layerNum][
                             'objIDs'][objID]:
                         self._gen_G(m, j)
-                    G = self.lithoDict['layers'][layerNum]['objIDs'][objID]['G']
+                    G = layers[layerNum]['objIDs'][objID]['G']
                     if checkOverlap([B, G]):
                         GList.append(G)
         AList = []
@@ -614,14 +616,13 @@ class modelBuilder:
 
     def _gen_G(self, layerNum, objID):
         """Generate the gate deposition for a given layerNum and objID."""
-        if 'G' not in self.lithoDict['layers'][layerNum]['objIDs'][objID]:
-            if () not in self.lithoDict['layers'][layerNum]['objIDs'][objID]['HDict']:
-                self.lithoDict['layers'][layerNum]['objIDs'][objID][
+        layer = self.lithoDict['layers'][layerNum]
+        if 'G' not in layer['objIDs'][objID]:
+            if () not in layer['objIDs'][objID]['HDict']:
+                layer['objIDs'][objID][
                     'HDict'][()] = self._H_offset(layerNum, objID)
-            H = genUnion(
-                self.lithoDict['layers'][layerNum]['objIDs'][objID]
-                ['HDict'][()],
-                consumeInputs=False)
+            H = genUnion(layer['objIDs'][objID]['HDict'][()],
+                         consumeInputs=False)
             self.trash.append(H)
             if self.fillShells:
                 G = copy(H)
@@ -629,10 +630,9 @@ class modelBuilder:
                 U = self._gen_U(layerNum, objID)
                 G = subtract(H, U)
                 delete(U)
-            self.lithoDict['layers'][layerNum]['objIDs'][objID]['G'] = G
-        G = self.lithoDict['layers'][layerNum]['objIDs'][objID]['G']
-        partName = self.lithoDict['layers'][layerNum]['objIDs'][objID][
-            'partName']
+            layer['objIDs'][objID]['G'] = G
+        G = layer['objIDs'][objID]['G']
+        partName = layer['objIDs'][objID]['partName']
         G.Label = partName
         return G
 
@@ -662,8 +662,6 @@ def buildCrossSection(sliceInfo, passModel=None):
             fcName = shapeName + '_section_' + sliceName
             partObj = doc.getObject(shapeName)
             section = crossSection(partObj, axis=axis, d=distance, name=fcName)
-            # if len(section.Shape.Vertexes) == 0:
-            #     continue
 
             # separate disjoint pieces
             segments, cycles = findEdgeCycles(section)
@@ -688,10 +686,7 @@ def build2DGeo(passModel=None):
     """Construct the 2D geometry entities defined in the json file."""
     # TODO: THIS FUNCTION NEEDS TO BE UPDATED AFTER modelRevision
     # RESTRUCTURING!
-    if passModel is None:
-        myModel = getModel()
-    else:
-        myModel = passModel
+    myModel = getModel() if passModel is None else passModel
     twoDObjs = {}
     doc = FreeCAD.ActiveDocument
     for fcName in myModel.modelDict['freeCADInfo']:
