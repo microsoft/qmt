@@ -9,20 +9,21 @@ import FreeCAD
 import Draft
 
 import numpy as np
-# import qmt.freecad
-from six import iteritems
+from six import iteritems, text_type
 
-from qmt.freecad import extrude, copy, delete, genUnion, getBB, \
-    makeBB, splitSketch, makeHexFace, extendSketch, exportCAD, exportMeshed, updateParams,\
-    deepRemove, findSegments, extrudeBetween, centerObjects, \
-    intersect, checkOverlap, subtract, getModel, crossSection, findEdgeCycles, draftOffset
+from qmt.freecad import (extrude, copy, delete, genUnion, getBB,
+                         makeBB, splitSketch, makeHexFace, extendSketch,
+                         exportCAD, exportMeshed, updateParams,
+                         deepRemove, findSegments, extrudeBetween,
+                         centerObjects, intersect, checkOverlap, subtract,
+                         getModel, crossSection, findEdgeCycles, draftOffset)
 
 
 def buildWire(sketch, zBottom, width, faceOverride=None, offset=0.0):
-    ''' Given a line segment, build a nanowire of given cross-sectional width
-        with a bottom location at zBottom. Offset produces an offset with a specified
-        offset.
-    '''
+    """Given a line segment, build a nanowire of given cross-sectional width
+    with a bottom location at zBottom. Offset produces an offset with a specified
+    offset.
+    """
     doc = FreeCAD.ActiveDocument
     if faceOverride is None:
         face = makeHexFace(sketch, zBottom - offset, width + 2 * offset)
@@ -41,14 +42,15 @@ def buildWire(sketch, zBottom, width, faceOverride=None, offset=0.0):
 
 def buildAlShell(sketch, zBottom, width, verts, thickness,
                  depoZone=None, etchZone=None, offset=0.0):
-    '''Builds a shell on a nanowire parameterized by sketch, zBottom, and width.
+    """Builds a shell on a nanowire parameterized by sketch, zBottom, and width.
+
     Here, verts describes the vertices that are covered, and thickness describes
     the thickness of the shell. depoZone, if given, is extruded and intersected
     with the shell (for an etch). Note that offset here *is not* a real offset -
     for simplicity we keep this a thin shell that lies cleanly on top of the
     bigger wire offset. There's no need to include the bottom portion since that's
     already taken up by the wire.
-    '''
+    """
     lineSegments = findSegments(sketch)[0]
     x0, y0, z0 = lineSegments[0]
     x1, y1, z1 = lineSegments[1]
@@ -169,8 +171,7 @@ def makeSAG(sketch, zBot, zMid, zTop, tIn, tOut, offset=0.):
 
 class modelBuilder:
     def __init__(self, passModel=None, debugMode=False):
-        ''' Builds a model defined by the JSON input file.
-        '''
+        """Builds a model defined by the JSON input file."""
         if passModel is None:
             self.model = getModel()
         else:
@@ -209,9 +210,6 @@ class modelBuilder:
         # 3D renders corresponding to a single shape into one entity:
         totalObjsDict = {}
         for partName in self._buildPartsDict.keys():
-            totalObjList = []
-            totalFileNamesList = []
-            totalPartNamesList = []
             objsList = self._buildPartsDict[partName]
             mergedObj = genUnion(objsList, consumeInputs=True)
             mergedObj.Label = partName
@@ -233,14 +231,12 @@ class modelBuilder:
                 exportMeshed(obj, filePath)
 
     def saveFreeCADState(self, fileName):
-        ''' Save a copy of the freeCAD model and do garbage collection.
-        '''
+        """Save a copy of the freeCAD model and do garbage collection."""
         self._collect_garbarge()
         FreeCAD.ActiveDocument.saveAs(fileName)
 
     def _build_extrude(self, partName):
-        ''' Build an extrude part.
-        '''
+        """Build an extrude part."""
         partDict = self.model.modelDict['3DParts'][partName]
         assert partDict['directive'] == 'extrude'
         z0 = self._fetch_geo_param(partDict['z0'])
@@ -256,8 +252,7 @@ class modelBuilder:
         return extParts
 
     def _build_wire(self, partName, offset=0.):
-        ''' Build a wire part.
-        '''
+        """Build a wire part."""
         partDict = self.model.modelDict['3DParts'][partName]
         assert partDict['directive'] == 'wire'
         zBottom = self._fetch_geo_param(partDict['z0'])
@@ -268,8 +263,7 @@ class modelBuilder:
         return [wire]
 
     def _build_wire_shell(self, partName, offset=0.):
-        ''' Build a wire shell part.
-        '''
+        """Build a wire shell part."""
         partDict = self.model.modelDict['3DParts'][partName]
         wirePartDict = self.model.modelDict['3DParts'][partDict['targetWire']]
         assert partDict['directive'] == 'wireShell'
@@ -314,8 +308,7 @@ class modelBuilder:
         return [SAG]
 
     def _build_litho(self, partName):
-        '''Build a lithography part.
-        '''
+        """Build a lithography part."""
         partDict = self.model.modelDict['3DParts'][partName]
         if not self.lithoSetup:
             self._initialize_lithography(fillShells=partDict['fillLitho'])
@@ -330,10 +323,10 @@ class modelBuilder:
         return returnObjs
 
     def _fetch_geo_param(self, param):
-        ''' Fetch the numerical value of a geometric parameter, which might be
+        """Fetch the numerical value of a geometric parameter, which might be
         either a string or a float.
-        '''
-        if isinstance(param, str) or isinstance(param, unicode):
+        """
+        if isinstance(param, text_type):
             returnParam = float(
                 self.model.modelDict['geometricParams'][param][0])
         else:
@@ -341,8 +334,7 @@ class modelBuilder:
         return returnParam
 
     def _gen_offset(self, obj, offsetVal):
-        ''' Generates an offset non-destructively.
-        '''
+        """Generates an offset non-destructively."""
         # First, we need to check if the object needs special treatment:
         treatment = 'standard'
         for partName in self.model.modelDict['3DParts'].keys():
@@ -479,12 +471,12 @@ class modelBuilder:
                     'HDict'] = {}
 
     def _screened_H_union_list(self, obj, m, j, offsetTuple, checkOffsetTuple):
-        ''' Foremd the "screened union list" of obj with the layer m, objID j H object that has
+        """Foremd the "screened union list" of obj with the layer m, objID j H object that has
         been offset according to offsetTuple. The screened union list is defined by checking
         first whether the object intersects with the components of the checkOffset version
         of the H object. Then, for each component that would intersect, we return the a list
         of the offsetTuple version of the object.
-        '''
+        """
         # First, we need to check to see if we need to compute either of the
         # underlying H obj lists:
         HDict = self.lithoDict['layers'][m]['objIDs'][j]['HDict']
@@ -510,9 +502,9 @@ class modelBuilder:
         return returnList
 
     def _screened_A_UnionList(self, obj, t, ti, offsetTuple, checkOffsetTuple):
-        ''' Foremd the "screened union list" of obj with the substrate A that has
+        """Foremd the "screened union list" of obj with the substrate A that has
         been offset according to offsetTuple.
-        '''
+        """
         # First, we need to see if we have built the objects before:
         if checkOffsetTuple not in self.lithoDict['substrate']:
             self.lithoDict['substrate'][checkOffsetTuple] = []
@@ -535,15 +527,18 @@ class modelBuilder:
         return returnList
 
     def _H_offset(self, layerNum, objID, tList=[]):
-        ''' For a given layerNum=n and ObjID=i, compute the deposited object
-            H_{n,i}(t) = C_{n,i}(t) \cap [ B_{n,i}(t) \cup (\cup_{m<n;j} H_{m,j}(t_i+t)) \cup (\cup_k A_k(t_i + t))],
-            where A_k is from the base substrate list. This is computed recursively. The list of integers
-            tList determines the offset t; t = the sum of all layer thicknesses ti that appear
-            in tList. For example, tList = [1,2,3] -> t = t1+t2+t3.
+        """For a given layerNum=n and ObjID=i, compute the deposited object.
 
-            Note: this object is returned as a list of objects that need to be unioned together
-            in order to form the full H.
-        '''
+        ```latex
+        H_{n,i}(t) = C_{n,i}(t) \cap [ B_{n,i}(t) \cup (\cup_{m<n;j} H_{m,j}(t_i+t)) \cup (\cup_k A_k(t_i + t))],
+        ```
+        where A_k is from the base substrate list. This is computed recursively. The list of integers
+        tList determines the offset t; t = the sum of all layer thicknesses ti that appear
+        in tList. For example, tList = [1,2,3] -> t = t1+t2+t3.
+
+        Note: this object is returned as a list of objects that need to be unioned together
+        in order to form the full H.
+        """
         # This is a tuple that encodes the check offset t:
         checkOffsetTuple = tuple(sorted(tList))
         # This is a tuple that encodes the total offset t_i+t:
@@ -591,13 +586,13 @@ class modelBuilder:
         return returnList
 
     def _gen_U(self, layerNum, objID):
-        ''' For a given layerNum and objID, compute the quantity:
-
-            U_{n,i}(t) = (\cup_{m<n;j} G_{m,j}) \cup (\cup_{k} A_k),
-
-            where the inner union terms are not included if their intersection
-            with B_i is empty.
-        '''
+        """For a given layerNum and objID, compute the quantity:
+        ```latex
+        U_{n,i}(t) = (\cup_{m<n;j} G_{m,j}) \cup (\cup_{k} A_k),
+        ```
+        where the inner union terms are not included if their intersection
+        with B_i is empty.
+        """
         B = self.lithoDict['layers'][layerNum]['objIDs'][objID][
             'B']  # B prism for this layer & objID
         GList = []
@@ -619,8 +614,7 @@ class modelBuilder:
         return unionObj
 
     def _gen_G(self, layerNum, objID):
-        ''' Generate the gate deposition for a given layerNum and objID.
-        '''
+        """Generate the gate deposition for a given layerNum and objID."""
         if 'G' not in self.lithoDict['layers'][layerNum]['objIDs'][objID]:
             if () not in self.lithoDict['layers'][layerNum]['objIDs'][objID]['HDict']:
                 self.lithoDict['layers'][layerNum]['objIDs'][objID][
@@ -644,8 +638,7 @@ class modelBuilder:
         return G
 
     def _collect_garbarge(self):
-        ''' Delete all the objects in self.trash.
-        '''
+        """Delete all the objects in self.trash."""
         for obj in self.trash:
             try:
                 delete(obj)
@@ -654,8 +647,7 @@ class modelBuilder:
 
 
 def buildCrossSection(sliceInfo, passModel=None):
-    ''' Render the 2D objects required for cross-sections
-    '''
+    """Render the 2D objects required for cross-sections."""
     if passModel is None:
         passModel = getModel()
     doc = FreeCAD.ActiveDocument
@@ -694,8 +686,7 @@ def buildCrossSection(sliceInfo, passModel=None):
 
 
 def build2DGeo(passModel=None):
-    ''' Construct the 2D geometry entities defined in the json file.
-    '''
+    """Construct the 2D geometry entities defined in the json file."""
     # TODO: THIS FUNCTION NEEDS TO BE UPDATED AFTER modelRevision
     # RESTRUCTURING!
     if passModel is None:
