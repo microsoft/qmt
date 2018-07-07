@@ -7,7 +7,7 @@
 #
 
 from __future__ import absolute_import, division, print_function
-from six import iteritems
+from six import iteritems, text_type
 import qmt as QMT
 import os
 import sys
@@ -55,7 +55,7 @@ class Harness:
     def convert_unicode_to_ascii(dic):
         """Convert any unicode entries in the dict."""
         for key, value in dic.iteritems():
-            if isinstance(key, unicode) or isinstance(value, unicode):
+            if isinstance(key, text_type) or isinstance(value, text_type):
                 newkey = key.encode('ascii', 'ignore')
                 newvalue = value.encode('ascii', 'ignore')
                 del dic[key]
@@ -181,11 +181,11 @@ class Harness:
         path_settings = model_dict['pathSettings']
         job_settings = model_dict['jobSettings']
 
-        numNodes = model_dict['jobSettings']['numNodes']
-        numJobsPerNode = model_dict['jobSettings']['numJobsPerNode']
-        numCoresPerJob = model_dict['jobSettings']['numCoresPerJob']
+        numNodes = job_settings['numNodes']
+        numJobsPerNode = job_settings['numJobsPerNode']
+        numCoresPerJob = job_settings['numCoresPerJob']
+        hostFile = job_settings['hostFile']
         numParallelJobs = numNodes * numJobsPerNode
-        hostFile = model_dict['jobSettings']['hostFile']
         comsolExecPath = path_settings['COMSOLExecPath']
         comsolCompilePath = path_settings['COMSOLCompilePath']
         jdkPath = path_settings['jdkPath']
