@@ -444,22 +444,22 @@ class Model:
             'bare_bands'. A boolean value corresponds to all or none of these.
         @param temperature: Temperature [in K] for the simulation.
         """
-        if write_data:
+        if write_data is True:
             write_data = [
                 'density',
                 'electrostatic_potential',
                 'potential_energy',
                 'effective_mass']
-        else:
+        elif write_data is False:
             write_data = []
-        if plot_data:
+        if plot_data is True:
             plot_data = [
                 'density',
                 'electrostatic_potential',
                 'potential_energy',
                 'effective_mass',
                 'bare_bands']
-        else:
+        elif plot_data is False:
             plot_data = []
         task = {
             'task': 'thomasFermi2d',
@@ -514,15 +514,28 @@ class Model:
             all or none of these.
         @param temperature: Temperature [in K] for the calculation of densities.
         """
-        write_wavefunctions = list(range(eigenvalues)) if write_wavefunctions else []
-        plot_wavefunctions = list(range(eigenvalues)) if plot_wavefunctions else []
-        write_data = ['energies',
-                      'density',
-                      'electrostatic_potential',
-                      'potential_energy'] if write_data else []
-        plot_data = ['density',
-                     'electrostatic_potential',
-                     'potential_energy'] if plot_data else []
+        if write_wavefunctions is True:
+            write_wavefunctions = list(range(eigenvalues))
+        elif write_wavefunctions is False:
+            write_wavefunctions = []
+        if plot_wavefunctions is True:
+            plot_wavefunctions = list(range(eigenvalues))
+        elif plot_wavefunctions is False:
+            plot_wavefunctions = []
+        if write_data is True:
+            write_data = ['energies',
+                          'density',
+                          'electrostatic_potential',
+                          'potential_energy']
+        elif write_data is False:
+            write_data = []
+        if plot_data is True:
+            plot_data = ['density',
+                         'electrostatic_potential',
+                         'potential_energy']
+        elif plot_data is False:
+            plot_data = []
+
         task = {
             'task': 'schrodinger2d',
             'slice': slice_name,
@@ -574,8 +587,14 @@ class Model:
             none of these.
         """
         data_keys = ['electrostatic_potential', 'potential_energy']
-        write_data = data_keys if write_data else []
-        plot_data = data_keys if plot_data else []
+        if write_data is True:
+            write_data = data_keys
+        elif write_data is False:
+            write_data = []
+        if plot_data is True:
+            plot_data = data_keys
+        elif plot_data is False:
+            plot_data = []
         task = {
             'task': 'plotPotential2d',
             'slice': slice_name,
