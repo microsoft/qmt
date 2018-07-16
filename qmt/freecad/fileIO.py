@@ -2,7 +2,7 @@
 # Licensed under the MIT License.
 
 ###
-### Functions that deal with file i/o
+# Functions that deal with file i/o
 ###
 
 import FreeCAD
@@ -61,12 +61,14 @@ def exportCAD(obj, fileName):
     if (fileName[-5:] == '.step') or (fileName[-4:] == '.stp'):
         Part.export([obj], fileName)
     else:
-        raise ValueError('The file path' + fileName + ' does not end in .step or .stp. \
+        raise ValueError(
+            'The file path' + fileName +
+            ' does not end in .step or .stp. \
                           Please fix this and try your export again.')
 
 
 def updateParams(passModel=None):
-    ''' Update the parameters in the modelParams spreadsheet to reflect the 
+    ''' Update the parameters in the modelParams spreadsheet to reflect the
         current value in the model file.
     '''
     if passModel is None:

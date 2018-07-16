@@ -11,7 +11,7 @@ from sympy.physics.quantum import TensorProduct as kron
 try:
     from types import SimpleNamespace
 except ImportError:
-    # SimpleNamespace was introduced in python 3.3; in earlier versions use the 
+    # SimpleNamespace was introduced in python 3.3; in earlier versions use the
     # simple implementation from docs.python.org
     class SimpleNamespace:
         def __init__(self, **kwargs):
@@ -46,8 +46,8 @@ units = SimpleNamespace(
     V=spu.volt,
     K=spu.K,
     mK=spu.K / 1e3,
-    amp = spu.coulomb / spu.s,
-    nA = 1e-9 * spu.coulomb / spu.s,
+    amp=spu.coulomb / spu.s,
+    nA=1e-9 * spu.coulomb / spu.s,
 )
 
 
@@ -58,7 +58,8 @@ def parseUnit(s):
             continue
         if u == s:
             return units.__dict__[u]
-    # if s is a sympy object we assume it has already been parsed and pass it through
+    # if s is a sympy object we assume it has already been parsed and pass it
+    # through
     if hasattr(s, 'subs'):
         return s
     raise RuntimeError('unknown unit: {}'.format(s))
@@ -66,10 +67,12 @@ def parseUnit(s):
 
 constants = SimpleNamespace(
     hbar=spu.hbar,
-    k_B=sc.physical_constants['Boltzmann constant in eV/K'][0] * units.eV / units.K,
+    k_B=sc.physical_constants['Boltzmann constant in eV/K'][0] *
+    units.eV / units.K,
     m_e=sc.physical_constants["electron mass"][0] * spu.kg,
     q_e=sc.physical_constants["elementary charge"][0] * units.coulomb,
-    mu_b=sc.physical_constants["Bohr magneton in eV/T"][0] * units.eV / units.tesla,
+    mu_b=sc.physical_constants["Bohr magneton in eV/T"][0] *
+    units.eV / units.tesla,
     epsilon0=sc.epsilon_0 * spu.farad / spu.m,
     c=sc.physical_constants["speed of light in vacuum"][0] * spu.m / spu.s,
     pi=sc.pi

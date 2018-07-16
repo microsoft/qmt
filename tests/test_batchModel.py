@@ -5,6 +5,7 @@ import os
 import qmt
 from qmt.freecad.fileIO import *
 
+
 def setup_function(function):
     global myDoc
     global testDir
@@ -28,16 +29,17 @@ def manual_testing(function):
 def test_genEmptyModelDict():
     '''Guarantee that the empty model doesn't change. If it does: update here.'''
     d = model.genEmptyModelDict()
-    assert(str(d) == "{'comsolInfo': {'zeroLevel': [None, None], 'surfaceIntegrals': {}, 'volumeIntegrals': {}}, 'buildOrder': {}, 'slices': {}, 'physicsSweep': {'sweepParts': {}, 'length': 1, 'type': 'sparse'}, 'geometricParams': {}, 'pathSettings': {}, '3DParts': {}, 'meshInfo': {}, 'geomSweep': {}, 'materials': {}, 'postProcess': {'tasks': {}, 'sweeps': {}}, 'jobSettings': {}}")
+    assert str(d) == "{'jobSettings': {}, 'pathSettings': {}, 'comsolInfo': {'zeroLevel': [None, None], 'surfaceIntegrals': {}, 'volumeIntegrals': {}}, 'physicsSweep': {'sweepParts': {}, 'length': 1, 'type': 'sparse'}, 'geometricParams': {}, 'slices': {}, 'buildOrder': {}, '3DParts': {}, 'meshInfo': {}, 'geomSweep': {}, 'materials': {}, 'postProcess': {'tasks': {}, 'sweeps': {}}}"
 
 
 def test_genPhysicsSweep():
     '''Test generation of physics sweeps.'''
-    model.addPart('dummyPart','dummySketch','extrude','dielectric',
-                  material = 'SiO2',z0=-0.2,thickness=0.2,meshMaxSize=0.2)
+    model.addPart('dummyPart', 'dummySketch', 'extrude', 'dielectric',
+                  material='SiO2', z0=-0.2, thickness=0.2, meshMaxSize=0.2)
     model.genPhysicsSweep('dummyPart', 'param1', [1.1, 1.2, 1.3])
     assert model.modelDict['physicsSweep']['sweepParts']['param1_dummyPart']['part'] == "dummyPart"
-    assert model.modelDict['physicsSweep']['sweepParts']['param1_dummyPart']['values'] == [1.1, 1.2, 1.3]
+    assert model.modelDict['physicsSweep']['sweepParts']['param1_dummyPart']['values'] == [
+        1.1, 1.2, 1.3]
 
 
 def test_genGeomSweep():
@@ -49,33 +51,45 @@ def test_genGeomSweep():
 def test_genSurfaceIntegral():
     '''Test addition of surface integrals with default quantity 'V'.'''
     model.genSurfaceIntegral('dummyPart')
-    assert model.modelDict['comsolInfo']['surfaceIntegrals']['dummyPart'] == ['V']
+    assert model.modelDict['comsolInfo']['surfaceIntegrals']['dummyPart'] == [
+        'V']
 
 
 def test_genVolumeIntegral():
     '''Test addition of volume integrals with default quantity 'V'.'''
     model.genVolumeIntegral('dummyPart')
-    assert model.modelDict['comsolInfo']['volumeIntegrals']['dummyPart'] == ['V']
+    assert model.modelDict['comsolInfo']['volumeIntegrals']['dummyPart'] == [
+        'V']
 
 
 def test_setSimZero():
     '''Test setting of cosmetic zero levels for default property 'workFunction'.'''
     model.setSimZero('dummyPart')
-    assert model.modelDict['comsolInfo']['zeroLevel'] == ['dummyPart','workFunction']
+    assert model.modelDict['comsolInfo']['zeroLevel'] == [
+        'dummyPart', 'workFunction']
+
 
 def test_genComsolInfo():
     model.genComsolInfo()
-    assert model.modelDict['comsolInfo']['meshExport'] == None
-    assert model.modelDict['comsolInfo']['repairTolerance'] == None
+    assert model.modelDict['comsolInfo']['meshExport'] is None
+    assert model.modelDict['comsolInfo']['repairTolerance'] is None
     assert model.modelDict['comsolInfo']['fileName'] == 'comsolModel'
     assert model.modelDict['comsolInfo']['exportDir'] == 'solutions'
 
 
 def test_addPart():
-    model.addPart('test_part_1','i_AlEtch_Polyline003_sketch','extrude','dielectric',
-                  material = 'SiO2',z0=-0.2,thickness=0.2,meshMaxSize=0.2)
+    model.addPart(
+        'test_part_1',
+        'i_AlEtch_Polyline003_sketch',
+        'extrude',
+        'dielectric',
+        material='SiO2',
+        z0=-0.2,
+        thickness=0.2,
+        meshMaxSize=0.2)
+
 
 def test_addJob():
     jobPath = os.path.join(testDir, 'testJob')
-    model.addJob(jobPath,jobSequence=['geoGen'],numCoresPerJob=1)
+    model.addJob(jobPath, jobSequence=['geoGen'], numCoresPerJob=1)
     assert(model.modelDict['jobSettings']['rootPath'] == jobPath)

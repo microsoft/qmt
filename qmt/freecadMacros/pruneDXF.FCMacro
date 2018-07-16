@@ -37,7 +37,7 @@ class GuiClass(QtGui.QDialog):
         selObjs = Gui.Selection.getSelection()
         self.selObjNames = []
         for obj in selObjs:
-            self.selObjNames += [obj.Name]
+            self.selObjNames.append(obj.Name)
         
         # Next, specify the mask name:
 

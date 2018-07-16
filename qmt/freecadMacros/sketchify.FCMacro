@@ -43,7 +43,7 @@ class GuiClass(QtGui.QDialog):
         selObjs = Gui.Selection.getSelection()
         self.selObjNames = []
         for obj in selObjs:
-            self.selObjNames += [obj.Name]
+            self.selObjNames.append(obj.Name)
         
         self.etchCheckbox = QtGui.QCheckBox("Etch layer", self)
         self.etchCheckbox.move(20,vPix(0))

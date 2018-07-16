@@ -17,7 +17,7 @@ def test_setupModelFile():
     myDoc = FreeCAD.newDocument('testDoc')
     testDir = os.path.join(repo_path(), 'tests')
     filePath = os.path.join(testDir, 'testModel.json')
-    dummy = myDoc.addObject("Part::Box","modelFilePath")
+    dummy = myDoc.addObject("Part::Box", "modelFilePath")
     setupModelFile(filePath)
     assert 'testModel.json' in os.listdir(testDir)
     assert FreeCAD.ActiveDocument.modelFilePath.A1 == 'Path to model file:'
@@ -33,7 +33,7 @@ def test_getModel():
     setupModelFile(filePath)
     myModel = getModel()
     testModel = qmt.Model()
-    assert (myModel.modelDict==testModel.modelDict)
+    assert (myModel.modelDict == testModel.modelDict)
     os.remove(filePath)
     FreeCAD.closeDocument('testDoc')
 
@@ -55,7 +55,7 @@ def test_exportMeshed():
     yMax = meshImport.Mesh.BoundBox.YMax
     zMin = meshImport.Mesh.BoundBox.ZMin
     zMax = meshImport.Mesh.BoundBox.ZMax
-    assert testBB == (xMin,xMax,yMin,yMax,zMin,zMax)
+    assert testBB == (xMin, xMax, yMin, yMax, zMin, zMax)
     os.remove(filePath)
     FreeCAD.closeDocument('testDoc')
 
@@ -77,13 +77,13 @@ def test_exportCAD():
     yMax = CADImport.Shape.BoundBox.YMax
     zMin = CADImport.Shape.BoundBox.ZMin
     zMax = CADImport.Shape.BoundBox.ZMax
-    assert testBB == (xMin,xMax,yMin,yMax,zMin,zMax)
+    assert testBB == (xMin, xMax, yMin, yMax, zMin, zMax)
     os.remove(filePath)
 
     with pytest.raises(ValueError) as err:
         exportCAD(testShape, 'not_a_step_file')
     assert 'does not end' in str(err.value)
-    
+
     FreeCAD.closeDocument('testDoc')
 
 
@@ -97,19 +97,19 @@ def test_updateParams():
     setupModelFile(filePath)
     model = qmt.Model(modelPath=filePath)
 
-    dummy = myDoc.addObject("Part::Box","modelParams")
-    model.modelDict['geometricParams']['length1'] = (2,'freeCAD')
+    dummy = myDoc.addObject("Part::Box", "modelParams")
+    model.modelDict['geometricParams']['length1'] = (2, 'freeCAD')
     updateParams()
-    model.modelDict['geometricParams']['length2'] = (3,'freeCAD')
-    model.modelDict['geometricParams']['param3'] = (3,'python')
+    model.modelDict['geometricParams']['length2'] = (3, 'freeCAD')
+    model.modelDict['geometricParams']['param3'] = (3, 'python')
     updateParams(model)
-    model.modelDict['geometricParams']['param4'] = (3,'unknown')
+    model.modelDict['geometricParams']['param4'] = (3, 'unknown')
     model.saveModel()
     with pytest.raises(ValueError) as err:
         updateParams()
     assert 'Unknown geometric parameter' in str(err.value)
 
-    fcFilePath = os.path.splitext(filePath)[0]+'.FCStd'
+    fcFilePath = os.path.splitext(filePath)[0] + '.FCStd'
     myDoc.saveAs(fcFilePath)
     myDoc2 = FreeCAD.newDocument('testDoc2')
     myDoc2.load(fcFilePath)
