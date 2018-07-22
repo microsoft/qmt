@@ -16,19 +16,19 @@ class GeometryTask(Task):
         return current_part_dict
 
 
-    def _generate_output(self):
+    def _generate_result(self):
         if self.sweep_manager is None:
             self.result = self.part_dict
         else:
             self.list_of_tags = [result for result in gen_tag_extract(self.part_dict)]
             sweep_holder = SweepHolder(self.sweep_manager,self.list_of_tags)
             for sweep_holder_index,tag_values in enumerate(sweep_holder.tagged_value_list):
-                #current_part_dict = delayed(self._make_current_part_dict)(tag_values)
-                current_part_dict = self._make_current_part_dict(tag_values)
+                current_part_dict = delayed(self._make_current_part_dict)(tag_values)
                 sweep_holder.add(current_part_dict,sweep_holder_index)
-            self.result = sweep_holder#.compute()
-        return True
+            self.result = sweep_holder
 
     def compile(self):
-        return delayed(self._generate_output())
+        self._generate_result()
+        return self.result
+        #return delayed(self._generate_output())
 

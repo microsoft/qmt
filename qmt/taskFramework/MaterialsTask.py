@@ -24,15 +24,15 @@ class MaterialsTask(Task):
         return current_part_dict
 
 
-    def _generate_output(self,completed=True):
+    def _generate_result(self,completed=True):
         if self.sweep_manager is None:
             self.result = self.part_dict
         else:
             self.list_of_tags = [result for result in gen_tag_extract(self.part_dict)]
             sweep_holder = SweepHolder(self.sweep_manager,self.list_of_tags)
             for sweep_holder_index,tag_values in enumerate(sweep_holder.tagged_value_list):
-                #current_part_dict = delayed(self._make_current_part_dict)(tag_values)
-                current_part_dict = self._make_current_part_dict(tag_values)
+                current_part_dict = delayed(self._make_current_part_dict)(tag_values)
+                #current_part_dict = self._make_current_part_dict(tag_values)
                 sweep_holder.add(current_part_dict,sweep_holder_index)
             self.result = sweep_holder#.compute()
         return True
@@ -40,5 +40,6 @@ class MaterialsTask(Task):
     def compile(self):
         completed = self.geo_task.compile()
         completed = delayed(self._check_part_names)(completed)
-        return delayed(self._generate_output)(completed)
+        self._generate_result(completed)
+        return self.result
         

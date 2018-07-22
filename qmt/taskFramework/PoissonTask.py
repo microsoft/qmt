@@ -36,16 +36,16 @@ class PoissonTask(Task):
             self.list_of_tags += self.geo_task.list_of_tags
             sweep_holder = SweepHolder(self.sweep_manager,self.list_of_tags)
             for sweep_holder_index,tag_values in enumerate(sweep_holder.tagged_value_list):
-                #current_part_dict = delayed(self._make_current_part_dict)(tag_values)
-                #total_index = delayed(sweep_holder.index_in_sweep[sweep_holder_index][0])
-                #materials_result_instance = delayed(self.mat_task.result.get_object)(total_index)
-                #geo_result_instance = delayed(self.geo_task.result.get_object)(total_index)
-                #output = delayed(self._solve_instance)(materials_result_instance,geo_result_instance,current_part_dict)
                 current_part_dict = self._make_current_part_dict(tag_values)
                 total_index = sweep_holder.index_in_sweep[sweep_holder_index][0]
                 materials_result_instance = self.mat_task.result.get_object(total_index)
                 geo_result_instance = self.geo_task.result.get_object(total_index)
-                output = self._solve_instance(materials_result_instance,geo_result_instance,current_part_dict)
+                output = delayed(self._solve_instance)(materials_result_instance,geo_result_instance,current_part_dict)
+                #current_part_dict = self._make_current_part_dict(tag_values)
+                #total_index = sweep_holder.index_in_sweep[sweep_holder_index][0]
+                #materials_result_instance = self.mat_task.result.get_object(total_index)
+                #geo_result_instance = self.geo_task.result.get_object(total_index)
+                #output = self._solve_instance(materials_result_instance,geo_result_instance,current_part_dict)
                 sweep_holder.add(output,sweep_holder_index)
             self.result = sweep_holder#.compute()
         return True
@@ -53,5 +53,7 @@ class PoissonTask(Task):
     def compile(self):
         mat_completed = self.mat_task.compile()
         geo_completed = self.geo_task.compile()
-        return delayed(self._generate_output)(mat_completed,geo_completed)
+        self._generate_output()
+        return self.result
+        #return delayed(self._generate_output)(mat_completed,geo_completed)
 
