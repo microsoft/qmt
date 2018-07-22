@@ -12,7 +12,7 @@ class GeometryTask(Task):
 
     def _populate_result(self):
         if self.sweep_manager is None:
-            self.result = delayed(self._solve_instance)(None)
+            self.result = delayed(self._solve_instance)(self.part_dict)
         else:
             sweep_holder = SweepHolder(self.sweep_manager,self.list_of_tags)
             for sweep_holder_index,tag_values in enumerate(sweep_holder.tagged_value_list):
