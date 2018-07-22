@@ -1,5 +1,7 @@
 from dask import delayed
 from Task import Task
+from GeometryTask import GeometryTask
+from MaterialsTask import MaterialsTask
 from SweepHolder import SweepHolder
 from SweepTag import replace_tag_with_value
 
@@ -9,7 +11,7 @@ class PoissonTask(Task):
         super(self.__class__, self).__init__(**Task.remove_self_argument(locals()))
         assert isinstance(mat_task,MaterialsTask)
         self.mat_task = mat_task
-        asser isinstance(geo_task,GeometryTask)
+        assert isinstance(geo_task,GeometryTask)
         self.geo_task = geo_task
     
     def _make_current_part_dict(self,tag_values):
@@ -30,7 +32,7 @@ class PoissonTask(Task):
 
     def _populate_result(self,mat_completed=True,geo_completed=True):
         if self.sweep_manager is None:
-            self.result = self._solve_instance(self.mat_task.result,self.geo_task.result,self.part_dict)
+            self.result = delayed(self._solve_instance)(self.mat_task.result,self.geo_task.result,self.part_dict)
         else:
             sweep_holder = SweepHolder(self.sweep_manager,self.list_of_tags)
             for sweep_holder_index,tag_values in enumerate(sweep_holder.tagged_value_list):

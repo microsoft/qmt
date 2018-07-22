@@ -38,7 +38,7 @@ class SweepHolder(object):
         self.object_list[object_list_index] = item
 
     def compute(self):
-         self.object_list = map(lambda x: x.compute(),self.object_list)
+         #self.object_list = map(lambda x: x.compute(),self.object_list)
          #print self.object_list
          #self.object_list[0] = self.object_list[0].compute()
-         #self.object_list = dask.compute(*self.object_list)
+         self.object_list = dask.compute(*self.object_list)

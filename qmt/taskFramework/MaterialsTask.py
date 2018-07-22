@@ -1,7 +1,8 @@
 from dask import delayed
 from Task import Task
+from GeometryTask import GeometryTask
 from SweepHolder import SweepHolder
-from SweepTag import gen_tag_extract,replace_tag_with_value
+from SweepTag import replace_tag_with_value
 
 class MaterialsTask(Task):
 
@@ -25,7 +26,7 @@ class MaterialsTask(Task):
     #TODO: need to run _check_part_names!
     def _populate_result(self,completed=True):
         if self.sweep_manager is None:
-            self.result = self.part_dict
+            self.result = delayed(self._solve_instance)(None)
         else:
             sweep_holder = SweepHolder(self.sweep_manager,self.list_of_tags)
             for sweep_holder_index,tag_values in enumerate(sweep_holder.tagged_value_list):

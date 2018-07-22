@@ -97,8 +97,11 @@ class Task(object):
 
     def run(self):
         if self.result is None:
-            self.compile().compute()
-            #self.result = self.result.compute()
+            self.compile()
+        if self.sweep_manager is None:
+            self.result = self.result.compute()
+        else:
+            self.result.compute()
 
     @staticmethod
     def remove_self_argument(init_arguments):
