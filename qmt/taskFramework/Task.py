@@ -26,8 +26,8 @@ class Task(object):
         self.argumentDictionary = kwargs
         self.argumentDictionary.pop("name", None)
 
-        if 'part_dict' in kwargs:
-            self.part_dict = kwargs['part_dict']
+        if 'options' in kwargs:
+            self.options = kwargs['options']
 
         self.sweep_manager = None
 
@@ -37,7 +37,7 @@ class Task(object):
                 previous_tasks += [kwarg]
         self.previous_tasks = previous_tasks
 
-        self.list_of_tags = [result for result in gen_tag_extract(self.part_dict)]
+        self.list_of_tags = [result for result in gen_tag_extract(self.options)]
         if 'inheret_tags_from' not in kwargs:
             inheret_from = self.previous_tasks
         elif kwargs['inheret_tags_from'] is None:
@@ -92,11 +92,11 @@ class Task(object):
         if self.result is None:
             self._populate_result()
     
-    def _make_current_part_dict(self,tag_values):
-        current_part_dict = self.part_dict
+    def _make_current_options(self,tag_values):
+        current_options = self.options
         for i,tag in enumerate(self.list_of_tags):
-            current_part_dict = replace_tag_with_value(current_part_dict,tag,tag_values[tag])
-        return current_part_dict
+            current_options = replace_tag_with_value(current_options,tag,tag_values[tag])
+        return current_options
 
     def _solve_instance(self):
         raise NotImplementedError("Task is missing the _solve_instance method!")
@@ -106,14 +106,14 @@ class Task(object):
             raise ValueError("self.input_task_list must be set in init!")
         if self.sweep_manager is None:
             input_result_list = [task.result for task in self.input_task_list]
-            self.result = delayed(self._solve_instance)(input_result_list,self.part_dict)
+            self.result = delayed(self._solve_instance)(input_result_list,self.options)
         else:
             sweep_holder = SweepHolder(self.sweep_manager,self.list_of_tags)
             for sweep_holder_index,tag_values in enumerate(sweep_holder.tagged_value_list):
-                current_part_dict = self._make_current_part_dict(tag_values)
+                current_options = self._make_current_options(tag_values)
                 total_index = sweep_holder.index_in_sweep[sweep_holder_index][0]
                 input_result_list = [task.result.get_object(total_index) for task in self.input_task_list]
-                output = delayed(self._solve_instance)(input_result_list,current_part_dict)
+                output = delayed(self._solve_instance)(input_result_list,current_options)
                 sweep_holder.add(output,sweep_holder_index)
             self.result = sweep_holder
 
