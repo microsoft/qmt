@@ -4,7 +4,7 @@ from SweepHolder import SweepHolder
 
 class GeometryTask(Task):
 
-    def __init__(self,part_dict={},name='geometry_task'):
+    def __init__(self,part_dict=None,name='geometry_task'):
         super(self.__class__, self).__init__(**Task.remove_self_argument(locals()))
     
     def _solve_instance(self,current_part_dict):

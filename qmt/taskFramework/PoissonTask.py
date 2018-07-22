@@ -6,7 +6,7 @@ from SweepHolder import SweepHolder
 
 class PoissonTask(Task):
 
-    def __init__(self,geo_task,mat_task,part_dict={},name='poisson_task'):
+    def __init__(self,geo_task,mat_task,part_dict=None,name='poisson_task'):
         super(self.__class__, self).__init__(**Task.remove_self_argument(locals()))
         assert isinstance(mat_task,MaterialsTask)
         self.mat_task = mat_task

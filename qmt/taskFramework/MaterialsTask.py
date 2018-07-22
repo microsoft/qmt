@@ -5,7 +5,7 @@ from SweepHolder import SweepHolder
 
 class MaterialsTask(Task):
 
-    def __init__(self,geo_task,part_dict={},name='materials_task',inheret_tags_from = None):
+    def __init__(self,geo_task,part_dict=None,name='materials_task',inheret_tags_from = None):
         super(self.__class__, self).__init__(**Task.remove_self_argument(locals()))
         assert isinstance(geo_task,GeometryTask)
         self.geo_task = geo_task
