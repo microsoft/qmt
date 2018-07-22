@@ -26,7 +26,7 @@ class SweepManager(object):
     def run_task(self,task):
         def set_sweep_manager(current_task):
             current_task.sweep_manager = self
-            for child_task in current_task.child_tasks:
+            for child_task in current_task.previous_tasks:
                 set_sweep_manager(child_task)
         
         set_sweep_manager(task)

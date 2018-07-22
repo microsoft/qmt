@@ -1,19 +1,11 @@
 from dask import delayed
 from SweepTag import gen_tag_extract,replace_tag_with_value
 
-class MaterialsTask(Task):
+class GeometryTask(Task):
 
-    def __init__(self,geo_task,part_dict={},name='materials_task'):
+    def __init__(self,part_dict={},name='geometry_task'):
         super(self.__class__, self).__init__(**Task.remove_self_argument(locals()))
-        #geo_task is type GeometryTask
-        self.geo_task = geo_task
         self.part_dict = part_dict
-
-    def _check_part_names(completed=True):
-        #TODO: write this function
-        #checks to see if the parts in my part_dict
-        #are the same as in geo_task's part_dict
-        return True
     
     def _make_current_part_dict(tag_values):
         current_part_dict = self.part_dict
@@ -35,8 +27,4 @@ class MaterialsTask(Task):
         return True
 
     def run(self):
-        completed = delayed(self.geo_task.run)()
-        completed = delayed(self._check_part_names)(completed)
         return delayed(self._generate_output)(completed)
-        
-

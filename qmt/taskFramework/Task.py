@@ -10,7 +10,7 @@ class Task(object):
     __metaclass__ = TaskMetaclass
     current_instance_id = 0
 
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
 
         if "name" not in kwargs:
             raise AttributeError("All subclasses of Task must have a 'name' keyword argument")
@@ -22,6 +22,14 @@ class Task(object):
 
         self.argumentDictionary = kwargs
         self.argumentDictionary.pop("name", None)
+
+        self.sweep_manager = None
+
+        previous_tasks = []
+        for arg in args:
+            if isinstance(arg,Task):
+                previous_tasks += [arg]
+        self.previous_tasks = previous_tasks
 
         self.result = None
 
@@ -74,3 +82,11 @@ class Task(object):
     @staticmethod
     def remove_self_argument(init_arguments):
         init_arguments.pop('self', None)
+        return init_arguments
+
+    @staticmethod
+    def isTaskRepresentation(argValue):
+        # check if it has form {name:otherDict}
+        hasSingleItem = isinstance(argValue, dict) and len(argValue.items()) == 1
+        # check if it has the class to reconstitute the task from
+        return hasSingleItem and "class" in argValue.values()[0]

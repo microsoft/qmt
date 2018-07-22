@@ -23,8 +23,7 @@ class SweepHolder(object):
 
         self.tagged_value_list = tagged_value_list
         self.index_in_sweep = index_in_sweep
-        self.object_list = [None]*len(self.tagged_value_list)
-        
+        self.object_list = [None]*len(self.index_in_sweep)
         
     
     def get_object(self,total_index):
