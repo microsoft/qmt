@@ -1,4 +1,5 @@
 from dask import delayed
+from Task import Task
 from SweepTag import gen_tag_extract,replace_tag_with_value
 
 class PoissonTask(Task):
@@ -40,7 +41,7 @@ class PoissonTask(Task):
                 geo_result_instance = delayed(self.geo_task.result.get_object)(total_index)
                 output = delayed(_solve_instance)(materials_result_instance,geo_result_instance,current_part_dict)
                 sweep_holder.add(output,sweep_holder_index)
-            delayed(self.result = sweep_holder)
+            self.result = sweep_holder
         return True
 
     def run(self):

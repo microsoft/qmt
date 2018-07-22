@@ -1,4 +1,5 @@
 from dask import delayed
+from Task import Task
 from SweepTag import gen_tag_extract,replace_tag_with_value
 
 class MaterialsTask(Task):
@@ -31,7 +32,7 @@ class MaterialsTask(Task):
             for sweep_holder_index,tag_values in enumerate(self.sweep_holder.tag_value_list):
                 current_part_dict = delayed(_make_current_part_dict)(tag_values)
                 sweep_holder.add(current_part_dict,sweep_holder_index)
-            delayed(self.result = sweep_holder)
+            self.result = sweep_holder
         return True
 
     def run(self):
