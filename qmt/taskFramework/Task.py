@@ -3,6 +3,8 @@ from collections import OrderedDict
 import json
 from TaskMetaclass import TaskMetaclass
 from SweepTag import gen_tag_extract,replace_tag_with_value
+from SweepHolder import SweepHolder
+from dask import delayed
 
 # todo base import then factories
 
@@ -46,6 +48,7 @@ class Task(object):
             self.list_of_tags += task.list_of_tags
 
         self.result = None
+        self.input_task_list = None
 
     def to_dict(self):
         result = OrderedDict()
@@ -97,9 +100,22 @@ class Task(object):
 
     def _solve_instance(self):
         raise NotImplementedError("Task is missing the _solve_instance method!")
-    
+
     def _populate_result(self):
-        raise NotImplementedError("Task is missing the _populate_result method!")
+        if self.input_task_list is None:
+            raise ValueError("self.input_task_list must be set in init!")
+        if self.sweep_manager is None:
+            input_result_list = [task.result for task in self.input_task_list]
+            self.result = delayed(self._solve_instance)(input_result_list,self.part_dict)
+        else:
+            sweep_holder = SweepHolder(self.sweep_manager,self.list_of_tags)
+            for sweep_holder_index,tag_values in enumerate(sweep_holder.tagged_value_list):
+                current_part_dict = self._make_current_part_dict(tag_values)
+                total_index = sweep_holder.index_in_sweep[sweep_holder_index][0]
+                input_result_list = [task.result.get_object(total_index) for task in self.input_task_list]
+                output = delayed(self._solve_instance)(input_result_list,current_part_dict)
+                sweep_holder.add(output,sweep_holder_index)
+            self.result = sweep_holder
 
     def visualize(self,filename=None):
         return self.compile().visualize(filename=filename)
