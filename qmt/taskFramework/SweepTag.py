@@ -23,7 +23,7 @@ def gen_tag_extract(var):
             if isinstance(v,SweepTag):
                 yield v
             if isinstance(v, dict):
-                for result in gen_dict_extract(v):
+                for result in gen_tag_extract(v):
                     yield result
 
 def replace_tag_with_value(var,tag,value):

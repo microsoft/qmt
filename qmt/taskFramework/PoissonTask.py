@@ -1,5 +1,6 @@
 from dask import delayed
 from Task import Task
+from SweepHolder import SweepHolder
 from SweepTag import gen_tag_extract,replace_tag_with_value
 
 class PoissonTask(Task):
@@ -12,7 +13,7 @@ class PoissonTask(Task):
     
     def _make_current_part_dict(self,tag_values):
         current_part_dict = self.part_dict
-        for i,tag in enumerate(list_of_tags):
+        for i,tag in enumerate(self.list_of_tags):
             current_part_dict = replace_tag_with_value(current_part_dict,tag,tag_values[tag])
         return current_part_dict
 
@@ -30,18 +31,23 @@ class PoissonTask(Task):
         if self.sweep_manager is None:
             self.result = self._solve_instance(self.mat_task.result,self.geo_task.result,self.part_dict)
         else:
-            list_of_tags = [result for result in gen_tag_extract(self.part_dict)]
-            list_of_tags += [self.mat_task.result.list_of_tags]
-            list_of_tags += [self.geo_task.result.list_of_tags]
-            sweep_holder = SweepHolder(self.sweep_manager,list_of_tags)
-            for sweep_holder_index,tag_values in enumerate(self.sweep_holder.tag_value_list):
-                current_part_dict = delayed(_make_current_part_dict)(tag_values)
-                total_index = delayed(sweep_holder.index_in_sweep[sweep_holder_index][0])
-                materials_result_instance = delayed(self.mat_task.result.get_object)(total_index)
-                geo_result_instance = delayed(self.geo_task.result.get_object)(total_index)
-                output = delayed(self._solve_instance)(materials_result_instance,geo_result_instance,current_part_dict)
+            self.list_of_tags = [result for result in gen_tag_extract(self.part_dict)]
+            self.list_of_tags += self.mat_task.list_of_tags
+            self.list_of_tags += self.geo_task.list_of_tags
+            sweep_holder = SweepHolder(self.sweep_manager,self.list_of_tags)
+            for sweep_holder_index,tag_values in enumerate(sweep_holder.tagged_value_list):
+                #current_part_dict = delayed(self._make_current_part_dict)(tag_values)
+                #total_index = delayed(sweep_holder.index_in_sweep[sweep_holder_index][0])
+                #materials_result_instance = delayed(self.mat_task.result.get_object)(total_index)
+                #geo_result_instance = delayed(self.geo_task.result.get_object)(total_index)
+                #output = delayed(self._solve_instance)(materials_result_instance,geo_result_instance,current_part_dict)
+                current_part_dict = self._make_current_part_dict(tag_values)
+                total_index = sweep_holder.index_in_sweep[sweep_holder_index][0]
+                materials_result_instance = self.mat_task.result.get_object(total_index)
+                geo_result_instance = self.geo_task.result.get_object(total_index)
+                output = self._solve_instance(materials_result_instance,geo_result_instance,current_part_dict)
                 sweep_holder.add(output,sweep_holder_index)
-            self.result = sweep_holder
+            self.result = sweep_holder#.compute()
         return True
 
     def compile(self):

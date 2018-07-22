@@ -1,3 +1,4 @@
+import dask
 from collections import OrderedDict
 import json
 from TaskMetaclass import TaskMetaclass
@@ -26,11 +27,10 @@ class Task(object):
         self.sweep_manager = None
 
         previous_tasks = []
-        for arg in args:
-            if isinstance(arg,Task):
-                previous_tasks += [arg]
+        for kwarg in kwargs.values():
+            if isinstance(kwarg,Task):
+                previous_tasks += [kwarg]
         self.previous_tasks = previous_tasks
-
         self.result = None
 
     def to_dict(self):
@@ -78,6 +78,7 @@ class Task(object):
     def run(self):
         if self.result is None:
             self.compile().compute()
+            #self.result = self.result.compute()
 
     @staticmethod
     def remove_self_argument(init_arguments):

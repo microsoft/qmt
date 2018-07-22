@@ -23,7 +23,7 @@ class SweepManager(object):
             result = [merge_two_dicts(x,{key:y}) for x in result for y in pool]
         return SweepManager(result)
 
-    def run_task(self,task):
+    def run(self,task):
         def set_sweep_manager(current_task):
             current_task.sweep_manager = self
             for child_task in current_task.previous_tasks:
