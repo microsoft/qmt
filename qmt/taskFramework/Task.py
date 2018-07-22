@@ -2,7 +2,7 @@ import dask
 from collections import OrderedDict
 import json
 from TaskMetaclass import TaskMetaclass
-from SweepTag import gen_tag_extract
+from SweepTag import gen_tag_extract,replace_tag_with_value
 
 # todo base import then factories
 
@@ -88,9 +88,18 @@ class Task(object):
             task.compile()
         if self.result is None:
             self._populate_result()
+    
+    def _make_current_part_dict(self,tag_values):
+        current_part_dict = self.part_dict
+        for i,tag in enumerate(self.list_of_tags):
+            current_part_dict = replace_tag_with_value(current_part_dict,tag,tag_values[tag])
+        return current_part_dict
 
     def _solve_instance(self):
         raise NotImplementedError("Task is missing the _solve_instance method!")
+    
+    def _populate_result(self):
+        raise NotImplementedError("Task is missing the _populate_result method!")
 
     def visualize(self,filename=None):
         return self.compile().visualize(filename=filename)

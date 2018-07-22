@@ -3,7 +3,6 @@ from Task import Task
 from GeometryTask import GeometryTask
 from MaterialsTask import MaterialsTask
 from SweepHolder import SweepHolder
-from SweepTag import replace_tag_with_value
 
 class PoissonTask(Task):
 
@@ -13,12 +12,6 @@ class PoissonTask(Task):
         self.mat_task = mat_task
         assert isinstance(geo_task,GeometryTask)
         self.geo_task = geo_task
-    
-    def _make_current_part_dict(self,tag_values):
-        current_part_dict = self.part_dict
-        for i,tag in enumerate(self.list_of_tags):
-            current_part_dict = replace_tag_with_value(current_part_dict,tag,tag_values[tag])
-        return current_part_dict
 
     def _solve_instance(self,materials_result_instance,geo_result_instance,current_part_dict):
         output = ''
