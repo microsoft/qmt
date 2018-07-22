@@ -2,7 +2,7 @@ import dask
 from collections import OrderedDict
 import json
 from TaskMetaclass import TaskMetaclass
-
+from SweepTag import gen_tag_extract
 
 # todo base import then factories
 
@@ -24,6 +24,9 @@ class Task(object):
         self.argumentDictionary = kwargs
         self.argumentDictionary.pop("name", None)
 
+        if 'part_dict' in kwargs:
+            self.part_dict = kwargs['part_dict']
+
         self.sweep_manager = None
 
         previous_tasks = []
@@ -31,6 +34,17 @@ class Task(object):
             if isinstance(kwarg,Task):
                 previous_tasks += [kwarg]
         self.previous_tasks = previous_tasks
+
+        self.list_of_tags = [result for result in gen_tag_extract(self.part_dict)]
+        if 'inheret_tags_from' not in kwargs:
+            inheret_from = self.previous_tasks
+        elif kwargs['inheret_tags_from'] is None:
+            inheret_from = self.previous_tasks
+        else:
+            inheret_from = kwargs['inheret_tags_from']
+        for task in inheret_from:
+            self.list_of_tags += task.list_of_tags
+
         self.result = None
 
     def to_dict(self):
@@ -70,7 +84,13 @@ class Task(object):
         return result
 
     def compile(self):
-        raise NotImplementedError("Task is abstract. Method 'compile' is defined only for subclasses of Task.")
+        for task in self.previous_tasks:
+            task.compile()
+        if self.result is None:
+            self._populate_result()
+
+    def _solve_instance(self):
+        raise NotImplementedError("Task is missing the _solve_instance method!")
 
     def visualize(self,filename=None):
         return self.compile().visualize(filename=filename)
