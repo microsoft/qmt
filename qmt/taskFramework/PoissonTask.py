@@ -35,6 +35,5 @@ class PoissonTask(Task):
                 geo_result_instance = self.geo_task.result.get_object(total_index)
                 output = delayed(self._solve_instance)(materials_result_instance,geo_result_instance,current_part_dict)
                 sweep_holder.add(output,sweep_holder_index)
-            self.result = sweep_holder#.compute()
-        return True
+            self.result = sweep_holder
 

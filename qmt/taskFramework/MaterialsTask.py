@@ -30,5 +30,4 @@ class MaterialsTask(Task):
                 output = delayed(self._solve_instance)(current_part_dict)
                 sweep_holder.add(output,sweep_holder_index)
             self.result = sweep_holder
-        return True
         
