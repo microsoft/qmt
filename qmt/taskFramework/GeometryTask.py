@@ -8,14 +8,14 @@ class GeometryTask(Task):
         super(self.__class__, self).__init__(**Task.remove_self_argument(locals()))
         self.part_dict = part_dict
     
-    def _make_current_part_dict(tag_values):
+    def _make_current_part_dict(self,tag_values):
         current_part_dict = self.part_dict
         for i,tag in enumerate(list_of_tags):
             current_part_dict = replace_tag_with_value(current_part_dict,tag,tag_values[tag])
         return current_part_dict
 
 
-    def _generate_output(completed=True):
+    def _generate_output(self):
         if self.sweep_manager is None:
             self.result = self.part_dict
         else:
@@ -27,5 +27,6 @@ class GeometryTask(Task):
             self.result = sweep_holder
         return True
 
-    def run(self):
-        return delayed(self._generate_output)(completed)
+    def compile(self):
+        return delayed(self._generate_output())
+

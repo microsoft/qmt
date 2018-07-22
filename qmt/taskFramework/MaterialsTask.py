@@ -10,20 +10,20 @@ class MaterialsTask(Task):
         self.geo_task = geo_task
         self.part_dict = part_dict
 
-    def _check_part_names(completed=True):
+    def _check_part_names(self,completed=True):
         #TODO: write this function
         #checks to see if the parts in my part_dict
         #are the same as in geo_task's part_dict
         return True
     
-    def _make_current_part_dict(tag_values):
+    def _make_current_part_dict(self,tag_values):
         current_part_dict = self.part_dict
         for i,tag in enumerate(list_of_tags):
             current_part_dict = replace_tag_with_value(current_part_dict,tag,tag_values[tag])
         return current_part_dict
 
 
-    def _generate_output(completed=True):
+    def _generate_output(self,completed=True):
         if self.sweep_manager is None:
             self.result = self.part_dict
         else:
@@ -35,9 +35,8 @@ class MaterialsTask(Task):
             self.result = sweep_holder
         return True
 
-    def run(self):
-        completed = delayed(self.geo_task.run)()
+    def compile(self):
+        completed = self.geo_task.compile()
         completed = delayed(self._check_part_names)(completed)
         return delayed(self._generate_output)(completed)
         
-

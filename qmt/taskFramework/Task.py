@@ -69,15 +69,15 @@ class Task(object):
 
         return result
 
+    def compile(self):
+        raise NotImplementedError("Task is abstract. Method 'compile' is defined only for subclasses of Task.")
+
+    def visualize(self,filename=None):
+        return self.compile().visualize(filename=filename)
+
     def run(self):
-        raise NotImplementedError("Task is abstract. Method 'run' is defined only for subclasses of Task.")
-
-    def visualize(self):
-        return self.run().visualize()
-
-    def compute(self):
         if self.result is None:
-            self.result = self.run().compute()
+            self.compile().compute()
 
     @staticmethod
     def remove_self_argument(init_arguments):
