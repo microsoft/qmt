@@ -48,6 +48,8 @@ class Task(object):
         if 'inheret_tags_from' not in kwargs:
             inheret_from = self.previous_tasks
         elif kwargs['inheret_tags_from'] is None:
+            inheret_from = []
+        elif kwargs['inheret_tags_from'] == 'all':
             inheret_from = self.previous_tasks
         else:
             inheret_from = kwargs['inheret_tags_from']
