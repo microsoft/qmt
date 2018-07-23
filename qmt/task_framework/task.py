@@ -1,8 +1,16 @@
-from sweep import SweepHolder,gen_tag_extract,replace_tag_with_value
+"""
+Core module of the Task framework. Contains the base Task class,
+from which all special purpose tasks are subclassed.
+
+Classes:
+    Task
+    TaskMetaclass
+"""
+
+from sweep import SweepHolder, gen_tag_extract, replace_tag_with_value
 from dask import delayed
 
 class TaskMetaclass(type):
-
     class_registry = {}
 
     def __new__(mcs, name, bases, class_dict):
@@ -17,6 +25,11 @@ class TaskMetaclass(type):
         TaskMetaclass.class_registry[class_to_register.__name__] = class_to_register
 
 class Task(object):
+    """
+    Abstract class for general simulation tasks run within the Dask framework.
+
+    At
+    """
     __metaclass__ = TaskMetaclass
     current_instance_id = 0
 
@@ -40,18 +53,20 @@ class Task(object):
 
         previous_tasks = []
         for kwarg in kwargs.values():
-            if isinstance(kwarg,Task):
+            if isinstance(kwarg, Task):
                 previous_tasks += [kwarg]
         self.previous_tasks = previous_tasks
 
         self.list_of_tags = [result for result in gen_tag_extract(self.options)]
-        if 'inheret_tags_from' not in kwargs:
-            inheret_from = self.previous_tasks
-        elif kwargs['inheret_tags_from'] is None:
-            inheret_from = self.previous_tasks
+        if 'inherit_tags_from' not in kwargs:
+            inherit_from = self.previous_tasks
+        elif kwargs['inherit_tags_from'] is None:
+            inherit_from = []
+        elif kwargs['inherit_tags_from'] is 'all':
+            inherit_from = self.previous_tasks
         else:
-            inheret_from = kwargs['inheret_tags_from']
-        for task in inheret_from:
+            inherit_from = kwargs['inherit_tags_from']
+        for task in inherit_from:
             self.list_of_tags += task.list_of_tags
 
         self.result = None
@@ -73,7 +88,7 @@ class Task(object):
 
     def save(self, file_name):
         raise NotImplementedError("json serialization not yet implemented")
-        #TODO add serialization
+        # TODO add serialization
 
         # def to_dict(self):
         #     result = OrderedDict()
@@ -101,14 +116,14 @@ class Task(object):
             task.compile()
         if self.result is None:
             self._populate_result()
-    
-    def _make_current_options(self,tag_values):
+
+    def _make_current_options(self, tag_values):
         current_options = self.options
-        for i,tag in enumerate(self.list_of_tags):
-            current_options = replace_tag_with_value(current_options,tag,tag_values[tag])
+        for i, tag in enumerate(self.list_of_tags):
+            current_options = replace_tag_with_value(current_options, tag, tag_values[tag])
         return current_options
 
-    def _solve_instance(self,input_result_list,current_options):
+    def _solve_instance(self, input_result_list, current_options):
         raise NotImplementedError("Task is missing the _solve_instance method!")
 
     def _populate_result(self):
@@ -116,18 +131,18 @@ class Task(object):
             raise ValueError("self.input_task_list must be set in init!")
         if self.sweep_manager is None:
             input_result_list = [task.result for task in self.input_task_list]
-            self.result = delayed(self._solve_instance)(input_result_list,self.options)
+            self.result = delayed(self._solve_instance)(input_result_list, self.options)
         else:
-            sweep_holder = SweepHolder(self.sweep_manager,self.list_of_tags)
-            for sweep_holder_index,tag_values in enumerate(sweep_holder.tagged_value_list):
+            sweep_holder = SweepHolder(self.sweep_manager, self.list_of_tags)
+            for sweep_holder_index, tag_values in enumerate(sweep_holder.tagged_value_list):
                 current_options = self._make_current_options(tag_values)
                 total_index = sweep_holder.index_in_sweep[sweep_holder_index][0]
                 input_result_list = [task.result.get_object(total_index) for task in self.input_task_list]
-                output = delayed(self._solve_instance)(input_result_list,current_options)
-                sweep_holder.add(output,sweep_holder_index)
+                output = delayed(self._solve_instance)(input_result_list, current_options)
+                sweep_holder.add(output, sweep_holder_index)
             self.result = sweep_holder
 
-    def visualize(self,filename=None):
+    def visualize(self, filename=None):
         return self.compile().visualize(filename=filename)
 
     def run(self):
@@ -149,5 +164,3 @@ class Task(object):
         hasSingleItem = isinstance(argValue, dict) and len(argValue.items()) == 1
         # check if it has the class to reconstitute the task from
         return hasSingleItem and "class" in argValue.values()[0]
-
-
