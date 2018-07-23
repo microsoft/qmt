@@ -1,6 +1,5 @@
 import dask
 
-
 class SweepManager(object):
     """
     Represents a sweep over simulation input values.
@@ -164,7 +163,7 @@ class SweepHolder(object):
     def __iter__(self):
         return iter(self.object_list)
 
-
+# TODO refactor the creation of sweeps and sweepTags to make script less noisy
 class SweepTag(object):
 
     def __init__(self, tag_name):
