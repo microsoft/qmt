@@ -36,6 +36,7 @@ def fix_FCDoc():
     FreeCAD.closeDocument('testDoc')
 
 
+#TODO: rename
 @pytest.fixture(scope='function')
 def a():
     '''Set up and tear down a FreeCAD document.'''
