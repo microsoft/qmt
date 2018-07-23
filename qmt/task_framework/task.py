@@ -1,23 +1,21 @@
+"""
+Core module of the Task framework. Contains the base Task class,
+from which all special purpose tasks are subclassed.
+
+Classes:
+    Task
+    TaskMetaclass
+"""
+
 from sweep import SweepHolder, gen_tag_extract, replace_tag_with_value
 from dask import delayed
 
-
-class TaskMetaclass(type):
-    class_registry = {}
-
-    def __new__(mcs, name, bases, class_dict):
-        cls = type.__new__(mcs, name, bases, class_dict)
-
-        TaskMetaclass.register_class(cls)
-
-        return cls
-
-    @staticmethod
-    def register_class(class_to_register):
-        TaskMetaclass.class_registry[class_to_register.__name__] = class_to_register
-
-
 class Task(object):
+    """
+    Abstract class for general simulation tasks run within the Dask framework.
+
+    At
+    """
     __metaclass__ = TaskMetaclass
     current_instance_id = 0
 
@@ -150,3 +148,22 @@ class Task(object):
         hasSingleItem = isinstance(argValue, dict) and len(argValue.items()) == 1
         # check if it has the class to reconstitute the task from
         return hasSingleItem and "class" in argValue.values()[0]
+
+
+# might be deprecated soon
+class TaskMetaclass(type):
+    """
+    Registers the constructor of each subclass of Task for use in serialization.
+    """
+    class_registry = {}
+
+    def __new__(mcs, name, bases, class_dict):
+        cls = type.__new__(mcs, name, bases, class_dict)
+
+        TaskMetaclass.register_class(cls)
+
+        return cls
+
+    @staticmethod
+    def register_class(class_to_register):
+        TaskMetaclass.class_registry[class_to_register.__name__] = class_to_register
