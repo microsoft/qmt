@@ -1,150 +1,167 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
+"""Testing QMT sketch util functions."""
+
+
 from __future__ import absolute_import, division, print_function
 import pytest
 import qmt
 import FreeCAD
 import Part
 from qmt.freecad.sketchUtils import *
+from test_freecad_geomUtils import aux_two_cycle_sketch
+
+vec = FreeCAD.Vector
 
 
-def setup_function(function):
-    global myDoc
-    myDoc = FreeCAD.newDocument('testDoc')
-
-
-def teardown_function(function):
-    FreeCAD.closeDocument('testDoc')
-
-
-def manual_testing(function):
-    setup_function(function)
-    function()
-    teardown_function(function)
-
-
-def aux_two_cycle_sketch(
-        a=(20, 20, 0),
-        b=(-30, 20, 0),
-        c=(-30, -10, 0),
-        d=(20, -10, 0),
-        e=(50, 50, 0),
-        f=(60, 50, 0),
-        g=(55, 60, 0)):
-    '''Helper function to drop a simple multi-cycle sketch.
-       The segments are carefully ordered.
-    '''
-
-    sketch = FreeCAD.activeDocument().addObject('Sketcher::SketchObject', 'Sketch')
-    geoList = []
-    geoList.append(Part.Line(FreeCAD.Vector(*a), FreeCAD.Vector(*b)))
-    geoList.append(Part.Line(FreeCAD.Vector(*b), FreeCAD.Vector(*c)))
-    geoList.append(Part.Line(FreeCAD.Vector(*c), FreeCAD.Vector(*d)))
-    geoList.append(Part.Line(FreeCAD.Vector(*d), FreeCAD.Vector(*a)))
-    geoList.append(Part.Line(FreeCAD.Vector(*e), FreeCAD.Vector(*f)))
-    geoList.append(Part.Line(FreeCAD.Vector(*f), FreeCAD.Vector(*g)))
-    geoList.append(Part.Line(FreeCAD.Vector(*g), FreeCAD.Vector(*e)))
-    FreeCAD.ActiveDocument.Sketch.addGeometry(geoList, False)
-    FreeCAD.ActiveDocument.recompute()
-    return sketch
-
-
-def test_deepRemove():
-    '''Test deep (recursive) removal by all parameters.'''
+def test_delete(fix_FCDoc):
     sketch = aux_two_cycle_sketch()
     part = qmt.freecad.extrude(sketch, 10)
-    deepRemove(part)
-    assert len(myDoc.Objects) == 0
+    delete(sketch)
+    delete(part)
+    assert len(fix_FCDoc.Objects) == 0
 
     sketch = aux_two_cycle_sketch()
     part = qmt.freecad.extrude(sketch, 10)
-    part2 = myDoc.copyObject(part, False)
+    part2 = fix_FCDoc.copyObject(part, False)
     deepRemove(name=part2.Name)
     assert len(part.OutList) == 0  # part2 steals sketch from part1
 
-    deepRemove(label=part.Label)
-    assert len(myDoc.Objects) == 0
 
+def test_deepRemove(fix_FCDoc):
+    '''Test deep (recursive) removal by all parameters.'''
+
+    # check input sanitation
     with pytest.raises(RuntimeError) as err:
         deepRemove(None)
     assert 'No object selected' in str(err.value)
 
-    box1 = myDoc.addObject("Part::Box", "Box1")
-    box2 = myDoc.addObject("Part::Box", "Box2")
-    box3 = myDoc.addObject("Part::Box", "Box3")
-    inter1 = myDoc.addObject("Part::MultiCommon", "inter1")
+    # simple deletion
+    sketch = aux_two_cycle_sketch()
+    part1 = qmt.freecad.extrude(sketch, 10)
+    deepRemove(part1)
+    assert len(fix_FCDoc.Objects) == 0
+
+    # copied object deletion
+    sketch = aux_two_cycle_sketch()
+    part1 = qmt.freecad.extrude(sketch, 10)
+    part2 = fix_FCDoc.copyObject(part1, False)
+    deepRemove(name=part2.Name)  # part2 refs to sketch from part1
+    assert len(part1.OutList) == 0
+
+    deepRemove(label=part1.Label)
+    assert len(fix_FCDoc.Objects) == 0
+
+    # compound object deletion
+    box1 = fix_FCDoc.addObject("Part::Box", "Box1")
+    box2 = fix_FCDoc.addObject("Part::Box", "Box2")
+    box3 = fix_FCDoc.addObject("Part::Box", "Box3")
+    inter1 = fix_FCDoc.addObject("Part::MultiCommon", "inter1")
     inter1.Shapes = [box1, box2, ]
-    myDoc.recompute()
-    inter2 = myDoc.addObject("Part::MultiCommon", "inter2")
+    fix_FCDoc.recompute()
+    inter2 = fix_FCDoc.addObject("Part::MultiCommon", "inter2")
     inter2.Shapes = [inter1, box3, ]
-    myDoc.recompute()
+    fix_FCDoc.recompute()
+    fix_FCDoc.removeObject(box1.Name)  # annoying interjected delete
     deepRemove(inter2)
+    assert len(fix_FCDoc.Objects) == 0
 
 
-def test_findSegments():
+def test_findSegments(fix_FCDoc):
     '''Test if segment finding is ordered correctly.'''
-    b = (-30, 20, 0)
-    d = (20, -10, 0)
+    b = (-33, 22, 0)
+    d = (22, -11, 0)
     sketch = aux_two_cycle_sketch(b=b, d=d)
+    segArr = findSegments(sketch)
+    assert (segArr[0][1] == [b]).all()
+    assert (segArr[2][1] == [d]).all()
 
-    segL = findSegments(sketch)
-    assert (segL[0][1] == [b]).all()
-    assert (segL[2][1] == [d]).all()
 
-
-def test_nextSegment():
+def test_nextSegment(fix_FCDoc):
     '''Test if nextSegment correctly increments.'''
+
+    # Match the cycle segments
     sketch = aux_two_cycle_sketch()  # trivial case
-    lineSegments = findSegments(sketch)
-    assert nextSegment(lineSegments, 0) == 1
-    assert nextSegment(lineSegments, 1) == 2
-    assert nextSegment(lineSegments, 2) == 3
-    assert nextSegment(lineSegments, 3) == 0  # a square cycle
+    segArr = findSegments(sketch)
 
-    deepRemove(sketch)
+    assert nextSegment(segArr, 0) == 1  # square cycle
+    assert nextSegment(segArr, 1) == 2
+    assert nextSegment(segArr, 2) == 3
+    assert nextSegment(segArr, 3) == 0
+
+    assert nextSegment(segArr, 4) == 5  # triangle cycle
+    assert nextSegment(segArr, 5) == 6
+    assert nextSegment(segArr, 6) == 4
+
+    # Test order fixing
+    segArr = np.array([ [[0,0,0],[1,0,0]] , [[1,1,0],[1,0,0]] , [[1,1,0],[0,0,0]] ])
+    assert ( segArr[1] == np.array([[1,1,0],[1,0,0]]) ).all()
+    nextSegment(segArr, 0, fixOrder=False)
+    assert ( segArr[1] == np.array([[1,1,0],[1,0,0]]) ).all()
+    nextSegment(segArr, 0, fixOrder=True)
+    assert ( segArr[1] == np.array([[1,0,0],[1,1,0]]) ).all()
+
+    # Ambiguous cycles
     a = (20, 20, 0)
-    sketch = aux_two_cycle_sketch(a=a, e=a)
-    lineSegments = findSegments(sketch)
+    sketch = aux_two_cycle_sketch(a=a, g=a)
+    segArr = findSegments(sketch)
     with pytest.raises(ValueError) as err:
-        nextSegment(lineSegments, 3)  # e is ambiguous
-    assert 'possible paths found' in str(err.value)
+        nextSegment(segArr, 3)
+    assert 'Multiple possible paths found' in str(err.value)
+
+    # Open cycles
+    segArr = np.array([ [[0,0,0],[1,0,0]] , [[1,0,0],[2,0,0]] ])
+    with pytest.raises(ValueError) as err:
+        nextSegment(segArr, 1)
+    assert 'No paths found' in str(err.value)
 
 
-def test_findCycle():
+def test_findCycle(fix_FCDoc):
     '''Test cycle ordering.'''
     sketch = aux_two_cycle_sketch()
-    lineSegments = findSegments(sketch)
-    c0 = findCycle(lineSegments, 0, range(lineSegments.shape[0]))
-    assert c0 == [1, 2, 3, 0]
+    segArr = findSegments(sketch)
+    ref1 = [0, 1, 2, 3]  # square cycle indices
+    ref2 = [4, 5, 6]     # triangular cycle indices
+    for i in range(4):
+        c = findCycle(segArr, i, range(segArr.shape[0]))  # update starting point
+        assert c == ref1[i:] + ref1[:i]  # advancing rotation
+    for i in range(3):
+        c = findCycle(segArr, i + 4, range(segArr.shape[0]))
+        assert c == ref2[i:] + ref2[:i]
 
 
-def test_addCycleSketch():
+def test_addCycleSketch(fix_FCDoc):
     '''Test if cycles are correctly added.'''
     b = (-30, 20, 0)
     d = (20, -10, 0)
     sketch = aux_two_cycle_sketch(b=b, d=d)
-    lineSegments, cycles = findEdgeCycles(sketch)
-    addCycleSketch('cyclesketch', myDoc, cycles[0], lineSegments[0:4])
-    segL = findSegments(myDoc.cyclesketch)
-    # note: added cycle is shifted  (TODO: intentionally?)
-    assert (segL[0][0] == [b]).all()
-    assert (segL[2][0] == [d]).all()
+    segArr, cycles = findEdgeCycles(sketch)
+    addCycleSketch('cyclesketch', fix_FCDoc, cycles[0], segArr[0:4])
+    segArr = findSegments(fix_FCDoc.cyclesketch)
+    assert (segArr[0][1] == [b]).all()
+    assert (segArr[2][1] == [d]).all()
 
     with pytest.raises(ValueError) as err:
-        addCycleSketch('cyclesketch', myDoc, cycles[0], lineSegments[0:4])
+        addCycleSketch('cyclesketch', fix_FCDoc, cycles[0], segArr[0:4])
     assert 'already exists' in str(err.value)
 
 
-def test_findEdgeCycles():
+def test_addPolyLineSketch(fix_FCDoc):
+    '''Test if polylines are correctly added.'''
+    pass
+    #TODO
+
+
+def test_findEdgeCycles(fix_FCDoc):
     '''Test multiple cycle ordering.'''
     sketch = aux_two_cycle_sketch()
-    seg, cycles = findEdgeCycles(sketch)
-    assert cycles[0] == [1, 2, 3, 0]
-    assert cycles[1] == [5, 6, 4]
+    _, cycles = findEdgeCycles(sketch)
+    assert cycles[0] == [0, 1, 2, 3]
+    assert cycles[1] == [4, 5, 6]
 
 
-def test_splitSketch():
+def test_splitSketch(fix_FCDoc):
     '''Test if multi-cycle sketches are split correctly.'''
     sketch = aux_two_cycle_sketch()
 
@@ -159,37 +176,37 @@ def test_splitSketch():
         assert p in centers_orig and p not in centers_sq
 
 
-def test_extendSketch():
+def test_extendSketch(fix_FCDoc):
     '''Test unconnected sketch extension, all cases.'''
-    sketch = myDoc.addObject('Sketcher::SketchObject', 'Sketch')
+    sketch = fix_FCDoc.addObject('Sketcher::SketchObject', 'Sketch')
     geoList = []
-    geoList.append(Part.Line(FreeCAD.Vector(0, 0, 0), FreeCAD.Vector(0, 2, 0)))
-    geoList.append(Part.Line(FreeCAD.Vector(
-        0, 2, 0), FreeCAD.Vector(-2, 2, 0)))
+    geoList.append(Part.LineSegment(vec(0,0,0),vec(0,2,0)))
+    geoList.append(Part.LineSegment(vec(0,2,0),vec(-2,2,0)))
     sketch.addGeometry(geoList, False)
-    myDoc.recompute()
+    fix_FCDoc.recompute()
     ext = extendSketch(sketch, 1)
-    assert ext.Shape.Vertexes[0].Point == FreeCAD.Vector(0, -1, 0)
-    assert ext.Shape.Vertexes[2].Point == FreeCAD.Vector(-3, 2, 0)
+    assert ext.Shape.Vertexes[0].Point == vec(0,-1,0)
+    assert ext.Shape.Vertexes[2].Point == vec(-3,2,0)
 
     deepRemove(sketch)
     deepRemove(ext)
-    sketch = myDoc.addObject('Sketcher::SketchObject', 'Sketch')
+    sketch = fix_FCDoc.addObject('Sketcher::SketchObject', 'Sketch')
     geoList = []
-    geoList.append(Part.Line(FreeCAD.Vector(0, 0, 0), FreeCAD.Vector(2, 0, 0)))
-    geoList.append(Part.Line(FreeCAD.Vector(
-        2, 0, 0), FreeCAD.Vector(2, -2, 0)))
+    geoList.append(Part.LineSegment(vec(0,0,0),vec(2,0,0)))
+    geoList.append(Part.LineSegment(vec(2,0,0),vec(2,-2,0)))
     sketch.addGeometry(geoList, False)
-    myDoc.recompute()
+    fix_FCDoc.recompute()
     ext = extendSketch(sketch, 1)
     assert ext.Shape.Length == 2 + sketch.Shape.Length
 
+def test_makeIntoSketch(fix_FCDoc):
+    #TODO
+    pass
 
-def test_draftOffset():
+def test_draftOffset(fix_FCDoc):
     '''Check if draft offset resizes the object. TODO: edge cases'''
     pl = FreeCAD.Placement()
-    pl.Base = FreeCAD.Vector(1, 1, 0)
-    draft = Draft.makeRectangle(
-        length=2, height=2, placement=pl, face=False, support=None)
+    pl.Base = vec(1, 1, 0)
+    draft = Draft.makeRectangle(length=2, height=2, placement=pl, face=False, support=None)
     draft2 = draftOffset(draft, 20)
     assert draft.Height.Value + 40 == draft2.Height.Value

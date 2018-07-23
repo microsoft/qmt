@@ -19,9 +19,9 @@ install:
   - conda env create -q -n test-environment -f environment.yml
   - source activate test-environment
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      sudo add-apt-repository -y ppa:freecad-maintainers/freecad-legacy;
+      sudo add-apt-repository -y ppa:freecad-maintainers/freecad-stable;
       sudo apt-get -qq update;
-      sudo apt-get install -y freecad-0.16;
+      sudo apt-get install -y freecad;
     else
       conda config --add channels conda-forge
       conda config --add channels freecad
@@ -32,7 +32,7 @@ install:
   
 script:
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      export PYTHONPATH=$PYTHONPATH:/usr/lib/freecad-0.16/lib ;
+      export PYTHONPATH=$PYTHONPATH:/usr/lib/freecad/lib ;
     else
       export PYTHONPATH=$PYTHONPATH:$HOME/miniconda/envs/test-environment/lib ;
     fi

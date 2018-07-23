@@ -1,95 +1,69 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-import os
-import qmt
-from qmt.freecad.fileIO import *
+"""Testing QMT batch model class."""
 
 
-def setup_function(function):
-    global myDoc
-    global testDir
-    global model
-    myDoc = FreeCAD.newDocument('testDoc')
-    rootPath = os.path.join(os.path.dirname(qmt.__file__), os.pardir)
-    testDir = os.path.join(rootPath, 'tests')
-    model = qmt.Model()
+def test_genEmptyModelDict(fix_model):
+    '''Guarantee the empty model specification. If it does: adjust here.'''
+    d = fix_model.genEmptyModelDict()
+    assert str(d) == "{'comsolInfo': {'zeroLevel': [None, None], 'surfaceIntegrals': {}, 'volumeIntegrals': {}}, 'buildOrder': {}, 'slices': {}, 'physicsSweep': {'sweepParts': {}, 'length': 1, 'type': 'sparse'}, 'geometricParams': {}, 'pathSettings': {}, '3DParts': {}, 'meshInfo': {}, 'geomSweep': {}, 'materials': {}, 'postProcess': {'tasks': {}, 'sweeps': {}}, 'jobSettings': {}}"
 
 
-def teardown_function(function):
-    FreeCAD.closeDocument('testDoc')
-
-
-def manual_testing(function):
-    setup_function(function)
-    function()
-    teardown_function(function)
-
-
-def test_genEmptyModelDict():
-    '''Guarantee that the empty model doesn't change. If it does: update here.'''
-    d = model.genEmptyModelDict()
-    assert str(d) == "{'jobSettings': {}, 'pathSettings': {}, 'comsolInfo': {'zeroLevel': [None, None], 'surfaceIntegrals': {}, 'volumeIntegrals': {}}, 'physicsSweep': {'sweepParts': {}, 'length': 1, 'type': 'sparse'}, 'geometricParams': {}, 'slices': {}, 'buildOrder': {}, '3DParts': {}, 'meshInfo': {}, 'geomSweep': {}, 'materials': {}, 'postProcess': {'tasks': {}, 'sweeps': {}}}"
-
-
-def test_genPhysicsSweep():
+def test_genPhysicsSweep(fix_model):
     '''Test generation of physics sweeps.'''
-    model.addPart('dummyPart', 'dummySketch', 'extrude', 'dielectric',
-                  material='SiO2', z0=-0.2, thickness=0.2, meshMaxSize=0.2)
-    model.genPhysicsSweep('dummyPart', 'param1', [1.1, 1.2, 1.3])
-    assert model.modelDict['physicsSweep']['sweepParts']['param1_dummyPart']['part'] == "dummyPart"
-    assert model.modelDict['physicsSweep']['sweepParts']['param1_dummyPart']['values'] == [
-        1.1, 1.2, 1.3]
+    fix_model.addPart('dummyPart', 'dummySketch', 'extrude', 'dielectric',
+                      material='SiO2', z0=-0.2, thickness=0.2, meshMaxSize=0.2)
+    fix_model.genPhysicsSweep('dummyPart', 'param1', [1.1, 1.2, 1.3])
+    assert fix_model.modelDict['physicsSweep']['sweepParts']['param1_dummyPart']['part'] == "dummyPart"
+    assert fix_model.modelDict['physicsSweep']['sweepParts']['param1_dummyPart']['values'] == [1.1, 1.2, 1.3]
 
 
-def test_genGeomSweep():
-    '''Check if geometry sweeps get added correctly with default FreeCAD type.'''
-    model.genGeomSweep('d', [0.1, 0.2, 0.3])
-    assert model.modelDict['geomSweep']['d']['vals'] == '0.1, 0.2, 0.3'
+def test_genGeomSweep(fix_model):
+    '''Check if geometry sweeps get added correctly by default.'''
+    fix_model.genGeomSweep('d', [0.1, 0.2, 0.3])
+    assert fix_model.modelDict['geomSweep']['d']['vals'] == '0.1, 0.2, 0.3'
 
 
-def test_genSurfaceIntegral():
+def test_genSurfaceIntegral(fix_model):
     '''Test addition of surface integrals with default quantity 'V'.'''
-    model.genSurfaceIntegral('dummyPart')
-    assert model.modelDict['comsolInfo']['surfaceIntegrals']['dummyPart'] == [
-        'V']
+    fix_model.genSurfaceIntegral('dummyPart')
+    assert fix_model.modelDict['comsolInfo']['surfaceIntegrals']['dummyPart'] == ['V']
 
 
-def test_genVolumeIntegral():
+def test_genVolumeIntegral(fix_model):
     '''Test addition of volume integrals with default quantity 'V'.'''
-    model.genVolumeIntegral('dummyPart')
-    assert model.modelDict['comsolInfo']['volumeIntegrals']['dummyPart'] == [
-        'V']
+    fix_model.genVolumeIntegral('dummyPart')
+    assert fix_model.modelDict['comsolInfo']['volumeIntegrals']['dummyPart'] == ['V']
 
 
-def test_setSimZero():
-    '''Test setting of cosmetic zero levels for default property 'workFunction'.'''
-    model.setSimZero('dummyPart')
-    assert model.modelDict['comsolInfo']['zeroLevel'] == [
-        'dummyPart', 'workFunction']
+def test_setSimZero(fix_model):
+    '''Test cosmetic zero levels for default property 'workFunction'.'''
+    fix_model.setSimZero('dummyPart')
+    assert fix_model.modelDict['comsolInfo']['zeroLevel'] == ['dummyPart', 'workFunction']
 
 
-def test_genComsolInfo():
-    model.genComsolInfo()
-    assert model.modelDict['comsolInfo']['meshExport'] is None
-    assert model.modelDict['comsolInfo']['repairTolerance'] is None
-    assert model.modelDict['comsolInfo']['fileName'] == 'comsolModel'
-    assert model.modelDict['comsolInfo']['exportDir'] == 'solutions'
+def test_genComsolInfo(fix_model):
+    '''Check for correct COMSOL default information.'''
+    fix_model.genComsolInfo()
+    assert fix_model.modelDict['comsolInfo']['meshExport'] is None
+    assert fix_model.modelDict['comsolInfo']['repairTolerance'] is None
+    assert fix_model.modelDict['comsolInfo']['fileName'] == 'comsolModel'
+    assert fix_model.modelDict['comsolInfo']['exportDir'] == 'solutions'
 
 
-def test_addPart():
-    model.addPart(
-        'test_part_1',
-        'i_AlEtch_Polyline003_sketch',
-        'extrude',
-        'dielectric',
-        material='SiO2',
-        z0=-0.2,
-        thickness=0.2,
-        meshMaxSize=0.2)
+def test_addPart(fix_model):
+    '''Test addition of geometric parts.'''
+    fix_model.addPart('test_part_1', 'i_AlEtch_Polyline003_sketch', 'extrude',
+                      'dielectric', material='SiO2', z0=-0.2, thickness=0.2,
+                      meshMaxSize=0.2)
+    # TODO: clean checks
 
 
-def test_addJob():
-    jobPath = os.path.join(testDir, 'testJob')
-    model.addJob(jobPath, jobSequence=['geoGen'], numCoresPerJob=1)
-    assert(model.modelDict['jobSettings']['rootPath'] == jobPath)
+def test_addJob(fix_model, fix_testDir):
+    '''Test addition of jobs.'''
+    import os
+    jobPath = os.path.join(fix_testDir, 'testJob')
+    fix_model.addJob(jobPath, jobSequence=['geoGen'], numCoresPerJob=1)
+    assert fix_model.modelDict['jobSettings']['rootPath'] == jobPath
+    # TODO: more checks
