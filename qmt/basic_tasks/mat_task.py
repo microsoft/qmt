@@ -1,5 +1,5 @@
-from Task import Task
-from GeometryTask import GeometryTask
+from qmt.task_framework import Task
+from geo_task import GeometryTask
 
 class MaterialsTask(Task):
 

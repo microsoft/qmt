@@ -1,4 +1,5 @@
-from qmt.taskFramework import *
+from qmt.basic_tasks import GeometryTask, MaterialsTask
+from qmt.ms_tasks import PoissonTask
 
 geo_dict = {'part1':{'side length':5.},'part2':{'side length': 10.}}
 geo_task = GeometryTask(options=geo_dict)

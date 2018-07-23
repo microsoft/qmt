@@ -1,13 +1,20 @@
-import dask
-from collections import OrderedDict
-import json
-from TaskMetaclass import TaskMetaclass
-from SweepTag import gen_tag_extract,replace_tag_with_value
-from SweepHolder import SweepHolder
+from sweep import SweepHolder,gen_tag_extract,replace_tag_with_value
 from dask import delayed
 
-# todo base import then factories
+class TaskMetaclass(type):
 
+    class_registry = {}
+
+    def __new__(mcs, name, bases, class_dict):
+        cls = type.__new__(mcs, name, bases, class_dict)
+
+        TaskMetaclass.register_class(cls)
+
+        return cls
+
+    @staticmethod
+    def register_class(class_to_register):
+        TaskMetaclass.class_registry[class_to_register.__name__] = class_to_register
 
 class Task(object):
     __metaclass__ = TaskMetaclass
@@ -50,14 +57,6 @@ class Task(object):
         self.result = None
         self.input_task_list = None
 
-    def to_dict(self):
-        result = OrderedDict()
-        result_data = OrderedDict()
-        result_data['class'] = self.__class__.__name__
-        result_data['argumentDictionary'] = self.dependencies_dict()
-        result[self.name] = result_data
-        return result
-
     @staticmethod
     def from_dict(dict_representation):
         taskName, data = dict_representation.items()[0]
@@ -73,8 +72,19 @@ class Task(object):
         return target_class(name=taskName, **kwargs)
 
     def save(self, file_name):
-        with open(file_name, 'w') as jsonFile:
-            json.dump(self.to_dict(), jsonFile)
+        raise NotImplementedError("json serialization not yet implemented")
+        #TODO add serialization
+
+        # def to_dict(self):
+        #     result = OrderedDict()
+        #     result_data = OrderedDict()
+        #     result_data['class'] = self.__class__.__name__
+        #     result_data['argumentDictionary'] = self.dependencies_dict()
+        #     result[self.name] = result_data
+        #     return result
+
+        # with open(file_name, 'w') as jsonFile:
+        #     json.dump(self.to_dict(), jsonFile)
 
     def dependencies_dict(self):
         result = {}
@@ -98,7 +108,7 @@ class Task(object):
             current_options = replace_tag_with_value(current_options,tag,tag_values[tag])
         return current_options
 
-    def _solve_instance(self):
+    def _solve_instance(self,input_result_list,current_options):
         raise NotImplementedError("Task is missing the _solve_instance method!")
 
     def _populate_result(self):
@@ -139,3 +149,5 @@ class Task(object):
         hasSingleItem = isinstance(argValue, dict) and len(argValue.items()) == 1
         # check if it has the class to reconstitute the task from
         return hasSingleItem and "class" in argValue.values()[0]
+
+

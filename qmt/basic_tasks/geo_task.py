@@ -1,4 +1,4 @@
-from Task import Task
+from qmt.task_framework import Task
 
 class GeometryTask(Task):
 
