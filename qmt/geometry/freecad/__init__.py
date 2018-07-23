@@ -4,7 +4,7 @@
 """FreeCAD routines."""
 
 
-from .fileIO import *
-from .sketchUtils import *
-from .geomUtils import *
-from .objectConstruction import *
+import fileIO
+import sketchUtils
+import geomUtils
+import objectConstruction
