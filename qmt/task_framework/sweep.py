@@ -165,7 +165,9 @@ class SweepHolder(object):
 
 # TODO refactor the creation of sweeps and sweepTags to make script less noisy
 class SweepTag(object):
-
+    """
+    Unique tag for id'ing parameters in the sweep.
+    """
     def __init__(self, tag_name):
         self.tag_name = tag_name
 
@@ -184,9 +186,15 @@ class SweepTag(object):
         return not self.__eq__(other)
 
 
-def gen_tag_extract(var):
-    if hasattr(var, 'iteritems'):
-        for k, v in var.iteritems():
+def gen_tag_extract(nested_dictionary_of_tags):
+    """
+    Extract all tags from nested dictionary that may have tags
+    as values at any level
+    :param nested_dictionary_of_tags: exactly what it sounds like
+    :return: a generator that yields all the tags in the dictionary
+    """
+    if hasattr(nested_dictionary_of_tags, 'iteritems'):
+        for k, v in nested_dictionary_of_tags.iteritems():
             if isinstance(v, SweepTag):
                 yield v
             if isinstance(v, dict):
@@ -194,14 +202,21 @@ def gen_tag_extract(var):
                     yield result
 
 
-def replace_tag_with_value(var, tag, value):
+def replace_tag_with_value(name_to_tag_mapping, tag, new_value):
+    """
+    Returns a copy of name_to_tag_mapping with values of tag replaced with new_value.
+    :param name_to_tag_mapping: Dictionary mapping parameter names to SweepTags.
+    :param tag: The SweepTag to replace.
+    :param new_value: the value to replace it with.
+    :return: a copy of name_to_tag_mapping with values of tag replaced with new_value
+    """
     var_copy = {}
-    if hasattr(var, 'iteritems'):
-        for k, v in var.iteritems():
+    if hasattr(name_to_tag_mapping, 'iteritems'):
+        for k, v in name_to_tag_mapping.iteritems():
             if v == tag:
-                var_copy[k] = value
+                var_copy[k] = new_value
             elif isinstance(v, dict):
-                var_copy[k] = replace_tag_with_value(v, tag, value)
+                var_copy[k] = replace_tag_with_value(v, tag, new_value)
             else:
                 var_copy[k] = v
     return var_copy
