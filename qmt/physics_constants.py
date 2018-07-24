@@ -51,7 +51,7 @@ units = SimpleNamespace(
 )
 
 
-def parseUnit(s):
+def parse_unit(s):
     """convert name of a unit into the corresponding sympy value"""
     for u in dir(units):
         if u[:2] == '__':
@@ -95,7 +95,7 @@ def cancel(expr):
     return canonicalize(expr, 1)
 
 
-def toFloat(expr):
+def to_float(expr):
     """Convert sympy expression involving units to a float. Fails if expr is not dimensionless."""
     return float(cancel(expr))
 
@@ -113,4 +113,4 @@ matrices.tau_zy = kron(matrices.s_z, matrices.s_y)
 matrices.tau_zz = kron(matrices.s_z, matrices.s_z)
 matrices.tau_yy = kron(matrices.s_y, matrices.s_y)
 
-__all__ = ["units", "constants", "matrices", "parseUnit", "toFloat"]
+__all__ = ["units", "constants", "matrices", "parse_unit", "to_float"]

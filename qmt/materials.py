@@ -21,8 +21,8 @@ try:
     import qmt.physics_constants as pc
 
     units = pc.units
-    parseUnit = pc.parseUnit
-    toFloat = pc.toFloat
+    parseUnit = pc.parse_unit
+    toFloat = pc.to_float
 except ImportError:  # to avoid problems if we are using FreeCAD
     pass
 
@@ -80,11 +80,11 @@ class Material(collections.Mapping):
         return 'Material({}, {}, {})'.format(
             self.name, self.properties, self.energyUnit)
 
-    def serializeDict(self):
+    def serialize_dict(self):
         """Return a dict with the material properties that can be dumped to json."""
         return self.properties
 
-    def holeMass(self, band, direction):
+    def hole_mass(self, band, direction):
         """Determine effective mass for a valence band.
 
         :param str band: Which valence band: 'heavy' or 'light' for a specific band. Also 'dos' for
@@ -96,8 +96,8 @@ class Material(collections.Mapping):
         # DOS effective mass corresponding to both heavy and light hole band
         # [Lax and Mavroides (1955) Eq. 17]
         if band == 'dos':
-            return (self.holeMass('heavy', direction)**1.5 +
-                    self.holeMass('light', direction)**1.5)**(2 / 3.)
+            return (self.hole_mass('heavy', direction) ** 1.5 +
+                    self.hole_mass('light', direction) ** 1.5) ** (2 / 3.)
 
         # Retrieve Luttinger parameters
         gamma1, gamma2, gamma3 = (
@@ -175,31 +175,31 @@ class Materials(collections.Mapping):
     def __len__(self):
         return len(self.matDict)
 
-    def genMat(self, name, matType, **kwargs):
+    def add_material(self, name, mat_type, **kwargs):
         """Generate a material and add it to the matDict.
         """
-        if matType in ('metal', 'dielectric'):
+        if mat_type in ('metal', 'dielectric'):
             kwargs['electronMass'] = kwargs.get('electronMass', 1.)
-        self.matDict[name] = self._makeMaterial(matType, **kwargs)
+        self.matDict[name] = self._make_material(mat_type, **kwargs)
 
-    def setBowingParameters(self, nameA, nameB, matType, **kwargs):
+    def set_bowing_parameters(self, name_a, name_b, mat_type, **kwargs):
         """Generate a bowing parameter set and add it to the bowingParameters dict."""
-        self.bowingParameters[(nameA, nameB)] = self._makeMaterial(
-            matType, **kwargs)
+        self.bowingParameters[(name_a, name_b)] = self._make_material(
+            mat_type, **kwargs)
 
-    def _makeMaterial(self, matType, **kwargs):
+    def _make_material(self, mat_type, **kwargs):
         material = {}
 
         def set_property(key):
             if key in kwargs and kwargs[key] is not None:
                 material[key] = kwargs.pop(key)
 
-        material['type'] = matType
+        material['type'] = mat_type
         set_property('relativePermittivity')  # \eps_r
         set_property('electronMass')  # m_e* [in units of bare electron mass]
-        if matType in ('metal', 'dielectric'):
+        if mat_type in ('metal', 'dielectric'):
             set_property('workFunction')  # Work function \Phi [in meV]
-        if matType == 'semi':
+        if mat_type == 'semi':
             set_property('electronAffinity')  # Electron affinity \chi [in meV]
             set_property('directBandGap')  # E_g(\Gamma) [in meV]
             # wrt InSb valence band maximum [in meV]
@@ -218,8 +218,8 @@ class Materials(collections.Mapping):
 
             # Unused so far
             # set_property('holeMass')  # Hole mass [in units of bare electron mass]
-            # set_property('valenceBandMaximum')  # Position of valence band maximum [in meV]
-            # set_property('conductionBandMinimum')  # Position of conduction band minimum [in meV]
+            # set_property('valence_band_maximum')  # Position of valence band maximum [in meV]
+            # set_property('conduction_band_minimum')  # Position of conduction band minimum [in meV]
             # set_property('bulkDoping')  # Bulk doping [unit?]
 
         if kwargs:
@@ -259,22 +259,22 @@ class Materials(collections.Mapping):
                 A, y, B, x, C = match1.groups()
                 x, y = float(x), float(y)
                 x /= x + y
-                properties = self._makeBinaryAlloy(A + C, B + C, x)
+                properties = self._make_binary_alloy(A + C, B + C, x)
             elif match2:
                 A, B, y, C, x = match2.groups()
                 x, y = float(x), float(y)
                 x /= x + y
-                properties = self._makeBinaryAlloy(A + B, A + C, x)
+                properties = self._make_binary_alloy(A + B, A + C, x)
             elif match3:
                 A, y, B, x = match3.groups()
                 x, y = float(x), float(y)
                 x /= x + y
-                properties = self._makeBinaryAlloy(A, B, x)
+                properties = self._make_binary_alloy(A, B, x)
             else:
                 raise KeyError(name)
         return Material(name, properties, eunit=eunit)
 
-    def _makeBinaryAlloy(self, nameA, nameB, x):
+    def _make_binary_alloy(self, nameA, nameB, x):
         """Interpolate properties of binary alloy A_{1-x} B_x.
 
         The material database must contain properties for the two named materials.
@@ -307,7 +307,7 @@ class Materials(collections.Mapping):
             alloy[key] = val
         return alloy
 
-    def serializeDict(self):
+    def serialize_dict(self):
         db = self.matDict.copy()
         bowingParms = {}
         for k, v in iteritems(self.bowingParameters):
@@ -315,7 +315,7 @@ class Materials(collections.Mapping):
         db['__bowing_parameters'] = bowingParms
         return db
 
-    def deserializeDict(self, db):
+    def deserialize_dict(self, db):
         bowingParms = db.pop('__bowing_parameters', {})
         self.matDict = db
         self.bowingParameters = {}
@@ -325,7 +325,7 @@ class Materials(collections.Mapping):
     def save(self):
         """Save the current materials database to disk.
         """
-        db = self.serializeDict()
+        db = self.serialize_dict()
         with open(self.matPath, 'w') as myFile:
             json.dump(db, myFile, indent=4, sort_keys=True)
 
@@ -339,9 +339,9 @@ class Materials(collections.Mapping):
             print("Could not load materials file %s." % self.matPath)
             print("Generating a new file at that location...")
             db = {}
-        self.deserializeDict(db)
+        self.deserialize_dict(db)
 
-    def conductionBandMinimum(self, mat):
+    def conduction_band_minimum(self, mat):
         """Calculate the energy of the conduction band minimum $E_c$ of a semiconductor material.
 
         The reference energy E=0 is fixed to the vacuum level, as defined by the electron affinity
@@ -361,10 +361,10 @@ class Materials(collections.Mapping):
 
         See also
         --------
-        - valenceBandMaximum(mat) is equivalent to
-          `self.conductionBandMinimum(mat) - mat['directBandGap']`
+        - valence_band_maximum(mat) is equivalent to
+          `self.conduction_band_minimum(mat) - mat['directBandGap']`
         - conduction_band_offset(mat1, mat2) is equivalent to
-          `self.conductionBandMinimum(mat1) - self.conductionBandMinimum(mat2)`
+          `self.conduction_band_minimum(mat1) - self.conduction_band_minimum(mat2)`
         """
         ref_name = 'InSb'
         try:
@@ -388,11 +388,11 @@ class Materials(collections.Mapping):
             print(msg)
             return -mat['electronAffinity']
 
-    def valenceBandMaximum(self, mat):
+    def valence_band_maximum(self, mat):
         """Calculate the energy of the valence band maximum $E_v$ of a semiconductor material.
 
         The reference energy E=0 is fixed to the vacuum level, as defined by the electron affinity
-        of InSb. See conductionBandMinimum for additional details.
+        of InSb. See conduction_band_minimum for additional details.
 
         Parameters
         ----------
@@ -401,10 +401,10 @@ class Materials(collections.Mapping):
 
         See also
         --------
-        - conductionBandMinimum(mat) is equivalent to
-          `self.valenceBandMaximum(mat) + mat['directBandGap']`
+        - conduction_band_minimum(mat) is equivalent to
+          `self.valence_band_maximum(mat) + mat['directBandGap']`
         - valence_band_offset(mat1, mat2) is equivalent to
-          `self.valenceBandMaximum(mat1) - self.valenceBandMaximum(mat2)`
+          `self.valence_band_maximum(mat1) - self.valence_band_maximum(mat2)`
         """
         ref_name = 'InSb'
         try:
@@ -633,21 +633,21 @@ if __name__ == '__main__':
     materials = Materials(fname)
 
     # === Metals ===
-    materials.genMat('Al', 'metal', relativePermittivity=1000,
-                     # source? Wikipedia and others quote 4.06 - 4.26 eV
-                     # depending on face.
-                     workFunction=4280.)
-    materials.genMat('Au', 'metal', relativePermittivity=1000,
-                     # source- Wikipedia quotes it as 5.1-5.47; this is the
-                     # average.
-                     workFunction=5285.)
-    materials.genMat('degenDopedSi', 'metal', relativePermittivity=1000,
-                     # source - Ioffe Institute,
-                     # http://www.ioffe.ru/SVA/NSM/Semicond/Si/basic.html
-                     workFunction=4050.)
-    materials.genMat('NbTiN', 'metal', relativePermittivity=1000,
-                     # Unknown; just setting it to Al for now.
-                     workFunction=4280.)
+    materials.add_material('Al', 'metal', relativePermittivity=1000,
+                           # source? Wikipedia and others quote 4.06 - 4.26 eV
+                           # depending on face.
+                           workFunction=4280.)
+    materials.add_material('Au', 'metal', relativePermittivity=1000,
+                           # source- Wikipedia quotes it as 5.1-5.47; this is the
+                           # average.
+                           workFunction=5285.)
+    materials.add_material('degenDopedSi', 'metal', relativePermittivity=1000,
+                           # source - Ioffe Institute,
+                           # http://www.ioffe.ru/SVA/NSM/Semicond/Si/basic.html
+                           workFunction=4050.)
+    materials.add_material('NbTiN', 'metal', relativePermittivity=1000,
+                           # Unknown; just setting it to Al for now.
+                           workFunction=4280.)
 
     # === Dielectrics ===
     # Sources:
@@ -661,18 +661,18 @@ if __name__ == '__main__':
     # https://doi.org/10.1116/1.4769207
 
     # air
-    materials.genMat('air', 'dielectric', relativePermittivity=1)
+    materials.add_material('air', 'dielectric', relativePermittivity=1)
 
     # Si3N4
     # [Robertson]: eps=7.
     # [Yota]: eps=6.5 for PECVD Si3N4
     # [???]: eps=7.9
-    materials.genMat('Si3N4', 'dielectric',
-                     relativePermittivity=7.)  # Robertson
+    materials.add_material('Si3N4', 'dielectric',
+                           relativePermittivity=7.)  # Robertson
 
     # SiO2
     # [Robertson]: eps=3.9
-    materials.genMat('SiO2', 'dielectric', relativePermittivity=3.9)
+    materials.add_material('SiO2', 'dielectric', relativePermittivity=3.9)
 
     # HfO2
     # [Robertson] eps=25
@@ -680,21 +680,21 @@ if __name__ == '__main__':
     # [Yota] eps=18.7 for ALD HfO2
     # NB: Dielectric constant of ALD HfO2 seems to depend strongly on growth conditions like
     # temperature.
-    materials.genMat('HfO2', 'dielectric',
-                     relativePermittivity=25.)  # Robertson
+    materials.add_material('HfO2', 'dielectric',
+                           relativePermittivity=25.)  # Robertson
 
     # ZrO2
     # [Robertson] eps=25
     # [Biercuk] eps=20-29 for ALD ZrO2
-    materials.genMat('ZrO2', 'dielectric',
-                     relativePermittivity=25.)  # Robertson
+    materials.add_material('ZrO2', 'dielectric',
+                           relativePermittivity=25.)  # Robertson
 
     # Al2O3
     # [Robertson] eps=9
     # [Biercuk] eps=8-9 for ALD Al2O3
     # [Yota] eps=10.3 for ALD Al2O3
-    materials.genMat('Al2O3', 'dielectric',
-                     relativePermittivity=9.)  # Robertson
+    materials.add_material('Al2O3', 'dielectric',
+                           relativePermittivity=9.)  # Robertson
 
     # === Semiconductors ===
     # Sources:
@@ -704,86 +704,86 @@ if __name__ == '__main__':
     # - [Heedt] Heedt, et al. Resolving ambiguities in nanowire field-effect transistor
     #   characterization. Nanoscale 7, 18188-18197, 2015. https://doi.org/10.1039/c5nr03608a
     # - [Monch] Monch, Semiconductor Surfaces and Interfaces, 3rd Edition, Springer (2001).
-    materials.genMat('GaAs', 'semi',
-                     relativePermittivity=13.1,  # source?
-                     # 300K,
-                     # http://www.ioffe.ru/SVA/NSM/Semicond/GaAs/basic.html
-                     electronAffinity=4070.,
-                     # Vurgaftman et al. (2001)
-                     electronMass=0.067, directBandGap=1519., valenceBandOffset=-800.,
-                     luttingerGamma1=6.98, luttingerGamma2=2.06, luttingerGamma3=2.93,
-                     spinOrbitSplitting=341., interbandMatrixElement=28800.)
+    materials.add_material('GaAs', 'semi',
+                           relativePermittivity=13.1,  # source?
+                           # 300K,
+                           # http://www.ioffe.ru/SVA/NSM/Semicond/GaAs/basic.html
+                           electronAffinity=4070.,
+                           # Vurgaftman et al. (2001)
+                           electronMass=0.067, directBandGap=1519., valenceBandOffset=-800.,
+                           luttingerGamma1=6.98, luttingerGamma2=2.06, luttingerGamma3=2.93,
+                           spinOrbitSplitting=341., interbandMatrixElement=28800.)
     # caution: AlAs has global CB minimum at X! We give values for the local
     # minimum at Gamma here.
-    materials.genMat('AlAs', 'semi',
-                     # 300K, http://www.ioffe.ru/SVA/NSM/Semicond/AlGaAs/basic.html
-                     # Values for interpolating properties of Al_{x}Ga_{1-x}As with x<0.45.
-                     # Pure GaAs has \chi_a=3.5 eV.
-                     relativePermittivity=12.90 - 2.84, electronAffinity=4070. - 1100.,
-                     # Vurgaftman et al. (2001)
-                     electronMass=0.15, directBandGap=3099, valenceBandOffset=-1330.,
-                     luttingerGamma1=3.76, luttingerGamma2=0.82, luttingerGamma3=1.42,
-                     spinOrbitSplitting=280., interbandMatrixElement=21100.)
-    materials.genMat('InAs', 'semi',
-                     relativePermittivity=15.15,  # ioffe.ru at 300 K; Davies quotes 14.6
-                     # Vurgaftman et al. (2001)
-                     electronMass=0.026, directBandGap=417., valenceBandOffset=-590.,
-                     # NB: uncertainty on InAs Luttinger parameters seems to be
-                     # large
-                     luttingerGamma1=20., luttingerGamma2=8.5, luttingerGamma3=9.2,
-                     spinOrbitSplitting=390., interbandMatrixElement=21500.,
-                     # ioffe.ru:
-                     electronAffinity=4900.,
-                     # Heedt:
-                     chargeNeutralityLevel=417. + 160., surfaceChargeDensity=3e12)
-    materials.genMat('GaSb', 'semi',
-                     # 300 K,
-                     # http://www.ioffe.ru/SVA/NSM/Semicond/GaSb/basic.html
-                     relativePermittivity=15.7, electronAffinity=4060.,
-                     # Vurgaftman et al. (2001)
-                     electronMass=.039, directBandGap=812., valenceBandOffset=-30.,
-                     luttingerGamma1=13.4, luttingerGamma2=4.7, luttingerGamma3=6.0,
-                     spinOrbitSplitting=760., interbandMatrixElement=27000.)
-    materials.genMat('AlSb', 'semi',
-                     # https://en.wikipedia.org/wiki/Aluminium_antimonide and
-                     # https://www.azom.com/article.aspx?ArticleID=8427
-                     relativePermittivity=11.,
-                     # Vurgaftman et al. (2001)
-                     electronMass=.14, directBandGap=2386., valenceBandOffset=-410.,
-                     luttingerGamma1=5.18, luttingerGamma2=1.19, luttingerGamma3=1.97,
-                     spinOrbitSplitting=676., interbandMatrixElement=18700.)
-    materials.genMat('InSb', 'semi',
-                     # 300 K,
-                     # http://www.ioffe.ru/SVA/NSM/Semicond/InSb/basic.html
-                     relativePermittivity=16.8, electronAffinity=4590.,
-                     # Vurgaftman et al. (2001)
-                     electronMass=.0135, directBandGap=235., valenceBandOffset=0.,
-                     luttingerGamma1=34.8, luttingerGamma2=15.5, luttingerGamma3=16.5,
-                     spinOrbitSplitting=810., interbandMatrixElement=23300.,
-                     # Monch has some values for this, but I don't think we have too
-                     # good an idea. For now, I'll use mid-gap states of density equal to
-                     # InAs. TODO: experimentally determine this!
-                     chargeNeutralityLevel=0.5 * 235., surfaceChargeDensity=3e12)
-    materials.genMat('InP', 'semi',
-                     # 300 K,
-                     # http://www.ioffe.ru/SVA/NSM/Semicond/InP/basic.html
-                     relativePermittivity=12.5, electronAffinity=4380.,
-                     # Vurgaftman et al. (2001)
-                     electronMass=.0795, directBandGap=1423.6, valenceBandOffset=-940.,
-                     luttingerGamma1=5.08, luttingerGamma2=1.60, luttingerGamma3=2.10,
-                     spinOrbitSplitting=108., interbandMatrixElement=20700.)
-    materials.genMat('Si', 'semi',
-                     # 300 K,
-                     # http://www.ioffe.ru/SVA/NSM/Semicond/Si/basic.html
-                     relativePermittivity=11.7, electronAffinity=4050.,
-                     electronMass=(0.98 + 0.19 * 2)**(1. / 3.),  # DOS mass
-                     # Yu & Cardona
-                     directBandGap=3480.,
-                     luttingerGamma1=4.28, luttingerGamma2=0.339, luttingerGamma3=1.446,
-                     spinOrbitSplitting=44.)
+    materials.add_material('AlAs', 'semi',
+                           # 300K, http://www.ioffe.ru/SVA/NSM/Semicond/AlGaAs/basic.html
+                           # Values for interpolating properties of Al_{x}Ga_{1-x}As with x<0.45.
+                           # Pure GaAs has \chi_a=3.5 eV.
+                           relativePermittivity=12.90 - 2.84, electronAffinity=4070. - 1100.,
+                           # Vurgaftman et al. (2001)
+                           electronMass=0.15, directBandGap=3099, valenceBandOffset=-1330.,
+                           luttingerGamma1=3.76, luttingerGamma2=0.82, luttingerGamma3=1.42,
+                           spinOrbitSplitting=280., interbandMatrixElement=21100.)
+    materials.add_material('InAs', 'semi',
+                           relativePermittivity=15.15,  # ioffe.ru at 300 K; Davies quotes 14.6
+                           # Vurgaftman et al. (2001)
+                           electronMass=0.026, directBandGap=417., valenceBandOffset=-590.,
+                           # NB: uncertainty on InAs Luttinger parameters seems to be
+                           # large
+                           luttingerGamma1=20., luttingerGamma2=8.5, luttingerGamma3=9.2,
+                           spinOrbitSplitting=390., interbandMatrixElement=21500.,
+                           # ioffe.ru:
+                           electronAffinity=4900.,
+                           # Heedt:
+                           chargeNeutralityLevel=417. + 160., surfaceChargeDensity=3e12)
+    materials.add_material('GaSb', 'semi',
+                           # 300 K,
+                           # http://www.ioffe.ru/SVA/NSM/Semicond/GaSb/basic.html
+                           relativePermittivity=15.7, electronAffinity=4060.,
+                           # Vurgaftman et al. (2001)
+                           electronMass=.039, directBandGap=812., valenceBandOffset=-30.,
+                           luttingerGamma1=13.4, luttingerGamma2=4.7, luttingerGamma3=6.0,
+                           spinOrbitSplitting=760., interbandMatrixElement=27000.)
+    materials.add_material('AlSb', 'semi',
+                           # https://en.wikipedia.org/wiki/Aluminium_antimonide and
+                           # https://www.azom.com/article.aspx?ArticleID=8427
+                           relativePermittivity=11.,
+                           # Vurgaftman et al. (2001)
+                           electronMass=.14, directBandGap=2386., valenceBandOffset=-410.,
+                           luttingerGamma1=5.18, luttingerGamma2=1.19, luttingerGamma3=1.97,
+                           spinOrbitSplitting=676., interbandMatrixElement=18700.)
+    materials.add_material('InSb', 'semi',
+                           # 300 K,
+                           # http://www.ioffe.ru/SVA/NSM/Semicond/InSb/basic.html
+                           relativePermittivity=16.8, electronAffinity=4590.,
+                           # Vurgaftman et al. (2001)
+                           electronMass=.0135, directBandGap=235., valenceBandOffset=0.,
+                           luttingerGamma1=34.8, luttingerGamma2=15.5, luttingerGamma3=16.5,
+                           spinOrbitSplitting=810., interbandMatrixElement=23300.,
+                           # Monch has some values for this, but I don't think we have too
+                           # good an idea. For now, I'll use mid-gap states of density equal to
+                           # InAs. TODO: experimentally determine this!
+                           chargeNeutralityLevel=0.5 * 235., surfaceChargeDensity=3e12)
+    materials.add_material('InP', 'semi',
+                           # 300 K,
+                           # http://www.ioffe.ru/SVA/NSM/Semicond/InP/basic.html
+                           relativePermittivity=12.5, electronAffinity=4380.,
+                           # Vurgaftman et al. (2001)
+                           electronMass=.0795, directBandGap=1423.6, valenceBandOffset=-940.,
+                           luttingerGamma1=5.08, luttingerGamma2=1.60, luttingerGamma3=2.10,
+                           spinOrbitSplitting=108., interbandMatrixElement=20700.)
+    materials.add_material('Si', 'semi',
+                           # 300 K,
+                           # http://www.ioffe.ru/SVA/NSM/Semicond/Si/basic.html
+                           relativePermittivity=11.7, electronAffinity=4050.,
+                           electronMass=(0.98 + 0.19 * 2)**(1. / 3.),  # DOS mass
+                           # Yu & Cardona
+                           directBandGap=3480.,
+                           luttingerGamma1=4.28, luttingerGamma2=0.339, luttingerGamma3=1.446,
+                           spinOrbitSplitting=44.)
 
     # bowing parameters from Vurgaftman et al. (2001)
-    materials.setBowingParameters(
+    materials.set_bowing_parameters(
         'GaAs',
         'InAs',
         'semi',
@@ -792,8 +792,8 @@ if __name__ == '__main__':
         valenceBandOffset=-380.,
         spinOrbitSplitting=150.,
         interbandMatrixElement=-1480.)
-    materials.setBowingParameters('AlAs', 'GaAs', 'semi', electronMass=0.)
-    materials.setBowingParameters(
+    materials.set_bowing_parameters('AlAs', 'GaAs', 'semi', electronMass=0.)
+    materials.set_bowing_parameters(
         'AlAs',
         'InAs',
         'semi',
@@ -801,18 +801,18 @@ if __name__ == '__main__':
         directBandGap=700.,
         valenceBandOffset=-640.,
         spinOrbitSplitting=150.)
-    materials.setBowingParameters(
+    materials.set_bowing_parameters(
         'GaSb',
         'InSb',
         'semi',
         electronMass=0.0092,
         directBandGap=425.,
         spinOrbitSplitting=100.)
-    materials.setBowingParameters('InAs', 'InSb', 'semi', electronMass=0.035, directBandGap=670.0,
-                                  # the bowing of the spinOrbitSplitting seems
-                                  # to be closer to zero for some
-                                  # first-principles calculations!
-                                  spinOrbitSplitting=1200.)
+    materials.set_bowing_parameters('InAs', 'InSb', 'semi', electronMass=0.035, directBandGap=670.0,
+                                    # the bowing of the spinOrbitSplitting seems
+                                    # to be closer to zero for some
+                                    # first-principles calculations!
+                                    spinOrbitSplitting=1200.)
 
     materials.save()
 
