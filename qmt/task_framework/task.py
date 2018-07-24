@@ -169,29 +169,29 @@ class Task(object):
             self.result = sweep_holder
 
 
-def visualize(self, filename=None):
-    """
-    Visualizes the task graph of this.
+    def visualize(self, filename=None):
+        """
+        Visualizes the task graph of this.
 
-    :param filename: File to export the visualization to.
-    """
-    self.compile().visualize(filename=filename)
+        :param filename: File to export the visualization to.
+        """
+        self.compile().visualize(filename=filename)
 
 
-def run(self):
-    """
-    Runs the task DAG graph whose root is this.
+    def run(self):
+        """
+        Runs the task DAG graph whose root is this.
 
-    Replaces the delayed objects in this.result with actual results.
+        Replaces the delayed objects in this.result with actual results.
 
-    pre: this.compile() has been called to initialize the task graph.
-    """
-    if self.result is None:
-        self.compile()
-    if self.sweep_manager is None:
-        self.result = self.result.compute()
-    else:
-        self.result = self.result.compute()
+        pre: this.compile() has been called to initialize the task graph.
+        """
+        if self.result is None:
+            self.compile()
+        if self.sweep_manager is None:
+            self.result = self.result.compute()
+        else:
+            self.result = self.result.compute()
 
 # DEPRECATED serialization
 # @staticmethod
