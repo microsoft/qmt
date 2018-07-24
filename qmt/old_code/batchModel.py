@@ -388,7 +388,7 @@ class Model:
             slicePart['material'] = None
         elif material not in self.modelDict['materials']:
             # The material needs to be generated (it's probably an alloy)
-            self.modelDict['materials'][material] = matLib[material].serializeDict()
+            self.modelDict['materials'][material] = matLib[material].serialize_dict()
             slicePart['material'] = material
         else:
             slicePart['material'] = material

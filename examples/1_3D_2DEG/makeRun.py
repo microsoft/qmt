@@ -34,7 +34,7 @@ runModel.modelDict = runModel.genEmptyModelDict()
 
 # Import the materials we need:
 matLib = qmt.Materials()
-runModel.modelDict['materials'] = matLib.serializeDict()
+runModel.modelDict['materials'] = matLib.serialize_dict()
 
 # Tell FreeCAD what to do with the names we passed in. All the units here are in microns.
 # The simplest type of object directive is an extrude, which just takes one 2D
