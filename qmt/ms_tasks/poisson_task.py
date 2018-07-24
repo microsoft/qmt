@@ -5,7 +5,7 @@ from qmt.basic_tasks import GeometryTask, MaterialsTask
 class PoissonTask(Task):
 
     def __init__(self, geo_task, mat_task, options=None, name='poisson_task'):
-        super(self.__class__, self).__init__([mat_task, geo_task], options, name)
+        super(PoissonTask, self).__init__([mat_task, geo_task], options, name)
         assert isinstance(mat_task, MaterialsTask)
         assert isinstance(geo_task, GeometryTask)
 

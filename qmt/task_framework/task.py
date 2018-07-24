@@ -40,19 +40,28 @@ class Task(object):
     """
     Abstract class for general simulation tasks run within the Dask framework.
 
+    Translates the dependencies between Task instances reflected in their constructors
+    into a Dask task graph and provides facilities for examining and evaluating this graph.
+
     Class attributes:
         current_instance_id: unique id for each task for serialization.
         Might be deprecated soon.
 
     Attributes:
+        task_list: The tasks that this depends on.
+        options: Additional options that control the operation of this.
         name: The name of the task.
-
-
     """
     __metaclass__ = TaskMetaclass
     current_instance_id = 0
 
     def __init__(self, task_list, options, name):
+        """
+        Constructs a new Task.
+        :param task_list: the tasks that this depends on.
+        :param options: The additional options this requires.
+        :param name: The name of this.
+        """
         self.name = name
         if "#" not in self.name:
             self.name += "#" + str(Task.current_instance_id)
@@ -74,18 +83,36 @@ class Task(object):
         self.result = None
 
     def compile(self):
+        """
+        Constructs the Dask task graph corresponding to this and its dependencies.
+        """
         for task in self.previous_tasks:
             task.compile()
         if self.result is None:
             self._populate_result()
 
     def _make_current_options(self, tag_values):
+        """
+        Creates the concrete options of this corresponding to the current sweep iteration.
+
+        Replaces each tag in the options of this with the values in the current sweep iteration.
+        :param tag_values: a dict mapping each tag to its value in the current sweep iteration
+        :return: the options needed by this task, with concrete values corresponding to the current sweep iteration.
+        """
         current_options = self.options
         for i, tag in enumerate(self.list_of_tags):
             current_options = replace_tag_with_value(current_options, tag, tag_values[tag])
         return current_options
 
     def _solve_instance(self, input_result_list, current_options):
+        """
+        Does the actual computation of this.
+
+        Note: Abstract method.
+        :param input_result_list: The results produced by dependent tasks, in the order
+        that the dependent tasks were given in the call to the Task base class constructor.
+        :param current_options: The options of this corresponding to the current sweep iteration.
+        """
         raise NotImplementedError("Task is missing the _solve_instance method!")
 
     def _populate_result(self):
@@ -105,6 +132,11 @@ class Task(object):
             self.result = sweep_holder
 
     def visualize(self, filename=None):
+        """
+        Visualizes the
+        :param filename:
+        :return:
+        """
         return self.compile().visualize(filename=filename)
 
     def run(self):
