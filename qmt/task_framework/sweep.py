@@ -163,9 +163,11 @@ class SweepHolder(object):
     def __iter__(self):
         return iter(self.object_list)
 
-    def visualize(self, filename):
-        print(filename)
-        dask.delayed(list)(*self.object_list).visualize(filename=filename)
+    def visualize(self, filename=None):
+        if filename is None:
+             dask.delayed(list)(*self.object_list).visualize()
+        else:
+            dask.delayed(list)(*self.object_list).visualize(filename=filename)
 
 # TODO refactor the creation of sweeps and sweepTags to make script less noisy
 class SweepTag(object):
