@@ -1,5 +1,5 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-from geo_task import GeometryTask
-from mat_task import MaterialsTask
+from geometry import Geometry1D, Geometry2D, Geometry3D
+from reduce_dim import ReduceDim2D, ReduceDim3D

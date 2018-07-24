@@ -1,48 +1,44 @@
 FROM ubuntu:18.04
 
-#needs to be set since tzdate is a dependency
+#needs to be set since tzdata is a dependency
 ENV DEBIAN_FRONTEND=noninteractive
-
-# get the microsoft azure package source
-RUN apt-get update && apt-get install -y wget
-RUN wget https://packages.microsoft.com/config/ubuntu/18.04/packages-microsoft-prod.deb && dpkg -i packages-microsoft-prod.deb 
 
 # install all elements
 RUN apt-get update && apt-get install -y python3-notebook jupyter-core jupyter-notebook \
-python3-pip python3-numpy python3-scipy python3-matplotlib
-#RUN blobfuse libcurl4-gnutls-dev
+	python3-pip python3-numpy python3-scipy python3-matplotlib
 
 RUN yes | pip3 install bokeh
 RUN yes | pip3 install "holoviews[all]"
 
-# since tzdate was installed noninteractively
-RUN ln -fs /usr/share/zoneinfo/America/Vancouver /etc/localtime
-
-RUN useradd -r -d /home/notebook -s /sbin/nologin -c "Docker image user" notebook
-
-
-# Now mount the blob storage
-
-
 # temporary directory for Blobfuse and user directories
-RUN mkdir /home/notebook && mkdir /home/notebook/notebooks && mkdir /home/notebook/notebook_templates \
-	&& mkdir /home/notebook/data && chown notebook /home/notebook -R
+RUN mkdir /notebook && mkdir /notebook/notebooks && mkdir /notebook/notebook_templates \
+	&& mkdir /notebook/data
+
+RUN useradd -r -d /notebook -s /sbin/nologin -c "notebook user" notebook
 
 
 ADD jupyter_notebook_config.py /jupyter_notebook_config.py
-RUN chown notebook /jupyter_notebook_config.py
+RUN chown notebook /notebook -R && chown notebook /jupyter_notebook_config.py
 
-
+RUN chmod 777 /notebook -R && chmod 777 /notebook/data /notebook/notebook_templates -R
 
 EXPOSE 8888
 
+# Add Tini. Tini operates as a process subreaper for jupyter. This prevents
+# kernel crashes.
+ENV TINI_VERSION v0.6.0
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /usr/bin/tini
+RUN chmod +x /usr/bin/tini
+ENTRYPOINT ["/usr/bin/tini", "--"]
 
-WORKDIR /home/notebook
+
+
+WORKDIR /notebook
 
 USER notebook
 
-ADD hall_data.ipynb /home/notebook/notebooks
-ADD Vx1bxwaitq33_39.txt /home/notebook/Vx1bxwaitq33_39.txt
+ADD hall_data.ipynb /notebook/notebook_templates
+ADD Vx1bxwaitq33_39.txt /notebook/data/Vx1bxwaitq33_39.txt
 
 
-CMD ["jupyter", "notebook", "--config=/jupyter_notebook_config.py"]
+CMD ["jupyter", "notebook", "-y", "--config=/jupyter_notebook_config.py"]
