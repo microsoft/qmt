@@ -4,9 +4,8 @@ from qmt.basic_tasks import GeometryTask, MaterialsTask
 
 class PoissonTask(Task):
 
-    def __init__(self, geo_task, mat_task, options=None, name='poisson_task'):
-        super(PoissonTask, self).__init__([mat_task, geo_task], options, name)
-        assert isinstance(mat_task, MaterialsTask)
+    def __init__(self, geo_task, options=None, name='poisson_task'):
+        super(PoissonTask, self).__init__([geo_task], options, name)
         assert isinstance(geo_task, GeometryTask)
 
     def _solve_instance(self, input_result_list, current_options):
