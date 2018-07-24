@@ -3,12 +3,33 @@ Core module of the Task framework. Contains the base Task class,
 from which all special purpose tasks are subclassed.
 
 How to use, in a nutshell:
-    To create a new task, subclass from Task and implement the _solve_instance method.
-    The constructor must (TODO)
-    See ms_tasks/poisson_task.py for an example.
+    To create a new task, subclass Task.
+    The constructor for the subclass must call the superclass constructor with
+        task_list=list of all dependent tasks,
+        options=dictionary containing all other inputs to the subclass task,
+        and optionally name=arbitrary name.
+    These should also, in most cases, be the arguments to the subclass constructor--
+    any arguments that the subclass constructor needs that are not dependent tasks should
+    be placed into the options argument.
+        See ms_tasks/poisson_task.py for an example.
 
-    To run a task, use the run() method,
-    and extract the results from the run() field as an iterable SweepHolder.
+    The actual work done by your Task subclass will be done in the _solve_instance callback,
+    which you must implement.
+    The _solve_instance callback expects two parameters:
+    input_result_list and current_options.
+    The input_result_list stores the outputs of the dependent tasks in the same order these tasks
+    were given in the constructor, and current_options stores the options to the current task.
+    The reason this latter has to be provided is that both the input results and options
+    may be dependent on an automatically-handled sweep. Your _solve_instance does not have to know about this--
+    it just has to compute its result dependent on the outputs of dependent tasks and its options,
+    and return this result.
+
+    Finally, to run a task, use the run() method,
+    and extract the results (over a sweep) from the .result field as an iterable SweepHolder.
+    (If there is no sweep, the .result field will simply contain the result as returned by _solve_instance.)
+
+    For an example of how to set up a sweep, see ./tests/test_tasks_sweep.py and refer
+    to the documentation of the sweeping classes in sweep.py.
 
 Classes:
     Task
@@ -53,6 +74,9 @@ class Task(object):
         task_list: The tasks that this depends on.
         options: Additional options that control the operation of this.
         name: The name of the task.
+
+    Notes for subclassing:
+
     """
     __metaclass__ = TaskMetaclass
     current_instance_id = 0
@@ -110,6 +134,7 @@ class Task(object):
 
         Note: Abstract method. Should be implemented by subclasses of Task.
         Note: This is a callback and should not be called directly.
+        The parameters are automatically provided.
         :param input_result_list: The results produced by dependent tasks, in the order
         that the dependent tasks were given in the call to the Task base class constructor.
         :param current_options: The options of this corresponding to the current sweep iteration.
