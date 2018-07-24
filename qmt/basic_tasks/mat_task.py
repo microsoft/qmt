@@ -4,7 +4,7 @@ from geo_task import GeometryTask
 class MaterialsTask(Task):
 
     def __init__(self,options=None,name='materials_task'):
-        super(MaterialsTask, self).__init__([], options, name)
+        super(self.__class__, self).__init__([], options, name)
 
     def _check_part_names(self):
         #TODO: write this function
@@ -14,4 +14,4 @@ class MaterialsTask(Task):
     
     def _solve_instance(self,input_result_list,current_options):
         return current_options
-        
+

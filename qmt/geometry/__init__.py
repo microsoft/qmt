@@ -4,4 +4,4 @@
 """Geometry generation and handling."""
 
 
-import freecad
+# ~ import freecad
