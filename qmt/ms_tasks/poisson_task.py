@@ -1,5 +1,5 @@
 from qmt.task_framework import Task
-from qmt.basic_tasks import GeometryTask, MaterialsTask
+from qmt.basic_tasks.geo_task import GeometryTask
 
 
 class PoissonTask(Task):
