@@ -163,6 +163,9 @@ class SweepHolder(object):
     def __iter__(self):
         return iter(self.object_list)
 
+    def visualize(self):
+        dask.delayed(list)(*self.object_list).visualize()
+
 # TODO refactor the creation of sweeps and sweepTags to make script less noisy
 class SweepTag(object):
     """
