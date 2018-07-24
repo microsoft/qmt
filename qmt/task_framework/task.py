@@ -191,7 +191,7 @@ def run(self):
     if self.sweep_manager is None:
         self.result = self.result.compute()
     else:
-        self.result.compute()
+        self.result = self.result.compute()
 
 # DEPRECATED serialization
 # @staticmethod
