@@ -183,15 +183,13 @@ class Task(object):
         Runs the task DAG graph whose root is this.
 
         Replaces the delayed objects in this.result with actual results.
-
-        pre: this.compile() has been called to initialize the task graph.
         """
         if self.result is None:
             self.compile()
         if self.sweep_manager is None:
             self.result = self.result.compute()
         else:
-            self.result = self.result.compute()
+            self.result.compute()
 
 # DEPRECATED serialization
 # @staticmethod
