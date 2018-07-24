@@ -9,7 +9,7 @@ geo_dict = {'part1': {'side length': tag1}, 'part2': {'side length': 10.}}
 geo_task = GeometryTask(options=geo_dict)
 
 mat_dict = {'part1': {'material': 'InAs'}, 'part2': {'material': 'InP'}}
-mat_task = MaterialsTask(geo_task, options=mat_dict)
+mat_task = MaterialsTask(options=mat_dict)
 
 poisson_dict = {'part1': {'voltage': 2.}, 'part2': {'voltage': tag2}}
 poisson_task = PoissonTask(geo_task, mat_task, options=poisson_dict)
