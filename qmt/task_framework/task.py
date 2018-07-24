@@ -125,7 +125,7 @@ class Task(object):
         if self.sweep_manager is None:
             # Treat the result as a single value to be computed
             input_result_list = [task.result for task in self.previous_tasks]
-            self.result = delayed(self._solve_instance)(input_result_list, self.options)
+            self.result = delayed(self._solve_instance)(input_result_list, self.options, dask_key_name = self.name)
         else:
             # Make a SweepHolder to store results
             sweep_holder = SweepHolder(self.sweep_manager, self.list_of_tags)
@@ -139,7 +139,7 @@ class Task(object):
                 input_result_list = [task.result.get_object(total_index) for task in self.previous_tasks]
 
                 # Create a delayed object for this task's computation.
-                output = delayed(self._solve_instance)(input_result_list, current_options)
+                output = delayed(self._solve_instance)(input_result_list, current_options, dask_key_name = self.name)
                 sweep_holder.add(output, sweep_holder_index)
             self.result = sweep_holder
 
