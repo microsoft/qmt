@@ -147,10 +147,6 @@ class Task(object):
         """
         if self.previous_tasks is None:
             raise ValueError("A list of dependent tasks must be passed to the constructor by subclasses!")
-        if self.sweep_manager is None:
-            # Treat the result as a single value to be computed
-            input_result_list = [task.result for task in self.previous_tasks]
-            self.result = delayed(self._solve_instance)(input_result_list, self.options, dask_key_name = self.name)
         else:
             # Make a SweepHolder to store results
             sweep_holder = SweepHolder(self.sweep_manager, self.list_of_tags)
@@ -188,8 +184,6 @@ class Task(object):
         """
         if self.result is None:
             self.compile()
-        if self.sweep_manager is None:
-            self.result = self.result.compute()
         else:
             self.result.compute()
 

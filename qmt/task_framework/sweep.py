@@ -164,7 +164,7 @@ class SweepHolder(object):
         return iter(self.object_list)
 
     def visualize(self, filename=None):
-        print(self.object_list)
+        # print(self.object_list)
         if filename is None:
             dask.delayed(list)(*self.object_list).visualize()
         else:
