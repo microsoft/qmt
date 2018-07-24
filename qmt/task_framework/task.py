@@ -175,7 +175,8 @@ class Task(object):
 
         :param filename: File to export the visualization to.
         """
-        self.compile().visualize(filename=filename)
+        self.compile()
+        self.result.visualize(filename=filename)
 
 
     def run(self):
