@@ -66,11 +66,13 @@ def exportCAD(obj, fileName):
                           Please fix this and try your export again.')
 
 
-def updateParams(paramDict):
+# TODO: this is general, not fileIO
+def updateParams(doc, paramDict):
     ''' Update the parameters in the modelParams spreadsheet to reflect the
         current value in the dict.
     '''
-    doc = FreeCAD.ActiveDocument
+    # ~ doc = FreeCAD.ActiveDocument
+
     # ~ if passModel is None:
         # ~ myModel = getModel()
     # ~ else:
@@ -83,12 +85,15 @@ def updateParams(paramDict):
     # a geometry sweep in the model script.
     if paramDict:
         # Internal: unconditional removeObject on spreadSheet breaks param dependencies.
+        # ~ spreadSheet = doc.addObject('Spreadsheet::Sheet', 'modelParams')
         try:
             spreadSheet = doc.modelParams
             spreadSheet.clearAll()  # clear existing spreadsheet
+            print("cleared")
         except:
             doc.removeObject('modelParams')  # otherwise it was not a good spreadsheet
             spreadSheet = doc.addObject('Spreadsheet::Sheet', 'modelParams')
+        print("-----------_")
         spreadSheet.set('A1', 'paramName')
         spreadSheet.set('B1', 'paramValue')
         spreadSheet.setColumnWidth('A', 200)
@@ -104,6 +109,7 @@ def updateParams(paramDict):
                 pass
             else:
                 raise ValueError('Unknown geometric parameter type.')
+        
         doc.recompute()
 
 

@@ -4,6 +4,7 @@
 """FreeCAD routines."""
 
 
+import FreeCAD
 import fileIO
 import sketchUtils
 import geomUtils

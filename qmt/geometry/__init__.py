@@ -2,6 +2,3 @@
 # Licensed under the MIT License.
 
 """Geometry generation and handling."""
-
-
-# ~ import freecad
