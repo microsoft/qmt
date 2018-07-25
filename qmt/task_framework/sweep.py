@@ -246,6 +246,7 @@ class ReducedSweep(object):
         :return: list of corresponding indices in the total sweep
         """
         total_index = self._index_in_sweep[reduced_index]
+        return total_index
 
     def __len__(self):
         return len(self._index_in_sweep)
