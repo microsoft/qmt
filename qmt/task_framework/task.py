@@ -163,8 +163,7 @@ class Task(object):
         else:
             # Make a SweepHolder to store results
             # TODO
-            # make reduced sweep
-            # make delayed sweep based on reduced sweep as self.delayed_result
+            # rearrange sweeps
             reduced_sweep = ReducedSweep.create_from_manager_and_tags(self.sweep_manager, self.list_of_tags)
             self.delayed_result = ReducedSweepDelayed.create_from_reduced_sweep_and_manager(reduced_sweep,
                                                                                        self.sweep_manager)
