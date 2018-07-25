@@ -35,7 +35,7 @@ class SweepManager(object):
             'All dicts in sweep_list must have same keys.'
 
         if dask_client is None:
-            dask_client = dask.distributed.Client()  # client on the local machine
+            dask_client = dask.distributed.Client(processes=False)  # client on the local machine
 
         self.dask_client = dask_client
 
@@ -74,14 +74,12 @@ class SweepManager(object):
             result = [merge_two_dicts(x, {key: y}) for x in result for y in pool]
         return SweepManager(result)
 
-    def run(self, task, reduceFunction=None):
+    def run(self, task):
         """
         Runs the sweep represented by this.
 
-        R
-        :param task:
-        :param reduceFunction:
-        :return:
+        :param task: the top level task to run
+        :return: the ReducedSweepFutures representing the result
         """
 
         def set_sweep_manager(current_task):
@@ -90,25 +88,25 @@ class SweepManager(object):
                 set_sweep_manager(child_task)
 
         set_sweep_manager(task)
-        return task.run(reduceFunction)
+        return task.run()
 
     def __str__(self):
         return "<SweepManager with " + str(len(self.sweep_list)) + " entries>"
 
-class ReducedSweepResults(object):
+class ReducedSweepFutures(object):
     """
     Contains sweep information and results in the form of Dask futures.
     """
-    def __init__(self, sweep, results):
+    def __init__(self, sweep, futures):
         self.sweep = sweep
-        self.results = results
+        self.futures = futures
 
     @staticmethod
     def get_each_element_function(self):
-        return self.sweep, [future.result() for future in self.results]
+        return self.sweep, [future.result() for future in self.futures]
 
     def __iter__(self):
-        return iter(self.results)
+        return iter(self.futures)
 
 
 # TODO
@@ -147,16 +145,16 @@ class ReducedSweepDelayed(object):
         for delayed_result in self.delayed_results:
             futures.append(self.dask_client.compute(delayed_result))
 
-        return ReducedSweepResults(self.sweep, futures)
+        return ReducedSweepFutures(self.sweep, futures)
 
     def visualize_entire_sweep(self, filename=None):
-        delayed_proxy = dask.delayed(id)(self.delayed_object_list)
+        delayed_proxy = dask.delayed(id)(self.delayed_results)
         delayed_proxy.visualize(filename=filename)
         return delayed_proxy.visualize()
 
     def visualize_single_sweep_element(self, filename=None):
-        self.delayed_object_list[0].visualize(filename=filename)
-        return self.delayed_object_list[0].visualize()
+        self.delayed_results[0].visualize(filename=filename)
+        return self.delayed_results[0].visualize()
 
 class ReducedSweep(object):
     """
