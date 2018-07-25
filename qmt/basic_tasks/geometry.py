@@ -85,6 +85,7 @@ class GeoFreeCAD(Task):
             pass
 
         doc = cad.FreeCAD.newDocument('instance')
+        cad.FreeCAD.setActiveDocument('instance')
 
         if 'filepath' in current_options:
             doc.load(current_options['filepath'])

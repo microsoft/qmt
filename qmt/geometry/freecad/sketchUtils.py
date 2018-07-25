@@ -12,11 +12,11 @@ import numpy as np
 from copy import deepcopy
 
 
-def deepRemove_impl(doc, obj):
+def _deepRemove_impl(obj):
     ''' Implementation helper for deepRemove.
     '''
     for child in obj.OutList:
-        deepRemove_impl(doc, child)
+        deepRemove_impl(child)
     FreeCAD.ActiveDocument.removeObject(obj.Name)
 
 
@@ -32,7 +32,7 @@ def deepRemove(obj=None, name=None, label=None):
         obj = doc.getObjectsByLabel(label)[0]
     else:
         raise RuntimeError('No object selected!')
-    deepRemove_impl(doc, obj)
+    _deepRemove_impl(obj)
     doc.recompute()
 
 
@@ -48,10 +48,6 @@ def findSegments(sketch):
     '''Return the line segments in a sketch as a numpy array.
     '''
     lineSegments = []
-    # The old way would also discover guide segments, which we probably don't want to do...
-    # for seg in sketch.Geometry:
-    #     lineSegments += [[[seg.StartPoint[0], seg.StartPoint[1], seg.StartPoint[2]], \
-    #                       [seg.EndPoint[0], seg.EndPoint[1], seg.EndPoint[2]]]]
     # ~ for edge in sketch.Shape.Edges:
         # ~ lineSegments.append([tuple(edge.Vertexes[0].Point), tuple(edge.Vertexes[1].Point)])
     for wire in sketch.Shape.Wires:  # fc17: wires should be defined for all sketches
@@ -109,15 +105,15 @@ def findCycle(lineSegments, startingIndex, availSegIDs):
     return segList
 
 
-def addCycleSketch(name, fcDoc, cycleSegIndList, lineSegments):
+def addCycleSketch(name, doc, cycleSegIndList, lineSegments):
     ''' Add a sketch of a cycle to a FC document.
     '''
-    if (fcDoc.getObject(name) != None):  # this name already exists
+    if (doc.getObject(name) != None):  # this name already exists
         raise ValueError("Error: sketch " + name + " already exists.")
-    obj = fcDoc.addObject('Sketcher::SketchObject', name)
+    obj = doc.addObject('Sketcher::SketchObject', name)
     vec = FreeCAD.Vector
     # obj.MapMode = 'FlatFace'
-    obj = fcDoc.getObject(name)
+    obj = doc.getObject(name)
     cnt = 0
     for segIndex in cycleSegIndList:
         startPoint = lineSegments[segIndex, 0, :]
@@ -128,16 +124,16 @@ def addCycleSketch(name, fcDoc, cycleSegIndList, lineSegments):
             continue
         obj.addConstraint(Sketcher.Constraint('Coincident', cnt - 2, 2, cnt - 1, 1))
     obj.addConstraint(Sketcher.Constraint('Coincident', cnt - 1, 2, 0, 1))
-    fcDoc.recompute()
+    doc.recompute()
     return obj
 
 
-def addPolyLineSketch(name, fcDoc, segmentOrder, lineSegments):
+def addPolyLineSketch(name, doc, segmentOrder, lineSegments):
     ''' Add a sketch given segment order and line segments
     '''
-    if (fcDoc.getObject(name) != None):  # this name already exists
+    if (doc.getObject(name) != None):  # this name already exists
         raise ValueError("Error: sketch " + name + " already exists.")
-    obj = fcDoc.addObject('Sketcher::SketchObject', name)
+    obj = doc.addObject('Sketcher::SketchObject', name)
     for segIndex, segment in enumerate(lineSegments):
         startPoint = segment[0, :]
         endPoint = segment[1, :]
@@ -146,7 +142,7 @@ def addPolyLineSketch(name, fcDoc, segmentOrder, lineSegments):
         connectIndex = segmentOrder[i]
         if connectIndex < len(lineSegments):
             obj.addConstraint(Sketcher.Constraint('Coincident', i, 2, connectIndex, 1))
-    fcDoc.recompute()
+    doc.recompute()
     return obj
 
 
@@ -168,14 +164,14 @@ def findEdgeCycles(sketch):
 def splitSketch(sketch):
     '''Splits a sketch into several, returning a list of names of the new sketches.
     '''
+    doc = FreeCAD.ActiveDocument
     lineSegments, cycles = findEdgeCycles(sketch)
     # Finally, add new sketches based on the cycles:
-    myDoc = FreeCAD.ActiveDocument
     currentSketchName = sketch.Name
     cycleObjList = []
     for i, cycle in enumerate(cycles):
         cycleObj = addCycleSketch(currentSketchName + '_' + str(i),
-                                  myDoc, cycle, lineSegments)
+                                  doc, cycle, lineSegments)
         cycleObjList += [cycleObj]
     return cycleObjList
 
