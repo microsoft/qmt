@@ -12,6 +12,9 @@ import numpy as np
 from copy import deepcopy
 from .auxiliary import *
 
+vec = FreeCAD.Vector
+
+
 def findSegments(sketch):
     '''Return the line segments in a sketch as a numpy array.
     Note: in FC0.17 sketches contain wires by default.
@@ -92,7 +95,6 @@ def addCycleSketch(name, doc, cycleSegIndList, lineSegments):
     if (doc.getObject(name) != None):  # this name already exists
         raise ValueError("Error: sketch " + name + " already exists.")
     obj = doc.addObject('Sketcher::SketchObject', name)
-    vec = FreeCAD.Vector
     # obj.MapMode = 'FlatFace'
     obj = doc.getObject(name)
     cnt = 0
@@ -114,7 +116,6 @@ def addCycleSketch2(name, wire):
     '''
     assert wire.isClosed()
     doc = FreeCAD.ActiveDocument
-    vec = FreeCAD.Vector
     if (doc.getObject(name) != None):
         raise ValueError("Error: sketch " + name + " already exists.")
     sketch = doc.addObject('Sketcher::SketchObject', name)
@@ -137,7 +138,7 @@ def addPolyLineSketch(name, doc, segmentOrder, lineSegments):
     for segIndex, segment in enumerate(lineSegments):
         startPoint = segment[0, :]
         endPoint = segment[1, :]
-        obj.addGeometry(Part.LineSegment(FreeCAD.Vector(tuple(startPoint)), FreeCAD.Vector(tuple(endPoint))))
+        obj.addGeometry(Part.LineSegment(vec(tuple(startPoint)), vec(tuple(endPoint))))
     for i in range(len(lineSegments)):
         connectIndex = segmentOrder[i]
         if connectIndex < len(lineSegments):
@@ -146,7 +147,6 @@ def addPolyLineSketch(name, doc, segmentOrder, lineSegments):
     return obj
 
 
-# ~ def findEdgeCycles_16(sketch):
 def findEdgeCycles(sketch):
     """Find the list of edges in a sketch and separate them into cycles."""
     lineSegments = findSegments(sketch)
@@ -267,8 +267,8 @@ def draftOffset(inputSketch,t):
     if t == 0.:
         return copy(inputSketch)
     deltaT = np.abs(t)
-    offsetVec1 =FreeCAD.Vector(-deltaT,-deltaT,0.)
-    offsetVec2 = FreeCAD.Vector(deltaT,deltaT,0.)
+    offsetVec1 = vec(-deltaT,-deltaT,0.)
+    offsetVec2 = vec(deltaT,deltaT,0.)
     
     offset0 = copy(inputSketch)
     offset1 = Draft.offset(inputSketch,offsetVec1,copy=True)

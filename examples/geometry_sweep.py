@@ -7,7 +7,7 @@ import os
 import numpy as np
 
 import qmt.task_framework as qtf
-from qmt.basic_tasks import GeoFreeCAD
+from qmt.basic_tasks.geometry import GeoFreeCAD
 
 # Set up geometry task
 tag = qtf.SweepTag('thickness')

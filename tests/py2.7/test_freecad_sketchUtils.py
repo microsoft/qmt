@@ -99,9 +99,20 @@ def test_addCycleSketch(fix_FCDoc, fix_two_cycle_sketch):
 
 def test_addCycleSketch2(fix_FCDoc, fix_two_cycle_sketch):
     '''Test if cycles are correctly added.'''
+    b = (-30, 20, 0)
+    d = (20, -10, 0)
     sketch = fix_two_cycle_sketch()
     wire = sketch.Shape.Wires[0]
-    addCycleSketch2('cyclesketch_wire', wire)
+    sketch_new = addCycleSketch2('cyclesketch', wire)
+
+    segArr = findSegments(sketch_new)
+    assert (segArr[0][1] == [b]).all()
+    assert (segArr[2][1] == [d]).all()
+
+    with pytest.raises(ValueError) as err:
+        addCycleSketch2('cyclesketch', wire)
+    assert 'already exists' in str(err.value)
+
 
 def test_addPolyLineSketch(fix_FCDoc):
     '''Test if polylines are correctly added.'''
@@ -120,14 +131,12 @@ def test_findEdgeCycles(fix_FCDoc, fix_two_cycle_sketch):
 def test_findEdgeCycles2(fix_FCDoc, fix_two_cycle_sketch):
     '''Test multiple cycle ordering.'''
     sketch = fix_two_cycle_sketch()
-    com_ref = []
-    com_ref += [(e.CenterOfMass.x, e.CenterOfMass.y, e.CenterOfMass.z)
-                for e in [wire.Edges for wire in sketch.Shape.Wires][0]]
+    com_ref = [(e.CenterOfMass.x, e.CenterOfMass.y, e.CenterOfMass.z)
+               for e in [wire.Edges for wire in sketch.Shape.Wires][0]]
 
     wires = findEdgeCycles2(sketch)
-    com = []
-    com += [(e.CenterOfMass.x, e.CenterOfMass.y, e.CenterOfMass.z)
-            for e in [wire.Edges for wire in wires][0]]
+    com = [(e.CenterOfMass.x, e.CenterOfMass.y, e.CenterOfMass.z)
+           for e in [wire.Edges for wire in wires][0]]
     assert np.allclose(com, com_ref)
 
 
@@ -146,7 +155,7 @@ def test_splitSketch(fix_FCDoc, fix_two_cycle_sketch):
         assert p in centers_orig and p not in centers_sq
 
 
-def test_splitSketch2(fix_FCDoc, fix_two_cycle_sketch):
+def test_splitSketch2(fix_FCDoc, fix_two_cycle_sketch, fix_unit_square_sketch):
     '''Test if multi-cycle sketches are split correctly.'''
     sketch = fix_two_cycle_sketch()
 
@@ -159,7 +168,10 @@ def test_splitSketch2(fix_FCDoc, fix_two_cycle_sketch):
         assert p in centers_orig and p not in centers_tri
     for p in centers_tri:
         assert p in centers_orig and p not in centers_sq
-    fix_FCDoc.saveAs("test.fcstd")
+    # ~ fix_FCDoc.saveAs("test.fcstd")
+
+    sketch = fix_unit_square_sketch()
+    assert sketch.Content == splitSketch2(sketch).Content
 
 
 def test_extendSketch(fix_FCDoc):
