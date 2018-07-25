@@ -9,21 +9,22 @@ import pytest
 import qmt
 import FreeCAD
 import Part
-from qmt.freecad.sketchUtils import *
+from qmt.geometry.freecad.sketchUtils import *
 from test_freecad_geomUtils import aux_two_cycle_sketch
 
 vec = FreeCAD.Vector
 
 
 def test_delete(fix_FCDoc):
+    '''Test deep (recursive) removal by all parameters.'''
     sketch = aux_two_cycle_sketch()
-    part = qmt.freecad.extrude(sketch, 10)
+    part = qmt.geometry.freecad.geomUtils.extrude(sketch, 10)
     delete(sketch)
     delete(part)
     assert len(fix_FCDoc.Objects) == 0
 
     sketch = aux_two_cycle_sketch()
-    part = qmt.freecad.extrude(sketch, 10)
+    part = qmt.geometry.freecad.geomUtils.extrude(sketch, 10)
     part2 = fix_FCDoc.copyObject(part, False)
     deepRemove(name=part2.Name)
     assert len(part.OutList) == 0  # part2 steals sketch from part1
@@ -39,13 +40,13 @@ def test_deepRemove(fix_FCDoc):
 
     # simple deletion
     sketch = aux_two_cycle_sketch()
-    part1 = qmt.freecad.extrude(sketch, 10)
+    part1 = qmt.geometry.freecad.geomUtils.extrude(sketch, 10)
     deepRemove(part1)
     assert len(fix_FCDoc.Objects) == 0
 
     # copied object deletion
     sketch = aux_two_cycle_sketch()
-    part1 = qmt.freecad.extrude(sketch, 10)
+    part1 = qmt.geometry.freecad.geomUtils.extrude(sketch, 10)
     part2 = fix_FCDoc.copyObject(part1, False)
     deepRemove(name=part2.Name)  # part2 refs to sketch from part1
     assert len(part1.OutList) == 0

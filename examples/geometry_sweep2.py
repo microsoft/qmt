@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from qmt.basic_tasks import FreeCADTask
+"""Example geometry sweeping in-memory."""
+
+from qmt.basic_tasks import GeoFreeCAD
 import qmt.task_framework as qtf
 import qmt.geometry.freecad as cad
 import ProfileLib.RegularPolygon
@@ -22,10 +24,11 @@ sketch.setExpression('Constraints['+str(len(sketch.Constraints)-1)+']', u'modelP
 tag_al = qtf.SweepTag('Al thickness')
 tag_wire = qtf.SweepTag('Wire diameter')
 freecad_dict = { 'document': doc, 'params': {'thickness_al': tag_al, 'thickness_wire': tag_wire} }
-geo_task = FreeCADTask(options=freecad_dict)
+geo_task = GeoFreeCAD(options=freecad_dict)
 
 sweeps = [ {tag_al: 1., tag_wire: val} for val in np.arange(2,10,2) ]
-# ~ sweeps = [ {tag1:val1,tag2:val2} for val1 in np.arange(2,10,2) for val2 in [5.,6.] ]
+# ~ sweeps = [ {tag_al: val1, tag_wire: val2}
+           # ~ for val1 in np.arange(2,10,2) for val2 in [5.,6.] ]
 # ~ sweep_man = qtf.SweepManager.construct_cartesian_product({})
 qtf.SweepManager(sweeps).run(geo_task)
 

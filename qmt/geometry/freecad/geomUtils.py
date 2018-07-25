@@ -17,7 +17,8 @@ def delete(obj):
     doc.recompute()
 
 
-def extrude(sketch, length,reversed=False,name=None):
+
+def extrude(sketch, length,reverse=False,name=None):
     '''
     Extrude sketch up to given length. Optional name (default: append '_extr').
     Return handle to extrude.
@@ -28,11 +29,35 @@ def extrude(sketch, length,reversed=False,name=None):
         f = FreeCAD.ActiveDocument.addObject('PartDesign::Pad',name)
     f.Sketch = sketch
     f.Length = length
-    if reversed:
+    if reverse:
         f.Reversed = 1
     FreeCAD.ActiveDocument.recompute()
     return f
 
+def extrude_partwb(sketch, length,reverse=False,name=None):
+    '''Extrude via Part workbench.'''
+    doc = FreeCAD.ActiveDocument
+    if name is None:
+        f = FreeCAD.ActiveDocument.addObject('Part::Extrusion')
+    else:
+        f = FreeCAD.ActiveDocument.addObject('Part::Extrusion',name)
+    f.Base = sketch
+    f.DirMode = "Normal"
+    f.DirLink = None
+    f.LengthFwd = length
+    f.LengthRev = 0.
+    f.Solid = True
+    f.Reversed = True if reverse else False
+    f.Symmetric = False
+    f.TaperAngle = 0.
+    f.TaperAngleRev = 0.
+    # ~ f.Base.ViewObject.hide()
+    doc.recompute()
+    return f
+
+def extrude(sketch, length,reverse=False,name=None):
+    '''Selector for extrude method.'''
+    return extrude_partwb(sketch, length, reverse, name)
 
 def copy(obj, moveVec=(0., 0., 0.), copy=True):
     '''

@@ -6,8 +6,8 @@ import qmt
 import os
 import FreeCAD
 import Part
-from qmt.freecad.objectConstruction import *
-from qmt.freecad.fileIO import setupModelFile
+from qmt.geometry.freecad.objectConstruction import *
+# ~ from qmt.geometry.freecad.fileIO import setupModelFile
 
 
 def setup_function():
@@ -18,7 +18,7 @@ def setup_function():
     testDir = os.path.join(repo_path, 'tests')
     global modelFilePath
     modelFilePath = os.path.join(testDir, 'testModel.json')
-    setupModelFile(modelFilePath)
+    # ~ setupModelFile(modelFilePath)
 
 
 def teardown_function():

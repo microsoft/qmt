@@ -9,7 +9,7 @@ import FreeCAD
 import Draft
 import Part
 import numpy as np
-from qmt.freecad import findSegments, deepRemove
+from qmt.freecad import findSegments
 
 
 def delete(obj):
@@ -19,7 +19,7 @@ def delete(obj):
 
 
 
-def extrude(sketch, length,reversed=False,name=None):
+def extrude(sketch, length,reverse=False,name=None):
     '''
     Extrude sketch up to given length. Optional name (default: append '_extr').
     Return handle to extrude.
@@ -30,11 +30,35 @@ def extrude(sketch, length,reversed=False,name=None):
         f = FreeCAD.ActiveDocument.addObject('PartDesign::Pad',name)
     f.Sketch = sketch
     f.Length = length
-    if reversed:
+    if reverse:
         f.Reversed = 1
     FreeCAD.ActiveDocument.recompute()
     return f
 
+def extrude_partwb(sketch, length,reverse=False,name=None):
+    '''Extrude via Part workbench.'''
+    doc = FreeCAD.ActiveDocument
+    if name is None:
+        f = FreeCAD.ActiveDocument.addObject('Part::Extrusion')
+    else:
+        f = FreeCAD.ActiveDocument.addObject('Part::Extrusion',name)
+    f.Base = sketch
+    f.DirMode = "Normal"
+    f.DirLink = None
+    f.LengthFwd = length
+    f.LengthRev = 0.
+    f.Solid = True
+    f.Reversed = True if reverse else False
+    f.Symmetric = False
+    f.TaperAngle = 0.
+    f.TaperAngleRev = 0.
+    # ~ f.Base.ViewObject.hide()
+    doc.recompute()
+    return f
+
+def extrude(sketch, length,reverse=False,name=None):
+    '''Selector for extrude method.'''
+    return extrude_partwb(sketch, length, reverse, name)
 
 def copy(obj, moveVec=(0., 0., 0.), copy=True):
     '''
@@ -220,11 +244,15 @@ def extrudeBetween(sketch, zMin, zMax):
     '''
     doc = FreeCAD.ActiveDocument
     tempExt = extrude(sketch, zMax - zMin)
-    ext = copy(tempExt, moveVec=(0., 0., zMin))
+
+    vec = FreeCAD.Vector
+    tempExt.Placement = FreeCAD.Placement(vec(0,0,zMin),FreeCAD.Rotation(vec(0,0,1),0))
+    # ~ ext = copy(tempExt, moveVec=(0., 0., zMin))
+    # ~ doc.recompute()
+    # ~ doc.removeObject(tempExt.Name)
     doc.recompute()
-    doc.removeObject(tempExt.Name)
-    doc.recompute()
-    return ext
+    # ~ return ext
+    return tempExt
 
 
 def liftObject(obj, d, consumeInputs=False):

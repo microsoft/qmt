@@ -89,11 +89,9 @@ def updateParams(doc, paramDict):
         try:
             spreadSheet = doc.modelParams
             spreadSheet.clearAll()  # clear existing spreadsheet
-            print("cleared")
         except:
             doc.removeObject('modelParams')  # otherwise it was not a good spreadsheet
             spreadSheet = doc.addObject('Spreadsheet::Sheet', 'modelParams')
-        print("-----------_")
         spreadSheet.set('A1', 'paramName')
         spreadSheet.set('B1', 'paramValue')
         spreadSheet.setColumnWidth('A', 200)

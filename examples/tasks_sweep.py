@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import qmt.task_framework as qtf
 from qmt.basic_tasks import Geometry1D
 from qmt.ms_tasks import PoissonTask

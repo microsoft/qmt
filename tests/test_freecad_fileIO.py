@@ -8,31 +8,31 @@ from __future__ import absolute_import, division, print_function
 import os
 import pytest
 import qmt
-from qmt.freecad.fileIO import *
+from qmt.geometry.freecad.fileIO import *
 
 
-def test_setupModelFile(fix_testDir, fix_modelPath, fix_FCDoc):
-    '''Test the setup function for model files.'''
-    dummy = fix_FCDoc.addObject("Part::Box", "modelFilePath")
-    setupModelFile(fix_modelPath)
-    assert 'testModel.json' in os.listdir(fix_testDir)
-    assert FreeCAD.ActiveDocument.modelFilePath.A1 == 'Path to model file:'
-    assert FreeCAD.ActiveDocument.modelFilePath.B1 == fix_modelPath
-    os.remove(fix_modelPath)
+# ~ def test_setupModelFile(fix_testDir, fix_modelPath, fix_FCDoc):
+    # ~ '''Test the setup function for model files.'''
+    # ~ dummy = fix_FCDoc.addObject("Part::Box", "modelFilePath")
+    # ~ setupModelFile(fix_modelPath)
+    # ~ assert 'testModel.json' in os.listdir(fix_testDir)
+    # ~ assert FreeCAD.ActiveDocument.modelFilePath.A1 == 'Path to model file:'
+    # ~ assert FreeCAD.ActiveDocument.modelFilePath.B1 == fix_modelPath
+    # ~ os.remove(fix_modelPath)
 
 
-def test_getModel(fix_modelPath, fix_FCDoc, fix_model):
-    '''Test model retrieval.'''
-    setupModelFile(fix_modelPath)
-    myModel = getModel()
-    assert myModel.modelDict == fix_model.modelDict
-    os.remove(fix_modelPath)
+# ~ def test_getModel(fix_modelPath, fix_FCDoc, fix_model):
+    # ~ '''Test model retrieval.'''
+    # ~ setupModelFile(fix_modelPath)
+    # ~ myModel = getModel()
+    # ~ assert myModel.modelDict == fix_model.modelDict
+    # ~ os.remove(fix_modelPath)
 
 
 def test_exportMeshed(fix_testDir, fix_FCDoc):
     '''Test mesh export/import.'''
     filePath = os.path.join(fix_testDir, 'testExport.stl')
-    from qmt.freecad.geomUtils import makeBB
+    from qmt.geometry.freecad.geomUtils import makeBB
     testBB = (-1., 1., -2., 2., -3., 3.)
     testShape = makeBB(testBB)
     exportMeshed(testShape, filePath)
@@ -51,7 +51,7 @@ def test_exportMeshed(fix_testDir, fix_FCDoc):
 def test_exportCAD(fix_testDir, fix_FCDoc):
     '''Test step export/import.'''
     filePath = os.path.join(fix_testDir, 'testExport.step')
-    from qmt.freecad.geomUtils import makeBB
+    from qmt.geometry.freecad.geomUtils import makeBB
     testBB = (-1., 1., -2., 2., -3., 3.)
     testShape = makeBB(testBB)
     exportCAD(testShape, filePath)
@@ -71,32 +71,32 @@ def test_exportCAD(fix_testDir, fix_FCDoc):
     assert 'does not end' in str(err.value)
 
 
-def test_updateParams(fix_modelPath, fix_FCDoc):
-    '''Test updating of parameters in the FC gui.
-       TODO: this should probably work with only 1 param (right now it doesn't).
-    '''
-    setupModelFile(fix_modelPath)
-    model = qmt.Model(modelPath=fix_modelPath)
+# ~ def test_updateParams(fix_modelPath, fix_FCDoc):
+    # ~ '''Test updating of parameters in the FC gui.
+       # ~ TODO: this should probably work with only 1 param (right now it doesn't).
+    # ~ '''
+    # ~ setupModelFile(fix_modelPath)
+    # ~ model = qmt.Model(modelPath=fix_modelPath)
 
-    dummy = fix_FCDoc.addObject("Part::Box", "modelParams")
-    model.modelDict['geometricParams']['length1'] = (2, 'freeCAD')
-    updateParams()
-    model.modelDict['geometricParams']['length2'] = (3, 'freeCAD')
-    model.modelDict['geometricParams']['param3'] = (3, 'python')
-    updateParams(model)
-    model.modelDict['geometricParams']['param4'] = (3, 'unknown')
-    model.saveModel()
-    with pytest.raises(ValueError) as err:
-        updateParams()
-    assert 'Unknown geometric parameter' in str(err.value)
+    # ~ dummy = fix_FCDoc.addObject("Part::Box", "modelParams")
+    # ~ model.modelDict['geometricParams']['length1'] = (2, 'freeCAD')
+    # ~ updateParams()
+    # ~ model.modelDict['geometricParams']['length2'] = (3, 'freeCAD')
+    # ~ model.modelDict['geometricParams']['param3'] = (3, 'python')
+    # ~ updateParams(model)
+    # ~ model.modelDict['geometricParams']['param4'] = (3, 'unknown')
+    # ~ model.saveModel()
+    # ~ with pytest.raises(ValueError) as err:
+        # ~ updateParams()
+    # ~ assert 'Unknown geometric parameter' in str(err.value)
 
-    fcFilePath = os.path.splitext(fix_modelPath)[0] + '.FCStd'
-    fix_FCDoc.saveAs(fcFilePath)
-    myDoc2 = FreeCAD.newDocument('testDoc2')
-    myDoc2.load(fcFilePath)
-    assert myDoc2.modelParams.length1 == 2
-    assert myDoc2.modelParams.length2 == 3
+    # ~ fcFilePath = os.path.splitext(fix_modelPath)[0] + '.FCStd'
+    # ~ fix_FCDoc.saveAs(fcFilePath)
+    # ~ myDoc2 = FreeCAD.newDocument('testDoc2')
+    # ~ myDoc2.load(fcFilePath)
+    # ~ assert myDoc2.modelParams.length1 == 2
+    # ~ assert myDoc2.modelParams.length2 == 3
 
-    FreeCAD.closeDocument('testDoc2')
-    os.remove(fcFilePath)
-    os.remove(fix_modelPath)
+    # ~ FreeCAD.closeDocument('testDoc2')
+    # ~ os.remove(fcFilePath)
+    # ~ os.remove(fix_modelPath)

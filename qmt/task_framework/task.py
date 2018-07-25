@@ -155,6 +155,7 @@ class Task(object):
             # Make a SweepHolder to store results
             sweep_holder = SweepHolder(self.sweep_manager, self.list_of_tags)
             for sweep_holder_index, tag_values in enumerate(sweep_holder.tagged_value_list):
+                # ~ print("TAGVAL: " + str(tag_values))
                 current_options = self._make_current_options(tag_values)
 
                 # Get the index in the total sweep

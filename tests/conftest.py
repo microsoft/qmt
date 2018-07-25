@@ -5,6 +5,7 @@
 
 import os
 import pytest
+
 import qmt
 import FreeCAD
 
@@ -16,29 +17,20 @@ def fix_testDir():
     return os.path.join(rootPath, 'tests')
 
 
-@pytest.fixture(scope='session')
-def fix_modelPath():
-    '''Return the model path.'''
-    return os.path.join(fix_testDir(), 'testModel.json')
+# ~ @pytest.fixture(scope='session')
+# ~ def fix_modelPath():
+    # ~ '''Return the model path.'''
+    # ~ return os.path.join(fix_testDir(), 'testModel.json')
 
 
-@pytest.fixture(scope='function')
-def fix_model():
-    '''Return a fresh QMT model instance.'''
-    return qmt.Model()
+# ~ @pytest.fixture(scope='function')
+# ~ def fix_model():
+    # ~ '''Return a fresh QMT model instance.'''
+    # ~ return qmt.Model()
 
 
 @pytest.fixture(scope='function')
 def fix_FCDoc():
-    '''Set up and tear down a FreeCAD document.'''
-    doc = FreeCAD.newDocument('testDoc')
-    yield doc
-    FreeCAD.closeDocument('testDoc')
-
-
-#TODO: rename
-@pytest.fixture(scope='function')
-def a():
     '''Set up and tear down a FreeCAD document.'''
     doc = FreeCAD.newDocument('testDoc')
     yield doc

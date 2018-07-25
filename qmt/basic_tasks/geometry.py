@@ -37,7 +37,7 @@ class Geometry2D(Task):
 
     def _solve_instance(self, input_result_list, current_options):
         """
-        Renders a geometry in 1D.
+        Renders a geometry in 2D.
         :param input_result_list: This is an empty list.
         :param current_options: The dictionary specifying parts from above.
         :return:
@@ -62,9 +62,40 @@ class Geometry3D(Task):
 
     def _solve_instance(self, input_result_list, current_options):
         """
-        Renders a geometry in 1D.
+        Renders a geometry in 3D.
         :param input_result_list: This is an empty list.
         :param current_options: The dictionary specifying parts from above.
         :return:
         """
         return current_options
+
+
+# ~ class GeoFreeCAD(Geometry3D):  # needs adjustments
+class GeoFreeCAD(Task):
+
+    def __init__(self, options=None, name='freecad_task'):
+        super(GeoFreeCAD, self).__init__([], options, name)
+
+    def _solve_instance(self, input_result_list, current_options):
+
+        print(current_options)
+        import qmt.geometry.freecad as cad
+
+        if 'parts' in current_options:  # TODO: parts = dict{ 'part1': 3DPart, ... }
+            pass
+
+        doc = cad.FreeCAD.newDocument('instance')
+
+        if 'filepath' in current_options:
+            doc.load(current_options['filepath'])
+        elif 'document' in current_options:
+            for obj in current_options['document'].Objects:
+                doc.copyObject(obj, False)  # don't deep copy dependencies
+        else:
+            raise ValueError("No FreeCAD document available")
+
+        # extend params dictionary to generic parts schema
+        fcdict = {key:(value, 'freeCAD') for (key,value) in current_options['params'].items()}
+
+        cad.fileIO.updateParams(doc, fcdict)
+        return doc

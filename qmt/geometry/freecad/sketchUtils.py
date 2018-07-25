@@ -12,9 +12,11 @@ import numpy as np
 from copy import deepcopy
 
 
-def deepRemove_impl(obj):
+def deepRemove_impl(doc, obj):
+    ''' Implementation helper for deepRemove.
+    '''
     for child in obj.OutList:
-        deepRemove_impl(child)
+        deepRemove_impl(doc, child)
     FreeCAD.ActiveDocument.removeObject(obj.Name)
 
 
@@ -30,11 +32,13 @@ def deepRemove(obj=None, name=None, label=None):
         obj = doc.getObjectsByLabel(label)[0]
     else:
         raise RuntimeError('No object selected!')
-    deepRemove_impl(obj)
+    deepRemove_impl(doc, obj)
     doc.recompute()
 
 
 def delete(obj):
+    '''Delete an object by FreeCAD name.
+    '''
     doc = FreeCAD.ActiveDocument
     doc.removeObject(obj.Name)
     doc.recompute()
@@ -247,7 +251,7 @@ def draftOffset(inputSketch,t):
     ''' Attempt to offset the draft figure by a thickness t. Positive t is an
     inflation, while negative t is a deflation.
     '''
-    from qmt.freecad import extrude,copy,subtract,delete    
+    from qmt.geometry.freecad.geomUtils import extrude,copy,subtract,delete    
 
     if t == 0.:
         return copy(inputSketch)

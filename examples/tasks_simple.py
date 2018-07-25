@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from qmt.basic_tasks import GeometryTask
 from qmt.ms_tasks import PoissonTask
 

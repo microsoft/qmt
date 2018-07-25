@@ -8,7 +8,7 @@ from __future__ import absolute_import, division, print_function
 import FreeCAD
 import Part
 import ProfileLib.RegularPolygon
-from qmt.freecad.geomUtils import *
+from qmt.geometry.freecad.geomUtils import *
 
 vec = FreeCAD.Vector
 
