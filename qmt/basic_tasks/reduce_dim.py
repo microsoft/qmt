@@ -54,7 +54,7 @@ class ReduceDim2D(Task):
 
     def _solve_instance(self, input_result_list, current_options):
         """
-        :param list input_result_list: This is a singleton list of a Geometry2D result.
+        :param list input_result_list: This is a one-element list of a Geometry2D result.
         :param dict current_options: The dictionary specifying parts from above.
         :return geo_1d: A Geo1DData object
         """
