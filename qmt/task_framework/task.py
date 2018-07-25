@@ -165,8 +165,8 @@ class Task(object):
             # TODO
             # make reduced sweep
             # make delayed sweep based on reduced sweep as self.delayed_result
-            reduced_sweep = ReducedSweep.createFromManagerAndTags(self.sweep_manager, self.list_of_tags)
-            self.delayed_result = ReducedSweepDelayed.createFromReducedSweepAndManager(reduced_sweep,
+            reduced_sweep = ReducedSweep.create_from_manager_and_tags(self.sweep_manager, self.list_of_tags)
+            self.delayed_result = ReducedSweepDelayed.create_from_reduced_sweep_and_manager(reduced_sweep,
                                                                                        self.sweep_manager)
             for sweep_holder_index, tag_values in enumerate(self.delayed_result.tagged_value_list):
                 current_options = self._make_current_options(tag_values)
