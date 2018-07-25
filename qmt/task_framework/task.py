@@ -172,7 +172,7 @@ class Task(object):
                 current_options = self._make_current_options(tag_values)
 
                 # Get an index in the total sweep
-                total_index = self.delayed_result.convert_to_total_indices[sweep_holder_index][0]
+                total_index = self.delayed_result.sweep.convert_to_total_indices(sweep_holder_index)[0]
 
                 # Use this index to get the appropriate results in dependent tasks
                 input_result_list = [task.delayed_result.get_object(total_index) for task in self.previous_tasks]
