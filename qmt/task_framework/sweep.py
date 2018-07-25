@@ -108,6 +108,9 @@ class ReducedSweepFutures(object):
     def __iter__(self):
         return iter(self.futures)
 
+    def __str__(self):
+        return str(self.futures)
+
 
 # TODO
 class ReducedSweepDelayed(object):
