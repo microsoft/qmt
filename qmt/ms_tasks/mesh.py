@@ -3,7 +3,20 @@
 
 from qmt.task_framework import Task
 
-class Mesh1D(Task):
+
+class Mesh(Task):
+    def __init__(self, geo_task, options=None, name='mesh_task'):
+        """
+        Constructs a Mesh Task
+
+        :param geo_task: Dependent GeoTask
+        :param options: Dict containing information on the meshing of the object. This should be of the form...
+        :param name: Name of the task
+        """
+        super(Mesh, self).__init__([geo_task], options, name)
+
+
+class Mesh1D(Mesh):
     def __init__(self, geo_task, options=None, name='mesh_1D_task'):
         """
         Constructs a 1D Mesh from a 1D geometry.
@@ -23,7 +36,7 @@ class Mesh1D(Task):
         return geo_result_instance
 
 
-class Mesh2D(Task):
+class Mesh2D(Mesh):
     def __init__(self, geo_task, options=None, name='mesh_2D_task'):
         """
         Constructs a 2D Mesh from a 2D geometry.
@@ -43,7 +56,7 @@ class Mesh2D(Task):
         return geo_result_instance
 
 
-class Mesh3D(Task):
+class Mesh3D(Mesh):
     def __init__(self, geo_task, options=None, name='mesh_3D_task'):
         """
         Constructs a 3D Mesh from a 3D geometry.

@@ -2,6 +2,7 @@
 # Licensed under the MIT License.
 
 from qmt.task_framework import Task
+from qmt.geometry import Geo1DData
 
 
 class Geometry1D(Task):
@@ -19,7 +20,10 @@ class Geometry1D(Task):
         :param dict current_options: The dictionary specifying parts from above.
         :return geo_1d: A Geo1DData object.
         """
-        return current_options
+        geo_1d = Geo1DData()
+        for part_name in current_options:
+            geo_1d.add_part(part_name,current_options[part_name][0],current_options[part_name][1])
+        return geo_1d
 
 
 class Geometry2D(Task):
