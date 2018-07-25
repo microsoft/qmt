@@ -119,6 +119,9 @@ class ReducedSweepDelayed(object):
         self.dask_client = dask_client
         self.delayed_results = [None]*len(self.sweep)
 
+        # TODO replace accesses to these by accesses to the sweep
+        self.tagged_value_list = sweep.tagged_value_list
+
     @staticmethod
     def create_from_reduced_sweep_and_manager(sweep, manager):
         sweep = sweep
