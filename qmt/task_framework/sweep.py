@@ -120,7 +120,7 @@ class ReducedSweepDelayed(object):
         self.delayed_results = [None]*len(self.sweep)
 
     @staticmethod
-    def createFromReducedSweepAndManager(self, sweep, manager):
+    def create_from_reduced_sweep_and_manager(self, sweep, manager):
         self.sweep = sweep
         self.dask_client = manager.dask_client
     # contains a ReducedSweep and forwards its methods
