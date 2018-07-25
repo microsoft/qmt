@@ -17,5 +17,5 @@ sweeps = [{tag1: 1., tag2: 10.}, {tag1: 2., tag2: 10.}, {tag1: 1., tag2: 5.}, {t
 
 sweep_man = qtf.SweepManager(sweeps)
 
-sweep_man.run(poisson_task)
-print poisson_task.result
+result = sweep_man.run(poisson_task)
+print(result)
