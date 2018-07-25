@@ -1,1 +1,1 @@
-from parts import Part2D, Part3D
+from .parts import Part2D, Part3D
