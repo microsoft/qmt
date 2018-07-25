@@ -15,7 +15,6 @@ class Geometry1D(Task):
 
     def _solve_instance(self, input_result_list, current_options):
         """
-        Renders a geometry in 1D.
         :param list input_result_list: This is an empty list.
         :param dict current_options: The dictionary specifying parts from above.
         :return geo_1d: A Geo1DData object.
@@ -36,7 +35,6 @@ class Geometry2D(Task):
 
     def _solve_instance(self, input_result_list, current_options):
         """
-        Renders a geometry in 1D.
         :param list input_result_list: This is an empty list.
         :param dict current_options: The dictionary specifying parts from above.
         :return: geo_2d: A Geo2DData object.
@@ -61,7 +59,6 @@ class Geometry3D(Task):
 
     def _solve_instance(self, input_result_list, current_options):
         """
-        Renders a geometry in 1D.
         :param list input_result_list: This is an empty list.
         :param dict current_options: The dictionary specifying parts from above.
         :return geo_3d: A Geo3DData object.
