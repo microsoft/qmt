@@ -28,7 +28,7 @@ class ReduceDim3D(Task):
         Reduces a 3D geometry to a 2D geometry for use with 2D solvers.
         :param list input_result_list: This is a singleton list of a geo_3d object.
         :param dict current_options: The dictionary specifying parts from above.
-        :return geo_2d: A geo_2d object
+        :return geo_2d: A Geo2DData object
         """
         geo_2d = current_options
         return geo_2d
@@ -58,7 +58,7 @@ class ReduceDim2D(Task):
         Reduces a 2D geometry to a 1D geometry for use with 1D solvers.
         :param list input_result_list: This is a singleton list of a Geometry2D result.
         :param dict current_options: The dictionary specifying parts from above.
-        :return geo_1d: A geo_1d object
+        :return geo_1d: A Geo1DData object
         """
 
         geo_1d = current_options

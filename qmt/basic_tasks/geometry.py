@@ -18,7 +18,7 @@ class Geometry1D(Task):
         Renders a geometry in 1D.
         :param list input_result_list: This is an empty list.
         :param dict current_options: The dictionary specifying parts from above.
-        :return:
+        :return geo_1d: A Geo1DData object.
         """
         return current_options
 
@@ -39,7 +39,7 @@ class Geometry2D(Task):
         Renders a geometry in 1D.
         :param list input_result_list: This is an empty list.
         :param dict current_options: The dictionary specifying parts from above.
-        :return:
+        :return: geo_2d: A Geo2DData object.
         """
         return current_options
 
@@ -64,6 +64,6 @@ class Geometry3D(Task):
         Renders a geometry in 1D.
         :param list input_result_list: This is an empty list.
         :param dict current_options: The dictionary specifying parts from above.
-        :return:
+        :return geo_3d: A Geo3DData object.
         """
         return current_options
