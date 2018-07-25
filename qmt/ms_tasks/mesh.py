@@ -21,19 +21,19 @@ class Mesh(Task):
         return geo_result_instance
 
 
-class MeshTask1D(Mesh):
+class Mesh1D(Mesh):
     def __init__(self, geo_task, options=None, name='mesh_3D_task'):
-        super(MeshTask1D, self).__init__([geo_task], options, name)
+        super(Mesh1D, self).__init__([geo_task], options, name)
         assert type(geo_task) is Geometry1D
 
 
-class MeshTask2D(Mesh):
+class Mesh2D(Mesh):
     def __init__(self, geo_task, options=None, name='mesh_3D_task'):
-        super(MeshTask2D, self).__init__([geo_task], options, name)
+        super(Mesh2D, self).__init__([geo_task], options, name)
         assert type(geo_task) is Geometry2D
 
 
-class MeshTask3D(Mesh):
+class Mesh3D(Mesh):
     def __init__(self, geo_task, options=None, name='mesh_3D_task'):
-        super(MeshTask3D, self).__init__([geo_task], options, name)
+        super(Mesh3D, self).__init__([geo_task], options, name)
         assert type(geo_task) is Geometry3D
