@@ -14,4 +14,5 @@ class PoissonTask(Task):
         for part in geo_result_instance.keys():
             output += ' part: ' + part
             output += ', side length: ' + str(geo_result_instance[part]['side length'])
+            output += ', voltage: ' + str(geo_result_instance[part]['voltage'])
         return output
