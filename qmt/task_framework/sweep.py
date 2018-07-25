@@ -180,7 +180,7 @@ class ReducedSweep(object):
     def __init__(self, list_of_tags, sweep_list, tagged_value_list, index_in_sweep):
         self.list_of_tags = list_of_tags
         self.sweep_list = sweep_list
-        self._tagged_value_list = tagged_value_list
+        self.tagged_value_list = tagged_value_list
         self._index_in_sweep = index_in_sweep
 
         # contains info about the sweep points in the reduced sweep
