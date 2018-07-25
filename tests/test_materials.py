@@ -12,13 +12,13 @@ def test_band_offsets():
     mat1 = matlib.find('InSb', eunit='eV')
     mat2 = matlib.find('InAs', eunit='eV')
     mat3 = matlib.find('GaAs', eunit='eV')
-    assert matlib.conductionBandMinimum(mat1) - mat1['directBandGap'] == \
-        approx(matlib.valenceBandMaximum(mat1))
-    assert matlib.conductionBandMinimum(mat1) - matlib.conductionBandMinimum(
+    assert matlib.conduction_band_minimum(mat1) - mat1['directBandGap'] == \
+        approx(matlib.valence_band_maximum(mat1))
+    assert matlib.conduction_band_minimum(mat1) - matlib.conduction_band_minimum(
         mat2) == approx(materials.conduction_band_offset(mat1, mat2))
-    assert matlib.valenceBandMaximum(mat1) + mat1['directBandGap'] == \
-        approx(matlib.conductionBandMinimum(mat1))
-    assert matlib.valenceBandMaximum(mat1) - matlib.valenceBandMaximum(
+    assert matlib.valence_band_maximum(mat1) + mat1['directBandGap'] == \
+        approx(matlib.conduction_band_minimum(mat1))
+    assert matlib.valence_band_maximum(mat1) - matlib.valence_band_maximum(
         mat2) == approx(materials.valence_band_offset(mat1, mat2))
     assert materials.conduction_band_offset(mat1, mat2) + \
         materials.conduction_band_offset(mat2, mat3) == \
@@ -36,10 +36,10 @@ def test_bowing_parameters():
     alloy = matlib.find('InAs80Sb20', eunit='meV')
     # band gap bowing for InAsSb is strong enough to push CBM in alloy below
     # CBM in either binary
-    assert matlib.conductionBandMinimum(
-        alloy) < matlib.conductionBandMinimum(inas)
-    assert matlib.conductionBandMinimum(
-        inas) < matlib.conductionBandMinimum(insb)
+    assert matlib.conduction_band_minimum(
+        alloy) < matlib.conduction_band_minimum(inas)
+    assert matlib.conduction_band_minimum(
+        inas) < matlib.conduction_band_minimum(insb)
     # check that we have bowing parameters for m_* and E_g, which are
     # significant for this alloy
     bow = matlib.bowingParameters[('InAs', 'InSb')]
@@ -63,19 +63,19 @@ def test_band_offsets_fallback():
     """Test calculation of band positions and offsets via fallback on Anderson's rule."""
     # define a couple of semiconductors without valenceBandOffset
     matlib = materials.Materials()
-    matlib.genMat('GaAs', 'semi', electronAffinity=4070., directBandGap=1519.)
-    matlib.genMat('InAs', 'semi', directBandGap=417., electronAffinity=4900.)
-    matlib.genMat('InSb', 'semi', electronAffinity=4590., directBandGap=235.)
+    matlib.add_material('GaAs', 'semi', electronAffinity=4070., directBandGap=1519.)
+    matlib.add_material('InAs', 'semi', directBandGap=417., electronAffinity=4900.)
+    matlib.add_material('InSb', 'semi', electronAffinity=4590., directBandGap=235.)
     mat1 = matlib.find('InSb', eunit='eV')
     mat2 = matlib.find('InAs', eunit='eV')
     mat3 = matlib.find('GaAs', eunit='eV')
-    assert matlib.conductionBandMinimum(mat1) - mat1['directBandGap'] == \
-        approx(matlib.valenceBandMaximum(mat1))
-    assert matlib.conductionBandMinimum(mat1) - matlib.conductionBandMinimum(
+    assert matlib.conduction_band_minimum(mat1) - mat1['directBandGap'] == \
+           approx(matlib.valence_band_maximum(mat1))
+    assert matlib.conduction_band_minimum(mat1) - matlib.conduction_band_minimum(
         mat2) == approx(materials.conduction_band_offset(mat1, mat2))
-    assert matlib.valenceBandMaximum(mat1) + mat1['directBandGap'] == \
-        approx(matlib.conductionBandMinimum(mat1))
-    assert matlib.valenceBandMaximum(mat1) - matlib.valenceBandMaximum(
+    assert matlib.valence_band_maximum(mat1) + mat1['directBandGap'] == \
+           approx(matlib.conduction_band_minimum(mat1))
+    assert matlib.valence_band_maximum(mat1) - matlib.valence_band_maximum(
         mat2) == approx(materials.valence_band_offset(mat1, mat2))
     assert materials.conduction_band_offset(mat1, mat2) + \
         materials.conduction_band_offset(mat2, mat3) == \
@@ -90,24 +90,24 @@ def test_effective_mass():
     matlib = materials.Materials()
     gasb = matlib['GaSb']
     # check basic mass anisotropy
-    assert gasb.holeMass('heavy', 'z') == gasb.holeMass('heavy', '001')
-    assert gasb.holeMass('heavy', '001') < gasb.holeMass('heavy', '110')
-    assert gasb.holeMass('heavy', '110') < gasb.holeMass('heavy', '111')
-    assert gasb.holeMass('light', 'z') == gasb.holeMass('light', '001')
-    assert gasb.holeMass('light', '001') > gasb.holeMass('light', '110')
-    assert gasb.holeMass('light', '110') > gasb.holeMass('light', '111')
+    assert gasb.hole_mass('heavy', 'z') == gasb.hole_mass('heavy', '001')
+    assert gasb.hole_mass('heavy', '001') < gasb.hole_mass('heavy', '110')
+    assert gasb.hole_mass('heavy', '110') < gasb.hole_mass('heavy', '111')
+    assert gasb.hole_mass('light', 'z') == gasb.hole_mass('light', '001')
+    assert gasb.hole_mass('light', '001') > gasb.hole_mass('light', '110')
+    assert gasb.hole_mass('light', '110') > gasb.hole_mass('light', '111')
     # compare DOS average masses to directional masses
-    assert gasb.holeMass('heavy', '001') < gasb.holeMass('heavy', 'dos') < \
-        gasb.holeMass('heavy', '110')
-    assert gasb.holeMass('light', '001') > gasb.holeMass('light', 'dos') > \
-        gasb.holeMass('light', '110')
-    assert gasb.holeMass('light', 'dos') < gasb.holeMass('heavy', 'dos') < \
-        gasb.holeMass('dos', 'dos')
+    assert gasb.hole_mass('heavy', '001') < gasb.hole_mass('heavy', 'dos') < \
+           gasb.hole_mass('heavy', '110')
+    assert gasb.hole_mass('light', '001') > gasb.hole_mass('light', 'dos') > \
+           gasb.hole_mass('light', '110')
+    assert gasb.hole_mass('light', 'dos') < gasb.hole_mass('heavy', 'dos') < \
+           gasb.hole_mass('dos', 'dos')
     # compare to a few reference values from http://www.ioffe.ru/SVA/NSM/
-    assert gasb.holeMass('heavy', 'dos') == approx(0.4, rel=0.2)
-    assert gasb.holeMass('light', 'dos') == approx(0.05, rel=0.2)
+    assert gasb.hole_mass('heavy', 'dos') == approx(0.4, rel=0.2)
+    assert gasb.hole_mass('light', 'dos') == approx(0.05, rel=0.2)
     inas = matlib.find('InAs')
-    inas.holeMass('heavy', 'dos')
-    assert inas.holeMass('heavy', 'dos') == approx(0.41, rel=0.2)
-    assert inas.holeMass('light', 'dos') == approx(0.026, rel=0.2)
-    assert inas.holeMass('dos', 'dos') == approx(0.41, rel=0.2)
+    inas.hole_mass('heavy', 'dos')
+    assert inas.hole_mass('heavy', 'dos') == approx(0.41, rel=0.2)
+    assert inas.hole_mass('light', 'dos') == approx(0.026, rel=0.2)
+    assert inas.hole_mass('dos', 'dos') == approx(0.41, rel=0.2)

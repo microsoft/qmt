@@ -1,12 +1,12 @@
 import qmt.task_framework as qtf
-from qmt.basic_tasks import Geometry_1D
+from qmt.basic_tasks import Geometry1D
 from qmt.ms_tasks import PoissonTask
 
 tag1 = qtf.SweepTag('s1')
 tag2 = qtf.SweepTag('v1')   
 
 geo_dict = {'part1': {'side length': tag1}, 'part2': {'side length': 10.}}
-geo_task = Geometry_1D(options=geo_dict)
+geo_task = Geometry1D(options=geo_dict)
 
 mat_dict = {'part1': {'material': 'InAs'}, 'part2': {'material': 'InP'}}
 
