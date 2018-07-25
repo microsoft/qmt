@@ -163,14 +163,13 @@ class Task(object):
         else:
             # Make a SweepHolder to store results
             # TODO
-            # make reduced sweep
-            # make delayed sweep based on reduced sweep as self.delayed_result
+            # rearrange sweeps
             reduced_sweep = ReducedSweep.create_from_manager_and_tags(self.sweep_manager, self.list_of_tags)
             self.delayed_result = ReducedSweepDelayed.create_from_reduced_sweep_and_manager(reduced_sweep,
                                                                                        self.sweep_manager)
             for sweep_holder_index, tag_values in enumerate(self.delayed_result.tagged_value_list):
                 current_options = self._make_current_options(tag_values)
-
+                print(current_options)
                 # Get an index in the total sweep
                 total_index = self.delayed_result.sweep.convert_to_total_indices(sweep_holder_index)[0]
 
@@ -178,7 +177,7 @@ class Task(object):
                 input_result_list = [task.delayed_result.get_object(total_index) for task in self.previous_tasks]
 
                 # Create a delayed object for this task's computation.
-                output = delayed(self._solve_instance)(input_result_list, current_options, dask_key_name=self.name)
+                output = delayed(self._solve_instance)(input_result_list, current_options, dask_key_name=self.name+'_'+str(sweep_holder_index))
                 self.delayed_result.add(output, sweep_holder_index)
 
     def visualize_entire_sweep(self, filename=None):
