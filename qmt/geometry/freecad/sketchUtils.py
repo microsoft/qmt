@@ -114,18 +114,15 @@ def addCycleSketch2(name, wire):
     '''
     assert wire.isClosed()
     doc = FreeCAD.ActiveDocument
+    vec = FreeCAD.Vector
     if (doc.getObject(name) != None):
         raise ValueError("Error: sketch " + name + " already exists.")
     sketch = doc.addObject('Sketcher::SketchObject', name)
-    vec = FreeCAD.Vector
-    lseg = Part.LineSegment
     for i,edge in enumerate(wire.Edges):
-        startPoint = edge.Vertexes[0].Point
-        endPoint = edge.Vertexes[1].Point
-        sketch.addGeometry(lseg(vec(tuple(startPoint)), vec(tuple(endPoint))))
-        if i == 0:
-            continue
-        sketch.addConstraint(Sketcher.Constraint('Coincident', i - 1, 2, i, 1))
+        sketch.addGeometry(Part.LineSegment(vec(tuple(edge.Vertexes[0].Point)),
+                                            vec(tuple(edge.Vertexes[1].Point))))
+        if i > 0:
+            sketch.addConstraint(Sketcher.Constraint('Coincident', i - 1, 2, i, 1))
     sketch.addConstraint(Sketcher.Constraint('Coincident', i, 2, 0, 1))
     doc.recompute()
     return sketch
@@ -164,9 +161,9 @@ def findEdgeCycles(sketch):
             availSegIDs = [item for item in availSegIDs if item not in newCycle]
     return lineSegments, cycles
 
-# ~ def findEdgeCycles(sketch):
-    # ~ """Find the list of edges in a sketch and separate them into cycles."""
-    
+def findEdgeCycles2(sketch):
+    """Find the list of edges in a sketch and separate them into cycles."""
+    return sketch.Shape.Wires
 
 def splitSketch(sketch):
     '''Splits a sketch into several, returning a list of names of the new sketches.
@@ -187,9 +184,10 @@ def splitSketch2(sketch):
     '''
     if len(sketch.Shape.Wires) < 2:
         return sketch
+    sketchList = []
     for i,wire in enumerate(sketch.Shape.Wires):
-        addCycleSketch2(sketch.Name + '_' + str(i), wire)
-    return cycleObjList
+        sketchList.append(addCycleSketch2(sketch.Name + '_' + str(i), wire))
+    return sketchList
 
 
 def extendSketch(sketch, d):

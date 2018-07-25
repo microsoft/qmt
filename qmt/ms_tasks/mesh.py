@@ -2,38 +2,62 @@
 # Licensed under the MIT License.
 
 from qmt.task_framework import Task
-from qmt.basic_tasks import Geometry1D, Geometry2D, Geometry3D
 
-
-class Mesh(Task):
-    def __init__(self, geo_task, options=None, name='mesh_task'):
+class Mesh1D(Task):
+    def __init__(self, geo_task, options=None, name='mesh_1D_task'):
         """
-        Constructs a Mesh Task
-
-        :param geo_task: Dependent GeoTask
+        Constructs a 1D Mesh from a 1D geometry.
+        :param Geometry1D geo_task: The 1D geometry task that feeds this mesh task.
         :param options: Dict containing information on the meshing of the object. This should be of the form...
         :param name: Name of the task
         """
-        super(Mesh, self).__init__([geo_task], options, name)
+        super(Mesh1D, self).__init__([geo_task], options, name)
 
     def _solve_instance(self, input_result_list, current_options):
+        """
+        :param list input_result_list: Singleton list with a Geo1DData element.
+        :param dict current_options: Dict from above.
+        :return Mesh1DData mesh_1d: Output mesh
+        """
         geo_result_instance = input_result_list[0]
         return geo_result_instance
 
 
-class Mesh1D(Mesh):
-    def __init__(self, geo_task, options=None, name='mesh_3D_task'):
-        super(Mesh1D, self).__init__([geo_task], options, name)
-        assert type(geo_task) is Geometry1D
-
-
-class Mesh2D(Mesh):
-    def __init__(self, geo_task, options=None, name='mesh_3D_task'):
+class Mesh2D(Task):
+    def __init__(self, geo_task, options=None, name='mesh_2D_task'):
+        """
+        Constructs a 2D Mesh from a 2D geometry.
+        :param Geometry2D geo_task: The 2D geometry task that feeds this mesh task.
+        :param options: Dict containing information on the meshing of the object. This should be of the form...
+        :param name: Name of the task
+        """
         super(Mesh2D, self).__init__([geo_task], options, name)
-        assert type(geo_task) is Geometry2D
+        # assert type(geo_task) is Geometry2D
+    def _solve_instance(self, input_result_list, current_options):
+        """
+        :param list input_result_list: Singleton list with a Geo1DData element.
+        :param dict current_options: Dict from above.
+        :return Mesh2DData mesh_1d: Output mesh
+        """
+        geo_result_instance = input_result_list[0]
+        return geo_result_instance
 
 
-class Mesh3D(Mesh):
+class Mesh3D(Task):
     def __init__(self, geo_task, options=None, name='mesh_3D_task'):
+        """
+        Constructs a 3D Mesh from a 3D geometry.
+        :param Geometry3D geo_task: The 3D geometry task that feeds this mesh task.
+        :param options: Dict containing information on the meshing of the object. This should be of the form...
+        :param name: Name of the task
+        """
         super(Mesh3D, self).__init__([geo_task], options, name)
-        assert type(geo_task) is Geometry3D
+        # assert type(geo_task) is Geometry3D
+    def _solve_instance(self, input_result_list, current_options):
+        """
+        :param list input_result_list: Singleton list with a Geo1DData element.
+        :param dict current_options: Dict from above.
+        :return Mesh3DData mesh_1d: Output mesh
+        """
+        geo_result_instance = input_result_list[0]
+        return geo_result_instance

@@ -15,7 +15,8 @@ freecad_dict = {'filepath': 'geometry_sweep.fcstd', 'params': {'d1': tag}}
 geo_task = GeoFreeCAD(options=freecad_dict)
 
 # Run sweeps
-sweeps = [{tag: 8}, {tag: 2}, {tag: 5}]
+# ~ sweeps = [{tag: 8}, {tag: 2}, {tag: 5}]
+sweeps = [ {tag:val} for val in np.arange(2,10,2) ]
 sman = qtf.SweepManager(sweeps)
 sman.run(geo_task)
 

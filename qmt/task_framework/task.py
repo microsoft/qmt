@@ -19,14 +19,21 @@ How to use, in a nutshell:
     input_result_list and current_options.
     The input_result_list stores the outputs of the dependent tasks in the same order these tasks
     were given in the constructor, and current_options stores the options to the current task.
+
+    IMPORTANT: object references in both of these callback parameters must be treated as read-only
+    or copied before modification,
+    since they are shared across parameter sweeps.
+
     The reason this latter has to be provided is that both the input results and options
     may be dependent on an automatically-handled sweep. Your _solve_instance does not have to know about this--
     it just has to compute its result dependent on the outputs of dependent tasks and its options,
     and return this result.
 
     Finally, to run a task, use the run() method,
-    and extract the results (over a sweep) from the .result field as an iterable SweepHolder.
-    (If there is no sweep, the .result field will simply contain the result as returned by _solve_instance.)
+    and extract the results (over a sweep) from the .computed_result field as an iterable SweepHolder.
+    These results will be Dask futures. You can call reduce() on the Task to wait for the results
+    and bring them into local memory (a blocking operation). If you only want to compute
+    on some of the data, and/or do postprocessing, you will need to hand reduce() a reduceFunction to use.
 
     For an example of how to set up a sweep, see ./tests/test_tasks_sweep.py and refer
     to the documentation of the sweeping classes in sweep.py.
@@ -36,7 +43,7 @@ Classes:
     TaskMetaclass
 """
 
-from sweep import SweepHolder, gen_tag_extract, replace_tag_with_value
+from sweep import ReducedSweep, ReducedSweepDelayed, gen_tag_extract, replace_tag_with_value
 from dask import delayed
 
 
@@ -71,12 +78,12 @@ class Task(object):
         Might be deprecated soon.
 
     Attributes:
-        task_list: The tasks that this depends on.
+        previous_tasks: The tasks that this depends on.
         options: Additional options that control the operation of this.
         name: The name of the task.
-
-    Notes for subclassing:
-
+        list_of_tags: the list of sweep input tags that the sweep over this depends on
+        delayed_result: the task graph rooted at this
+        # TODO put in description of accessors for sweepholders !!!
     """
     __metaclass__ = TaskMetaclass
     current_instance_id = 0
@@ -86,6 +93,7 @@ class Task(object):
         Constructs a new Task.
         :param task_list: the tasks that this depends on.
         :param options: The additional options this requires.
+        Options should be a nested dictionary of immutable objects.
         :param name: The name of this.
         """
         self.name = name
@@ -95,7 +103,7 @@ class Task(object):
 
         self.options = options
 
-        self.sweep_manager = None
+        self.sweep_manager = None  # Set by an enclosing sweep manager
 
         self.previous_tasks = task_list
 
@@ -104,15 +112,16 @@ class Task(object):
         for task in self.previous_tasks:
             self.list_of_tags += task.list_of_tags
 
-        self.result = None
+        self.delayed_result = None
+        self.computed_result = None
 
-    def compile(self):
+    def _compile(self):
         """
         Constructs the Dask task graph corresponding to this and its dependencies.
         """
         for task in self.previous_tasks:
-            task.compile()
-        if self.result is None:
+            task._compile()
+        if self.delayed_result is None:
             self._populate_result()
 
     def _make_current_options(self, tag_values):
@@ -135,6 +144,10 @@ class Task(object):
         Note: Abstract method. Should be implemented by subclasses of Task.
         Note: This is a callback and should not be called directly.
         The parameters are automatically provided.
+
+        IMPORTANT: object references in both current_options and input_result_list
+        must be treated as read-only or copied before modification, since they are shared across parameter sweeps.
+
         :param input_result_list: The results produced by dependent tasks, in the order
         that the dependent tasks were given in the call to the Task base class constructor.
         :param current_options: The options of this corresponding to the current sweep iteration.
@@ -143,56 +156,89 @@ class Task(object):
 
     def _populate_result(self):
         """
-        Runs the sweep and populates self.result with dask.delayed objects.
+        Runs the sweep and populates self.delayed_result with dask.delayed objects.
         """
         if self.previous_tasks is None:
             raise ValueError("A list of dependent tasks must be passed to the constructor by subclasses!")
-        if self.sweep_manager is None:
-            # Treat the result as a single value to be computed
-            input_result_list = [task.result for task in self.previous_tasks]
-            self.result = delayed(self._solve_instance)(input_result_list, self.options, dask_key_name = self.name)
         else:
             # Make a SweepHolder to store results
-            sweep_holder = SweepHolder(self.sweep_manager, self.list_of_tags)
-            for sweep_holder_index, tag_values in enumerate(sweep_holder.tagged_value_list):
-                # ~ print("TAGVAL: " + str(tag_values))
+            # TODO
+            # rearrange sweeps
+            reduced_sweep = ReducedSweep.create_from_manager_and_tags(self.sweep_manager, self.list_of_tags)
+            self.delayed_result = ReducedSweepDelayed.create_from_reduced_sweep_and_manager(reduced_sweep,
+                                                                                       self.sweep_manager)
+            for sweep_holder_index, tag_values in enumerate(self.delayed_result.tagged_value_list):
                 current_options = self._make_current_options(tag_values)
-
-                # Get the index in the total sweep
-                total_index = sweep_holder.index_in_sweep[sweep_holder_index][0]
+                print(current_options)
+                # Get an index in the total sweep
+                total_index = self.delayed_result.sweep.convert_to_total_indices(sweep_holder_index)[0]
 
                 # Use this index to get the appropriate results in dependent tasks
-                input_result_list = [task.result.get_object(total_index) for task in self.previous_tasks]
+                input_result_list = [task.delayed_result.get_object(total_index) for task in self.previous_tasks]
 
                 # Create a delayed object for this task's computation.
-                output = delayed(self._solve_instance)(input_result_list, current_options, dask_key_name = self.name)
-                sweep_holder.add(output, sweep_holder_index)
-            self.result = sweep_holder
+                output = delayed(self._solve_instance)(input_result_list, current_options, dask_key_name=self.name+'_'+str(sweep_holder_index))
+                self.delayed_result.add(output, sweep_holder_index)
 
-
-    def visualize(self, filename=None):
+    def visualize_entire_sweep(self, filename=None):
         """
-        Visualizes the task graph of this.
+        Return a visualization of the entire task graph of the sweep rooted at this as an IPython image object.
 
-        :param filename: File to export the visualization to.
+        If filename is given, also exports the visualization to the given file.
+        Supported
+
+        :param filename: Optional file to export the visualization to
+        :return: A visualization of he entire task graph of the sweep rooted at this as an IPython image object.
         """
-        self.compile()
+        if self.delayed_result is None:
+            self._compile()
 
-        self.result.visualize(filename=filename)
+        return self.delayed_result.visualize_entire_sweep(filename=filename)
 
+    def visualize_single_sweep_element(self, filename):
+        """
+        Return a visualization of task graph of one element of the sweep rooted at this as an IPython image object.
+
+        If filename is given, also exports the visualization to the given file.
+        :param filename: Optional file to export the visualization to
+        :return: a visualization of task graph of one element of the sweep rooted at this as an IPython image object.
+
+        """
+        if self.delayed_result is None:
+            self._compile()
+
+        return self.delayed_result.visualize_single_sweep_element(filename=filename)
 
     def run(self):
         """
-        Runs the task DAG graph whose root is this.
+        Runs the task DAG graph whose root is this and returns the results.
 
-        Replaces the delayed objects in this.result with actual results.
+        Replaces the delayed objects in this.delayed_result with actual results.
+        :return:
         """
-        if self.result is None:
-            self.compile()
-        if self.sweep_manager is None:
-            self.result = self.result.compute()
-        else:
-            self.result.compute()
+        if self.delayed_result is None:
+            self._compile()
+
+        if self.computed_result is None:
+            # TODO this should NOT reduce! Should compute everything as futures
+            self.computed_result = self.delayed_result.calculate_futures()
+
+        return self.computed_result
+
+    def reduce(self, reduce_function=None):
+        assert self.computed_result is not None
+
+        if reduce_function is None:
+            reduce_function = Task.gather_futures
+
+        return reduce_function(self.computed_result)
+
+    @staticmethod
+    def gather_futures(sweep_results):
+        presents = []
+        for future in sweep_results:
+            presents.append(future.result())
+        return sweep_results.sweep, presents
 
 # DEPRECATED serialization
 # @staticmethod

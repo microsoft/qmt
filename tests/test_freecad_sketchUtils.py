@@ -102,7 +102,6 @@ def test_addCycleSketch2(fix_FCDoc, fix_two_cycle_sketch):
     sketch = fix_two_cycle_sketch()
     wire = sketch.Shape.Wires[0]
     addCycleSketch2('cyclesketch_wire', wire)
-    fix_FCDoc.saveAs("test.fcstd")
 
 def test_addPolyLineSketch(fix_FCDoc):
     '''Test if polylines are correctly added.'''
@@ -116,6 +115,20 @@ def test_findEdgeCycles(fix_FCDoc, fix_two_cycle_sketch):
     _, cycles = findEdgeCycles(sketch)
     assert cycles[0] == [0, 1, 2, 3]
     assert cycles[1] == [4, 5, 6]
+
+
+def test_findEdgeCycles2(fix_FCDoc, fix_two_cycle_sketch):
+    '''Test multiple cycle ordering.'''
+    sketch = fix_two_cycle_sketch()
+    com_ref = []
+    com_ref += [(e.CenterOfMass.x, e.CenterOfMass.y, e.CenterOfMass.z)
+                for e in [wire.Edges for wire in sketch.Shape.Wires][0]]
+
+    wires = findEdgeCycles2(sketch)
+    com = []
+    com += [(e.CenterOfMass.x, e.CenterOfMass.y, e.CenterOfMass.z)
+            for e in [wire.Edges for wire in wires][0]]
+    assert np.allclose(com, com_ref)
 
 
 def test_splitSketch(fix_FCDoc, fix_two_cycle_sketch):
@@ -137,7 +150,7 @@ def test_splitSketch2(fix_FCDoc, fix_two_cycle_sketch):
     '''Test if multi-cycle sketches are split correctly.'''
     sketch = fix_two_cycle_sketch()
 
-    newsketchL = splitSketch(sketch)
+    newsketchL = splitSketch2(sketch)
     centers_orig = [e.CenterOfMass for e in sketch.Shape.Edges]
     centers_sq = [e.CenterOfMass for e in newsketchL[0].Shape.Edges]
     centers_tri = [e.CenterOfMass for e in newsketchL[1].Shape.Edges]
@@ -146,6 +159,7 @@ def test_splitSketch2(fix_FCDoc, fix_two_cycle_sketch):
         assert p in centers_orig and p not in centers_tri
     for p in centers_tri:
         assert p in centers_orig and p not in centers_sq
+    fix_FCDoc.saveAs("test.fcstd")
 
 
 def test_extendSketch(fix_FCDoc):
