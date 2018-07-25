@@ -78,6 +78,7 @@ class GeoFreeCAD(Task):
 
     def _solve_instance(self, input_result_list, current_options):
 
+        # TODO: write a sub2.7 subprocess wrapper
         print(current_options)
         import qmt.geometry.freecad as cad
 

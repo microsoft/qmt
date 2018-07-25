@@ -7,65 +7,14 @@
 from __future__ import absolute_import, division, print_function
 import FreeCAD
 import Part
-import ProfileLib.RegularPolygon
 from qmt.geometry.freecad.geomUtils import *
 
 vec = FreeCAD.Vector
 
 
-def aux_two_cycle_sketch( a=( 20, 20, 0), b=(-30, 20, 0), c=(-30,-10, 0), d=( 20,-10, 0),
-                          e=( 50, 50, 0), f=( 60, 50, 0), g=( 55, 60, 0) ):
-    '''Helper function to drop a simple multi-cycle sketch.
-       The segments are ordered into one rectangle and one triangle.
-    '''
-    # Note: the z-component is zero, as sketches are plane objects.
-    #       Adjust orientation with Sketch.Placement(Normal, Rotation)
-
-    doc = FreeCAD.ActiveDocument
-    sketch = doc.addObject('Sketcher::SketchObject', 'Sketch')
-    sketch.addGeometry(Part.LineSegment(vec(*a), vec(*b)), False)
-    sketch.addGeometry(Part.LineSegment(vec(*b), vec(*c)), False)
-    sketch.addGeometry(Part.LineSegment(vec(*c), vec(*d)), False)
-    sketch.addGeometry(Part.LineSegment(vec(*d), vec(*a)), False)
-    sketch.addGeometry(Part.LineSegment(vec(*e), vec(*f)), False)
-    sketch.addGeometry(Part.LineSegment(vec(*f), vec(*g)), False)
-    sketch.addGeometry(Part.LineSegment(vec(*g), vec(*e)), False)
-    doc.recompute()
-    return sketch
-
-
-def aux_unit_square_sketch():
-    '''Helper function to drop a simple unit square sketch.
-       The segments are carefully ordered.
-    '''
-    a = (0, 0, 0)
-    b = (1, 0, 0)
-    c = (1, 1, 0)
-    d = (0, 1, 0)
-
-    doc = FreeCAD.ActiveDocument
-    sketch = doc.addObject('Sketcher::SketchObject', 'Sketch')
-    sketch.addGeometry(Part.LineSegment(vec(*a), vec(*b)), False)
-    sketch.addGeometry(Part.LineSegment(vec(*b), vec(*c)), False)
-    sketch.addGeometry(Part.LineSegment(vec(*c), vec(*d)), False)
-    sketch.addGeometry(Part.LineSegment(vec(*d), vec(*a)), False)
-    doc.recompute()
-    return sketch
-
-
-def aux_hexagon_sketch(r=1):
-    '''Helper function to drop a hexagonal sketch.'''
-
-    doc = FreeCAD.ActiveDocument
-    sketch = doc.addObject('Sketcher::SketchObject', 'HexSketch')
-    ProfileLib.RegularPolygon.makeRegularPolygon('HexSketch', 6, vec(10,10,0), vec(20,20,0), False)
-    doc.recompute()
-    return sketch
-
-
-def test_extrude(fix_FCDoc):
+def test_extrude(fix_FCDoc, fix_two_cycle_sketch):
     '''Test if extrusion produces PartDesign parts.'''
-    sketch = aux_two_cycle_sketch()
+    sketch = fix_two_cycle_sketch()
     pad = extrude(sketch, 50, name="pad", reverse=True)
     # ~ assert pad.Length.Value == 50
     # ~ assert pad.TypeId == 'PartDesign::Pad'
@@ -73,11 +22,11 @@ def test_extrude(fix_FCDoc):
     assert pad.TypeId == 'Part::Extrusion'
 
 
-def test_copy(fix_FCDoc):
+def test_copy(fix_FCDoc, fix_hexagon_sketch):
     '''Test copy.'''
     # TODO: warning.
     #~ sketch = aux_two_cycle_sketch() # WARNING: multi-cycle sketches don't get moved correctly -> need sanitation
-    sketch = aux_hexagon_sketch()
+    sketch = fix_hexagon_sketch()
     sketch2 = copy(sketch, vec(0,0,20), copy=True)
     fix_FCDoc.recompute()
     assert sketch.Shape.Edges[0].Vertexes[0].Point[2] + 20 == sketch2.Shape.Edges[0].Vertexes[0].Point[2]
@@ -172,17 +121,17 @@ def test_checkOverlap(fix_FCDoc):
     assert checkOverlap((box1, box2)) is False
 
 
-def test_extrudeBetween(fix_FCDoc):
+def test_extrudeBetween(fix_FCDoc, fix_hexagon_sketch):
     '''Test if extrusion bounding box is within z interval.'''
-    sketch = aux_hexagon_sketch()
+    sketch = fix_hexagon_sketch()
     pad = extrudeBetween(sketch, 10, 20)
     assert getBB(pad)[-2:] == (10, 20)
 
 
-def test_liftObject(fix_FCDoc):
+def test_liftObject(fix_FCDoc, fix_unit_square_sketch):
     '''Test sweeping lift for sketches.'''
     # TODO: why do we have to make union with the lifted sketch?.
-    sketch = aux_unit_square_sketch()
+    sketch = fix_unit_square_sketch()
     #~ vol = liftObject(sketch, 42, consumeInputs=False)
     #~ assert vol.Shape.Volume == 42
 

@@ -8,39 +8,33 @@ import FreeCAD
 import Draft
 import Part
 import numpy as np
-from qmt.geometry.freecad.sketchUtils import findSegments, deepRemove
+from auxiliary import *
+from sketchUtils import findSegments
 
-
-def delete(obj):
-    doc = FreeCAD.ActiveDocument
-    doc.removeObject(obj.Name)
-    doc.recompute()
-
-
-
-def extrude(sketch, length,reverse=False,name=None):
-    '''
-    Extrude sketch up to given length. Optional name (default: append '_extr').
-    Return handle to extrude.
-    '''
-    if name is None:
-        f = FreeCAD.ActiveDocument.addObject('PartDesign::Pad')
-    else:
-        f = FreeCAD.ActiveDocument.addObject('PartDesign::Pad',name)
-    f.Sketch = sketch
-    f.Length = length
-    if reverse:
-        f.Reversed = 1
-    FreeCAD.ActiveDocument.recompute()
-    return f
+# ~ def extrude(sketch, length,reverse=False,name=None):
+    # ~ '''
+    # ~ Extrude sketch up to given length. Optional name (default: append '_extr').
+    # ~ Return handle to extrude.
+    # ~ '''
+    # ~ doc = FreeCAD.ActiveDocument
+    # ~ if name is None:
+        # ~ f = doc.addObject('PartDesign::Pad')
+    # ~ else:
+        # ~ f = doc.addObject('PartDesign::Pad',name)
+    # ~ f.Sketch = sketch
+    # ~ f.Length = length
+    # ~ if reverse:
+        # ~ f.Reversed = 1
+    # ~ doc.recompute()
+    # ~ return f
 
 def extrude_partwb(sketch, length,reverse=False,name=None):
     '''Extrude via Part workbench.'''
     doc = FreeCAD.ActiveDocument
     if name is None:
-        f = FreeCAD.ActiveDocument.addObject('Part::Extrusion')
+        f = doc.addObject('Part::Extrusion')
     else:
-        f = FreeCAD.ActiveDocument.addObject('Part::Extrusion',name)
+        f = doc.addObject('Part::Extrusion',name)
     f.Base = sketch
     f.DirMode = "Normal"
     f.DirLink = None
@@ -192,7 +186,7 @@ def subtractParts(domainObj, partList):
     diffObj = copy(domainObj)
     for obj in partList:
         diffObjTemp = Draft.downgrade([diffObj, obj], delete=True)[0][0]
-        FreeCAD.ActiveDocument.recompute()
+        doc.recompute()
         diffObj = copy(diffObjTemp)
         delete(diffObjTemp)
     # TODO : This routine is leaving some nuisance objects around that should be deleted.

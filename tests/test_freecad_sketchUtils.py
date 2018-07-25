@@ -10,80 +10,26 @@ import qmt
 import FreeCAD
 import Part
 from qmt.geometry.freecad.sketchUtils import *
-from test_freecad_geomUtils import aux_two_cycle_sketch
 
 vec = FreeCAD.Vector
 
 
-def test_delete(fix_FCDoc):
-    '''Test deep (recursive) removal by all parameters.'''
-    sketch = aux_two_cycle_sketch()
-    part = qmt.geometry.freecad.geomUtils.extrude(sketch, 10)
-    delete(sketch)
-    delete(part)
-    assert len(fix_FCDoc.Objects) == 0
-
-    sketch = aux_two_cycle_sketch()
-    part = qmt.geometry.freecad.geomUtils.extrude(sketch, 10)
-    part2 = fix_FCDoc.copyObject(part, False)
-    deepRemove(name=part2.Name)
-    assert len(part.OutList) == 0  # part2 steals sketch from part1
-
-
-def test_deepRemove(fix_FCDoc):
-    '''Test deep (recursive) removal by all parameters.'''
-
-    # check input sanitation
-    with pytest.raises(RuntimeError) as err:
-        deepRemove(None)
-    assert 'No object selected' in str(err.value)
-
-    # simple deletion
-    sketch = aux_two_cycle_sketch()
-    part1 = qmt.geometry.freecad.geomUtils.extrude(sketch, 10)
-    deepRemove(part1)
-    assert len(fix_FCDoc.Objects) == 0
-
-    # copied object deletion
-    sketch = aux_two_cycle_sketch()
-    part1 = qmt.geometry.freecad.geomUtils.extrude(sketch, 10)
-    part2 = fix_FCDoc.copyObject(part1, False)
-    deepRemove(name=part2.Name)  # part2 refs to sketch from part1
-    assert len(part1.OutList) == 0
-
-    deepRemove(label=part1.Label)
-    assert len(fix_FCDoc.Objects) == 0
-
-    # compound object deletion
-    box1 = fix_FCDoc.addObject("Part::Box", "Box1")
-    box2 = fix_FCDoc.addObject("Part::Box", "Box2")
-    box3 = fix_FCDoc.addObject("Part::Box", "Box3")
-    inter1 = fix_FCDoc.addObject("Part::MultiCommon", "inter1")
-    inter1.Shapes = [box1, box2, ]
-    fix_FCDoc.recompute()
-    inter2 = fix_FCDoc.addObject("Part::MultiCommon", "inter2")
-    inter2.Shapes = [inter1, box3, ]
-    fix_FCDoc.recompute()
-    fix_FCDoc.removeObject(box1.Name)  # annoying interjected delete
-    deepRemove(inter2)
-    assert len(fix_FCDoc.Objects) == 0
-
-
-def test_findSegments(fix_FCDoc):
+def test_findSegments(fix_FCDoc, fix_two_cycle_sketch):
     '''Test if segment finding is ordered correctly.'''
     b = (-33, 22, 0)
     d = (22, -11, 0)
-    sketch = aux_two_cycle_sketch(b=b, d=d)
+    sketch = fix_two_cycle_sketch(b=b, d=d)
     segArr = findSegments(sketch)
+    # ~ fix_FCDoc.saveAs("test.fcstd")
     assert (segArr[0][1] == [b]).all()
     assert (segArr[2][1] == [d]).all()
 
 
-def test_nextSegment(fix_FCDoc):
+def test_nextSegment(fix_FCDoc, fix_two_cycle_sketch):
     '''Test if nextSegment correctly increments.'''
 
     # Match the cycle segments
-    sketch = aux_two_cycle_sketch()  # trivial case
+    sketch = fix_two_cycle_sketch()  # trivial case
     segArr = findSegments(sketch)
 
     assert nextSegment(segArr, 0) == 1  # square cycle
@@ -96,16 +42,18 @@ def test_nextSegment(fix_FCDoc):
     assert nextSegment(segArr, 6) == 4
 
     # Test order fixing
-    segArr = np.array([ [[0,0,0],[1,0,0]] , [[1,1,0],[1,0,0]] , [[1,1,0],[0,0,0]] ])
-    assert ( segArr[1] == np.array([[1,1,0],[1,0,0]]) ).all()
+    segArr = np.array([[[0, 0, 0], [1, 0, 0]],
+                       [[1, 1, 0], [1, 0, 0]],
+                       [[1, 1, 0], [0, 0, 0]]])
+    assert (segArr[1] == np.array([[1, 1, 0], [1, 0, 0]])).all()
     nextSegment(segArr, 0, fixOrder=False)
-    assert ( segArr[1] == np.array([[1,1,0],[1,0,0]]) ).all()
+    assert (segArr[1] == np.array([[1, 1, 0], [1, 0, 0]])).all()
     nextSegment(segArr, 0, fixOrder=True)
-    assert ( segArr[1] == np.array([[1,0,0],[1,1,0]]) ).all()
+    assert (segArr[1] == np.array([[1, 0, 0], [1, 1, 0]])).all()
 
     # Ambiguous cycles
     a = (20, 20, 0)
-    sketch = aux_two_cycle_sketch(a=a, g=a)
+    sketch = fix_two_cycle_sketch(a=a, g=a)
     segArr = findSegments(sketch)
     with pytest.raises(ValueError) as err:
         nextSegment(segArr, 3)
@@ -118,25 +66,26 @@ def test_nextSegment(fix_FCDoc):
     assert 'No paths found' in str(err.value)
 
 
-def test_findCycle(fix_FCDoc):
+def test_findCycle(fix_FCDoc, fix_two_cycle_sketch):
     '''Test cycle ordering.'''
-    sketch = aux_two_cycle_sketch()
+    sketch = fix_two_cycle_sketch()
     segArr = findSegments(sketch)
     ref1 = [0, 1, 2, 3]  # square cycle indices
     ref2 = [4, 5, 6]     # triangular cycle indices
     for i in range(4):
         c = findCycle(segArr, i, range(segArr.shape[0]))  # update starting point
+        # ~ print(c)
         assert c == ref1[i:] + ref1[:i]  # advancing rotation
     for i in range(3):
         c = findCycle(segArr, i + 4, range(segArr.shape[0]))
         assert c == ref2[i:] + ref2[:i]
 
 
-def test_addCycleSketch(fix_FCDoc):
+def test_addCycleSketch(fix_FCDoc, fix_two_cycle_sketch):
     '''Test if cycles are correctly added.'''
     b = (-30, 20, 0)
     d = (20, -10, 0)
-    sketch = aux_two_cycle_sketch(b=b, d=d)
+    sketch = fix_two_cycle_sketch(b=b, d=d)
     segArr, cycles = findEdgeCycles(sketch)
     addCycleSketch('cyclesketch', fix_FCDoc, cycles[0], segArr[0:4])
     segArr = findSegments(fix_FCDoc.cyclesketch)
@@ -148,23 +97,45 @@ def test_addCycleSketch(fix_FCDoc):
     assert 'already exists' in str(err.value)
 
 
+def test_addCycleSketch2(fix_FCDoc, fix_two_cycle_sketch):
+    '''Test if cycles are correctly added.'''
+    sketch = fix_two_cycle_sketch()
+    wire = sketch.Shape.Wires[0]
+    addCycleSketch2('cyclesketch_wire', wire)
+    fix_FCDoc.saveAs("test.fcstd")
+
 def test_addPolyLineSketch(fix_FCDoc):
     '''Test if polylines are correctly added.'''
     pass
     #TODO
 
 
-def test_findEdgeCycles(fix_FCDoc):
+def test_findEdgeCycles(fix_FCDoc, fix_two_cycle_sketch):
     '''Test multiple cycle ordering.'''
-    sketch = aux_two_cycle_sketch()
+    sketch = fix_two_cycle_sketch()
     _, cycles = findEdgeCycles(sketch)
     assert cycles[0] == [0, 1, 2, 3]
     assert cycles[1] == [4, 5, 6]
 
 
-def test_splitSketch(fix_FCDoc):
+def test_splitSketch(fix_FCDoc, fix_two_cycle_sketch):
     '''Test if multi-cycle sketches are split correctly.'''
-    sketch = aux_two_cycle_sketch()
+    sketch = fix_two_cycle_sketch()
+
+    newsketchL = splitSketch(sketch)
+    centers_orig = [e.CenterOfMass for e in sketch.Shape.Edges]
+    centers_sq = [e.CenterOfMass for e in newsketchL[0].Shape.Edges]
+    centers_tri = [e.CenterOfMass for e in newsketchL[1].Shape.Edges]
+
+    for p in centers_sq:
+        assert p in centers_orig and p not in centers_tri
+    for p in centers_tri:
+        assert p in centers_orig and p not in centers_sq
+
+
+def test_splitSketch2(fix_FCDoc, fix_two_cycle_sketch):
+    '''Test if multi-cycle sketches are split correctly.'''
+    sketch = fix_two_cycle_sketch()
 
     newsketchL = splitSketch(sketch)
     centers_orig = [e.CenterOfMass for e in sketch.Shape.Edges]
@@ -199,6 +170,7 @@ def test_extendSketch(fix_FCDoc):
     fix_FCDoc.recompute()
     ext = extendSketch(sketch, 1)
     assert ext.Shape.Length == 2 + sketch.Shape.Length
+
 
 def test_makeIntoSketch(fix_FCDoc):
     #TODO

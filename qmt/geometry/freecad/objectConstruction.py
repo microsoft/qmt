@@ -11,14 +11,13 @@ import numpy as np
 from six import iteritems, text_type
 
 # TODO: use namespace in code
-from qmt.geometry.freecad.geomUtils import (extrude, copy, delete, genUnion,
+from qmt.geometry.freecad.auxiliary import *
+from qmt.geometry.freecad.geomUtils import (extrude, copy, genUnion,
                                   getBB, makeBB, makeHexFace,
-                                  deepRemove, findSegments,
                                   extrudeBetween, centerObjects, intersect,
                                   checkOverlap, subtract,
-                                  # ~ getModel,
                                   crossSection)
-from qmt.geometry.freecad.sketchUtils import (splitSketch, extendSketch,
+from qmt.geometry.freecad.sketchUtils import (findSegments, splitSketch, extendSketch,
                                               findEdgeCycles, draftOffset)
 from qmt.geometry.freecad.fileIO import (updateParams, exportCAD, exportMeshed)
 

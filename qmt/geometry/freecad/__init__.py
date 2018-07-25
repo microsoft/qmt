@@ -5,6 +5,7 @@
 
 
 import FreeCAD
+import auxiliary
 import fileIO
 import sketchUtils
 import geomUtils
