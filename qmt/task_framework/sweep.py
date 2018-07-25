@@ -159,11 +159,13 @@ class ReducedSweepDelayed(object):
 
     def visualize_entire_sweep(self, filename=None):
         delayed_proxy = dask.delayed(id)(self.delayed_results)
-        delayed_proxy.visualize(filename=filename)
+        if filename:
+            delayed_proxy.visualize(filename=filename)
         return delayed_proxy.visualize()
 
     def visualize_single_sweep_element(self, filename=None):
-        self.delayed_results[0].visualize(filename=filename)
+        if filename:
+            self.delayed_results[0].visualize(filename=filename)
         return self.delayed_results[0].visualize()
 
 class ReducedSweep(object):
