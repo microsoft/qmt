@@ -142,6 +142,9 @@ class ReducedSweepDelayed(object):
         """
         self.delayed_results[object_list_index] = item
 
+    def get_object(self, total_index):
+        return self.delayed_results[self.sweep.convert_to_reduced_index(total_index)]
+
     def calculate_futures(self):
         """
         Triggers the execution of the sweep.
