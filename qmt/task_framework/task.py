@@ -43,8 +43,8 @@ Classes:
     TaskMetaclass
 """
 
-from sweep import ReducedSweep, ReducedSweepDelayed, gen_tag_extract, replace_tag_with_value
 from dask import delayed
+from .sweep import ReducedSweep, ReducedSweepDelayed, gen_tag_extract, replace_tag_with_value
 
 
 class TaskMetaclass(type):
@@ -88,7 +88,7 @@ class Task(object):
     __metaclass__ = TaskMetaclass
     current_instance_id = 0
 
-    def __init__(self, task_list, options, name):
+    def __init__(self, task_list, options, name, gather = False):
         """
         Constructs a new Task.
         :param task_list: the tasks that this depends on.
@@ -102,10 +102,10 @@ class Task(object):
             Task.current_instance_id += 1
 
         self.options = options
+        self.resources = None
         if 'resources' in options:
             self.resources = options['resources']
-        else:
-            self.resources = None
+        self.gather = gather
 
         self.sweep_manager = None  # Set by an enclosing sweep manager
 
@@ -158,6 +158,23 @@ class Task(object):
         """
         raise NotImplementedError("Task is missing the _solve_instance method!")
 
+    def _solve_gathered(self, list_of_input_result_lists, list_of_current_options):
+        """
+        Does the actual computation of a 'gathered' task (e.g. COMSOL meshing).
+
+        Note: Abstract method. Should be implemented by subclasses of Task.
+        Note: This is a callback and should not be called directly.
+        The parameters are automatically provided.
+
+        IMPORTANT: object references in both list_of_current_options and list_of_input_result_list
+        must be treated as read-only or copied before modification, since they are shared across parameter sweeps.
+
+        :param list_of_input_result_list: The list of results produced by dependent tasks, in the order
+        that the dependent tasks were given in the call to the Task base class constructor.
+        :param list_of_current_options: The list of options of this corresponding to the current sweep iteration.
+        """
+        raise NotImplementedError("Task is missing the _solve_gathered method!")
+
     def _populate_result(self):
         """
         Runs the sweep and populates self.delayed_result with dask.delayed objects.
@@ -171,17 +188,24 @@ class Task(object):
             reduced_sweep = ReducedSweep.create_from_manager_and_tags(self.sweep_manager, self.list_of_tags)
             self.delayed_result = ReducedSweepDelayed.create_from_reduced_sweep_and_manager(reduced_sweep,
                                                                                        self.sweep_manager)
+            list_of_current_options = []
+            list_of_input_result_lists = []
             for sweep_holder_index, tag_values in enumerate(self.delayed_result.tagged_value_list):
                 current_options = self._make_current_options(tag_values)
+                list_of_current_options += [current_options]
                 # Get an index in the total sweep
                 total_index = self.delayed_result.sweep.convert_to_total_indices(sweep_holder_index)[0]
 
                 # Use this index to get the appropriate results in dependent tasks
                 input_result_list = [task.delayed_result.get_object(total_index) for task in self.previous_tasks]
-
-                # Create a delayed object for this task's computation.
-                output = delayed(self._solve_instance)(input_result_list, current_options, dask_key_name=self.name+'_'+str(sweep_holder_index))
-                self.delayed_result.add(output, sweep_holder_index)
+                list_of_input_result_lists += [input_result_list]
+                
+                if not self.gather:
+                    # Create a delayed object for this task's computation.
+                    output = delayed(self._solve_instance)(input_result_list, current_options, dask_key_name=self.name+'_'+str(sweep_holder_index))
+                    self.delayed_result.add(output, sweep_holder_index)
+            if self.gather:
+                self.delayed_result = delayed(self._solve_gathered)(list_of_input_result_lists, list_of_current_options, dask_key_name=self.name)
 
     def visualize_entire_sweep(self, filename=None):
         """
@@ -225,7 +249,10 @@ class Task(object):
         if self.computed_result is None:
             for task in self.previous_tasks:
                 task.run()
-            self.computed_result = self.delayed_result.calculate_futures(resources=self.resources)
+            if self.gather:
+                self.computed_result = self.sweep_manager.dask_client.compute(self.delayed_result)
+            else:
+                self.computed_result = self.delayed_result.calculate_futures(resources=self.resources)
 
         return self.computed_result
 
@@ -234,16 +261,18 @@ class Task(object):
 
         if reduce_function is None:
             reduce_function = Task.gather_futures
-
-        return reduce_function(self.computed_result)
+        if self.gather:
+            return reduce_function([self.computed_result])
+        else:
+            return reduce_function(self.computed_result)
 
     @staticmethod
     def gather_futures(sweep_results):
         presents = []
-        sweep_results.wait()
+        #sweep_results.wait()
         for future in sweep_results:
             presents.append(future.result())
-        return sweep_results.sweep, presents
+        return presents
 
 # DEPRECATED serialization
 # @staticmethod
