@@ -43,8 +43,8 @@ Classes:
     TaskMetaclass
 """
 
-from sweep import ReducedSweep, ReducedSweepDelayed, gen_tag_extract, replace_tag_with_value
 from dask import delayed
+from .sweep import ReducedSweep, ReducedSweepDelayed, gen_tag_extract, replace_tag_with_value
 
 
 class TaskMetaclass(type):

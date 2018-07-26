@@ -5,6 +5,7 @@
 
 
 import pytest
+
 from qmt.geometry.freecad.auxiliary import *
 from qmt.geometry.freecad.geomUtils import extrude
 

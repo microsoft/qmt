@@ -1,4 +1,4 @@
-from qmt.basic_tasks import Data
+from qmt.task_framework import Data
 
 class Geo1DData(Data):
     def __init__(self):

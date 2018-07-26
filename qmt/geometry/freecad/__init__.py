@@ -5,6 +5,8 @@
 
 
 import FreeCAD
+import Part
+
 import auxiliary
 import fileIO
 import sketchUtils
