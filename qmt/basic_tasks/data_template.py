@@ -19,6 +19,8 @@ class Data:
         """
         Method for retrieving data from self.content, called after it is loaded from Azure or disk.
         """
+        raise NotImplementedError("_serialize should define how to get data into self.content.")
+
 
     def save(self, azure_info=None, file_path=None):
         """
