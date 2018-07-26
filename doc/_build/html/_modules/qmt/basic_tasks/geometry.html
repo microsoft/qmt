@@ -1,0 +1,303 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>qmt.basic_tasks.geometry &mdash; QMT 1.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> QMT
+          
+
+          
+            
+            <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../rst/tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rst/dev_overview.html">Structure of QMT</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">QMT</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>qmt.basic_tasks.geometry</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for qmt.basic_tasks.geometry</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) Microsoft Corporation. All rights reserved.</span>
+<span class="c1"># Licensed under the MIT License.</span>
+
+<span class="kn">from</span> <span class="nn">qmt.task_framework</span> <span class="k">import</span> <span class="n">Task</span>
+<span class="kn">from</span> <span class="nn">qmt.geometry</span> <span class="k">import</span> <span class="n">Geo1DData</span><span class="p">,</span> <span class="n">Geo2DData</span>
+
+
+<div class="viewcode-block" id="Geometry1D"><a class="viewcode-back" href="../../../source/qmt.basic_tasks.html#qmt.basic_tasks.geometry.Geometry1D">[docs]</a><span class="k">class</span> <span class="nc">Geometry1D</span><span class="p">(</span><span class="n">Task</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;geometry_1d_task&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Builds a geometry in 1D.</span>
+<span class="sd">        :param dict options: The dictionary specifying parts, of the form</span>
+<span class="sd">        {&quot;part_name&quot;:(start_coord,stop_coord)}</span>
+<span class="sd">        :param str name: The name of this task.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Geometry1D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">([],</span> <span class="n">options</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_solve_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_result_list</span><span class="p">,</span> <span class="n">current_options</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param list input_result_list: This is an empty list.</span>
+<span class="sd">        :param dict current_options: The dictionary specifying parts from above.</span>
+<span class="sd">        :return geo_1d: A Geo1DData object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">geo_1d</span> <span class="o">=</span> <span class="n">Geo1DData</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">part_name</span> <span class="ow">in</span> <span class="n">current_options</span><span class="p">:</span>
+            <span class="n">geo_1d</span><span class="o">.</span><span class="n">add_part</span><span class="p">(</span><span class="n">part_name</span><span class="p">,</span> <span class="n">current_options</span><span class="p">[</span><span class="n">part_name</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="n">current_options</span><span class="p">[</span><span class="n">part_name</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">geo_1d</span></div>
+
+
+<div class="viewcode-block" id="Geometry2D"><a class="viewcode-back" href="../../../source/qmt.basic_tasks.html#qmt.basic_tasks.geometry.Geometry2D">[docs]</a><span class="k">class</span> <span class="nc">Geometry2D</span><span class="p">(</span><span class="n">Task</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;geometry_2d_task&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Builds a geometry in 2D.</span>
+<span class="sd">        :param dict options: The dictionary holding parts and edges. It should be of the form:</span>
+<span class="sd">        {&#39;parts&#39;:{&#39;part_name&#39;:Polygon}, &#39;edges&#39;:{&#39;edge_name&#39;:LineString}, where Polygon and</span>
+<span class="sd">        LineString are instances of shapely.geometry.</span>
+<span class="sd">        &quot;part_name&quot;:Part3D}</span>
+<span class="sd">        :param str name: The name of this task.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Geometry2D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">([],</span> <span class="n">options</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_solve_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_result_list</span><span class="p">,</span> <span class="n">current_options</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param list input_result_list: This is an empty list.</span>
+<span class="sd">        :param dict current_options: The dictionary specification from above.</span>
+<span class="sd">        :return: geo_2d: A Geo2DData object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">geo_2d</span> <span class="o">=</span> <span class="n">Geo2DData</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">part_name</span> <span class="ow">in</span> <span class="n">current_options</span><span class="p">[</span><span class="s1">&#39;parts&#39;</span><span class="p">]:</span>
+            <span class="n">geo_2d</span><span class="o">.</span><span class="n">add_part</span><span class="p">(</span><span class="n">part_name</span><span class="p">,</span> <span class="n">current_options</span><span class="p">[</span><span class="s1">&#39;parts&#39;</span><span class="p">][</span><span class="n">part_name</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">edge_name</span> <span class="ow">in</span> <span class="n">current_options</span><span class="p">[</span><span class="s1">&#39;edges&#39;</span><span class="p">]:</span>
+            <span class="n">geo_2d</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">edge_name</span><span class="p">,</span> <span class="n">current_options</span><span class="p">[</span><span class="s1">&#39;edges&#39;</span><span class="p">][</span><span class="n">edge_name</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">geo_2d</span></div>
+
+
+<div class="viewcode-block" id="Geometry3D"><a class="viewcode-back" href="../../../source/qmt.basic_tasks.html#qmt.basic_tasks.geometry.Geometry3D">[docs]</a><span class="k">class</span> <span class="nc">Geometry3D</span><span class="p">(</span><span class="n">Task</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;geometry_3d_task&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Builds a geometry in 3D.</span>
+<span class="sd">        :param dict options: The dictionary specifying parts and and FreeCAD infromation. It should</span>
+<span class="sd">        be of the form {&quot;fcname&quot;:path_to_freeCAD_file,&quot;parts_dict&quot;:parts_dict}, where parts_dict</span>
+<span class="sd">        is a dictionary of the form</span>
+<span class="sd">        {part_name:Part3D}.</span>
+<span class="sd">        :param str name: The name of this task.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Geometry3D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">([],</span> <span class="n">options</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="c1"># assert type(options[&quot;fcname&quot;]) is str</span>
+        <span class="c1"># assert type(options[&quot;parts_dict&quot;]) is dict</span>
+        <span class="c1"># for partDirective in options[&quot;part_dict&quot;]:</span>
+        <span class="c1">#     assert type(options[&quot;part_dict&quot;][partDirective]) is Part3D</span>
+
+    <span class="k">def</span> <span class="nf">_solve_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_result_list</span><span class="p">,</span> <span class="n">current_options</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param list input_result_list: This is an empty list.</span>
+<span class="sd">        :param dict current_options: The dictionary specifying parts from above.</span>
+<span class="sd">        :return geo_3d: A Geo3DData object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">current_options</span></div>
+
+
+<span class="c1"># ~ class GeoFreeCAD(Geometry3D):  # needs adjustments</span>
+<div class="viewcode-block" id="GeometryParams"><a class="viewcode-back" href="../../../source/qmt.basic_tasks.html#qmt.basic_tasks.geometry.GeometryParams">[docs]</a><span class="k">class</span> <span class="nc">GeometryParams</span><span class="p">(</span><span class="n">Task</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pyenv</span><span class="o">=</span><span class="s1">&#39;python2&#39;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;freecad_task&#39;</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">GeometryParams</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">([],</span> <span class="n">options</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">pyenv</span> <span class="o">=</span> <span class="n">pyenv</span>
+
+    <span class="k">def</span> <span class="nf">_solve_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_result_list</span><span class="p">,</span> <span class="n">current_options</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">qmt.geometry.freecad_wrapper</span> <span class="k">import</span> <span class="n">pywrapper</span>
+        <span class="k">return</span> <span class="n">pywrapper</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pyenv</span><span class="p">,</span> <span class="s1">&#39;updateParams&#39;</span><span class="p">,</span> <span class="n">input_result_list</span><span class="p">,</span> <span class="n">current_options</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Microsoft Corporation.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

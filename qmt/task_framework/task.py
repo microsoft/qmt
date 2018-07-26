@@ -102,6 +102,10 @@ class Task(object):
             Task.current_instance_id += 1
 
         self.options = options
+        if 'resources' in options:
+            self.resources = options['resources']
+        else:
+            self.resources = None
 
         self.sweep_manager = None  # Set by an enclosing sweep manager
 
@@ -169,7 +173,6 @@ class Task(object):
                                                                                        self.sweep_manager)
             for sweep_holder_index, tag_values in enumerate(self.delayed_result.tagged_value_list):
                 current_options = self._make_current_options(tag_values)
-                print(current_options)
                 # Get an index in the total sweep
                 total_index = self.delayed_result.sweep.convert_to_total_indices(sweep_holder_index)[0]
 
@@ -220,10 +223,9 @@ class Task(object):
             self._compile()
 
         if self.computed_result is None:
-            self.computed_result = self.delayed_result.calculate_futures()
-
-        for task in self.previous_tasks:
-            task.run()
+            for task in self.previous_tasks:
+                task.run()
+            self.computed_result = self.delayed_result.calculate_futures(resources=self.resources)
 
         return self.computed_result
 
@@ -238,6 +240,7 @@ class Task(object):
     @staticmethod
     def gather_futures(sweep_results):
         presents = []
+        sweep_results.wait()
         for future in sweep_results:
             presents.append(future.result())
         return sweep_results.sweep, presents

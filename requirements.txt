@@ -4,3 +4,4 @@ matplotlib
 pytest
 future
 pytablewriter
+h5py

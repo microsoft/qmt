@@ -101,6 +101,8 @@ class ReducedSweepFutures(object):
         self.sweep = sweep
         self.futures = futures
 
+    def wait(self):
+        return dask.distributed.wait(self.futures)
     @staticmethod
     def get_each_element_function(self):
         return self.sweep, [future.result() for future in self.futures]
@@ -110,6 +112,17 @@ class ReducedSweepFutures(object):
 
     def __str__(self):
         return str(self.futures)
+    
+    def add(self, item, object_list_index):
+        """
+        Adds the result item to the results of this restricted sweep.
+        :param item: the result to add
+        :param object_list_index: the index of the result IN THE RESTRICTED SWEEP
+        """
+        self.futures[object_list_index] = item
+
+    def get_object(self, total_index):
+        return self.futures[self.sweep.convert_to_reduced_index(total_index)]
 
 
 # TODO
@@ -145,7 +158,7 @@ class ReducedSweepDelayed(object):
     def get_object(self, total_index):
         return self.delayed_results[self.sweep.convert_to_reduced_index(total_index)]
 
-    def calculate_futures(self):
+    def calculate_futures(self,resources):
         """
         Triggers the execution of the sweep.
         """
@@ -153,7 +166,7 @@ class ReducedSweepDelayed(object):
         assert self.delayed_results[0] is not None
         futures = []
         for delayed_result in self.delayed_results:
-            futures.append(self.dask_client.compute(delayed_result))
+            futures.append(self.dask_client.compute(delayed_result,resources=resources))
 
         return ReducedSweepFutures(self.sweep, futures)
 
