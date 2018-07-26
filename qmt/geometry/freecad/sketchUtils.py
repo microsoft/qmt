@@ -1,9 +1,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-###
-### Functions that work with sketches
-###
+"""Sketch manipulation."""
+
 
 import FreeCAD
 import Draft
@@ -11,47 +10,17 @@ import Part
 import Sketcher
 import numpy as np
 from copy import deepcopy
+from .auxiliary import *
 
-
-def deepRemove_impl(obj):
-    for child in obj.OutList:
-        deepRemove_impl(child)
-    FreeCAD.ActiveDocument.removeObject(obj.Name)
-
-
-def deepRemove(obj=None, name=None, label=None):
-    ''' Remove a targeted object and recursively delete all its sub-objects.
-    '''
-    doc = FreeCAD.ActiveDocument
-    if obj is not None:
-        pass
-    elif name is not None:
-        obj = doc.getObject(name)
-    elif label is not None:
-        obj = doc.getObjectsByLabel(label)[0]
-    else:
-        raise RuntimeError('No object selected!')
-    deepRemove_impl(obj)
-    doc.recompute()
-
-
-def delete(obj):
-    doc = FreeCAD.ActiveDocument
-    doc.removeObject(obj.Name)
-    doc.recompute()
+vec = FreeCAD.Vector
 
 
 def findSegments(sketch):
     '''Return the line segments in a sketch as a numpy array.
+    Note: in FC0.17 sketches contain wires by default.
     '''
     lineSegments = []
-    # The old way would also discover guide segments, which we probably don't want to do...
-    # for seg in sketch.Geometry:
-    #     lineSegments += [[[seg.StartPoint[0], seg.StartPoint[1], seg.StartPoint[2]], \
-    #                       [seg.EndPoint[0], seg.EndPoint[1], seg.EndPoint[2]]]]
-    # ~ for edge in sketch.Shape.Edges:
-        # ~ lineSegments.append([tuple(edge.Vertexes[0].Point), tuple(edge.Vertexes[1].Point)])
-    for wire in sketch.Shape.Wires:  # fc17: wires should be defined for all sketches
+    for wire in sketch.Shape.Wires:
         for edge in wire.Edges:
             lineSegments.append([tuple(edge.Vertexes[0].Point), tuple(edge.Vertexes[1].Point)])
     # TODO: reuse list of wires for cycles
@@ -69,8 +38,11 @@ def nextSegment(lineSegments, segIndex, tol=1e-8, fixOrder=True):
         tol:          repair tolerance for matching
         fixOrder:     whether the order lineSegments should be repaired on the fly
     '''
-    diffList0 = np.sum(np.abs(lineSegments[segIndex, 1, :] - lineSegments[:, 0, :]), axis=1) # initial end point - all other segment starts
-    diffList1 = np.sum(np.abs(lineSegments[segIndex, 1, :] - lineSegments[:, 1, :]), axis=1) # initial end point - all other segment ends
+    # initial end point - all other segment starts
+    diffList0 = np.sum(np.abs(lineSegments[segIndex, 1, :] - lineSegments[:, 0, :]), axis=1)
+    # initial end point - all other segment ends
+    diffList1 = np.sum(np.abs(lineSegments[segIndex, 1, :] - lineSegments[:, 1, :]), axis=1)
+
     diffList0[segIndex] = 1000.
     diffList1[segIndex] = 1000.
     nextList0 = np.where(diffList0 <= tol)[0]
@@ -106,15 +78,25 @@ def findCycle(lineSegments, startingIndex, availSegIDs):
     return segList
 
 
-def addCycleSketch(name, fcDoc, cycleSegIndList, lineSegments):
+# ~ def findCycle2(sketch, lineSegments, idx):
+    # ~ '''Find a cycle in a collection of line segments given a starting index.
+    # ~ Return the list of indices in the cycle.
+    # ~ '''
+    # ~ # Find wire to which the indexed segment belongs
+    # ~ # return lineSegment indices of all edges in this wire
+    # ~ for wire in sketch.Shape.Wires:
+        # ~ for edge in wire.Edges:
+        # ~ if idx in wire
+
+
+def addCycleSketch(name, doc, cycleSegIndList, lineSegments):
     ''' Add a sketch of a cycle to a FC document.
     '''
-    if (fcDoc.getObject(name) != None):  # this name already exists
+    if (doc.getObject(name) != None):  # this name already exists
         raise ValueError("Error: sketch " + name + " already exists.")
-    obj = fcDoc.addObject('Sketcher::SketchObject', name)
-    vec = FreeCAD.Vector
+    obj = doc.addObject('Sketcher::SketchObject', name)
     # obj.MapMode = 'FlatFace'
-    obj = fcDoc.getObject(name)
+    obj = doc.getObject(name)
     cnt = 0
     for segIndex in cycleSegIndList:
         startPoint = lineSegments[segIndex, 0, :]
@@ -125,25 +107,43 @@ def addCycleSketch(name, fcDoc, cycleSegIndList, lineSegments):
             continue
         obj.addConstraint(Sketcher.Constraint('Coincident', cnt - 2, 2, cnt - 1, 1))
     obj.addConstraint(Sketcher.Constraint('Coincident', cnt - 1, 2, 0, 1))
-    fcDoc.recompute()
+    doc.recompute()
     return obj
 
 
-def addPolyLineSketch(name, fcDoc, segmentOrder, lineSegments):
+def addCycleSketch2(name, wire):
+    ''' Add a sketch of a cycle (closed wire) to a FC document.
+    '''
+    assert wire.isClosed()
+    doc = FreeCAD.ActiveDocument
+    if (doc.getObject(name) != None):
+        raise ValueError("Error: sketch " + name + " already exists.")
+    sketch = doc.addObject('Sketcher::SketchObject', name)
+    for i,edge in enumerate(wire.Edges):
+        sketch.addGeometry(Part.LineSegment(vec(tuple(edge.Vertexes[0].Point)),
+                                            vec(tuple(edge.Vertexes[1].Point))))
+        if i > 0:
+            sketch.addConstraint(Sketcher.Constraint('Coincident', i - 1, 2, i, 1))
+    sketch.addConstraint(Sketcher.Constraint('Coincident', i, 2, 0, 1))
+    doc.recompute()
+    return sketch
+
+
+def addPolyLineSketch(name, doc, segmentOrder, lineSegments):
     ''' Add a sketch given segment order and line segments
     '''
-    if (fcDoc.getObject(name) != None):  # this name already exists
+    if (doc.getObject(name) != None):  # this name already exists
         raise ValueError("Error: sketch " + name + " already exists.")
-    obj = fcDoc.addObject('Sketcher::SketchObject', name)
+    obj = doc.addObject('Sketcher::SketchObject', name)
     for segIndex, segment in enumerate(lineSegments):
         startPoint = segment[0, :]
         endPoint = segment[1, :]
-        obj.addGeometry(Part.LineSegment(FreeCAD.Vector(tuple(startPoint)), FreeCAD.Vector(tuple(endPoint))))
+        obj.addGeometry(Part.LineSegment(vec(tuple(startPoint)), vec(tuple(endPoint))))
     for i in range(len(lineSegments)):
         connectIndex = segmentOrder[i]
         if connectIndex < len(lineSegments):
             obj.addConstraint(Sketcher.Constraint('Coincident', i, 2, connectIndex, 1))
-    fcDoc.recompute()
+    doc.recompute()
     return obj
 
 
@@ -161,20 +161,33 @@ def findEdgeCycles(sketch):
             availSegIDs = [item for item in availSegIDs if item not in newCycle]
     return lineSegments, cycles
 
+def findEdgeCycles2(sketch):
+    """Find the list of edges in a sketch and separate them into cycles."""
+    return sketch.Shape.Wires
 
 def splitSketch(sketch):
     '''Splits a sketch into several, returning a list of names of the new sketches.
     '''
+    doc = FreeCAD.ActiveDocument
     lineSegments, cycles = findEdgeCycles(sketch)
     # Finally, add new sketches based on the cycles:
-    myDoc = FreeCAD.ActiveDocument
     currentSketchName = sketch.Name
-    cycleObjList = []
+    cycleSketchList = []
     for i, cycle in enumerate(cycles):
-        cycleObj = addCycleSketch(currentSketchName + '_' + str(i),
-                                  myDoc, cycle, lineSegments)
-        cycleObjList += [cycleObj]
-    return cycleObjList
+        cycleSketch = addCycleSketch(currentSketchName + '_' + str(i),
+                                  doc, cycle, lineSegments)
+        cycleSketchList += [cycleSketch]
+    return cycleSketchList
+
+def splitSketch2(sketch):
+    '''Splits a sketch into several, returning a list of names of the new sketches.
+    '''
+    if len(sketch.Shape.Wires) < 2:
+        return sketch
+    sketchList = []
+    for i,wire in enumerate(sketch.Shape.Wires):
+        sketchList.append(addCycleSketch2(sketch.Name + '_' + str(i), wire))
+    return sketchList
 
 
 def extendSketch(sketch, d):
@@ -240,6 +253,7 @@ def makeIntoSketch(inputObj, sketchName=None):
     if sketchName is None:
         sketchName = inputObj.Name + '_sketch'
     returnSketch = Draft.makeSketch(inputObj, autoconstraints=True, name=sketchName)
+    # TODO: check that fc017 Draft.makeSketch always produces wires
     deepRemove(obj=inputObj)
     FreeCAD.ActiveDocument.recompute()
     return returnSketch
@@ -248,13 +262,13 @@ def draftOffset(inputSketch,t):
     ''' Attempt to offset the draft figure by a thickness t. Positive t is an
     inflation, while negative t is a deflation.
     '''
-    from qmt.freecad import extrude,copy,subtract,delete    
+    from qmt.geometry.freecad.geomUtils import extrude,copy,subtract,delete    
 
     if t == 0.:
         return copy(inputSketch)
     deltaT = np.abs(t)
-    offsetVec1 =FreeCAD.Vector(-deltaT,-deltaT,0.)
-    offsetVec2 = FreeCAD.Vector(deltaT,deltaT,0.)
+    offsetVec1 = vec(-deltaT,-deltaT,0.)
+    offsetVec2 = vec(deltaT,deltaT,0.)
     
     offset0 = copy(inputSketch)
     offset1 = Draft.offset(inputSketch,offsetVec1,copy=True)
@@ -334,4 +348,3 @@ def draftOffset(inputSketch,t):
     delete(offset1)
     delete(offset2)
     return returnSketch
-

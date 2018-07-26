@@ -68,3 +68,45 @@ class Geometry3D(Task):
         :return geo_3d: A Geo3DData object.
         """
         return current_options
+
+
+# ~ class GeoFreeCAD(Geometry3D):  # needs adjustments
+class GeoFreeCAD(Task):
+
+    def __init__(self, options=None, name='freecad_task'):
+        super(GeoFreeCAD, self).__init__([], options, name)
+
+    def _solve_instance(self, input_result_list, current_options):
+
+        print(current_options)
+
+        # TODO: write a sub2.7 subprocess wrapper
+        # at current sweep point:
+        # - updateParams
+        # - object construction
+        # - litography
+        # - point region map
+
+        
+        import qmt.geometry.freecad as cad
+        cad.auxiliary.pywrapper(input_result_list, current_options, 'updateParams')
+
+        if 'parts' in current_options:  # TODO: parts = dict{ 'part1': 3DPart, ... }
+            pass
+
+        doc = cad.FreeCAD.newDocument('instance')
+        cad.FreeCAD.setActiveDocument('instance')
+
+        if 'filepath' in current_options:
+            doc.load(current_options['filepath'])
+        elif 'document' in current_options:
+            for obj in current_options['document'].Objects:
+                doc.copyObject(obj, False)  # don't deep copy dependencies
+        else:
+            raise ValueError("No FreeCAD document available")
+
+        # extend params dictionary to generic parts schema
+        fcdict = {key:(value, 'freeCAD') for (key,value) in current_options['params'].items()}
+
+        cad.fileIO.updateParams(doc, fcdict)
+        return doc
