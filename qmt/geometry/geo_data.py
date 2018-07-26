@@ -1,8 +1,11 @@
-class Geo1DData:
+from qmt.basic_tasks import Data
+
+class Geo1DData(Data):
     def __init__(self):
         """
         Class for holding a 1D geometry specification.
         """
+        super(Geo1DData, self).__init__()
         self.parts = {}
 
     def add_part(self, part_name, start_point, end_point, overwrite=False):
@@ -45,6 +48,7 @@ class Geo2DData:
         Parts are intended to be 2D domains, while edges are used for setting boundary conditions
         and surface conditions.
         """
+        super(Geo2DData, self).__init__()
         self.parts = {}
         self.edges = {}
 

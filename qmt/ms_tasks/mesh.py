@@ -28,7 +28,7 @@ class Mesh1D(Mesh):
 
     def _solve_instance(self, input_result_list, current_options):
         """
-        :param list input_result_list: Singleton list with a Geo1DData element.
+        :param list input_result_list: Single element list with a Geo1DData element.
         :param dict current_options: Dict from above.
         :return Mesh1DData mesh_1d: Output mesh
         """
