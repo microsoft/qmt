@@ -3,3 +3,4 @@
 
 from .geometry import Geometry1D, Geometry2D, Geometry3D
 from .reduce_dim import ReduceDim2D, ReduceDim3D
+from .data_template import Data
