@@ -2,14 +2,15 @@
 # Licensed under the MIT License.
 
 from qmt.task_framework import Task
-from qmt.geometry import Geo1DData
+from qmt.geometry import Geo1DData, Geo2DData
 
 
 class Geometry1D(Task):
     def __init__(self, options=None, name='geometry_1d_task'):
         """
         Builds a geometry in 1D.
-        :param dict options: The dictionary specifying parts, of the form {"part_name":(start_coord,stop_coord)}
+        :param dict options: The dictionary specifying parts, of the form
+        {"part_name":(start_coord,stop_coord)}
         :param str name: The name of this task.
         """
         super(Geometry1D, self).__init__([], options, name)
@@ -22,7 +23,7 @@ class Geometry1D(Task):
         """
         geo_1d = Geo1DData()
         for part_name in current_options:
-            geo_1d.add_part(part_name,current_options[part_name][0],current_options[part_name][1])
+            geo_1d.add_part(part_name, current_options[part_name][0], current_options[part_name][1])
         return geo_1d
 
 
@@ -30,28 +31,35 @@ class Geometry2D(Task):
     def __init__(self, options=None, name='geometry_2d_task'):
         """
         Builds a geometry in 2D.
-        :param dict options: The dictionary specifying parts, of the form {"part_name":Part3D}
+        :param dict options: The dictionary holding parts and edges. It should be of the form:
+        {'parts':{'part_name':Polygon}, 'edges':{'edge_name':LineString}, where Polygon and
+        LineString are instances of shapely.geometry.
+        "part_name":Part3D}
         :param str name: The name of this task.
         """
         super(Geometry2D, self).__init__([], options, name)
-        # for part_name in options:
-        #     assert type(options[part_name]) is Part2D
 
     def _solve_instance(self, input_result_list, current_options):
         """
         :param list input_result_list: This is an empty list.
-        :param dict current_options: The dictionary specifying parts from above.
+        :param dict current_options: The dictionary specification from above.
         :return: geo_2d: A Geo2DData object.
         """
-        return current_options
+        geo_2d = Geo2DData()
+        for part_name in current_options['parts']:
+            geo_2d.add_part(part_name, current_options['parts'][part_name])
+        for edge_name in current_options['edges']:
+            geo_2d.add_edge(edge_name, current_options['edges'][edge_name])
+        return geo_2d
 
 
 class Geometry3D(Task):
     def __init__(self, options=None, name='geometry_3d_task'):
         """
         Builds a geometry in 3D.
-        :param dict options: The dictionary specifying parts and and FreeCAD infromation. It should be of the form
-        {"fcname":path_to_freeCAD_file,"parts_dict":parts_dict}, where parts_dict is a dictionary of the form
+        :param dict options: The dictionary specifying parts and and FreeCAD infromation. It should
+        be of the form {"fcname":path_to_freeCAD_file,"parts_dict":parts_dict}, where parts_dict
+        is a dictionary of the form
         {part_name:Part3D}.
         :param str name: The name of this task.
         """
@@ -78,18 +86,14 @@ class GeoFreeCAD(Task):
 
     def _solve_instance(self, input_result_list, current_options):
 
-        print(current_options)
+        # ~ print(current_options)
 
-        # TODO: write a sub2.7 subprocess wrapper
-        # at current sweep point:
-        # - updateParams
-        # - object construction
-        # - litography
-        # - point region map
+        # ~ from qmt.geometry.freecad_wrapper import pywrapper
+        # ~ pywrapper(input_result_list, current_options, 'updateParams')
 
-        
+        # ~ return 1
+
         import qmt.geometry.freecad as cad
-        cad.auxiliary.pywrapper(input_result_list, current_options, 'updateParams')
 
         if 'parts' in current_options:  # TODO: parts = dict{ 'part1': 3DPart, ... }
             pass
@@ -106,7 +110,8 @@ class GeoFreeCAD(Task):
             raise ValueError("No FreeCAD document available")
 
         # extend params dictionary to generic parts schema
-        fcdict = {key:(value, 'freeCAD') for (key,value) in current_options['params'].items()}
+        fcdict = {key: (value, 'freeCAD') for (key, value) in current_options['params'].items()}
 
         cad.fileIO.updateParams(doc, fcdict)
-        return doc
+        # ~ return doc
+        return 1
