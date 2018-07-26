@@ -19,10 +19,12 @@ geo_task = GeoFreeCAD(options=freecad_dict)
 sweeps = [ {tag:val} for val in np.arange(2,10,2) ]
 sman = qtf.SweepManager(sweeps)
 sman.run(geo_task)
+import time
+time.sleep(0.5)
 
 # Investigate results
-if not os.path.exists('tmp'):
-    os.mkdir('tmp')
-for res in geo_task.result:
+# ~ if not os.path.exists('tmp'):
+    # ~ os.mkdir('tmp')
+# ~ for res in geo_task.result:
     # ~ print(res.modelParams.d1)
-    res.saveAs("tmp/example_geogen_" + str(res.modelParams.d1) + ".fcstd")
+    # ~ res.saveAs("tmp/example_geogen_" + str(res.modelParams.d1) + ".fcstd")

@@ -78,18 +78,14 @@ class GeoFreeCAD(Task):
 
     def _solve_instance(self, input_result_list, current_options):
 
-        print(current_options)
+        # ~ print(current_options)
 
-        # TODO: write a sub2.7 subprocess wrapper
-        # at current sweep point:
-        # - updateParams
-        # - object construction
-        # - litography
-        # - point region map
+        # ~ from qmt.geometry.freecad_wrapper import pywrapper
+        # ~ pywrapper(input_result_list, current_options, 'updateParams')
 
-        
+        # ~ return 1
+
         import qmt.geometry.freecad as cad
-        cad.auxiliary.pywrapper(input_result_list, current_options, 'updateParams')
 
         if 'parts' in current_options:  # TODO: parts = dict{ 'part1': 3DPart, ... }
             pass
@@ -109,4 +105,5 @@ class GeoFreeCAD(Task):
         fcdict = {key:(value, 'freeCAD') for (key,value) in current_options['params'].items()}
 
         cad.fileIO.updateParams(doc, fcdict)
-        return doc
+        # ~ return doc
+        return 1
