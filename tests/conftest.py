@@ -7,7 +7,6 @@ import os
 import pytest
 
 import qmt
-from qmt.geometry.freecad import FreeCAD
 
 
 @pytest.fixture(scope='session')
@@ -32,6 +31,7 @@ def fix_testDir():
 @pytest.fixture(scope='function')
 def fix_FCDoc():
     '''Set up and tear down a FreeCAD document.'''
+    from qmt.geometry.freecad import FreeCAD
     doc = FreeCAD.newDocument('testDoc')
     yield doc
     FreeCAD.closeDocument('testDoc')
@@ -55,6 +55,7 @@ def aux_two_cycle_sketch(a=(20, 20, 0), b=(-30, 20, 0), c=(-30, -10, 0), d=(20, 
     # Note: the z-component is zero, as sketches are plane objects.
     #       Adjust orientation with Sketch.Placement(Normal, Rotation)
     import Part
+    from qmt.geometry.freecad import FreeCAD
     vec = FreeCAD.Vector
     lseg = Part.LineSegment
 
@@ -82,6 +83,7 @@ def aux_unit_square_sketch():
     '''Helper function to drop a simple unit square sketch.
        The segments are carefully ordered.
     '''
+    from qmt.geometry.freecad import FreeCAD
     import Part
     vec = FreeCAD.Vector
     lseg = Part.LineSegment
@@ -109,6 +111,7 @@ def fix_hexagon_sketch():
 
 def aux_hexagon_sketch(r=1):
     '''Helper function to drop a hexagonal sketch.'''
+    from qmt.geometry.freecad import FreeCAD
     import Part
     import ProfileLib.RegularPolygon
     vec = FreeCAD.Vector
