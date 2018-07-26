@@ -236,6 +236,7 @@ class Task(object):
     @staticmethod
     def gather_futures(sweep_results):
         presents = []
+        sweep_results.wait()
         for future in sweep_results:
             presents.append(future.result())
         return sweep_results.sweep, presents

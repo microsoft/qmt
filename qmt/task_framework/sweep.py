@@ -101,6 +101,8 @@ class ReducedSweepFutures(object):
         self.sweep = sweep
         self.futures = futures
 
+    def wait(self):
+        return dask.distributed.wait(self.futures)
     @staticmethod
     def get_each_element_function(self):
         return self.sweep, [future.result() for future in self.futures]
