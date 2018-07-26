@@ -102,6 +102,10 @@ class Task(object):
             Task.current_instance_id += 1
 
         self.options = options
+        if 'resources' in options:
+            self.resources = options['resources']
+        else:
+            self.resources = None
 
         self.sweep_manager = None  # Set by an enclosing sweep manager
 
@@ -221,7 +225,7 @@ class Task(object):
         if self.computed_result is None:
             for task in self.previous_tasks:
                 task.run()
-            self.computed_result = self.delayed_result.calculate_futures()
+            self.computed_result = self.delayed_result.calculate_futures(resources=self.resources)
 
         return self.computed_result
 
