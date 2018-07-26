@@ -9,7 +9,7 @@ class PropertyMap(object):
     :param callable prop_map: Map from part identifier to a property value.
     """
 
-    def __init_(self, part_map, prop_map):
+    def __init__(self, part_map, prop_map):
         self.partMap = part_map
         self.propMap = prop_map
 
@@ -21,7 +21,7 @@ class PropertyMap(object):
             of the same shape as x except for the last axis corresponding to coordinate vector
             extent.
         """
-        return self.partMap.point_to_part(x)
+        return self.partMap(x)
 
     def __call__(self, x):
         """Do the mapping.
@@ -80,4 +80,4 @@ class MaterialPropertyMap(PropertyMap):
                     raise
                 return self.fillValue
 
-        super(MaterialPropertyMap, self).__init_(part_map, prop_map)
+        super(MaterialPropertyMap, self).__init__(part_map, prop_map)
