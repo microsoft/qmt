@@ -169,7 +169,6 @@ class Task(object):
                                                                                        self.sweep_manager)
             for sweep_holder_index, tag_values in enumerate(self.delayed_result.tagged_value_list):
                 current_options = self._make_current_options(tag_values)
-                print(current_options)
                 # Get an index in the total sweep
                 total_index = self.delayed_result.sweep.convert_to_total_indices(sweep_holder_index)[0]
 
@@ -236,6 +235,7 @@ class Task(object):
     @staticmethod
     def gather_futures(sweep_results):
         presents = []
+        sweep_results.wait()
         for future in sweep_results:
             presents.append(future.result())
         return sweep_results.sweep, presents
