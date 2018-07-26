@@ -1,0 +1,595 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>qmt.old_code.batchHarness &mdash; QMT 1.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> QMT
+          
+
+          
+            
+            <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../rst/tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rst/dev_overview.html">Structure of QMT</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">QMT</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>qmt.old_code.batchHarness</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for qmt.old_code.batchHarness</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) Microsoft Corporation. All rights reserved.</span>
+<span class="c1"># Licensed under the MIT License.</span>
+
+<span class="c1">#</span>
+<span class="c1"># This file coordinates the deployment of a batch job among toolchain component.</span>
+<span class="c1"># The geoGen component is included in this release. The run and</span>
+<span class="c1">#</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">absolute_import</span><span class="p">,</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">six</span> <span class="k">import</span> <span class="n">iteritems</span><span class="p">,</span> <span class="n">text_type</span>
+<span class="kn">import</span> <span class="nn">qmt</span> <span class="k">as</span> <span class="nn">QMT</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">deepcopy</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+
+<div class="viewcode-block" id="Harness"><a class="viewcode-back" href="../../../source/qmt.old_code.html#qmt.old_code.batchHarness.Harness">[docs]</a><span class="k">class</span> <span class="nc">Harness</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jsonPath</span><span class="p">,</span> <span class="n">os</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Class to run a batch 3D job on the cluster.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        jsonPath : str</span>
+<span class="sd">            Path to the model json file used to build the run</span>
+<span class="sd">        os : str</span>
+<span class="sd">            Either &#39;linux&#39; or &#39;windows&#39;. The default None detects</span>
+<span class="sd">            the OS from sys.platform.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">jsonPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">jsonPath</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">jsonPath</span> <span class="o">=</span> <span class="n">jsonPath</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">QMT</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">jsonPath</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">modelFilePaths</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">loadModel</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">os</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;linux&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">:</span>
+                <span class="n">os</span> <span class="o">=</span> <span class="s1">&#39;linux&#39;</span>
+            <span class="k">elif</span> <span class="s1">&#39;win&#39;</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">:</span>
+                <span class="n">os</span> <span class="o">=</span> <span class="s1">&#39;windows&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                    <span class="s1">&#39;Operating system </span><span class="si">{}</span><span class="s1"> is not supported.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="n">sys</span><span class="o">.</span><span class="n">platform</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">os</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;linux&#39;</span><span class="p">,</span> <span class="s1">&#39;windows&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;os must be either &quot;windows&quot; or &quot;linux&quot;!&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">os</span> <span class="o">=</span> <span class="n">os</span>
+
+<div class="viewcode-block" id="Harness.convert_unicode_to_ascii"><a class="viewcode-back" href="../../../source/qmt.old_code.html#qmt.old_code.batchHarness.Harness.convert_unicode_to_ascii">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">convert_unicode_to_ascii</span><span class="p">(</span><span class="n">dic</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Convert any unicode entries in the dict.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dic</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">text_type</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">text_type</span><span class="p">):</span>
+                <span class="n">newkey</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">,</span> <span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+                <span class="n">newvalue</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;ascii&#39;</span><span class="p">,</span> <span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+                <span class="k">del</span> <span class="n">dic</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                <span class="n">dic</span><span class="p">[</span><span class="n">newkey</span><span class="p">]</span> <span class="o">=</span> <span class="n">newvalue</span>
+        <span class="k">return</span> <span class="n">dic</span></div>
+
+<div class="viewcode-block" id="Harness.setupRun"><a class="viewcode-back" href="../../../source/qmt.old_code.html#qmt.old_code.batchHarness.Harness.setupRun">[docs]</a>    <span class="k">def</span> <span class="nf">setupRun</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">genModelFiles</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Set up the folder structure of a run, broken out by the geomSweep</span>
+<span class="sd">        specified in the json file.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">model_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modelDict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rootPath</span> <span class="o">=</span> <span class="n">model_dict</span><span class="p">[</span><span class="s1">&#39;jobSettings&#39;</span><span class="p">][</span><span class="s1">&#39;rootPath&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rootPath</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rootPath</span><span class="p">)</span>
+        <span class="n">geoSweepKeys</span> <span class="o">=</span> <span class="n">model_dict</span><span class="p">[</span><span class="s1">&#39;geomSweep&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+        <span class="n">instanceLists</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">geoSweepKey</span> <span class="ow">in</span> <span class="n">geoSweepKeys</span><span class="p">:</span>
+            <span class="n">numInstances</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span>
+                <span class="n">model_dict</span><span class="p">[</span><span class="s1">&#39;geomSweep&#39;</span><span class="p">][</span><span class="n">geoSweepKey</span><span class="p">][</span><span class="s1">&#39;vals&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">))</span>
+            <span class="n">valIDs</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="n">numInstances</span><span class="p">)</span>
+            <span class="n">instanceLists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">valIDs</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">prodInstance</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">instanceLists</span><span class="p">):</span>
+            <span class="n">folderPath</span> <span class="o">=</span> <span class="s1">&#39;geo_&#39;</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">prodInstance</span><span class="p">)))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rootPath</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">folderPath</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rootPath</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">folderPath</span><span class="p">)</span>
+            <span class="n">runPath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rootPath</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">folderPath</span>
+            <span class="n">tempModel</span> <span class="o">=</span> <span class="n">QMT</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">runPath</span> <span class="o">+</span> <span class="s1">&#39;/model.json&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">modelFilePaths</span> <span class="o">+=</span> <span class="p">[</span><span class="n">runPath</span> <span class="o">+</span> <span class="s1">&#39;/model.json&#39;</span><span class="p">]</span>
+            <span class="n">tempModel</span><span class="o">.</span><span class="n">modelDict</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">model_dict</span><span class="p">)</span>
+            <span class="n">tempModel</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;geomSweep&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># Also reset this</span>
+            <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+                    <span class="n">prodInstance</span><span class="p">,</span> <span class="n">model_dict</span><span class="p">[</span><span class="s1">&#39;geomSweep&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                <span class="c1"># Populate the geo parameter names:</span>
+                <span class="n">paramName</span> <span class="o">=</span> <span class="n">name</span>
+                <span class="c1"># freeCAD or python</span>
+                <span class="n">paramType</span> <span class="o">=</span> <span class="n">model_dict</span><span class="p">[</span><span class="s1">&#39;geomSweep&#39;</span><span class="p">][</span><span class="n">name</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>
+                <span class="n">paramValIndex</span> <span class="o">=</span> <span class="n">index</span>
+                <span class="n">paramValsStr</span> <span class="o">=</span> <span class="n">model_dict</span><span class="p">[</span><span class="s1">&#39;geomSweep&#39;</span><span class="p">][</span><span class="n">paramName</span><span class="p">][</span>
+                    <span class="s1">&#39;vals&#39;</span><span class="p">]</span>
+                <span class="n">paramValsList</span> <span class="o">=</span> <span class="n">paramValsStr</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+                <span class="n">paramVal</span> <span class="o">=</span> <span class="n">paramValsList</span><span class="p">[</span><span class="n">paramValIndex</span><span class="p">]</span>
+                <span class="n">tempModel</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;geometricParams&#39;</span><span class="p">][</span><span class="n">paramName</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">paramVal</span><span class="p">,</span> <span class="n">paramType</span><span class="p">)</span>
+                <span class="c1"># Populate the geo sweep (just one point, for bookkeeping</span>
+                <span class="c1"># purposes):</span>
+                <span class="n">tempModel</span><span class="o">.</span><span class="n">genGeomSweep</span><span class="p">(</span><span class="n">paramName</span><span class="p">,</span> <span class="p">[</span><span class="n">paramVal</span><span class="p">],</span> <span class="nb">type</span><span class="o">=</span><span class="n">paramType</span><span class="p">)</span>
+            <span class="n">tempModel</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;pathSettings&#39;</span><span class="p">][</span><span class="s1">&#39;dirPath&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">runPath</span>
+            <span class="k">if</span> <span class="n">genModelFiles</span><span class="p">:</span>
+                <span class="n">tempModel</span><span class="o">.</span><span class="n">saveModel</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Harness.runJob"><a class="viewcode-back" href="../../../source/qmt.old_code.html#qmt.old_code.batchHarness.Harness.runJob">[docs]</a>    <span class="k">def</span> <span class="nf">runJob</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Run the batch job.&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">modelFilePath</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelFilePaths</span><span class="p">:</span>  <span class="c1"># For now, this is the serial part</span>
+            <span class="k">for</span> <span class="n">jobStep</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;jobSettings&#39;</span><span class="p">][</span><span class="s1">&#39;jobSequence&#39;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">jobStep</span> <span class="o">==</span> <span class="s1">&#39;geoGen&#39;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">runBatchGeoGen</span><span class="p">(</span><span class="n">modelFilePath</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">jobStep</span> <span class="o">==</span> <span class="s1">&#39;comsolRun&#39;</span><span class="p">:</span>
+                    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">runBatchCOMSOLRun</span><span class="p">(</span><span class="n">modelFilePath</span><span class="p">)</span>
+                    <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Elapsed time is </span><span class="si">{0}</span><span class="s1"> s.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span>
+                <span class="k">elif</span> <span class="n">jobStep</span> <span class="o">==</span> <span class="s1">&#39;postProc&#39;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">runBatchPostProc</span><span class="p">(</span><span class="n">modelFilePath</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Job step is not defined!&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Harness.runBatchGeoGen"><a class="viewcode-back" href="../../../source/qmt.old_code.html#qmt.old_code.batchHarness.Harness.runBatchGeoGen">[docs]</a>    <span class="k">def</span> <span class="nf">runBatchGeoGen</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">modelFilePath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Run batch geometry generation.&quot;&quot;&quot;</span>
+        <span class="c1"># Import the FreeCAD functions we will need:</span>
+        <span class="kn">import</span> <span class="nn">FreeCAD</span>
+        <span class="kn">from</span> <span class="nn">qmt.freecad</span> <span class="k">import</span> <span class="n">modelBuilder</span><span class="p">,</span> <span class="n">build2DGeo</span><span class="p">,</span> <span class="n">buildCrossSection</span>
+
+        <span class="c1"># Load the model:</span>
+        <span class="n">myModel</span> <span class="o">=</span> <span class="n">QMT</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">modelPath</span><span class="o">=</span><span class="n">modelFilePath</span><span class="p">)</span>
+        <span class="n">myModel</span><span class="o">.</span><span class="n">loadModel</span><span class="p">()</span>
+        <span class="n">dirPath</span> <span class="o">=</span> <span class="n">myModel</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;pathSettings&#39;</span><span class="p">][</span><span class="s1">&#39;dirPath&#39;</span><span class="p">]</span>
+        <span class="n">FCDocPath</span> <span class="o">=</span> <span class="n">myModel</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;pathSettings&#39;</span><span class="p">][</span><span class="s1">&#39;freeCADPath&#39;</span><span class="p">]</span>
+        <span class="n">FreeCAD</span><span class="o">.</span><span class="n">openDocument</span><span class="p">(</span><span class="n">FCDocPath</span><span class="p">)</span>
+        <span class="c1"># Build the model</span>
+        <span class="n">buildModel</span> <span class="o">=</span> <span class="n">modelBuilder</span><span class="p">(</span><span class="n">passModel</span><span class="o">=</span><span class="n">myModel</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">myModel</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;buildOrder&#39;</span><span class="p">])):</span>
+            <span class="n">partName</span> <span class="o">=</span> <span class="n">myModel</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;buildOrder&#39;</span><span class="p">][</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span>
+            <span class="n">totalParts</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">myModel</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;buildOrder&#39;</span><span class="p">])</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;(&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">totalParts</span><span class="p">)</span> <span class="o">+</span>
+                  <span class="s1">&#39;) building part &#39;</span> <span class="o">+</span> <span class="n">partName</span> <span class="o">+</span> <span class="s1">&#39;...&#39;</span><span class="p">)</span>
+            <span class="n">buildModel</span><span class="o">.</span><span class="n">buildPart</span><span class="p">(</span><span class="n">partName</span><span class="p">)</span>
+        <span class="n">cadDirPath</span> <span class="o">=</span> <span class="n">dirPath</span> <span class="o">+</span> <span class="s1">&#39;/cadParts&#39;</span>
+        <span class="n">stlDirPath</span> <span class="o">=</span> <span class="n">dirPath</span> <span class="o">+</span> <span class="s1">&#39;/stlParts&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">cadDirPath</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">cadDirPath</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">stlDirPath</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">stlDirPath</span><span class="p">)</span>
+        <span class="n">buildModel</span><span class="o">.</span><span class="n">exportBuiltParts</span><span class="p">(</span>
+            <span class="n">stepFileDir</span><span class="o">=</span><span class="n">dirPath</span> <span class="o">+</span> <span class="s1">&#39;/cadParts&#39;</span><span class="p">,</span>
+            <span class="n">stlFileDir</span><span class="o">=</span><span class="n">dirPath</span> <span class="o">+</span> <span class="s1">&#39;/stlParts&#39;</span><span class="p">)</span>
+        <span class="n">buildModel</span><span class="o">.</span><span class="n">saveFreeCADState</span><span class="p">(</span><span class="n">dirPath</span> <span class="o">+</span> <span class="s1">&#39;/freeCADModel.FCStd&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Now that we have rendered the 3D objects, we want to draw any</span>
+        <span class="c1"># necessary 2D cross sections as 2D cuts:</span>
+        <span class="k">for</span> <span class="n">sliceName</span><span class="p">,</span> <span class="n">sliceData</span> <span class="ow">in</span> <span class="n">iteritems</span><span class="p">(</span><span class="n">myModel</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;slices&#39;</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="n">sliceData</span><span class="p">[</span><span class="s1">&#39;sliceInfo&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;crossSection&#39;</span><span class="p">):</span>
+                <span class="n">parts</span> <span class="o">=</span> <span class="n">buildCrossSection</span><span class="p">(</span>
+                    <span class="n">sliceData</span><span class="p">[</span><span class="s1">&#39;sliceInfo&#39;</span><span class="p">],</span> <span class="n">passModel</span><span class="o">=</span><span class="n">myModel</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">parts</span> <span class="o">=</span> <span class="n">build2DGeo</span><span class="p">(</span><span class="n">passModel</span><span class="o">=</span><span class="n">myModel</span><span class="p">)</span>
+            <span class="n">sliceData</span><span class="p">[</span><span class="s1">&#39;parts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">parts</span>
+
+        <span class="n">myModel</span><span class="o">.</span><span class="n">saveModel</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Harness.runBatchCOMSOLRun"><a class="viewcode-back" href="../../../source/qmt.old_code.html#qmt.old_code.batchHarness.Harness.runBatchCOMSOLRun">[docs]</a>    <span class="k">def</span> <span class="nf">runBatchCOMSOLRun</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">modelFilePath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Run batch COMSOL run. This requires proprietary components to be</span>
+<span class="sd">        installed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">qms</span>
+        <span class="kn">from</span> <span class="nn">qms</span> <span class="k">import</span> <span class="n">comsol</span>
+        <span class="kn">from</span> <span class="nn">qms.postProcessing</span> <span class="k">import</span> <span class="n">dataProcessing</span>
+
+        <span class="n">myModel</span> <span class="o">=</span> <span class="n">QMT</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">modelPath</span><span class="o">=</span><span class="n">modelFilePath</span><span class="p">)</span>
+        <span class="n">myModel</span><span class="o">.</span><span class="n">loadModel</span><span class="p">()</span>
+
+        <span class="c1"># Aliases</span>
+        <span class="n">model_dict</span> <span class="o">=</span> <span class="n">myModel</span><span class="o">.</span><span class="n">modelDict</span>
+        <span class="n">path_settings</span> <span class="o">=</span> <span class="n">model_dict</span><span class="p">[</span><span class="s1">&#39;pathSettings&#39;</span><span class="p">]</span>
+        <span class="n">job_settings</span> <span class="o">=</span> <span class="n">model_dict</span><span class="p">[</span><span class="s1">&#39;jobSettings&#39;</span><span class="p">]</span>
+
+        <span class="n">numNodes</span> <span class="o">=</span> <span class="n">job_settings</span><span class="p">[</span><span class="s1">&#39;numNodes&#39;</span><span class="p">]</span>
+        <span class="n">numJobsPerNode</span> <span class="o">=</span> <span class="n">job_settings</span><span class="p">[</span><span class="s1">&#39;numJobsPerNode&#39;</span><span class="p">]</span>
+        <span class="n">numCoresPerJob</span> <span class="o">=</span> <span class="n">job_settings</span><span class="p">[</span><span class="s1">&#39;numCoresPerJob&#39;</span><span class="p">]</span>
+        <span class="n">hostFile</span> <span class="o">=</span> <span class="n">job_settings</span><span class="p">[</span><span class="s1">&#39;hostFile&#39;</span><span class="p">]</span>
+        <span class="n">numParallelJobs</span> <span class="o">=</span> <span class="n">numNodes</span> <span class="o">*</span> <span class="n">numJobsPerNode</span>
+        <span class="n">comsolExecPath</span> <span class="o">=</span> <span class="n">path_settings</span><span class="p">[</span><span class="s1">&#39;COMSOLExecPath&#39;</span><span class="p">]</span>
+        <span class="n">comsolCompilePath</span> <span class="o">=</span> <span class="n">path_settings</span><span class="p">[</span><span class="s1">&#39;COMSOLCompilePath&#39;</span><span class="p">]</span>
+        <span class="n">jdkPath</span> <span class="o">=</span> <span class="n">path_settings</span><span class="p">[</span><span class="s1">&#39;jdkPath&#39;</span><span class="p">]</span>
+        <span class="n">mpiPath</span> <span class="o">=</span> <span class="n">path_settings</span><span class="p">[</span><span class="s1">&#39;mpiPath&#39;</span><span class="p">]</span>
+        <span class="n">folder</span> <span class="o">=</span> <span class="n">path_settings</span><span class="p">[</span><span class="s1">&#39;dirPath&#39;</span><span class="p">]</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">model_dict</span><span class="p">[</span><span class="s1">&#39;comsolInfo&#39;</span><span class="p">][</span><span class="s1">&#39;fileName&#39;</span><span class="p">]</span>
+        <span class="n">myComsolModel</span> <span class="o">=</span> <span class="n">comsol</span><span class="o">.</span><span class="n">ComsolModel</span><span class="p">(</span>
+            <span class="n">modelFilePath</span><span class="p">,</span> <span class="n">run_mode</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;jobSettings&#39;</span><span class="p">]</span>
+            <span class="p">[</span><span class="s1">&#39;comsolRunMode&#39;</span><span class="p">])</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Compiling COMSOL java file...&#39;</span><span class="p">)</span>
+        <span class="n">myComsolModel</span><span class="o">.</span><span class="n">_write</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">os</span> <span class="o">==</span> <span class="s1">&#39;windows&#39;</span><span class="p">:</span>
+            <span class="n">compileList</span> <span class="o">=</span> <span class="p">[</span><span class="n">comsolCompilePath</span><span class="p">,</span> <span class="s1">&#39;-jdkroot&#39;</span><span class="p">,</span>
+                           <span class="n">jdkPath</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">/</span><span class="si">{1}</span><span class="s1">.java&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">name</span><span class="p">)]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">os</span> <span class="o">==</span> <span class="s1">&#39;linux&#39;</span><span class="p">:</span>
+            <span class="n">compileList</span> <span class="o">=</span> <span class="p">[</span><span class="n">comsolExecPath</span><span class="p">,</span> <span class="s1">&#39;compile&#39;</span><span class="p">,</span>
+                           <span class="s1">&#39;</span><span class="si">{0}</span><span class="s1">/</span><span class="si">{1}</span><span class="s1">.java&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">name</span><span class="p">)]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Running &#39;</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">compileList</span><span class="p">))</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span><span class="n">compileList</span><span class="p">)</span>
+
+        <span class="c1"># If we are on the Linux cluster and not run by SLURM, we need to</span>
+        <span class="c1"># enable the launcher hack</span>
+        <span class="n">slurmRun</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">os</span> <span class="o">==</span> <span class="s1">&#39;linux&#39;</span> <span class="ow">and</span> <span class="s1">&#39;SLURM_JOB_NODELIST&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span>
+        <span class="n">my_env</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">os</span> <span class="o">==</span> <span class="s1">&#39;linux&#39;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">slurmRun</span><span class="p">:</span>
+            <span class="n">launcherPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">qms</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/launch.py&#39;</span>
+            <span class="n">my_env</span><span class="p">[</span><span class="s1">&#39;I_MPI_HYDRA_BOOTSTRAP_EXEC&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">launcherPath</span>  <span class="c1"># for Intel MPI</span>
+            <span class="n">my_env</span><span class="p">[</span><span class="s1">&#39;HYDRA_LAUNCHER_EXEC&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">launcherPath</span>  <span class="c1"># for MPICH</span>
+
+        <span class="c1"># Convert any unicode entries in the env</span>
+        <span class="n">my_env</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_unicode_to_ascii</span><span class="p">(</span><span class="n">my_env</span><span class="p">)</span>
+
+        <span class="c1"># Make the export directory if it doesn&#39;t exist:</span>
+        <span class="n">comsolSolsPath</span> <span class="o">=</span> <span class="n">path_settings</span><span class="p">[</span><span class="s1">&#39;dirPath&#39;</span><span class="p">]</span> <span class="o">+</span> \
+            <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">model_dict</span><span class="p">[</span><span class="s1">&#39;comsolInfo&#39;</span><span class="p">][</span><span class="s1">&#39;exportDir&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">comsolSolsPath</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">comsolSolsPath</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">os</span> <span class="o">==</span> <span class="s1">&#39;windows&#39;</span><span class="p">:</span>
+            <span class="n">comsolModelPath</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;</span><span class="se">\&quot;</span><span class="s1">&#39;</span>
+                               <span class="o">+</span> <span class="n">path_settings</span><span class="p">[</span><span class="s1">&#39;dirPath&#39;</span><span class="p">]</span>
+                               <span class="o">+</span> <span class="s1">&#39;/&#39;</span>
+                               <span class="o">+</span> <span class="n">myComsolModel</span><span class="o">.</span><span class="n">name</span>
+                               <span class="o">+</span> <span class="s1">&#39;.class&#39;</span>
+                               <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\&quot;</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">os</span> <span class="o">==</span> <span class="s1">&#39;linux&#39;</span><span class="p">:</span>
+            <span class="n">comsolModelPath</span> <span class="o">=</span> <span class="p">(</span><span class="n">path_settings</span><span class="p">[</span><span class="s1">&#39;dirPath&#39;</span><span class="p">]</span>
+                               <span class="o">+</span> <span class="s1">&#39;/&#39;</span>
+                               <span class="o">+</span> <span class="n">myComsolModel</span><span class="o">.</span><span class="n">name</span>
+                               <span class="o">+</span> <span class="s1">&#39;.class&#39;</span><span class="p">)</span>
+        <span class="c1"># Initiate the COMSOL run:</span>
+        <span class="c1"># comsolCommand = [mpiPath, &#39;-n&#39;, str(numCores), comsolExecPath, &#39;-nosave&#39;, &#39;-np&#39;, &#39;1&#39;, &#39;-inputFile&#39;, comsolModelPath]</span>
+        <span class="c1"># The above doesn&#39;t work with double quotes in the path names</span>
+
+        <span class="c1"># Note on cores: COMSOL uses the notation &quot;computational node&quot; to specify a shared</span>
+        <span class="c1"># memory single job. The -np flag is used to set the number of cores used by each,</span>
+        <span class="c1"># and it shouldn&#39;t exceed the number of physical cores on a machine. Apparently,</span>
+        <span class="c1"># the MPI -n flag should be the number of computational nodes, not the number of total</span>
+        <span class="c1"># cores.&#39;</span>
+        <span class="n">comsolLogName</span> <span class="o">=</span> <span class="n">path_settings</span><span class="p">[</span><span class="s1">&#39;dirPath&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;/comsolLog.txt&#39;</span>
+        <span class="n">stdOutLogName</span> <span class="o">=</span> <span class="n">path_settings</span><span class="p">[</span><span class="s1">&#39;dirPath&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;/comsolStdOut.txt&#39;</span>
+        <span class="n">stdErrLogName</span> <span class="o">=</span> <span class="n">path_settings</span><span class="p">[</span><span class="s1">&#39;dirPath&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;/comsolStdErr.txt&#39;</span>
+        <span class="c1"># save the resulting file for manual inspection</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;jobSettings&#39;</span><span class="p">][</span><span class="s1">&#39;comsolRunMode&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;batch&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">os</span> <span class="o">==</span> <span class="s1">&#39;windows&#39;</span><span class="p">:</span>
+                <span class="n">comsolCommand</span> <span class="o">=</span> <span class="n">mpiPath</span> <span class="o">+</span> <span class="s1">&#39; -n &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">numParallelJobs</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; </span><span class="se">\&quot;</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">comsolExecPath</span> <span class="o">+</span>\
+                    <span class="s1">&#39;</span><span class="se">\&quot;</span><span class="s1"> -np &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">numCoresPerJob</span><span class="p">)</span> <span class="o">+</span> \
+                    <span class="s1">&#39; -inputFile &#39;</span> <span class="o">+</span> <span class="n">comsolModelPath</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">os</span> <span class="o">==</span> <span class="s1">&#39;linux&#39;</span><span class="p">:</span>
+                <span class="n">comsolCommand</span> <span class="o">=</span> <span class="n">comsolExecPath</span> <span class="o">+</span> <span class="s1">&#39; batch -nn &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">numParallelJobs</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; -nnhost &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">numJobsPerNode</span><span class="p">)</span> <span class="o">+</span>\
+                    <span class="s1">&#39; -np &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">numCoresPerJob</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; -inputFile &#39;</span> <span class="o">+</span> <span class="n">comsolModelPath</span> <span class="o">+</span> <span class="s1">&#39; -batchlog &#39;</span> <span class="o">+</span>\
+                    <span class="n">comsolLogName</span> <span class="o">+</span> <span class="s1">&#39; -mpifabrics shm:tcp&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">os</span> <span class="o">==</span> <span class="s1">&#39;windows&#39;</span><span class="p">:</span>
+                <span class="n">comsolCommand</span> <span class="o">=</span> <span class="n">mpiPath</span> <span class="o">+</span> <span class="s1">&#39; -n &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">numParallelJobs</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; </span><span class="se">\&quot;</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">comsolExecPath</span> <span class="o">+</span>\
+                    <span class="s1">&#39;</span><span class="se">\&quot;</span><span class="s1"> -nosave -np &#39;</span> <span class="o">+</span> \
+                    <span class="nb">str</span><span class="p">(</span><span class="n">numCoresPerJob</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; -inputFile &#39;</span> <span class="o">+</span> <span class="n">comsolModelPath</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">os</span> <span class="o">==</span> <span class="s1">&#39;linux&#39;</span><span class="p">:</span>
+                <span class="n">comsolCommand</span> <span class="o">=</span> <span class="n">comsolExecPath</span> <span class="o">+</span> <span class="s1">&#39; batch -nn &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">numParallelJobs</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; -nnhost &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">numJobsPerNode</span><span class="p">)</span> <span class="o">+</span>\
+                    <span class="s1">&#39; -nosave -np &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">numCoresPerJob</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; -inputFile &#39;</span> <span class="o">+</span> <span class="n">comsolModelPath</span> <span class="o">+</span> <span class="s1">&#39; -batchlog &#39;</span> <span class="o">+</span>\
+                    <span class="n">comsolLogName</span> <span class="o">+</span> <span class="s1">&#39; -mpifabrics shm:tcp&#39;</span> <span class="o">+</span> <span class="s1">&#39; -mpiarg -verbose&#39;</span>
+        <span class="c1"># Intel MPI on SLURM needs an extra bootstrap argument</span>
+        <span class="k">if</span> <span class="n">slurmRun</span><span class="p">:</span>
+            <span class="n">comsolCommand</span> <span class="o">+=</span> <span class="s1">&#39; -mpibootstrap slurm&#39;</span>
+
+        <span class="k">if</span> <span class="n">hostFile</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">comsolCommand</span> <span class="o">+=</span> <span class="s1">&#39; -f &#39;</span> <span class="o">+</span> <span class="n">hostFile</span>
+        <span class="n">comsolLog</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">stdOutLogName</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="n">comsolErr</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">stdErrLogName</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Running </span><span class="si">{}</span><span class="s1"> ...&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">comsolCommand</span><span class="p">))</span>
+
+        <span class="n">comsolRun</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">(</span>
+            <span class="n">comsolCommand</span><span class="p">,</span>
+            <span class="n">stdout</span><span class="o">=</span><span class="n">comsolLog</span><span class="p">,</span>
+            <span class="n">stderr</span><span class="o">=</span><span class="n">comsolErr</span><span class="p">,</span>
+            <span class="n">shell</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">env</span><span class="o">=</span><span class="n">my_env</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Starting COMSOL run...&#39;</span><span class="p">)</span>
+        <span class="c1"># Determine the number of voltages we are expecting.</span>
+        <span class="n">numVoltages</span> <span class="o">=</span> <span class="n">model_dict</span><span class="p">[</span><span class="s1">&#39;physicsSweep&#39;</span><span class="p">][</span><span class="s1">&#39;length&#39;</span><span class="p">]</span>
+        <span class="n">resultFileBase</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">_export&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">comsolSolsPath</span><span class="p">,</span> <span class="n">model_dict</span><span class="p">[</span><span class="s1">&#39;comsolInfo&#39;</span><span class="p">][</span><span class="s1">&#39;fileName&#39;</span><span class="p">])</span>
+        <span class="n">eigenFileBase</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">_eigvals&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">comsolSolsPath</span><span class="p">,</span> <span class="n">model_dict</span><span class="p">[</span><span class="s1">&#39;comsolInfo&#39;</span><span class="p">][</span><span class="s1">&#39;fileName&#39;</span><span class="p">])</span>
+        <span class="n">surIntFileBase</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">_sur_integrals&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">comsolSolsPath</span><span class="p">,</span> <span class="n">model_dict</span><span class="p">[</span><span class="s1">&#39;comsolInfo&#39;</span><span class="p">][</span><span class="s1">&#39;fileName&#39;</span><span class="p">])</span>
+        <span class="n">volIntFileBase</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">{}</span><span class="s1">/</span><span class="si">{}</span><span class="s1">_vol_integrals&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">comsolSolsPath</span><span class="p">,</span> <span class="n">model_dict</span><span class="p">[</span><span class="s1">&#39;comsolInfo&#39;</span><span class="p">][</span><span class="s1">&#39;fileName&#39;</span><span class="p">])</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">comsolRun</span><span class="o">.</span><span class="n">poll</span><span class="p">()</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># If the run is done, tag it as complete</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;COMSOL run finshed with exit code </span><span class="si">{}</span><span class="s1">!&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">comsolRun</span><span class="o">.</span><span class="n">returncode</span><span class="p">))</span>
+                <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">fracComplete</span> <span class="o">=</span> <span class="mf">1.0</span>
+                <span class="k">if</span> <span class="s1">&#39;electrostatics&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;comsolInfo&#39;</span><span class="p">][</span>
+                        <span class="s1">&#39;physics&#39;</span><span class="p">]:</span>
+                    <span class="n">solsList</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">resultFileBase</span> <span class="o">+</span> <span class="s1">&#39;*.txt&#39;</span><span class="p">)</span>
+                    <span class="n">fracComplete</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span>
+                        <span class="nb">len</span><span class="p">(</span><span class="n">solsList</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">numVoltages</span><span class="p">),</span> <span class="n">fracComplete</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;schrodinger&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;comsolInfo&#39;</span><span class="p">][</span><span class="s1">&#39;physics&#39;</span><span class="p">])</span> <span class="ow">or</span> <span class="p">(</span>
+                        <span class="s1">&#39;bdg&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;comsolInfo&#39;</span><span class="p">][</span><span class="s1">&#39;physics&#39;</span><span class="p">]):</span>
+                    <span class="n">eigenList</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">eigenFileBase</span> <span class="o">+</span> <span class="s1">&#39;*.txt&#39;</span><span class="p">)</span>
+                    <span class="n">fracComplete</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span>
+                        <span class="nb">len</span><span class="p">(</span><span class="n">eigenList</span><span class="p">)</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">numVoltages</span><span class="p">),</span> <span class="n">fracComplete</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;comsolInfo&#39;</span><span class="p">][</span><span class="s1">&#39;surfaceIntegrals&#39;</span><span class="p">]:</span>
+                    <span class="n">surfIntList</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">surIntFileBase</span> <span class="o">+</span> <span class="s1">&#39;*.txt&#39;</span><span class="p">)</span>
+                    <span class="n">fracComplete</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">surfIntList</span><span class="p">)</span> <span class="o">/</span>
+                                       <span class="nb">float</span><span class="p">(</span><span class="n">numVoltages</span><span class="p">),</span> <span class="n">fracComplete</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;comsolInfo&#39;</span><span class="p">][</span><span class="s1">&#39;volumeIntegrals&#39;</span><span class="p">]:</span>
+                    <span class="n">volIntList</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">volIntFileBase</span> <span class="o">+</span> <span class="s1">&#39;*.txt&#39;</span><span class="p">)</span>
+                    <span class="n">fracComplete</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">volIntList</span><span class="p">)</span> <span class="o">/</span>
+                                       <span class="nb">float</span><span class="p">(</span><span class="n">numVoltages</span><span class="p">),</span> <span class="n">fracComplete</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;... &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fracComplete</span><span class="p">))</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">5.</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">fracComplete</span> <span class="o">&gt;=</span> <span class="mf">1.0</span><span class="p">:</span>  <span class="c1"># we are done!</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;COMSOL run finished, but failed to exit!&#39;</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Closing it in 120 seconds...&#39;</span><span class="p">)</span>
+                    <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">120.</span><span class="p">)</span>
+                    <span class="n">comsolRun</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                    <span class="k">break</span>
+        <span class="n">comsolLog</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">comsolErr</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="c1"># Now that we have run COMSOL, import the data as a binary:</span>
+        <span class="n">myData</span> <span class="o">=</span> <span class="n">dataProcessing</span><span class="o">.</span><span class="n">SimData</span><span class="p">(</span>
+            <span class="n">modelFilePath</span><span class="p">)</span>  <span class="c1"># initialize the bulk data</span>
+        <span class="n">myData</span><span class="o">.</span><span class="n">batch_import_solutions</span><span class="p">()</span>  <span class="c1"># gather up the data</span></div>
+
+<div class="viewcode-block" id="Harness.runBatchPostProc"><a class="viewcode-back" href="../../../source/qmt.old_code.html#qmt.old_code.batchHarness.Harness.runBatchPostProc">[docs]</a>    <span class="k">def</span> <span class="nf">runBatchPostProc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">modelFilePath</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Run batch post-processing. This requires proprietary components</span>
+<span class="sd">        to be installed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">qms</span>
+        <span class="n">numJobsPerNode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;jobSettings&#39;</span><span class="p">][</span><span class="s1">&#39;numJobsPerNode&#39;</span><span class="p">]</span>
+        <span class="n">numNodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;jobSettings&#39;</span><span class="p">][</span><span class="s1">&#39;numNodes&#39;</span><span class="p">]</span>
+        <span class="n">numCores</span> <span class="o">=</span> <span class="n">numNodes</span> <span class="o">*</span> <span class="n">numJobsPerNode</span>
+        <span class="n">mpiexecName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;pathSettings&#39;</span><span class="p">][</span><span class="s1">&#39;mpiPath&#39;</span><span class="p">]</span>
+        <span class="n">pythonName</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;pathSettings&#39;</span><span class="p">][</span><span class="s1">&#39;pythonPath&#39;</span><span class="p">]</span>
+        <span class="n">hostFile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;jobSettings&#39;</span><span class="p">][</span><span class="s1">&#39;hostFile&#39;</span><span class="p">]</span>
+
+        <span class="c1"># If we are on the Linux cluster and not run by SLURM, we need to</span>
+        <span class="c1"># enable the launcher hack</span>
+        <span class="n">my_env</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">os</span> <span class="o">==</span> <span class="s1">&#39;linux&#39;</span> <span class="ow">and</span> <span class="s1">&#39;SLURM_JOB_NODELIST&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+            <span class="n">launcherPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">qms</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/launch.py&#39;</span>
+            <span class="n">my_env</span><span class="p">[</span><span class="s1">&#39;I_MPI_HYDRA_BOOTSTRAP_EXEC&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">launcherPath</span>  <span class="c1"># for Intel MPI</span>
+            <span class="n">my_env</span><span class="p">[</span><span class="s1">&#39;HYDRA_LAUNCHER_EXEC&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">launcherPath</span>  <span class="c1"># for MPICH</span>
+
+        <span class="c1"># Convert any unicode entries in the env</span>
+        <span class="n">my_env</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_unicode_to_ascii</span><span class="p">(</span><span class="n">my_env</span><span class="p">)</span>
+
+        <span class="n">batchPostProcpath</span> <span class="o">=</span> <span class="n">qms</span><span class="o">.</span><span class="n">postProcessing</span><span class="o">.</span><span class="vm">__file__</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span>
+            <span class="s1">&#39;__init__.pyc&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;batchPostProc.py&#39;</span>
+        <span class="n">mpiCmd</span> <span class="o">=</span> <span class="p">[</span><span class="n">mpiexecName</span><span class="p">,</span> <span class="s1">&#39;-n&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">numCores</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="n">hostFile</span><span class="p">:</span>
+            <span class="n">mpiCmd</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;-f&#39;</span><span class="p">,</span> <span class="n">hostFile</span><span class="p">]</span>
+        <span class="n">pythonCmd</span> <span class="o">=</span> <span class="p">[</span><span class="n">pythonName</span><span class="p">,</span> <span class="n">batchPostProcpath</span><span class="p">,</span>
+                     <span class="s1">&#39;</span><span class="se">\&quot;</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">modelFilePath</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\&quot;</span><span class="s1">&#39;</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Running </span><span class="si">{}</span><span class="s1">...&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">mpiCmd</span> <span class="o">+</span> <span class="n">pythonCmd</span><span class="p">))</span>
+        <span class="n">subprocess</span><span class="o">.</span><span class="n">check_call</span><span class="p">(</span><span class="n">mpiCmd</span> <span class="o">+</span> <span class="n">pythonCmd</span><span class="p">,</span> <span class="n">env</span><span class="o">=</span><span class="n">my_env</span><span class="p">)</span>
+
+        <span class="n">basePath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">modelFilePath</span><span class="p">)</span>
+        <span class="n">solutionsPath</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">basePath</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;comsolInfo&#39;</span><span class="p">][</span><span class="s1">&#39;exportDir&#39;</span><span class="p">])</span>
+        <span class="n">solutionsPattern</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">solutionsPath</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;comsolInfo&#39;</span><span class="p">][</span><span class="s1">&#39;fileName&#39;</span><span class="p">]</span> <span class="o">+</span>
+            <span class="s1">&#39;_export*&#39;</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Deleting text solutions files...&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">solutionsPattern</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">solutionsPattern</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">f</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Microsoft Corporation.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

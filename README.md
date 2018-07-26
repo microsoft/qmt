@@ -22,7 +22,7 @@ Optionally in development mode (symlinks) and per user (not system wide)
 
 A significant part of the repository consists of Python functions and macros to
 be executed within FreeCAD, either interactively or in batch mode. These
-require the latest stable version of FreeCAD (0.16). Currently, FreeCAD only
+require the latest stable version of FreeCAD (0.17). Currently, FreeCAD only
 supports Python 2.7. So while the non-FreeCAD sections of the code are designed
 to work with either Python 3.6 or Python 2.7, the FreeCAD module will only run
 with 2.7.
