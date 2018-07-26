@@ -112,6 +112,17 @@ class ReducedSweepFutures(object):
 
     def __str__(self):
         return str(self.futures)
+    
+    def add(self, item, object_list_index):
+        """
+        Adds the result item to the results of this restricted sweep.
+        :param item: the result to add
+        :param object_list_index: the index of the result IN THE RESTRICTED SWEEP
+        """
+        self.futures[object_list_index] = item
+
+    def get_object(self, total_index):
+        return self.futures[self.sweep.convert_to_reduced_index(total_index)]
 
 
 # TODO

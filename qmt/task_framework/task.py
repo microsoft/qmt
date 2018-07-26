@@ -219,7 +219,8 @@ class Task(object):
             self._compile()
 
         if self.computed_result is None:
-            # TODO this should NOT reduce! Should compute everything as futures
+            for task in self.previous_tasks:
+                task.run()
             self.computed_result = self.delayed_result.calculate_futures()
 
         return self.computed_result
