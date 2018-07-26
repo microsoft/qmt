@@ -39,7 +39,7 @@ class Geo1DData(Data):
                 pass
 
 
-class Geo2DData:
+class Geo2DData(Data):
     def __init__(self):
         """
         Class for holding a 2D geometry specification. This class holds two main dicts:
@@ -107,5 +107,52 @@ class Geo2DData:
             if not ignore_if_absent:
                 raise ValueError(
                     "Attempted to remove the edge " + edge_name + ", which doesn't exist.")
+            else:
+                pass
+
+class Geo3DData(Data):
+    def __init__(self):
+        """
+        Class for holding a 2D geometry specification. This class holds two main dicts:
+            - parts is a dictionary of shapely Polygon objects
+            - edges is a dictionary of shapely LineString objects
+        Parts are intended to be 2D domains, while edges are used for setting boundary conditions
+        and surface conditions.
+        """
+        super(Geo3DData, self).__init__()
+        # ~ self.serial_FCdoc
+        # ~ self.parts = {label: part}
+
+    def get_parts():
+        return self.parts
+
+
+    def add_part(self, part_name, part, overwrite=False):
+        """
+        Add a part to this geometry.
+        :param str part_name: Name of the part to create
+        :param Polygon part: Polygon object from shapely.geometry. This must be a valid Polygon.
+        :param bool overwrite: Should we allow this to overwrite?
+        """
+        if not part.is_valid():
+            raise ValueError("Part " + part_name + " is not a valid polygon.")
+        if (part_name in self.parts) and (not overwrite):
+            raise ValueError("Attempted to overwrite the part " + part_name + ".")
+        else:
+            self.parts[part_name] = part
+
+    def remove_part(self, part_name, ignore_if_absent=False):
+        """
+        Remove a part from this geometry.
+        :param str part_name: Name of part to remove
+        :param bool ignore_if_absent: Should we ignore an attempted removal if the part name
+        is not found?
+        """
+        if part_name in self.parts:
+            del self.parts[part_name]
+        else:
+            if not ignore_if_absent:
+                raise ValueError(
+                    "Attempted to remove the part " + part_name + ", which doesn't exist.")
             else:
                 pass

@@ -217,6 +217,19 @@ input values in each input list</p>
 <em class="property">static </em><code class="descname">get_each_element_function</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/task_framework/sweep.html#ReducedSweepFutures.get_each_element_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.task_framework.sweep.ReducedSweepFutures.get_each_element_function" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
+<dl class="method">
+<dt id="qmt.task_framework.sweep.ReducedSweepFutures.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>item</em>, <em>object_list_index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/task_framework/sweep.html#ReducedSweepFutures.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.task_framework.sweep.ReducedSweepFutures.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds the result item to the results of this restricted sweep.
+:param item: the result to add
+:param object_list_index: the index of the result IN THE RESTRICTED SWEEP</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.task_framework.sweep.ReducedSweepFutures.get_object">
+<code class="descname">get_object</code><span class="sig-paren">(</span><em>total_index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/task_framework/sweep.html#ReducedSweepFutures.get_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.task_framework.sweep.ReducedSweepFutures.get_object" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="class">
@@ -243,7 +256,7 @@ input values in each input list</p>
 
 <dl class="method">
 <dt id="qmt.task_framework.sweep.ReducedSweepDelayed.calculate_futures">
-<code class="descname">calculate_futures</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/task_framework/sweep.html#ReducedSweepDelayed.calculate_futures"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.task_framework.sweep.ReducedSweepDelayed.calculate_futures" title="Permalink to this definition">¶</a></dt>
+<code class="descname">calculate_futures</code><span class="sig-paren">(</span><em>resources</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/task_framework/sweep.html#ReducedSweepDelayed.calculate_futures"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.task_framework.sweep.ReducedSweepDelayed.calculate_futures" title="Permalink to this definition">¶</a></dt>
 <dd><p>Triggers the execution of the sweep.</p>
 </dd></dl>
 
@@ -396,7 +409,7 @@ TaskMetaclass</dd>
 Might be deprecated soon.</p>
 <dl class="attribute">
 <dt id="qmt.task_framework.task.TaskMetaclass.class_registry">
-<code class="descname">class_registry</code><em class="property"> = {'Geometry1D': &lt;class 'qmt.basic_tasks.geometry.Geometry1D'&gt;, 'Geometry2D': &lt;class 'qmt.basic_tasks.geometry.Geometry2D'&gt;, 'Geometry3D': &lt;class 'qmt.basic_tasks.geometry.Geometry3D'&gt;, 'GeometryParams': &lt;class 'qmt.basic_tasks.geometry.GeometryParams'&gt;, 'Mesh': &lt;class 'qmt.ms_tasks.mesh.Mesh'&gt;, 'Mesh1D': &lt;class 'qmt.ms_tasks.mesh.Mesh1D'&gt;, 'Mesh2D': &lt;class 'qmt.ms_tasks.mesh.Mesh2D'&gt;, 'Mesh3D': &lt;class 'qmt.ms_tasks.mesh.Mesh3D'&gt;, 'PoissonTask': &lt;class 'qmt.ms_tasks.poisson_task.PoissonTask'&gt;, 'ReduceDim2D': &lt;class 'qmt.basic_tasks.reduce_dim.ReduceDim2D'&gt;, 'ReduceDim3D': &lt;class 'qmt.basic_tasks.reduce_dim.ReduceDim3D'&gt;, 'Task': &lt;class 'qmt.task_framework.task.Task'&gt;}</em><a class="headerlink" href="#qmt.task_framework.task.TaskMetaclass.class_registry" title="Permalink to this definition">¶</a></dt>
+<code class="descname">class_registry</code><em class="property"> = {'Geometry1D': &lt;class 'qmt.basic_tasks.geometry.Geometry1D'&gt;, 'Geometry2D': &lt;class 'qmt.basic_tasks.geometry.Geometry2D'&gt;, 'Geometry3D': &lt;class 'qmt.basic_tasks.geometry.Geometry3D'&gt;, 'Mesh': &lt;class 'qmt.ms_tasks.mesh.Mesh'&gt;, 'Mesh1D': &lt;class 'qmt.ms_tasks.mesh.Mesh1D'&gt;, 'Mesh2D': &lt;class 'qmt.ms_tasks.mesh.Mesh2D'&gt;, 'Mesh3D': &lt;class 'qmt.ms_tasks.mesh.Mesh3D'&gt;, 'PoissonTask': &lt;class 'qmt.ms_tasks.poisson_task.PoissonTask'&gt;, 'ReduceDim2D': &lt;class 'qmt.basic_tasks.reduce_dim.ReduceDim2D'&gt;, 'ReduceDim3D': &lt;class 'qmt.basic_tasks.reduce_dim.ReduceDim3D'&gt;, 'Task': &lt;class 'qmt.task_framework.task.Task'&gt;}</em><a class="headerlink" href="#qmt.task_framework.task.TaskMetaclass.class_registry" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="staticmethod">

@@ -256,6 +256,10 @@
             <span class="n">Task</span><span class="o">.</span><span class="n">current_instance_id</span> <span class="o">+=</span> <span class="mi">1</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="n">options</span>
+        <span class="k">if</span> <span class="s1">&#39;resources&#39;</span> <span class="ow">in</span> <span class="n">options</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resources</span> <span class="o">=</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;resources&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">resources</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">sweep_manager</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Set by an enclosing sweep manager</span>
 
@@ -373,8 +377,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_compile</span><span class="p">()</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">computed_result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># TODO this should NOT reduce! Should compute everything as futures</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">computed_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">delayed_result</span><span class="o">.</span><span class="n">calculate_futures</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">previous_tasks</span><span class="p">:</span>
+                <span class="n">task</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">computed_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">delayed_result</span><span class="o">.</span><span class="n">calculate_futures</span><span class="p">(</span><span class="n">resources</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">resources</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">computed_result</span></div>
 

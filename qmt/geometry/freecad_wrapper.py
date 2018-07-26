@@ -23,7 +23,8 @@ def pywrapper(pyenv, instruction, input_result_list, current_options):
                             stdin=subprocess.PIPE,
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output = proc.communicate(data)
-    if proc.returncode != 0 or output[1] != '':
+    # ~ if proc.returncode != 0 or output[1] != '':  # stderr used for warnings too often
+    if proc.returncode != 0:
         raise ValueError('pywrapper error ' + str(proc.returncode) + ' (' + output[1] + ')')
 
     try:

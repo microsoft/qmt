@@ -1,7 +1,7 @@
 import h5py
 
 
-class Data:
+class Data(object):
     def __init__(self):
         """
         Class for passing data between tasks.

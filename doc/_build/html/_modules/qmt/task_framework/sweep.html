@@ -265,7 +265,18 @@
         <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">futures</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">futures</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">futures</span><span class="p">)</span>
+    
+<div class="viewcode-block" id="ReducedSweepFutures.add"><a class="viewcode-back" href="../../../source/qmt.task_framework.html#qmt.task_framework.sweep.ReducedSweepFutures.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">object_list_index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds the result item to the results of this restricted sweep.</span>
+<span class="sd">        :param item: the result to add</span>
+<span class="sd">        :param object_list_index: the index of the result IN THE RESTRICTED SWEEP</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">futures</span><span class="p">[</span><span class="n">object_list_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">item</span></div>
+
+<div class="viewcode-block" id="ReducedSweepFutures.get_object"><a class="viewcode-back" href="../../../source/qmt.task_framework.html#qmt.task_framework.sweep.ReducedSweepFutures.get_object">[docs]</a>    <span class="k">def</span> <span class="nf">get_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">total_index</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">futures</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sweep</span><span class="o">.</span><span class="n">convert_to_reduced_index</span><span class="p">(</span><span class="n">total_index</span><span class="p">)]</span></div></div>
 
 
 <span class="c1"># TODO</span>
@@ -301,7 +312,7 @@
 <div class="viewcode-block" id="ReducedSweepDelayed.get_object"><a class="viewcode-back" href="../../../source/qmt.task_framework.html#qmt.task_framework.sweep.ReducedSweepDelayed.get_object">[docs]</a>    <span class="k">def</span> <span class="nf">get_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">total_index</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">delayed_results</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sweep</span><span class="o">.</span><span class="n">convert_to_reduced_index</span><span class="p">(</span><span class="n">total_index</span><span class="p">)]</span></div>
 
-<div class="viewcode-block" id="ReducedSweepDelayed.calculate_futures"><a class="viewcode-back" href="../../../source/qmt.task_framework.html#qmt.task_framework.sweep.ReducedSweepDelayed.calculate_futures">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_futures</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ReducedSweepDelayed.calculate_futures"><a class="viewcode-back" href="../../../source/qmt.task_framework.html#qmt.task_framework.sweep.ReducedSweepDelayed.calculate_futures">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_futures</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">resources</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Triggers the execution of the sweep.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -309,7 +320,7 @@
         <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">delayed_results</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="n">futures</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">delayed_result</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">delayed_results</span><span class="p">:</span>
-            <span class="n">futures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dask_client</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">delayed_result</span><span class="p">))</span>
+            <span class="n">futures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dask_client</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">delayed_result</span><span class="p">,</span><span class="n">resources</span><span class="o">=</span><span class="n">resources</span><span class="p">))</span>
 
         <span class="k">return</span> <span class="n">ReducedSweepFutures</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sweep</span><span class="p">,</span> <span class="n">futures</span><span class="p">)</span></div>
 

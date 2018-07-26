@@ -2,7 +2,7 @@
 # Licensed under the MIT License.
 
 from qmt.task_framework import Task
-from qmt.geometry import Geo1DData, Geo2DData
+from qmt.geometry import Geo1DData, Geo2DData, Geo3DData
 
 
 class Geometry1D(Task):
@@ -75,16 +75,10 @@ class Geometry3D(Task):
         :param dict current_options: The dictionary specifying parts from above.
         :return geo_3d: A Geo3DData object.
         """
-        return current_options
-
-
-# ~ class GeoFreeCAD(Geometry3D):  # needs adjustments
-class GeometryParams(Task):
-
-    def __init__(self, pyenv='python2', options=None, name='freecad_task'):
-        super(GeometryParams, self).__init__([], options, name)
-        self.pyenv = pyenv
-
-    def _solve_instance(self, input_result_list, current_options):
+        pyenv = current_options['pyenv'] if 'pyenv' in current_options else 'python2'
+        geo = Geo3DData()
+        # ~ for part_name in current_options['parts']:
+            # ~ geo.add_part(part_name, current_options['parts'][part_name])
         from qmt.geometry.freecad_wrapper import pywrapper
-        return pywrapper(self.pyenv, 'updateParams', input_result_list, current_options)
+        return pywrapper(pyenv, 'updateParams', input_result_list, current_options)
+        return geo
