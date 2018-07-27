@@ -1,5 +1,5 @@
 import h5py
-from .1d_denisty_plot import _plot_1d_density
+from .density_1d_plot import _plot_1d_density
 import dask
 
 
@@ -13,7 +13,7 @@ def plot(filename):
 
 
 
-def _save_relevant_data(generic_task, filename, dask_client, _get_relevant_data, plot_type):
+def save_relevant_data(generic_task, filename, dask_client, _get_relevant_data, plot_type):
     #get_relevant_data is function that gets the bands
     sweep_holder = generic_task.computed_result #sweepholder containing list of futures
     data = map(lambda x: dask.delayed(get_relevant_data)(x),sweep_holder.object_list)

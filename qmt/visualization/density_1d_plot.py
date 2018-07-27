@@ -1,5 +1,4 @@
-import Holoviews as hv
-from .plot import _save_relevant_data
+from qmt.visualization.plot_helpers import save_relevant_data
 
 def generate_1d_density_plot(generic_task, filename, dask_client = None):
     if dask_client is None:
@@ -7,19 +6,19 @@ def generate_1d_density_plot(generic_task, filename, dask_client = None):
     def _get_relevant_data(density_data):
         density_data._serialize()
         output = {}
-        output['densities'] = density_data['densities']
-        output['density_units'] = density_data['density_units']
-        output['bands'] = density_data['bands']
-        output['band_units'] = density_data['band_units']
-        output['mesh'] = density_data['mesh']
-        output['mesh_units'] = density_data['mesh_units']
+        output['densities'] = density_data.content['densities']
+        output['density_units'] = density_data.content['density_units']
+        output['bands'] = density_data.content['bands']
+        output['band_units'] = density_data.content['band_units']
+        output['mesh'] = density_data.content['mesh']
+        output['mesh_units'] = density_data.content['mesh_units']
         return output
     
-    _save_relevant_data(generic_task, filename, dask_client, _get_relevant_data, plot_type = '1d_density_plot')
+    save_relevant_data(generic_task, filename, dask_client, _get_relevant_data, plot_type = '1d_density_plot')
 
 
 def _plot_1d_density(data):
-
+    import Holoviews as hv
     def fm_modulation(tag_values):
         sampleInc = 1.0/sampleRate
         x = np.arange(0,length, sampleInc)
