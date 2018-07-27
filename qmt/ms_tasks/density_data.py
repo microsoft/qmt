@@ -4,7 +4,7 @@
 from qmt.task_framework import Data
 
 class Density1D(Data):
-    def __init__(self, densities, density_units, bands, band_units):
+    def __init__(self, densities, density_units, bands, band_units, mesh, mesh_units):
         """
         Constructs Data object stores density information for 1d.
          
@@ -12,6 +12,8 @@ class Density1D(Data):
         :param density_units: units of density
         :param bands: list of numpy arrays, corresponding to the band energy in [conduction band, light holes, heavy holes]
         :param band_units: units of band energy
+        :param mesh: numpy array with the 1d mesh
+        :param mesh_units: units of mesh points
         """
         super(Density1D, self).__init__()
         
