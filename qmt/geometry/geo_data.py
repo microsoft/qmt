@@ -18,7 +18,7 @@ class Geo1DData(Data):
         """
         start, end = sorted([start_point, end_point])
         if (part_name in self.parts) and (not overwrite):
-            raise ValueError("Attempted to overwrite then part " + part_name + ".")
+            raise ValueError("Attempted to overwrite the part " + part_name + ".")
         else:
             self.parts[part_name] = (start, end)
 
