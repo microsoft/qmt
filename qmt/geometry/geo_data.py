@@ -125,7 +125,10 @@ class Geo3DData(Data):
 
     def get_parts():
         return self.parts
+        # ~ parts[0].label == build_order[0]
+        # TODO with only part names: self.build_order
 
+    # TODO: serialisation
 
     def add_part(self, part_name, part, overwrite=False):
         """
@@ -134,12 +137,11 @@ class Geo3DData(Data):
         :param Polygon part: Polygon object from shapely.geometry. This must be a valid Polygon.
         :param bool overwrite: Should we allow this to overwrite?
         """
-        if not part.is_valid():
-            raise ValueError("Part " + part_name + " is not a valid polygon.")
         if (part_name in self.parts) and (not overwrite):
             raise ValueError("Attempted to overwrite the part " + part_name + ".")
         else:
             self.parts[part_name] = part
+
 
     def remove_part(self, part_name, ignore_if_absent=False):
         """

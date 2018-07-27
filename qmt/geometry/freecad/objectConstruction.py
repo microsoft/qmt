@@ -22,6 +22,48 @@ from qmt.geometry.freecad.sketchUtils import (findSegments, splitSketch, extendS
 from qmt.geometry.freecad.fileIO import (updateParams, exportCAD, exportMeshed)
 
 
+def buildPart(part):
+    # ~ partDict = self.model.modelDict['3DParts'][partName]
+    if part.directive == 'extrude':
+        objs = _build_extrude(part)
+    # ~ elif part.directive == 'wire':
+        # ~ objs = self._build_wire(part)
+    # ~ elif part.directive == 'wireShell':
+        # ~ objs = self._build_wire_shell(part)
+    # ~ elif part.directive == 'SAG':
+        # ~ objs = self._build_SAG(part)
+    # ~ elif part.directive == 'lithography':
+        # ~ objs = self._build_litho(part)
+    else:
+        raise ValueError('Directive ' + part.directive +
+                         ' is not a recognized directive type.')
+    # ~ self._buildPartsDict[partName] = objs
+    # ~ for obj in objs:
+        # ~ self.model.registerCadPart(partName, obj.Name, None)
+
+def _build_extrude(part):
+    """Build an extrude part."""
+    # ~ partDict = self.model.modelDict['3DParts'][partName]
+    assert part.directive == 'extrude'
+    # ~ z0 = self._fetch_geo_param(partDict['z0'])
+    # ~ deltaz = self._fetch_geo_param(partDict['thickness'])
+    deltaz = part.thickness
+    doc = FreeCAD.ActiveDocument
+    sketch = doc.getObject(part.fcName)
+    # ~ splitSketches = splitSketch(sketch)
+    extrudeBetween(sketch, 0, deltaz)
+    # ~ extParts = []
+    # ~ for mySplitSketch in splitSketches:
+        # ~ extPart = extrudeBetween(mySplitSketch, z0, z0 + deltaz)
+        # ~ extPart.Label = partName
+        # ~ extParts.append(extPart)
+        # ~ delete(mySplitSketch)
+    # ~ return extParts
+
+def X_build_extrude(part):
+    _build_extrude(part)
+################################################################################
+
 def buildWire(sketch, zBottom, width, faceOverride=None, offset=0.0):
     """Given a line segment, build a nanowire of given cross-sectional width
     with a bottom location at zBottom. Offset produces an offset with a specified

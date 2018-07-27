@@ -250,6 +250,11 @@ input values in each input list</p>
 </dd></dl>
 
 <dl class="method">
+<dt id="qmt.task_framework.sweep.ReducedSweepDelayed.copy_empty">
+<code class="descname">copy_empty</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/task_framework/sweep.html#ReducedSweepDelayed.copy_empty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.task_framework.sweep.ReducedSweepDelayed.copy_empty" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
 <dt id="qmt.task_framework.sweep.ReducedSweepDelayed.get_object">
 <code class="descname">get_object</code><span class="sig-paren">(</span><em>total_index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/task_framework/sweep.html#ReducedSweepDelayed.get_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.task_framework.sweep.ReducedSweepDelayed.get_object" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
@@ -421,7 +426,7 @@ Might be deprecated soon.</p>
 
 <dl class="class">
 <dt id="qmt.task_framework.task.Task">
-<em class="property">class </em><code class="descclassname">qmt.task_framework.task.</code><code class="descname">Task</code><span class="sig-paren">(</span><em>task_list</em>, <em>options</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/task_framework/task.html#Task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.task_framework.task.Task" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">qmt.task_framework.task.</code><code class="descname">Task</code><span class="sig-paren">(</span><em>task_list</em>, <em>options</em>, <em>name</em>, <em>gather=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/task_framework/task.html#Task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.task_framework.task.Task" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p>Abstract class for general simulation tasks run within the Dask framework.</p>
 <p>Translates the dependencies between Task instances reflected in their constructors

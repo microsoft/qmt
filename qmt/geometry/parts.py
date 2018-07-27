@@ -111,13 +111,14 @@ class Part3D(object):
         self.Ds = Ds
         # ~ self.step_pickle = pickle(load(filepath))
 
-    def write_step():
-        """Write part to a STEP file.
+    # ~ def write_stp(file_path = self.label):   # <- todo
+    def write_stp():
+        """Write part geometry to a STEP file.
 
-        Returns the STEP file path and a subtractlist.
+        Returns the STEP file path.
         """
         file_path = self.label
         data = pickle.dumps(self.serialised_stepfile)
         with open(file_path, 'b') as of:
             of.write(data)
-        # ~ return {file_path: ..., subtractlist: [label1, ...] }
+        return file_path

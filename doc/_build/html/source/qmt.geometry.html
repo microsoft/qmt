@@ -305,7 +305,7 @@ is not found?</p>
 <span id="qmt-geometry-property-map-module"></span><h2>qmt.geometry.property_map module<a class="headerlink" href="#module-qmt.geometry.property_map" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="qmt.geometry.property_map.PropertyMap">
-<em class="property">class </em><code class="descclassname">qmt.geometry.property_map.</code><code class="descname">PropertyMap</code><a class="reference internal" href="../_modules/qmt/geometry/property_map.html#PropertyMap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.property_map.PropertyMap" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">qmt.geometry.property_map.</code><code class="descname">PropertyMap</code><span class="sig-paren">(</span><em>part_map</em>, <em>prop_map</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/property_map.html#PropertyMap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.property_map.PropertyMap" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p>Map points in the simulation domain to properties of parts containing the points.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -352,7 +352,7 @@ extent.</td>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>part_map</strong> (<em>PartMap</em>) – Mapper from spatial location to part identifier.</li>
 <li><strong>part_materials</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – Dict mapping from part identifier to a material name.</li>
-<li><strong>mat_lib</strong> (<a class="reference internal" href="qmt.html#qmt.materials.Materials" title="qmt.materials.Materials"><em>Materials</em></a>) – Materials library used to look up the material properties.</li>
+<li><strong>mat_lib</strong> (<a class="reference internal" href="../rst/dev_overview.html#qmt.Materials" title="qmt.Materials"><em>Materials</em></a>) – Materials library used to look up the material properties.</li>
 <li><strong>prop_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Name of the material property to be retrieved for each part.</li>
 <li><strong>eunit</strong> – Energy unit, passed to <cite>mat_lib.find()</cite>.</li>
 <li><strong>fill_value</strong> – Value to be filled in places where there is no part or the part does not have
