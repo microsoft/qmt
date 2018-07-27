@@ -45,7 +45,7 @@ Classes:
 
 from dask import delayed
 from .sweep import ReducedSweep, ReducedSweepDelayed, gen_tag_extract, replace_tag_with_value
-
+import copy
 
 class TaskMetaclass(type):
     """
@@ -136,7 +136,7 @@ class Task(object):
         :param tag_values: a dict mapping each tag to its value in the current sweep iteration
         :return: the options needed by this task, with concrete values corresponding to the current sweep iteration.
         """
-        current_options = self.options
+        current_options = copy.deepcopy(self.options)
         for i, tag in enumerate(self.list_of_tags):
             current_options = replace_tag_with_value(current_options, tag, tag_values[tag])
         return current_options
