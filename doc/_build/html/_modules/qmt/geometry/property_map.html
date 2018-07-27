@@ -163,7 +163,7 @@
 <span class="sd">    :param callable prop_map: Map from part identifier to a property value.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part_map</span><span class="p">,</span> <span class="n">prop_map</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part_map</span><span class="p">,</span> <span class="n">prop_map</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">partMap</span> <span class="o">=</span> <span class="n">part_map</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">propMap</span> <span class="o">=</span> <span class="n">prop_map</span>
 
@@ -175,7 +175,7 @@
 <span class="sd">            of the same shape as x except for the last axis corresponding to coordinate vector</span>
 <span class="sd">            extent.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">partMap</span><span class="o">.</span><span class="n">point_to_part</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">partMap</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Do the mapping.</span>
@@ -234,7 +234,7 @@
                     <span class="k">raise</span>
                 <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fillValue</span>
 
-        <span class="nb">super</span><span class="p">(</span><span class="n">MaterialPropertyMap</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init_</span><span class="p">(</span><span class="n">part_map</span><span class="p">,</span> <span class="n">prop_map</span><span class="p">)</span></div>
+        <span class="nb">super</span><span class="p">(</span><span class="n">MaterialPropertyMap</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">part_map</span><span class="p">,</span> <span class="n">prop_map</span><span class="p">)</span></div>
 </pre></div>
 
            </div>

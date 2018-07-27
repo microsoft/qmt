@@ -309,6 +309,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">delayed_results</span><span class="p">[</span><span class="n">object_list_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">item</span></div>
 
+<div class="viewcode-block" id="ReducedSweepDelayed.copy_empty"><a class="viewcode-back" href="../../../source/qmt.task_framework.html#qmt.task_framework.sweep.ReducedSweepDelayed.copy_empty">[docs]</a>    <span class="k">def</span> <span class="nf">copy_empty</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sweep</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dask_client</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="ReducedSweepDelayed.get_object"><a class="viewcode-back" href="../../../source/qmt.task_framework.html#qmt.task_framework.sweep.ReducedSweepDelayed.get_object">[docs]</a>    <span class="k">def</span> <span class="nf">get_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">total_index</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">delayed_results</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sweep</span><span class="o">.</span><span class="n">convert_to_reduced_index</span><span class="p">(</span><span class="n">total_index</span><span class="p">)]</span></div>
 

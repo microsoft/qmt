@@ -70,4 +70,4 @@ class Data(object):
         :param unit_string: String corresponding with unit (e.g. 'meV')
         """
         from qmt import units
-       return units.__dict__[unit_string]
+        return units.__dict__[unit_string]

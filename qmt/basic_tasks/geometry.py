@@ -77,8 +77,11 @@ class Geometry3D(Task):
         """
         pyenv = current_options['pyenv'] if 'pyenv' in current_options else 'python2'
         geo = Geo3DData()
-        # ~ for part_name in current_options['parts']:
-            # ~ geo.add_part(part_name, current_options['parts'][part_name])
-        from qmt.geometry.freecad_wrapper import pywrapper
-        return pywrapper(pyenv, 'updateParams', input_result_list, current_options)
+        # fill geo with parts
+        # ~ for part_name in ret['serial_parts']:
+            # ~ geo.add_part(part_name, ret['serial_parts'][part_name])
+        from qmt.geometry.freecad_wrapper import fcwrapper
+        ret = fcwrapper(pyenv, 'build3d',
+                        {'input_result_list': input_result_list,
+                         'current_options': current_options})
         return geo
