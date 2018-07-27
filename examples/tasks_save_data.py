@@ -49,6 +49,6 @@ sweep_man = qtf.SweepManager(sweeps)
 
 result = sweep_man.run(poisson_task)
 
-generate_1d_density_plot(poisson_task, 'test.h5')
+generate_1d_density_plot(poisson_task, 'density_test.h5')
 
 #print(map(dask.result,result.futures))
