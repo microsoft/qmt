@@ -164,7 +164,7 @@
         <span class="n">meshScaleVector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">boundaryCondition</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subtractList</span><span class="o">=</span><span class="p">[],</span>
         <span class="n">Ns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Phi_NL</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Ds</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Add a geometric part to the model.</span>
-<span class="sd">        @param partName: The descriptive name of this new part.</span>
+<span class="sd">        @param label: The descriptive name of this new part.</span>
 <span class="sd">        @param fcName: The name of the 2D freeCAD object that this is built from.</span>
 <span class="sd">        @param directive: The freeCAD directive is used to construct this part.</span>
 <span class="sd">                            Valid options for this are:</span>
@@ -265,16 +265,17 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">Ds</span> <span class="o">=</span> <span class="n">Ds</span>
         <span class="c1"># ~ self.step_pickle = pickle(load(filepath))</span>
 
-<div class="viewcode-block" id="Part3D.write_step"><a class="viewcode-back" href="../../../source/qmt.geometry.html#qmt.geometry.parts.Part3D.write_step">[docs]</a>    <span class="k">def</span> <span class="nf">write_step</span><span class="p">():</span>
-        <span class="sd">&quot;&quot;&quot;Write part to a STEP file.</span>
+    <span class="c1"># ~ def write_stp(file_path = self.label):   # &lt;- todo</span>
+<div class="viewcode-block" id="Part3D.write_stp"><a class="viewcode-back" href="../../../source/qmt.geometry.html#qmt.geometry.parts.Part3D.write_stp">[docs]</a>    <span class="k">def</span> <span class="nf">write_stp</span><span class="p">():</span>
+        <span class="sd">&quot;&quot;&quot;Write part geometry to a STEP file.</span>
 
-<span class="sd">        Returns the STEP file path and a subtractlist.</span>
+<span class="sd">        Returns the STEP file path.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">file_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">label</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serialised_stepfile</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serial_stp</span><span class="p">)</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">of</span><span class="p">:</span>
-            <span class="n">of</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span></div></div>
-        <span class="c1"># ~ return {file_path: ..., subtractlist: [label1, ...] }</span>
+            <span class="n">of</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">file_path</span></div></div>
 </pre></div>
 
            </div>

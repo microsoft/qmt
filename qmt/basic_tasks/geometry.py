@@ -81,16 +81,13 @@ class Geometry3D(Task):
         ret = fcwrapper(pyenv, 'build3d',
                         {'input_result_list': input_result_list,
                          'current_options': current_options})
-        # ~ return ret
 
         geo = Geo3DData()
+        geo.serial_fcdoc = ret['serial_fcdoc']
         for part in current_options['input_parts']:
             geo.build_order.append(part.label)
-            # ~ part.serial_stp = ret['serial_stp_parts'][part.label]
+            # ~ print(len(ret['serial_stp_parts'][part.label]))  ###################
+            part.serial_stp = ret['serial_stp_parts'][part.label]
             geo.add_part(part.label, part)
-        # ~ for part in ret['built_parts']:
-            # ~ geo.add_part(part.label, part)
-        # fill geo with parts and serialised fcfile
-        # ~ for part_name in ret['serial_parts']:
-            # ~ geo.add_part(part_name, ret['serial_parts'][part_name])
+
         return geo

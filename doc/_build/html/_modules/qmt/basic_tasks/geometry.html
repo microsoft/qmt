@@ -229,12 +229,24 @@
 <span class="sd">        :param dict current_options: The dictionary specifying parts from above.</span>
 <span class="sd">        :return geo_3d: A Geo3DData object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="n">pyenv</span> <span class="o">=</span> <span class="n">current_options</span><span class="p">[</span><span class="s1">&#39;pyenv&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;pyenv&#39;</span> <span class="ow">in</span> <span class="n">current_options</span> <span class="k">else</span> <span class="s1">&#39;python2&#39;</span>
+        <span class="kn">from</span> <span class="nn">qmt.geometry.freecad_wrapper</span> <span class="k">import</span> <span class="n">fcwrapper</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">fcwrapper</span><span class="p">(</span><span class="n">pyenv</span><span class="p">,</span> <span class="s1">&#39;build3d&#39;</span><span class="p">,</span>
+                        <span class="p">{</span><span class="s1">&#39;input_result_list&#39;</span><span class="p">:</span> <span class="n">input_result_list</span><span class="p">,</span>
+                         <span class="s1">&#39;current_options&#39;</span><span class="p">:</span> <span class="n">current_options</span><span class="p">})</span>
+        <span class="c1"># ~ return ret</span>
+
         <span class="n">geo</span> <span class="o">=</span> <span class="n">Geo3DData</span><span class="p">()</span>
-        <span class="c1"># ~ for part_name in current_options[&#39;parts&#39;]:</span>
-            <span class="c1"># ~ geo.add_part(part_name, current_options[&#39;parts&#39;][part_name])</span>
-        <span class="kn">from</span> <span class="nn">qmt.geometry.freecad_wrapper</span> <span class="k">import</span> <span class="n">pywrapper</span>
-        <span class="k">return</span> <span class="n">pywrapper</span><span class="p">(</span><span class="n">pyenv</span><span class="p">,</span> <span class="s1">&#39;updateParams&#39;</span><span class="p">,</span> <span class="n">input_result_list</span><span class="p">,</span> <span class="n">current_options</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">current_options</span><span class="p">[</span><span class="s1">&#39;input_parts&#39;</span><span class="p">]:</span>
+            <span class="n">geo</span><span class="o">.</span><span class="n">build_order</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+            <span class="c1"># ~ part.serial_stp = ret[&#39;serial_stp_parts&#39;][part.label]</span>
+            <span class="n">geo</span><span class="o">.</span><span class="n">add_part</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">part</span><span class="p">)</span>
+        <span class="c1"># ~ for part in ret[&#39;built_parts&#39;]:</span>
+            <span class="c1"># ~ geo.add_part(part.label, part)</span>
+        <span class="c1"># fill geo with parts and serialised fcfile</span>
+        <span class="c1"># ~ for part_name in ret[&#39;serial_parts&#39;]:</span>
+            <span class="c1"># ~ geo.add_part(part_name, ret[&#39;serial_parts&#39;][part_name])</span>
         <span class="k">return</span> <span class="n">geo</span></div>
 </pre></div>
 

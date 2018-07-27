@@ -31,9 +31,11 @@ result = qtf.SweepManager(sweeps).run(geo_task)
 # Investigate results
 if not os.path.exists('tmp'):
     os.mkdirs('tmp')
-for future in result.futures:
+print("Writing in directory tmp:")
+for i, future in enumerate(result.futures):
     geo = future.result()
-    print(geo)
-    # ~ geo.write_fcdoc()
-    # ~ for part in geo.parts:
-        # ~ part.write_stp()
+    print('Writing instance ' + str(i) + ' to FreeCAD file.')
+    geo.write_fcstd('tmp/' + str(i) + '.fcstd')
+    for label in geo.parts:
+        print('Writing instance ' + str(i) + ' of ' + label + ' to STEP file.')
+        geo.parts[label].write_stp('tmp/' + label + str(i) + '.stp')

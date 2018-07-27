@@ -1,3 +1,4 @@
+import pickle
 from qmt.task_framework import Data
 
 class Geo1DData(Data):
@@ -158,3 +159,15 @@ class Geo3DData(Data):
                     "Attempted to remove the part " + part_name + ", which doesn't exist.")
             else:
                 pass
+
+    def write_fcstd(self, file_path=None):
+        """Write geometry to a fcstd file.
+
+        Returns the fcstd file path.
+        """
+        if file_path == None:
+            file_path = self.label + '.fcstd'
+        data = pickle.loads(self.serial_fcdoc)
+        with open(file_path, 'wb') as of:
+            of.write(data)
+        return file_path

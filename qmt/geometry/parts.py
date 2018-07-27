@@ -1,4 +1,4 @@
-
+import pickle
 
 class Part3D(object):
     def __init__(
@@ -111,14 +111,14 @@ class Part3D(object):
         self.Ds = Ds
         # ~ self.step_pickle = pickle(load(filepath))
 
-    # ~ def write_stp(file_path = self.label):   # <- todo
-    def write_stp():
+    def write_stp(self, file_path=None):
         """Write part geometry to a STEP file.
 
         Returns the STEP file path.
         """
-        file_path = self.label
-        data = pickle.dumps(self.serial_stp)
-        with open(file_path, 'b') as of:
+        if file_path == None:
+            file_path = self.label + '.stp'
+        data = pickle.loads(self.serial_stp)
+        with open(file_path, 'wb') as of:
             of.write(data)
         return file_path

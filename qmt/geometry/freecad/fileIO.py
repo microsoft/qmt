@@ -1,3 +1,4 @@
+# -*-coding: utf-8 -*-
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
@@ -60,10 +61,7 @@ def exportCAD(obj, fileName):
     if (fileName[-5:] == '.step') or (fileName[-4:] == '.stp'):
         Part.export([obj], fileName)
     else:
-        raise ValueError(
-            'The file path' + fileName +
-            ' does not end in .step or .stp. \
-                          Please fix this and try your export again.')
+        raise ValueError(fileName + ' is not a supported extension (.stp, .step)')
 
 
 # TODO: this is general, not fileIO

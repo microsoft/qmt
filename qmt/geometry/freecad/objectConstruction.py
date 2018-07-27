@@ -28,6 +28,8 @@ from qmt.geometry.freecad.fileIO import (updateParams, exportCAD, exportMeshed)
 
 def build3d(opts):  # TODO: smarter name, this is the full 3D build
 
+    import hashlib
+    instance_hash = hashlib.sha256(str(opts)).hexdigest()
     doc = FreeCAD.ActiveDocument
 
     if 'params' in opts:
@@ -35,28 +37,28 @@ def build3d(opts):  # TODO: smarter name, this is the full 3D build
         fcdict = {key: (value, 'freeCAD') for (key, value) in opts['params'].items()}
         updateParams(doc, fcdict)
 
-    # 
+    # build the parts and store serialised STEP representations in opts
     if 'input_parts' in opts:
         built_parts = {}
-        for part in opts['input_parts']:
-            # ~ builtParts.append([part.label, buildPart(part)])
-            built_parts[part.label] = buildPart(part)
+        for input_part in opts['input_parts']:
+            built_parts[input_part.label] = buildPart(input_part)
 
         if 'serial_stp_parts' not in opts:
             opts['serial_stp_parts'] = {}
         for label in built_parts:
-            # stp_file = export( partPair[1] , 'stp')
-            # stp_data = read(stp_file)  # content
-            serial_part = pickle.dumps('part_stp_content')
-            opts['serial_stp_parts'][label] = serial_part
+            tmp_path = 'tmp_' + label + '_' + instance_hash + '.stp'
+            exportCAD(built_parts[label], tmp_path)
+            with open(tmp_path, 'rb') as f:
+                opts['serial_stp_parts'][label] = pickle.dumps(f.read())
+            os.remove(tmp_path)
 
-    # serialise the freecad document and fill into opts
-    import hashlib
-    tmp_path = 'tmp_build3d_' + hashlib.sha256(str(opts)).hexdigest() + '.fcstd'
+    # store a serialised FreeCAD document representation in opts
+    tmp_path = 'tmp_built_' + instance_hash + '.fcstd'
     doc.saveAs(tmp_path)
     with open(tmp_path, 'rb') as f:
-        opts['fcdoc'] = pickle.dumps(f.read())
+        opts['serial_fcdoc'] = pickle.dumps(f.read())
     os.remove(tmp_path)
+
     return opts
 
 
@@ -88,11 +90,12 @@ def build_extrude(part):
     assert part.directive == 'extrude'
     # ~ z0 = self._fetch_geo_param(partDict['z0'])
     # ~ deltaz = self._fetch_geo_param(partDict['thickness'])
+
     deltaz = part.thickness
     doc = FreeCAD.ActiveDocument
     sketch = doc.getObject(part.fcName)
     # ~ splitSketches = splitSketch(sketch)
-    extrudeBetween(sketch, 0, deltaz)
+    obj = extrudeBetween(sketch, 0, deltaz)
     # ~ extParts = []
     # ~ for mySplitSketch in splitSketches:
         # ~ extPart = extrudeBetween(mySplitSketch, z0, z0 + deltaz)
@@ -100,6 +103,8 @@ def build_extrude(part):
         # ~ extParts.append(extPart)
         # ~ delete(mySplitSketch)
     # ~ return extParts
+    doc.recompute()
+    return obj
 
 ################################################################################
 
