@@ -161,13 +161,13 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="qmt.geometry.freecad.html">qmt.geometry.freecad package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="qmt.geometry.freecad.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="qmt.geometry.freecad.html#module-qmt.geometry.freecad.auxiliary">qmt.geometry.freecad.auxiliary module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="qmt.geometry.freecad.html#module-qmt.geometry.freecad.fileIO">qmt.geometry.freecad.fileIO module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="qmt.geometry.freecad.html#module-qmt.geometry.freecad.geomUtils">qmt.geometry.freecad.geomUtils module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="qmt.geometry.freecad.html#module-qmt.geometry.freecad.objectConstruction">qmt.geometry.freecad.objectConstruction module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="qmt.geometry.freecad.html#module-qmt.geometry.freecad.run">qmt.geometry.freecad.run module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="qmt.geometry.freecad.html#module-qmt.geometry.freecad.sketchUtils">qmt.geometry.freecad.sketchUtils module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="qmt.geometry.freecad.html#module-qmt.geometry.freecad">Module contents</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qmt.geometry.freecad.html#qmt-geometry-freecad-auxiliary-module">qmt.geometry.freecad.auxiliary module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qmt.geometry.freecad.html#qmt-geometry-freecad-fileio-module">qmt.geometry.freecad.fileIO module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qmt.geometry.freecad.html#qmt-geometry-freecad-geomutils-module">qmt.geometry.freecad.geomUtils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qmt.geometry.freecad.html#qmt-geometry-freecad-objectconstruction-module">qmt.geometry.freecad.objectConstruction module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qmt.geometry.freecad.html#qmt-geometry-freecad-run-module">qmt.geometry.freecad.run module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qmt.geometry.freecad.html#qmt-geometry-freecad-sketchutils-module">qmt.geometry.freecad.sketchUtils module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qmt.geometry.freecad.html#module-contents">Module contents</a></li>
 </ul>
 </li>
 </ul>
@@ -191,7 +191,8 @@
 <dl class="class">
 <dt id="qmt.geometry.geo_data.Geo1DData">
 <em class="property">class </em><code class="descclassname">qmt.geometry.geo_data.</code><code class="descname">Geo1DData</code><a class="reference internal" href="../_modules/qmt/geometry/geo_data.html#Geo1DData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.geo_data.Geo1DData" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">qmt.task_framework.data_template.Data</span></code></p>
+<dl class="method">
 <dt id="qmt.geometry.geo_data.Geo1DData.add_part">
 <code class="descname">add_part</code><span class="sig-paren">(</span><em>part_name</em>, <em>start_point</em>, <em>end_point</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/geo_data.html#Geo1DData.add_part"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.geo_data.Geo1DData.add_part" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a part to this geometry.
@@ -215,7 +216,8 @@ is not found?</p>
 <dl class="class">
 <dt id="qmt.geometry.geo_data.Geo2DData">
 <em class="property">class </em><code class="descclassname">qmt.geometry.geo_data.</code><code class="descname">Geo2DData</code><a class="reference internal" href="../_modules/qmt/geometry/geo_data.html#Geo2DData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.geo_data.Geo2DData" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">qmt.task_framework.data_template.Data</span></code></p>
+<dl class="method">
 <dt id="qmt.geometry.geo_data.Geo2DData.add_part">
 <code class="descname">add_part</code><span class="sig-paren">(</span><em>part_name</em>, <em>part</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/geo_data.html#Geo2DData.add_part"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.geo_data.Geo2DData.add_part" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a part to this geometry.
@@ -253,20 +255,57 @@ is not found?</p>
 
 </dd></dl>
 
+<dl class="class">
+<dt id="qmt.geometry.geo_data.Geo3DData">
+<em class="property">class </em><code class="descclassname">qmt.geometry.geo_data.</code><code class="descname">Geo3DData</code><a class="reference internal" href="../_modules/qmt/geometry/geo_data.html#Geo3DData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.geo_data.Geo3DData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">qmt.task_framework.data_template.Data</span></code></p>
+<dl class="method">
+<dt id="qmt.geometry.geo_data.Geo3DData.get_parts">
+<code class="descname">get_parts</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/geo_data.html#Geo3DData.get_parts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.geo_data.Geo3DData.get_parts" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qmt.geometry.geo_data.Geo3DData.add_part">
+<code class="descname">add_part</code><span class="sig-paren">(</span><em>part_name</em>, <em>part</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/geo_data.html#Geo3DData.add_part"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.geo_data.Geo3DData.add_part" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a part to this geometry.
+:param str part_name: Name of the part to create
+:param Polygon part: Polygon object from shapely.geometry. This must be a valid Polygon.
+:param bool overwrite: Should we allow this to overwrite?</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.geometry.geo_data.Geo3DData.remove_part">
+<code class="descname">remove_part</code><span class="sig-paren">(</span><em>part_name</em>, <em>ignore_if_absent=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/geo_data.html#Geo3DData.remove_part"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.geo_data.Geo3DData.remove_part" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove a part from this geometry.
+:param str part_name: Name of part to remove
+:param bool ignore_if_absent: Should we ignore an attempted removal if the part name
+is not found?</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="module-qmt.geometry.parts">
 <span id="qmt-geometry-parts-module"></span><h2>qmt.geometry.parts module<a class="headerlink" href="#module-qmt.geometry.parts" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="qmt.geometry.parts.Part3D">
-<em class="property">class </em><code class="descclassname">qmt.geometry.parts.</code><code class="descname">Part3D</code><a class="reference internal" href="../_modules/qmt/geometry/parts.html#Part3D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.parts.Part3D" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<em class="property">class </em><code class="descclassname">qmt.geometry.parts.</code><code class="descname">Part3D</code><span class="sig-paren">(</span><em>label</em>, <em>fcName</em>, <em>directive</em>, <em>domainType=None</em>, <em>material=None</em>, <em>z0=0</em>, <em>thickness=None</em>, <em>targetWire=None</em>, <em>shellVerts=None</em>, <em>depoZone=None</em>, <em>etchZone=None</em>, <em>zMiddle=None</em>, <em>tIn=None</em>, <em>tOut=None</em>, <em>layerNum=None</em>, <em>lithoBase=[]</em>, <em>fillLitho=True</em>, <em>meshMaxSize=None</em>, <em>meshGrowthRate=None</em>, <em>meshScaleVector=None</em>, <em>boundaryCondition=None</em>, <em>subtractList=[]</em>, <em>Ns=None</em>, <em>Phi_NL=None</em>, <em>Ds=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/parts.html#Part3D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.parts.Part3D" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dl class="method">
+<dt id="qmt.geometry.parts.Part3D.write_step">
+<code class="descname">write_step</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/parts.html#Part3D.write_step"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.parts.Part3D.write_step" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write part to a STEP file.</p>
+<p>Returns the STEP file path and a subtractlist.</p>
+</dd></dl>
+
+</dd></dl>
 
 </div>
 <div class="section" id="module-qmt.geometry.property_map">
 <span id="qmt-geometry-property-map-module"></span><h2>qmt.geometry.property_map module<a class="headerlink" href="#module-qmt.geometry.property_map" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="qmt.geometry.property_map.PropertyMap">
-<em class="property">class </em><code class="descclassname">qmt.geometry.property_map.</code><code class="descname">PropertyMap</code><a class="reference internal" href="../_modules/qmt/geometry/property_map.html#PropertyMap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.property_map.PropertyMap" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">qmt.geometry.property_map.</code><code class="descname">PropertyMap</code><span class="sig-paren">(</span><em>part_map</em>, <em>prop_map</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/property_map.html#PropertyMap"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.property_map.PropertyMap" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p>Map points in the simulation domain to properties of parts containing the points.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -313,7 +352,7 @@ extent.</td>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>part_map</strong> (<em>PartMap</em>) – Mapper from spatial location to part identifier.</li>
 <li><strong>part_materials</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – Dict mapping from part identifier to a material name.</li>
-<li><strong>mat_lib</strong> (<a class="reference internal" href="qmt.html#qmt.materials.Materials" title="qmt.materials.Materials"><em>Materials</em></a>) – Materials library used to look up the material properties.</li>
+<li><strong>mat_lib</strong> (<a class="reference internal" href="../rst/dev_overview.html#qmt.Materials" title="qmt.Materials"><em>Materials</em></a>) – Materials library used to look up the material properties.</li>
 <li><strong>prop_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Name of the material property to be retrieved for each part.</li>
 <li><strong>eunit</strong> – Energy unit, passed to <cite>mat_lib.find()</cite>.</li>
 <li><strong>fill_value</strong> – Value to be filled in places where there is no part or the part does not have

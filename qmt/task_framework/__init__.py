@@ -2,5 +2,5 @@
 # Licensed under the MIT License.
 
 from .data_template import Data
-from .sweep import SweepManager, SweepTag
+from .sweep import SweepManager, SweepTag, ReducedSweepFutures, ReducedSweepDelayed, ReducedSweep
 from .task import Task

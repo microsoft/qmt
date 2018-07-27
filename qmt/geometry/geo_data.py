@@ -39,7 +39,7 @@ class Geo1DData(Data):
                 pass
 
 
-class Geo2DData:
+class Geo2DData(Data):
     def __init__(self):
         """
         Class for holding a 2D geometry specification. This class holds two main dicts:
@@ -107,5 +107,54 @@ class Geo2DData:
             if not ignore_if_absent:
                 raise ValueError(
                     "Attempted to remove the edge " + edge_name + ", which doesn't exist.")
+            else:
+                pass
+
+class Geo3DData(Data):
+    def __init__(self):
+        """
+        Class for a 3D geometry specification. It holds:
+            - parts is a dict of Part3D objects, keyed by the label of each Part3D object.
+            - build_order is a list of strings indicating the construction order.
+        """
+        super(Geo3DData, self).__init__()
+        self.build_order = []
+        self.parts = {}
+        # ~ self.serial_FCdoc
+        # ~ self.parts = {label: part}
+
+    def get_parts():
+        return self.parts
+        # ~ parts[0].label == build_order[0]
+        # TODO with only part names: self.build_order
+
+    # TODO: serialisation
+
+    def add_part(self, part_name, part, overwrite=False):
+        """
+        Add a part to this geometry.
+        :param str part_name: Name of the part to create
+        :param Part3D part: Part3D object.
+        :param bool overwrite: Should we allow this to overwrite?
+        """
+        if (part_name in self.parts) and (not overwrite):
+            raise ValueError("Attempted to overwrite the part " + part_name + ".")
+        else:
+            self.parts[part_name] = part
+
+
+    def remove_part(self, part_name, ignore_if_absent=False):
+        """
+        Remove a part from this geometry.
+        :param str part_name: Name of part to remove
+        :param bool ignore_if_absent: Should we ignore an attempted removal if the part name
+        is not found?
+        """
+        if part_name in self.parts:
+            del self.parts[part_name]
+        else:
+            if not ignore_if_absent:
+                raise ValueError(
+                    "Attempted to remove the part " + part_name + ", which doesn't exist.")
             else:
                 pass

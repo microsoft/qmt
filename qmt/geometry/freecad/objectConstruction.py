@@ -4,11 +4,14 @@
 """Functions that perform composite executions."""
 
 
+import os
+import numpy as np
+from six import iteritems, text_type
+import pickle
+
 import FreeCAD
 import Draft
 
-import numpy as np
-from six import iteritems, text_type
 
 # TODO: use namespace in code
 from qmt.geometry.freecad.auxiliary import *
@@ -21,6 +24,84 @@ from qmt.geometry.freecad.sketchUtils import (findSegments, splitSketch, extendS
                                               findEdgeCycles, draftOffset)
 from qmt.geometry.freecad.fileIO import (updateParams, exportCAD, exportMeshed)
 
+
+
+def build3d(opts):  # TODO: smarter name, this is the full 3D build
+
+    doc = FreeCAD.ActiveDocument
+
+    if 'params' in opts:
+        # extend params dictionary to original parts schema
+        fcdict = {key: (value, 'freeCAD') for (key, value) in opts['params'].items()}
+        updateParams(doc, fcdict)
+
+    # 
+    if 'input_parts' in opts:
+        built_parts = {}
+        for part in opts['input_parts']:
+            # ~ builtParts.append([part.label, buildPart(part)])
+            built_parts[part.label] = buildPart(part)
+
+        if 'serial_stp_parts' not in opts:
+            opts['serial_stp_parts'] = {}
+        for label in built_parts:
+            # stp_file = export( partPair[1] , 'stp')
+            # stp_data = read(stp_file)  # content
+            serial_part = pickle.dumps('part_stp_content')
+            opts['serial_stp_parts'][label] = serial_part
+
+    # serialise the freecad document and fill into opts
+    import hashlib
+    tmp_path = 'tmp_build3d_' + hashlib.sha256(str(opts)).hexdigest() + '.fcstd'
+    doc.saveAs(tmp_path)
+    with open(tmp_path, 'rb') as f:
+        opts['fcdoc'] = pickle.dumps(f.read())
+    os.remove(tmp_path)
+    return opts
+
+
+
+
+def buildPart(part):
+    # ~ partDict = self.model.modelDict['3DParts'][partName]
+    if part.directive == 'extrude':
+        obj = build_extrude(part)
+    # ~ elif part.directive == 'wire':
+        # ~ objs = self._build_wire(part)
+    # ~ elif part.directive == 'wireShell':
+        # ~ objs = self._build_wire_shell(part)
+    # ~ elif part.directive == 'SAG':
+        # ~ objs = self._build_SAG(part)
+    # ~ elif part.directive == 'lithography':
+        # ~ objs = self._build_litho(part)
+    else:
+        raise ValueError('Directive ' + part.directive +
+                         ' is not a recognized directive type.')
+    # ~ self._buildPartsDict[partName] = objs
+    # ~ for obj in objs:
+        # ~ self.model.registerCadPart(partName, obj.Name, None)
+    return obj
+
+def build_extrude(part):
+    """Build an extrude part."""
+    # ~ partDict = self.model.modelDict['3DParts'][partName]
+    assert part.directive == 'extrude'
+    # ~ z0 = self._fetch_geo_param(partDict['z0'])
+    # ~ deltaz = self._fetch_geo_param(partDict['thickness'])
+    deltaz = part.thickness
+    doc = FreeCAD.ActiveDocument
+    sketch = doc.getObject(part.fcName)
+    # ~ splitSketches = splitSketch(sketch)
+    extrudeBetween(sketch, 0, deltaz)
+    # ~ extParts = []
+    # ~ for mySplitSketch in splitSketches:
+        # ~ extPart = extrudeBetween(mySplitSketch, z0, z0 + deltaz)
+        # ~ extPart.Label = partName
+        # ~ extParts.append(extPart)
+        # ~ delete(mySplitSketch)
+    # ~ return extParts
+
+################################################################################
 
 def buildWire(sketch, zBottom, width, faceOverride=None, offset=0.0):
     """Given a line segment, build a nanowire of given cross-sectional width

@@ -155,6 +155,9 @@ class ReducedSweepDelayed(object):
         """
         self.delayed_results[object_list_index] = item
 
+    def copy_empty(self):
+        return self.__init__(self, self.sweep, self.dask_client)
+
     def get_object(self, total_index):
         return self.delayed_results[self.sweep.convert_to_reduced_index(total_index)]
 

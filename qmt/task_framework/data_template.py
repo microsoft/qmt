@@ -1,7 +1,7 @@
 import h5py
 
 
-class Data:
+class Data(object):
     def __init__(self):
         """
         Class for passing data between tasks.
@@ -53,3 +53,21 @@ class Data:
             self._deserialize()
         else:
             raise ValueError("No file given for load.")
+
+    def _serialize_unit(self, unit_instance):
+        """
+        Serializes a unit instance (e.g. units.meV -> 'meV')
+        :param unit_instance: An instance of a unit (e.g. units.meV)
+        """
+        from qmt import units
+        for k,v in units.__dict__.iteritems():
+            if v==unit_instance:
+                return k
+
+    def _deserialize_unit(self, unit_string):
+        """
+        De-serializes a unit instance (e.g. 'meV' -> units.meV)
+        :param unit_string: String corresponding with unit (e.g. 'meV')
+        """
+        from qmt import units
+        return units.__dict__[unit_string]

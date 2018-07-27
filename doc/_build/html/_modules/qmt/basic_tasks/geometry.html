@@ -156,7 +156,7 @@
 <span class="c1"># Licensed under the MIT License.</span>
 
 <span class="kn">from</span> <span class="nn">qmt.task_framework</span> <span class="k">import</span> <span class="n">Task</span>
-<span class="kn">from</span> <span class="nn">qmt.geometry</span> <span class="k">import</span> <span class="n">Geo1DData</span><span class="p">,</span> <span class="n">Geo2DData</span>
+<span class="kn">from</span> <span class="nn">qmt.geometry</span> <span class="k">import</span> <span class="n">Geo1DData</span><span class="p">,</span> <span class="n">Geo2DData</span><span class="p">,</span> <span class="n">Geo3DData</span>
 
 
 <div class="viewcode-block" id="Geometry1D"><a class="viewcode-back" href="../../../source/qmt.basic_tasks.html#qmt.basic_tasks.geometry.Geometry1D">[docs]</a><span class="k">class</span> <span class="nc">Geometry1D</span><span class="p">(</span><span class="n">Task</span><span class="p">):</span>
@@ -229,19 +229,13 @@
 <span class="sd">        :param dict current_options: The dictionary specifying parts from above.</span>
 <span class="sd">        :return geo_3d: A Geo3DData object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">current_options</span></div>
-
-
-<span class="c1"># ~ class GeoFreeCAD(Geometry3D):  # needs adjustments</span>
-<div class="viewcode-block" id="GeometryParams"><a class="viewcode-back" href="../../../source/qmt.basic_tasks.html#qmt.basic_tasks.geometry.GeometryParams">[docs]</a><span class="k">class</span> <span class="nc">GeometryParams</span><span class="p">(</span><span class="n">Task</span><span class="p">):</span>
-
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pyenv</span><span class="o">=</span><span class="s1">&#39;python2&#39;</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;freecad_task&#39;</span><span class="p">):</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">GeometryParams</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">([],</span> <span class="n">options</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">pyenv</span> <span class="o">=</span> <span class="n">pyenv</span>
-
-    <span class="k">def</span> <span class="nf">_solve_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_result_list</span><span class="p">,</span> <span class="n">current_options</span><span class="p">):</span>
+        <span class="n">pyenv</span> <span class="o">=</span> <span class="n">current_options</span><span class="p">[</span><span class="s1">&#39;pyenv&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;pyenv&#39;</span> <span class="ow">in</span> <span class="n">current_options</span> <span class="k">else</span> <span class="s1">&#39;python2&#39;</span>
+        <span class="n">geo</span> <span class="o">=</span> <span class="n">Geo3DData</span><span class="p">()</span>
+        <span class="c1"># ~ for part_name in current_options[&#39;parts&#39;]:</span>
+            <span class="c1"># ~ geo.add_part(part_name, current_options[&#39;parts&#39;][part_name])</span>
         <span class="kn">from</span> <span class="nn">qmt.geometry.freecad_wrapper</span> <span class="k">import</span> <span class="n">pywrapper</span>
-        <span class="k">return</span> <span class="n">pywrapper</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">pyenv</span><span class="p">,</span> <span class="s1">&#39;updateParams&#39;</span><span class="p">,</span> <span class="n">input_result_list</span><span class="p">,</span> <span class="n">current_options</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">pywrapper</span><span class="p">(</span><span class="n">pyenv</span><span class="p">,</span> <span class="s1">&#39;updateParams&#39;</span><span class="p">,</span> <span class="n">input_result_list</span><span class="p">,</span> <span class="n">current_options</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">geo</span></div>
 </pre></div>
 
            </div>

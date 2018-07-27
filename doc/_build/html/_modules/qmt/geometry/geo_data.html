@@ -152,11 +152,14 @@
            <div itemprop="articleBody">
             
   <h1>Source code for qmt.geometry.geo_data</h1><div class="highlight"><pre>
-<div class="viewcode-block" id="Geo1DData"><a class="viewcode-back" href="../../../source/qmt.geometry.html#qmt.geometry.geo_data.Geo1DData">[docs]</a><span></span><span class="k">class</span> <span class="nc">Geo1DData</span><span class="p">:</span>
+<span></span><span class="kn">from</span> <span class="nn">qmt.task_framework</span> <span class="k">import</span> <span class="n">Data</span>
+
+<div class="viewcode-block" id="Geo1DData"><a class="viewcode-back" href="../../../source/qmt.geometry.html#qmt.geometry.geo_data.Geo1DData">[docs]</a><span class="k">class</span> <span class="nc">Geo1DData</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Class for holding a 1D geometry specification.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Geo1DData</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parts</span> <span class="o">=</span> <span class="p">{}</span>
 
 <div class="viewcode-block" id="Geo1DData.add_part"><a class="viewcode-back" href="../../../source/qmt.geometry.html#qmt.geometry.geo_data.Geo1DData.add_part">[docs]</a>    <span class="k">def</span> <span class="nf">add_part</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part_name</span><span class="p">,</span> <span class="n">start_point</span><span class="p">,</span> <span class="n">end_point</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -190,7 +193,7 @@
                 <span class="k">pass</span></div></div>
 
 
-<div class="viewcode-block" id="Geo2DData"><a class="viewcode-back" href="../../../source/qmt.geometry.html#qmt.geometry.geo_data.Geo2DData">[docs]</a><span class="k">class</span> <span class="nc">Geo2DData</span><span class="p">:</span>
+<div class="viewcode-block" id="Geo2DData"><a class="viewcode-back" href="../../../source/qmt.geometry.html#qmt.geometry.geo_data.Geo2DData">[docs]</a><span class="k">class</span> <span class="nc">Geo2DData</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Class for holding a 2D geometry specification. This class holds two main dicts:</span>
@@ -199,6 +202,7 @@
 <span class="sd">        Parts are intended to be 2D domains, while edges are used for setting boundary conditions</span>
 <span class="sd">        and surface conditions.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Geo2DData</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parts</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">edges</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -257,6 +261,53 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">ignore_if_absent</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="s2">&quot;Attempted to remove the edge &quot;</span> <span class="o">+</span> <span class="n">edge_name</span> <span class="o">+</span> <span class="s2">&quot;, which doesn&#39;t exist.&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">pass</span></div></div>
+
+<div class="viewcode-block" id="Geo3DData"><a class="viewcode-back" href="../../../source/qmt.geometry.html#qmt.geometry.geo_data.Geo3DData">[docs]</a><span class="k">class</span> <span class="nc">Geo3DData</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Class for holding a 2D geometry specification. This class holds two main dicts:</span>
+<span class="sd">            - parts is a dictionary of shapely Polygon objects</span>
+<span class="sd">            - edges is a dictionary of shapely LineString objects</span>
+<span class="sd">        Parts are intended to be 2D domains, while edges are used for setting boundary conditions</span>
+<span class="sd">        and surface conditions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Geo3DData</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="c1"># ~ self.serial_FCdoc</span>
+        <span class="c1"># ~ self.parts = {label: part}</span>
+
+<div class="viewcode-block" id="Geo3DData.get_parts"><a class="viewcode-back" href="../../../source/qmt.geometry.html#qmt.geometry.geo_data.Geo3DData.get_parts">[docs]</a>    <span class="k">def</span> <span class="nf">get_parts</span><span class="p">():</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span></div>
+
+
+<div class="viewcode-block" id="Geo3DData.add_part"><a class="viewcode-back" href="../../../source/qmt.geometry.html#qmt.geometry.geo_data.Geo3DData.add_part">[docs]</a>    <span class="k">def</span> <span class="nf">add_part</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part_name</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a part to this geometry.</span>
+<span class="sd">        :param str part_name: Name of the part to create</span>
+<span class="sd">        :param Polygon part: Polygon object from shapely.geometry. This must be a valid Polygon.</span>
+<span class="sd">        :param bool overwrite: Should we allow this to overwrite?</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">part</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Part &quot;</span> <span class="o">+</span> <span class="n">part_name</span> <span class="o">+</span> <span class="s2">&quot; is not a valid polygon.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">part_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">overwrite</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Attempted to overwrite the part &quot;</span> <span class="o">+</span> <span class="n">part_name</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="n">part_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">part</span></div>
+
+<div class="viewcode-block" id="Geo3DData.remove_part"><a class="viewcode-back" href="../../../source/qmt.geometry.html#qmt.geometry.geo_data.Geo3DData.remove_part">[docs]</a>    <span class="k">def</span> <span class="nf">remove_part</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part_name</span><span class="p">,</span> <span class="n">ignore_if_absent</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove a part from this geometry.</span>
+<span class="sd">        :param str part_name: Name of part to remove</span>
+<span class="sd">        :param bool ignore_if_absent: Should we ignore an attempted removal if the part name</span>
+<span class="sd">        is not found?</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">part_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="n">part_name</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">ignore_if_absent</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Attempted to remove the part &quot;</span> <span class="o">+</span> <span class="n">part_name</span> <span class="o">+</span> <span class="s2">&quot;, which doesn&#39;t exist.&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">pass</span></div></div>
 </pre></div>

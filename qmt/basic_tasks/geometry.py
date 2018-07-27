@@ -2,7 +2,7 @@
 # Licensed under the MIT License.
 
 from qmt.task_framework import Task
-from qmt.geometry import Geo1DData, Geo2DData
+from qmt.geometry import Geo1DData, Geo2DData, Geo3DData
 
 
 class Geometry1D(Task):
@@ -75,16 +75,22 @@ class Geometry3D(Task):
         :param dict current_options: The dictionary specifying parts from above.
         :return geo_3d: A Geo3DData object.
         """
-        return current_options
 
+        pyenv = current_options['pyenv'] if 'pyenv' in current_options else 'python2'
+        from qmt.geometry.freecad_wrapper import fcwrapper
+        ret = fcwrapper(pyenv, 'build3d',
+                        {'input_result_list': input_result_list,
+                         'current_options': current_options})
+        # ~ return ret
 
-# ~ class GeoFreeCAD(Geometry3D):  # needs adjustments
-class GeometryParams(Task):
-
-    def __init__(self, pyenv='python2', options=None, name='freecad_task'):
-        super(GeometryParams, self).__init__([], options, name)
-        self.pyenv = pyenv
-
-    def _solve_instance(self, input_result_list, current_options):
-        from qmt.geometry.freecad_wrapper import pywrapper
-        return pywrapper(self.pyenv, 'updateParams', input_result_list, current_options)
+        geo = Geo3DData()
+        for part in current_options['input_parts']:
+            geo.build_order.append(part.label)
+            # ~ part.serial_stp = ret['serial_stp_parts'][part.label]
+            geo.add_part(part.label, part)
+        # ~ for part in ret['built_parts']:
+            # ~ geo.add_part(part.label, part)
+        # fill geo with parts and serialised fcfile
+        # ~ for part_name in ret['serial_parts']:
+            # ~ geo.add_part(part_name, ret['serial_parts'][part_name])
+        return geo
