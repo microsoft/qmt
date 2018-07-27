@@ -15,5 +15,5 @@ setup(
     url='https://github.com/Microsoft/qmt',
     author='Andrey Antipov, John Gamble, Jan Gukelberger, Donjan Rodic, Kevin van Hoogdalem, Georg Winkler',
     author_email='john.gamble@microsoft.com', license='MIT',
-    install_requires=requirements, packages=find_packages(),
+    #install_requires=requirements, packages=find_packages(),
     zip_safe=False,)
