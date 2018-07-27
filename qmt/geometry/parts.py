@@ -10,7 +10,7 @@ class Part3D(object):
         meshScaleVector=None, boundaryCondition=None, subtractList=[],
         Ns=None, Phi_NL=None, Ds=None):
         """ Add a geometric part to the model.
-        @param partName: The descriptive name of this new part.
+        @param label: The descriptive name of this new part.
         @param fcName: The name of the 2D freeCAD object that this is built from.
         @param directive: The freeCAD directive is used to construct this part.
                             Valid options for this are:
@@ -118,7 +118,7 @@ class Part3D(object):
         Returns the STEP file path.
         """
         file_path = self.label
-        data = pickle.dumps(self.serialised_stepfile)
+        data = pickle.dumps(self.serial_stp)
         with open(file_path, 'b') as of:
             of.write(data)
         return file_path

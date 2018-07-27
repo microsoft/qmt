@@ -11,8 +11,13 @@ import pickle
 import qmt
 
 
-def fcwrapper(pyenv, instruction, data):
-    """The one and only wrapper function."""
+def fcwrapper(pyenv='python2', instruction=None, data=None):
+    """Wrapper to isolate FreeCAD Python 2.7 calls from the Python 3 code base.
+
+    :param str pyenv:       Python interpreter, defaults to 'python2'.
+    :param str instruction: A registered instruction for the QMT FreeCAD module.
+    :param     data:        Any data type serialisable through pickle.
+    """
 
     qmtPath = os.path.join(os.path.dirname(qmt.__file__))
     runPath = os.path.join(qmtPath, 'geometry', 'freecad', 'run.py')
@@ -27,6 +32,7 @@ def fcwrapper(pyenv, instruction, data):
         raise ValueError('pywrapper error ' + str(proc.returncode) + ' (' + output[1] + ')')
 
     try:
-        return pickle.loads(''.join(output[0]))
+        serial_data = ''.join(output[0]).split('MAGICTQMTRANSFERBYTES')[-1]
+        return pickle.loads(serial_data)
     except:
         return output[0]
