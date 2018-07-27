@@ -19,15 +19,21 @@ class Density1D(Data):
         self.density_units = density_units
         self.bands = bands
         self.band_units = band_units
+        self.mesh = mesh
+        self.mesh_units = mesh_units
 
     def _serialize(self):
         self.content['densities'] = self.densities
         self.content['density_units'] = self._serialize_unit(self.density_units)
         self.content['bands'] = self.bands
-        self.band_units['band_units'] = self._serialize_unit(self.band_units)
+        self.content['band_units'] = self._serialize_unit(self.band_units)
+        self.content['mesh'] = self.mesh
+        self.content['mesh_units'] = self._serialize_unit(self.mesh_units)
 
     def _deserialize(self):
         self.densities = self.content['densities']
         self.denisty_units = self._deserialize_unit(self.content['density_units'])
         self.bands = self.content['bands']
         self.band_units = self._deserialize_unit(self.content['band_units'])
+        self.mesh = self.content['mesh']
+        self.mesh_units = self._deserialize_unit(self.content['mesh_units'])
