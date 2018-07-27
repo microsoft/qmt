@@ -113,13 +113,13 @@ class Geo2DData(Data):
 class Geo3DData(Data):
     def __init__(self):
         """
-        Class for holding a 2D geometry specification. This class holds two main dicts:
-            - parts is a dictionary of shapely Polygon objects
-            - edges is a dictionary of shapely LineString objects
-        Parts are intended to be 2D domains, while edges are used for setting boundary conditions
-        and surface conditions.
+        Class for a 3D geometry specification. It holds:
+            - parts is a dict of Part3D objects, keyed by the label of each Part3D object.
+            - build_order is a list of strings indicating the construction order.
         """
         super(Geo3DData, self).__init__()
+        self.build_order = []
+        self.parts = {}
         # ~ self.serial_FCdoc
         # ~ self.parts = {label: part}
 
@@ -134,7 +134,7 @@ class Geo3DData(Data):
         """
         Add a part to this geometry.
         :param str part_name: Name of the part to create
-        :param Polygon part: Polygon object from shapely.geometry. This must be a valid Polygon.
+        :param Part3D part: Part3D object.
         :param bool overwrite: Should we allow this to overwrite?
         """
         if (part_name in self.parts) and (not overwrite):

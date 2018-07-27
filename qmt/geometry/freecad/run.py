@@ -19,37 +19,28 @@ def main():
     doc = active_doc_from(data['current_options'])
 
     if instruction == 'build3d':
-        print(pickle.dumps(build3d(data['current_options'])))
-        # just for debugging:
-        if not os.path.exists('tmp'):
-            os.mkdirs('tmp')
-        doc.saveAs("tmp/example_geogen_" + str(doc.modelParams.d1) + ".fcstd")
+        send_back(cad.objectConstruction.build3d(data['current_options']))
 
-    if instruction == 'writeFCfile':
+    elif instruction == 'writeFCfile':
         pass
 
-    if instruction == 'regionMap':
+    elif instruction == 'regionMap':
         pass
 
-
-def build3d(opts):  # TODO: move to objectConstruction
-    import qmt.geometry.freecad.objectConstruction as construct
-    # extend params dictionary to original parts schema
-    fcdict = {key: (value, 'freeCAD') for (key, value) in opts['params'].items()}
-    cad.fileIO.updateParams(cad.FreeCAD.ActiveDocument, fcdict)
-    for part in opts['parts']:
-        construct.buildPart(part)
-    # fill opts with serialised doc and parts
-    #serialise opts
-    return opts
+    else:
+        raise ValueError('Not a registered FreeCAD QMT instruction')
 
 
 def active_doc_from(opts):
+    """Return a valid FreeCAD document given a QMT Geometry3D opts dict.
+
+    This will load from the opts filepath or the serialised FCDoc.
+    """
     doc = cad.FreeCAD.newDocument('instance')
     cad.FreeCAD.setActiveDocument('instance')
 
-    if 'filepath' in opts:
-        doc.load(opts['filepath'])
+    if 'file_path' in opts:
+        doc.load(opts['file_path'])
     elif 'document' in opts:
         stored_doc = pickle.loads(opts['document'])
         for obj in stored_doc.Objects:
@@ -58,6 +49,10 @@ def active_doc_from(opts):
         raise ValueError("No FreeCAD document available")
 
     return doc
+
+
+def send_back(data):
+    sys.stdout.write('MAGICTQMTRANSFERBYTES'+pickle.dumps(data))
 
 
 if __name__ == '__main__':
