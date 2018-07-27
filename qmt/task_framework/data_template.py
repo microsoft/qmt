@@ -54,7 +54,7 @@ class Data(object):
         else:
             raise ValueError("No file given for load.")
 
-    def _serialize_unit(unit_instance):
+    def _serialize_unit(self, unit_instance):
         """
         Serializes a unit instance (e.g. units.meV -> 'meV')
         :param unit_instance: An instance of a unit (e.g. units.meV)
@@ -64,7 +64,7 @@ class Data(object):
             if v==unit_instance:
                 return k
 
-    def _deserialize_unit(unit_string):
+    def _deserialize_unit(self, unit_string):
         """
         De-serializes a unit instance (e.g. 'meV' -> units.meV)
         :param unit_string: String corresponding with unit (e.g. 'meV')
