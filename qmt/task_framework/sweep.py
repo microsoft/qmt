@@ -296,6 +296,9 @@ class SweepTag(object):
     def __ne__(self, other):
         return not self.__eq__(other)
 
+    def __hash__(self):
+        return hash(self.tag_name)
+
 
 def gen_tag_extract(nested_dictionary_of_tags):
     """
