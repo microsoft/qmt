@@ -8,11 +8,7 @@
 import json
 import os
 
-import qmt as QMT
-reload(QMT)
-
 selObjs = Gui.Selection.getSelection()
-
 
 print "Generating template for building the solid:"
 print "Available directives are: extrude, wire, wireShell, SAG, and lithography."
