@@ -32,7 +32,7 @@ class MeshingTaskExample(Task):
             output = current_options.copy()
             for key in current_options.keys():
                 output[key].update(input_result_lists[0][key])
-            print output
+            print(output)
             new_delayed_result.add(output, sweep_holder_index)
         return new_delayed_result
 
@@ -44,7 +44,7 @@ class PoissonTaskExample(Task):
 
     def _solve_instance(self, input_result_list, current_options):
         mesh_result_instance = input_result_list[0]
-        print mesh_result_instance
+        print(mesh_result_instance)
         time.sleep(2)
         output = ''
         for part in mesh_result_instance.keys():
