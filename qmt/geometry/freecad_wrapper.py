@@ -29,7 +29,7 @@ def fcwrapper(pyenv='python2', instruction=None, data=None):
     output = proc.communicate(serial_data)
     # output[1] not checked because stderr is used for mere warnings too often
     if proc.returncode != 0:
-        raise ValueError('pywrapper error ' + str(proc.returncode) + ' (' + output[1] + ')')
+        raise ValueError('pywrapper error ' + str(proc.returncode) + ' (' + str(output[1]) + ')')
 
     try:
         serial_data = ''.join(output[0]).split('MAGICTQMTRANSFERBYTES')[-1]
