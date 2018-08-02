@@ -305,9 +305,14 @@ class SweepTag(object):
         out.tag_function = lambda x: self.tag_function(x) + other
         return out
     
-    def __neg__(self):
+    def __sub__(self, other):
         out = SweepTag(self.tag_name)
-        out.tag_function = lambda x: -self.tag_function(x)
+        out.tag_function = lambda x: self.tag_function(x) - other
+        return out
+
+    def __mul__(self, other):
+        out = SweepTag(self.tag_name)
+        out.tag_function = lambda x: self.tag_function(x) * other
         return out
 
     def __truediv__(self, other):
@@ -315,8 +320,23 @@ class SweepTag(object):
         out.tag_function = lambda x: self.tag_function(x)/other
         return out
 
+    def __pow__(self, other):
+        out = SweepTag(self.tag_name)
+        out.tag_function = lambda x: self.tag_function(x)**other
+        return out
+
+    def __neg__(self):
+        out = SweepTag(self.tag_name)
+        out.tag_function = lambda x: -self.tag_function(x)
+        return out
+
+    def __abs__(self):
+        out = SweepTag(self.tag_name)
+        out.tag_function = lambda x: abs(self.tag_function(x))
+        return out
+
     def replace(self,value):
-        self.tag_function(value)
+        return self.tag_function(value)
 
 
 def gen_tag_extract(nested_dictionary_of_tags):

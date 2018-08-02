@@ -32,8 +32,8 @@ class Geometry2D(Task):
         """
         Builds a geometry in 2D.
         :param dict options: The dictionary holding parts and edges. It should be of the form:
-        {'parts':{'part_name':Polygon}, 'edges':{'edge_name':LineString}, where Polygon and
-        LineString are instances of shapely.geometry.
+        {'parts':{'part_name':list of 2d points}, 'edges':{'edge_name':list of 2d points}, where these lists are turned into Polygon and
+        LineString objects, which are instances of shapely.geometry.
         "part_name":Part3D}
         :param str name: The name of this task.
         """
