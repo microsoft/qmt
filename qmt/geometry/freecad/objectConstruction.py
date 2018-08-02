@@ -93,7 +93,7 @@ def build_extrude(part):
 
     deltaz = part.thickness
     doc = FreeCAD.ActiveDocument
-    sketch = doc.getObject(part.fcName)
+    sketch = doc.getObject(part.fc_name)
     # ~ splitSketches = splitSketch(sketch)
     obj = extrudeBetween(sketch, 0, deltaz)
     # ~ extParts = []

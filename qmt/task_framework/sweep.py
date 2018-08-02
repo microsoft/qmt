@@ -232,7 +232,7 @@ class ReducedSweep(object):
             new_point = True
             point_small_index = None
             for j, small_sweep_point in enumerate(tagged_value_list):
-                if small_sweep_point.viewitems() <= sweep_point.viewitems():
+                if small_sweep_point.items() <= sweep_point.items():
                     new_point = False
                     point_small_index = j
 
