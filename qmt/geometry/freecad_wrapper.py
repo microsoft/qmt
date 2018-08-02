@@ -21,8 +21,7 @@ def fcwrapper(pyenv='python2', instruction=None, data=None):
 
     qmtPath = os.path.join(os.path.dirname(qmt.__file__))
     runPath = os.path.join(qmtPath, 'geometry', 'freecad', 'run.py')
-    serial_data = pickle.dumps(data)
-
+    serial_data = pickle.dumps(data,protocol=2)
     proc = subprocess.Popen([pyenv, runPath, instruction],
                             stdin=subprocess.PIPE,
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -31,8 +30,14 @@ def fcwrapper(pyenv='python2', instruction=None, data=None):
     if proc.returncode != 0:
         raise ValueError('pywrapper error ' + str(proc.returncode) + ' (' + str(output[1]) + ')')
 
-    try:
-        serial_data = ''.join(output[0]).split('MAGICTQMTRANSFERBYTES')[-1]
-        return pickle.loads(serial_data)
-    except:
-        return output[0]
+    # The data should be passed out as a byte stream. The initial stuff written by freeCAD is
+    # in position 0, then the seperateor string "MAGICTQMTRANSFERBYTES" is used to mark the start
+    # of the serialized data stream to send back:
+    serial_data = output[0].decode().split('MAGICTQMTRANSFERBYTES')[-1].encode()
+    return pickle.loads(serial_data)
+
+    # try:
+    #     serial_data = ''.join(output[0]).split('MAGICTQMTRANSFERBYTES')[-1]
+    #     return pickle.loads(serial_data)
+    # except:
+    #     return output[0]
