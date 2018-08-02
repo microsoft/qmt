@@ -60,7 +60,7 @@ class Geo2DData(Data):
         :param Polygon part: Polygon object from shapely.geometry. This must be a valid Polygon.
         :param bool overwrite: Should we allow this to overwrite?
         """
-        if not part.is_valid():
+        if not part.is_valid:
             raise ValueError("Part " + part_name + " is not a valid polygon.")
         if (part_name in self.parts) and (not overwrite):
             raise ValueError("Attempted to overwrite the part " + part_name + ".")
