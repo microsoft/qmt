@@ -281,6 +281,7 @@ class SweepTag(object):
 
     def __init__(self, tag_name):
         self.tag_name = tag_name
+        self.tag_function = lambda x: x
 
     def __str__(self):
         return self.tag_name
@@ -298,6 +299,24 @@ class SweepTag(object):
 
     def __hash__(self):
         return hash(self.tag_name)
+    
+    def __add__(self, other):
+        out = SweepTag(self.tag_name)
+        out.tag_function = lambda x: self.tag_function(x) + other
+        return out
+    
+    def __neg__(self):
+        out = SweepTag(self.tag_name)
+        out.tag_function = lambda x: -self.tag_function(x)
+        return out
+
+    def __truediv__(self, other):
+        out = SweepTag(self.tag_name)
+        out.tag_function = lambda x: self.tag_function(x)/other
+        return out
+
+    def replace(self,value):
+        self.tag_function(value)
 
 
 def gen_tag_extract(nested_dictionary_of_tags):
@@ -328,7 +347,7 @@ def replace_tag_with_value(name_to_tag_mapping, tag, new_value):
     if hasattr(name_to_tag_mapping, 'iteritems'):
         for k, v in name_to_tag_mapping.iteritems():
             if v == tag:
-                var_copy[k] = new_value
+                var_copy[k] = v.replace(new_value)
             elif isinstance(v, dict):
                 var_copy[k] = replace_tag_with_value(v, tag, new_value)
             else:

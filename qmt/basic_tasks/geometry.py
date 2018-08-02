@@ -3,7 +3,7 @@
 
 from qmt.task_framework import Task
 from qmt.geometry import Geo1DData, Geo2DData, Geo3DData
-
+from shapely.geometry import Polygon, LineString
 
 class Geometry1D(Task):
     def __init__(self, options=None, name='geometry_1d_task'):
@@ -47,9 +47,9 @@ class Geometry2D(Task):
         """
         geo_2d = Geo2DData()
         for part_name in current_options['parts']:
-            geo_2d.add_part(part_name, current_options['parts'][part_name])
+            geo_2d.add_part(part_name, Polygon(current_options['parts'][part_name]))
         for edge_name in current_options['edges']:
-            geo_2d.add_edge(edge_name, current_options['edges'][edge_name])
+            geo_2d.add_edge(edge_name, LineString(current_options['edges'][edge_name]))
         return geo_2d
 
 

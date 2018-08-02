@@ -24,7 +24,7 @@ class Mesh1D(Mesh):
         :param options: Dict containing information on the meshing of the object. This should be of the form...
         :param name: Name of the task
         """
-        super(Mesh1D, self).__init__([geo_task], options, name)
+        super(Mesh, self).__init__([geo_task], options, name)
 
     def _solve_instance(self, input_result_list, current_options):
         """
@@ -44,16 +44,24 @@ class Mesh2D(Mesh):
         :param options: Dict containing information on the meshing of the object. This should be of the form...
         :param name: Name of the task
         """
-        super(Mesh2D, self).__init__([geo_task], options, name)
+        super(Mesh, self).__init__([geo_task], options, name)
         # assert type(geo_task) is Geometry2D
     def _solve_instance(self, input_result_list, current_options):
         """
         :param list input_result_list: Singleton list with a Geo1DData element.
         :param dict current_options: Dict from above.
-        :return Mesh2DData mesh_1d: Output mesh
+        :return Mesh2DData mesh_2d: Output mesh
         """
+        from qms.meshing import Mesh2dData
         geo_result_instance = input_result_list[0]
-        return geo_result_instance
+        mesh_2d = Mesh2dData(geo_result_instance.parts)
+        if current_options['mesh_type'] == 'difference':
+            mesh_2d.construct_difference()
+        elif current_options['mesh_type'] == 'element':
+            mesh_2d.construct_element()
+        else:
+            raise ValueError('Unrecognized meshing type: '+str(current_options['mesh_type']))
+        return mesh_2d
 
 
 class Mesh3D(Mesh):
@@ -64,7 +72,7 @@ class Mesh3D(Mesh):
         :param options: Dict containing information on the meshing of the object. This should be of the form...
         :param name: Name of the task
         """
-        super(Mesh3D, self).__init__([geo_task], options, name)
+        super(Mesh, self).__init__([geo_task], options, name)
         # assert type(geo_task) is Geometry3D
     def _solve_instance(self, input_result_list, current_options):
         """
