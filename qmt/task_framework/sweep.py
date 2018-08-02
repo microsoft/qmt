@@ -356,7 +356,27 @@ def gen_tag_extract(nested_dictionary_of_tags):
         if isinstance(v, dict):
             for result in gen_tag_extract(v):
                 yield result
+        if isinstance(v, list):
+            for result in gen_tag_extract_list(v):
+                yield result
 
+def gen_tag_extract_list(nested_list_of_tags):
+    """
+    Extract all tags from nested dictionary that may have tags
+    as values at any level
+    :param nested_list_of_tags: exactly what it sounds like
+    :return: a generator that yields all the tags in the dictionary
+    """
+    # if hasattr(nested_dictionary_of_tags, 'iteritems'): # doesn't work with python3
+    for v in nested_list_of_tags:
+        if isinstance(v, SweepTag):
+            yield v
+        if isinstance(v, dict):
+            for result in gen_tag_extract(v):
+                yield result
+        if isinstance(v, list):
+            for result in gen_tag_extract_list(v):
+                yield result
 
 def replace_tag_with_value(name_to_tag_mapping, tag, new_value):
     """
@@ -373,6 +393,29 @@ def replace_tag_with_value(name_to_tag_mapping, tag, new_value):
             var_copy[k] = v.replace(new_value)
         elif isinstance(v, dict):
             var_copy[k] = replace_tag_with_value(v, tag, new_value)
+        elif isinstance(v, list):
+            var_copy[k] = replace_tag_with_value_list(v, tag, new_value)
         else:
             var_copy[k] = v
+    return var_copy
+
+def replace_tag_with_value_list(name_to_tag_mapping, tag, new_value):
+    """
+    Returns a copy of name_to_tag_mapping with values of tag replaced with new_value.
+    :param name_to_tag_mapping: Dictionary mapping parameter names to SweepTags.
+    :param tag: The SweepTag to replace.
+    :param new_value: the value to replace it with.
+    :return: a copy of name_to_tag_mapping with values of tag replaced with new_value
+    """
+    var_copy = []
+    # if hasattr(name_to_tag_mapping, 'iteritems'):
+    for v in name_to_tag_mapping:
+        if v == tag:
+            var_copy += [v.replace(new_value)]
+        elif isinstance(v, dict):
+            var_copy += [replace_tag_with_value(v, tag, new_value)]
+        elif isinstance(v, list):
+            var_copy += [replace_tag_with_value_list(v, tag, new_value)]
+        else:
+            var_copy += [v]
     return var_copy
