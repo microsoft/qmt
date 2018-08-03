@@ -167,7 +167,8 @@ class Geo3DData(Data):
         """
         if file_path == None:
             file_path = self.label + '.fcstd'
-        data = pickle.loads(self.serial_fcdoc)
+        import codecs
+        data = codecs.decode(self.serial_fcdoc.encode(), 'base64')
         with open(file_path, 'wb') as of:
             of.write(data)
         return file_path

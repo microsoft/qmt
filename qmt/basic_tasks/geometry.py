@@ -3,7 +3,6 @@
 
 from qmt.task_framework import Task
 from qmt.geometry import Geo1DData, Geo2DData, Geo3DData
-from shapely.geometry import Polygon, LineString
 
 class Geometry1D(Task):
     def __init__(self, options=None, name='geometry_1d_task'):
@@ -37,6 +36,7 @@ class Geometry2D(Task):
         "part_name":Part3D}
         :param str name: The name of this task.
         """
+        from shapely.geometry import Polygon, LineString
         super(Geometry2D, self).__init__([], options, name)
 
     def _solve_instance(self, input_result_list, current_options):
@@ -86,7 +86,6 @@ class Geometry3D(Task):
         geo.serial_fcdoc = ret['serial_fcdoc']
         for part in current_options['input_parts']:
             geo.build_order.append(part.label)
-            # ~ print(len(ret['serial_stp_parts'][part.label]))  ###################
             part.serial_stp = ret['serial_stp_parts'][part.label]
             geo.add_part(part.label, part)
 

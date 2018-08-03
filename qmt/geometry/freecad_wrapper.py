@@ -21,7 +21,7 @@ def fcwrapper(pyenv='python2', instruction=None, data=None):
 
     qmtPath = os.path.join(os.path.dirname(qmt.__file__))
     runPath = os.path.join(qmtPath, 'geometry', 'freecad', 'run.py')
-    serial_data = pickle.dumps(data,protocol=2)
+    serial_data = pickle.dumps(data, protocol=2)
     proc = subprocess.Popen([pyenv, runPath, instruction],
                             stdin=subprocess.PIPE,
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)

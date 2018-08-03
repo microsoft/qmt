@@ -114,7 +114,8 @@ class Part3D(object):
         """
         if file_path == None:
             file_path = self.label + '.stp'
-        data = pickle.loads(self.serial_stp)
+        import codecs
+        data = codecs.decode(self.serial_stp.encode(), 'base64')
         with open(file_path, 'wb') as of:
             of.write(data)
         return file_path

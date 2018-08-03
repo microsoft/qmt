@@ -14,7 +14,7 @@ from qmt.basic_tasks.geometry import Geometry3D
 
 # Set up geometry task
 tag = qtf.SweepTag('thickness')
-myPart = Part3D('block_of_gold', 'Sketch', 'extrude', 'metalGate',
+myPart = Part3D('block_of_gold', 'Sketch', 'extrude', 'metal_gate',
                 material='Au', thickness=10)
 freecad_dict = {
     'pyenv': 'python2',
