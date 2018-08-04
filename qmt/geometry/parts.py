@@ -7,7 +7,7 @@ class Part3D(object):
             z0=0, thickness=None, target_wire=None, shell_verts=None,
             depo_zone=None, etch_zone=None, z_middle=None, t_in=None, t_out=None,
             layer_num=None, litho_base=None,
-            fill_litho=True, mesh_max_size=None, mesh_growth_rate=None,
+            fill_litho=True, mesh_max_size=None, mesh_min_size=None, mesh_growth_rate=None,
             mesh_scale_vector=None, boundary_condition=None, subtract_list=None,
             ns=None, phi_nl=None, ds=None):
         """
@@ -49,6 +49,7 @@ class Part3D(object):
         subtracting the base and subsequent lithography layers, but this can sometimes fail in
         opencascade.
         :param float mesh_max_size: The maximum allowable mesh size for this part, in microns.
+        :param float mesh_min_size: The minimum allowable mesh size for this part, in microns.
         :param float mesh_growth_rate: The maximum allowable mesh growth rate for this part.
         :param tuple mesh_scale_vector: 3D list with scaling factors for the mesh in x, y,
         z direction.
@@ -95,6 +96,7 @@ class Part3D(object):
             self.litho_base = litho_base
         self.fill_litho = fill_litho
         self.mesh_max_size = mesh_max_size
+        self.mesh_min_size = mesh_min_size
         self.mesh_groth_rate = mesh_growth_rate
         self.mesh_scale_vector = mesh_scale_vector
         self.boundary_condition = boundary_condition
@@ -105,7 +107,10 @@ class Part3D(object):
         self.ns = ns
         self.phi_nl = phi_nl
         self.ds = ds
-        # ~ self.step_pickle = pickle(load(filepath))
+        self.serial_stp = None # This gets set on geometry build
+
+
+
 
     def write_stp(self, file_path=None):
         """Write part geometry to a STEP file.
