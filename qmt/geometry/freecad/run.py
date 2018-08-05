@@ -4,7 +4,6 @@
 """Landing script for Python 2.7 calls to FreeCAD."""
 
 
-import os
 import sys
 import pickle
 
@@ -22,7 +21,7 @@ def main():
 
     if instruction == 'build3d':
         activate_doc_from(data['current_options'])
-        new_opts = cad.objectConstruction.build3d(data['current_options'])
+        new_opts = cad.objectConstruction.build(data['current_options'])
         send_back(new_opts)
 
     elif instruction == 'writeFCfile':
@@ -59,7 +58,7 @@ def activate_doc_from(opts):
 
 def send_back(data):
     """Go away."""
-    sys.stdout.write('MAGICTQMTRANSFERBYTES' + pickle.dumps(data))
+    sys.stdout.write('MAGICQMTRANSFERBYTES' + pickle.dumps(data))
 
 
 if __name__ == '__main__':

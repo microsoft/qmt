@@ -15,18 +15,17 @@ import Draft
 
 # TODO: use namespace in code
 from qmt.geometry.freecad.auxiliary import *
-from qmt.geometry.freecad.geomUtils import (extrude, copy, genUnion,
-                                  getBB, makeBB, makeHexFace,
-                                  extrudeBetween, centerObjects, intersect,
-                                  checkOverlap, subtract,
-                                  crossSection)
+from qmt.geometry.freecad.geomUtils import (extrude, copy_move, genUnion,
+                                            getBB, makeBB, makeHexFace,
+                                            extrudeBetween, centerObjects, intersect,
+                                            checkOverlap, subtract,
+                                            crossSection)
 from qmt.geometry.freecad.sketchUtils import (findSegments, splitSketch, extendSketch,
                                               findEdgeCycles, draftOffset)
 from qmt.geometry.freecad.fileIO import (updateParams, exportCAD, exportMeshed)
 
 
-
-def build3d(opts):  # TODO: smarter name, this is the full 3D build
+def build(opts):
 
     import codecs
     import hashlib
@@ -42,7 +41,7 @@ def build3d(opts):  # TODO: smarter name, this is the full 3D build
     if 'input_parts' in opts:
         built_parts = {}
         for input_part in opts['input_parts']:
-            built_parts[input_part.label] = buildPart(input_part)
+            built_parts[input_part.label] = build_part(input_part)
 
         if 'serial_stp_parts' not in opts:
             opts['serial_stp_parts'] = {}
@@ -63,9 +62,7 @@ def build3d(opts):  # TODO: smarter name, this is the full 3D build
     return opts
 
 
-
-
-def buildPart(part):
+def build_part(part):
     # ~ partDict = self.model.modelDict['3DParts'][partName]
     if part.directive == 'extrude':
         obj = build_extrude(part)
@@ -73,8 +70,8 @@ def buildPart(part):
         # ~ objs = self._build_wire(part)
     # ~ elif part.directive == 'wireShell':
         # ~ objs = self._build_wire_shell(part)
-    # ~ elif part.directive == 'SAG':
-        # ~ objs = self._build_SAG(part)
+    elif part.directive == 'SAG':
+        obj = build_SAG(part)
     # ~ elif part.directive == 'lithography':
         # ~ objs = self._build_litho(part)
     else:
@@ -85,29 +82,39 @@ def buildPart(part):
         # ~ self.model.registerCadPart(partName, obj.Name, None)
     return obj
 
+
 def build_extrude(part):
     """Build an extrude part."""
     # ~ partDict = self.model.modelDict['3DParts'][partName]
     assert part.directive == 'extrude'
-    # ~ z0 = self._fetch_geo_param(partDict['z0'])
-    # ~ deltaz = self._fetch_geo_param(partDict['thickness'])
-
+    z0 = part.z0
     deltaz = part.thickness
     doc = FreeCAD.ActiveDocument
     sketch = doc.getObject(part.fc_name)
-    # ~ splitSketches = splitSketch(sketch)
-    obj = extrudeBetween(sketch, 0, deltaz)
-    # ~ extParts = []
-    # ~ for mySplitSketch in splitSketches:
-        # ~ extPart = extrudeBetween(mySplitSketch, z0, z0 + deltaz)
-        # ~ extPart.Label = partName
-        # ~ extParts.append(extPart)
-        # ~ delete(mySplitSketch)
-    # ~ return extParts
+    splitSketches = splitSketch(sketch)
+    extParts = []
+    for sketch in splitSketches:
+        extParts.append(extrudeBetween(sketch, z0, z0 + deltaz, name=part.label))
+        delete(sketch)
     doc.recompute()
-    return obj
+    return extParts
+
+
+def build_SAG(part, offset=0.):
+    zBot = part.z0
+    zMid = part.z_middle
+    zTop = part.thickness + zBot
+    tIn = part.t_in
+    tOut = part.t_out
+    doc = FreeCAD.ActiveDocument
+    sketch = doc.getObject(part.fc_name)
+    SAG = makeSAG(sketch, zBot, zMid, zTop, tIn, tOut, offset=offset)
+    SAG.Label = part.label
+    return [SAG]
+
 
 ################################################################################
+
 
 def buildWire(sketch, zBottom, width, faceOverride=None, offset=0.0):
     """Given a line segment, build a nanowire of given cross-sectional width
@@ -125,7 +132,7 @@ def buildWire(sketch, zBottom, width, faceOverride=None, offset=0.0):
     mySweepTemp.Spine = sketchForSweep
     mySweepTemp.Solid = True
     doc.recompute()
-    mySweep = copy(mySweepTemp)
+    mySweep = copy_move(mySweepTemp)
     deepRemove(mySweepTemp)
     return mySweep
 
@@ -185,7 +192,7 @@ def buildAlShell(sketch, zBottom, width, verts, thickness,
             "Part::MultiFuse", sketch.Name + "_coating")
         coatingUnion.Shapes = shellList
         doc.recompute()
-        coatingUnionClone = copy(coatingUnion)
+        coatingUnionClone = copy_move(coatingUnion)
         doc.removeObject(coatingUnion.Name)
         for shell in shellList:
             doc.removeObject(shell.Name)
@@ -229,26 +236,32 @@ def makeSAG(sketch, zBot, zMid, zTop, tIn, tOut, offset=0.):
 
     sketchList = splitSketch(sketch)
     returnParts = []
+    import sys
+    sys.stderr.write("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC")
+    sys.stderr.write(str(sketchList))
+    sys.stderr.write("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD")
     for tempSketch in sketchList:
         # TODO: right now, if we try to taper the top of the SAG wire to a point, this
         # breaks, since the offset of topSketch is empty. We should detect and handle this.
         # For now, just make sure that the wire has a small flat top.
         botSketch = draftOffset(tempSketch, offset)  # the base of the wire
+        sys.stderr.write("AAAAAAAAAAAAAAAAAAAAAAAA")
+        sys.stderr.write(str(f + d - tIn))
         midSketch = draftOffset(tempSketch, f + d - tIn)  # the base of the cap
         topSketch = draftOffset(tempSketch, -tIn + f)  # the top of the cap
         delete(tempSketch)  # remove the copied sketch part
         # Make the bottom wire:
         rectPartTemp = extrude(botSketch, zMid - zBot)
-        rectPart = copy(rectPartTemp, moveVec=(0., 0., zBot - offset))
+        rectPart = copy_move(rectPartTemp, moveVec=(0., 0., zBot - offset))
         delete(rectPartTemp)
         # make the cap of the wire:
-        topSketchTemp = copy(topSketch, moveVec=(
+        topSketchTemp = copy_move(topSketch, moveVec=(
             0., 0., zTop - zMid + 2 * offset))
         capPartTemp = doc.addObject('Part::Loft', sketch.Name + '_cap')
         capPartTemp.Sections = [midSketch, topSketchTemp]
         capPartTemp.Solid = True
         doc.recompute()
-        capPart = copy(capPartTemp, moveVec=(0., 0., zMid - offset))
+        capPart = copy_move(capPartTemp, moveVec=(0., 0., zMid - offset))
         delete(capPartTemp)
         delete(topSketchTemp)
         delete(topSketch)
@@ -437,7 +450,7 @@ class modelBuilder:
         if treatment == 'standard':
             # Apparently the offset function is buggy for very small offsets...
             if offsetVal < 1e-5:
-                offsetDupe = copy(obj)
+                offsetDupe = copy_move(obj)
             else:
                 offset = self.doc.addObject("Part::Offset")
                 offset.Source = obj
@@ -445,7 +458,7 @@ class modelBuilder:
                 offset.Mode = 0
                 offset.Join = 2
                 self.doc.recompute()
-                offsetDupe = copy(offset)
+                offsetDupe = copy_move(offset)
                 self.doc.recompute()
                 delete(offset)
         elif treatment == 'wire':
@@ -715,7 +728,7 @@ class modelBuilder:
                          consumeInputs=False)
             self.trash.append(H)
             if self.fillShells:
-                G = copy(H)
+                G = copy_move(H)
             else:
                 U = self._gen_U(layerNum, objID)
                 G = subtract(H, U)

@@ -5,6 +5,7 @@
 
 
 import FreeCAD
+import Draft
 import Part
 
 import auxiliary

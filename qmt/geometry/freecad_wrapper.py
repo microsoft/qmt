@@ -26,18 +26,15 @@ def fcwrapper(pyenv='python2', instruction=None, data=None):
                             stdin=subprocess.PIPE,
                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output = proc.communicate(serial_data)
-    # output[1] not checked because stderr is used for mere warnings too often
+
+    # output[1] not checked because stderr is used for mere warnings too often.
     if proc.returncode != 0:
-        raise ValueError('pywrapper error ' + str(proc.returncode) + ' (' + str(output[1]) + ')')
+        print(output[1].decode())
+        print(os.linesep + ' --- END OF WRAPPED STDERR ---' + os.linesep)
+        raise ValueError('pywrapper returned ' + str(proc.returncode))
 
-    # The data should be passed out as a byte stream. The initial stuff written by freeCAD is
-    # in position 0, then the seperateor string "MAGICTQMTRANSFERBYTES" is used to mark the start
-    # of the serialized data stream to send back:
-    serial_data = output[0].decode().split('MAGICTQMTRANSFERBYTES')[-1].encode()
+    # The returned serialised byte stream is demarcated by the separator string
+    # "MAGICQMTRANSFERBYTES". Most data preceding the separator corresponds to
+    # FreeCAD notifications and gets discarded.
+    serial_data = output[0].decode().split('MAGICQMTRANSFERBYTES')[-1].encode()
     return pickle.loads(serial_data)
-
-    # try:
-    #     serial_data = ''.join(output[0]).split('MAGICTQMTRANSFERBYTES')[-1]
-    #     return pickle.loads(serial_data)
-    # except:
-    #     return output[0]
