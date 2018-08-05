@@ -97,7 +97,7 @@ class Part3D(object):
         self.fill_litho = fill_litho
         self.mesh_max_size = mesh_max_size
         self.mesh_min_size = mesh_min_size
-        self.mesh_groth_rate = mesh_growth_rate
+        self.mesh_growth_rate = mesh_growth_rate
         self.mesh_scale_vector = mesh_scale_vector
         self.boundary_condition = boundary_condition
         if subtract_list is None:
