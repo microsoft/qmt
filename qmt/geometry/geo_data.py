@@ -126,10 +126,11 @@ class Geo3DData(Data):
         super(Geo3DData, self).__init__()
         self.build_order = []
         self.parts = {}
-        # ~ self.serial_FCdoc
-        # ~ self.parts = {label: part}
+        self.mesh = None # Holding container for the meshed geometry
+        self.serial_FCdoc = None # serialized FreeCAD document for this geometry
+        self.parts = {} # dict of parts in this geometry
 
-    def get_parts():
+    def get_parts(self):
         return self.parts
         # ~ parts[0].label == build_order[0]
         # TODO with only part names: self.build_order
@@ -172,7 +173,8 @@ class Geo3DData(Data):
         """
         if file_path == None:
             file_path = self.label + '.fcstd'
-        data = pickle.loads(self.serial_fcdoc)
+        import codecs
+        data = codecs.decode(self.serial_fcdoc.encode(), 'base64')
         with open(file_path, 'wb') as of:
             of.write(data)
         return file_path

@@ -28,6 +28,7 @@ from qmt.geometry.freecad.fileIO import (updateParams, exportCAD, exportMeshed)
 
 def build3d(opts):  # TODO: smarter name, this is the full 3D build
 
+    import codecs
     import hashlib
     instance_hash = hashlib.sha256(str(opts)).hexdigest()
     doc = FreeCAD.ActiveDocument
@@ -49,14 +50,14 @@ def build3d(opts):  # TODO: smarter name, this is the full 3D build
             tmp_path = 'tmp_' + label + '_' + instance_hash + '.stp'
             exportCAD(built_parts[label], tmp_path)
             with open(tmp_path, 'rb') as f:
-                opts['serial_stp_parts'][label] = pickle.dumps(f.read())
+                opts['serial_stp_parts'][label] = codecs.encode(f.read(), 'base64')
             os.remove(tmp_path)
 
     # store a serialised FreeCAD document representation in opts
     tmp_path = 'tmp_built_' + instance_hash + '.fcstd'
     doc.saveAs(tmp_path)
     with open(tmp_path, 'rb') as f:
-        opts['serial_fcdoc'] = pickle.dumps(f.read())
+        opts['serial_fcdoc'] = codecs.encode(f.read(), 'base64')
     os.remove(tmp_path)
 
     return opts

@@ -30,6 +30,8 @@ def main():
 
     elif instruction == 'regionMap':
         pass
+        # ~ ret = qms.regionmap(data[])
+        # ~ send_back(ret)
 
     else:
         raise ValueError('Not a registered FreeCAD QMT instruction')
@@ -57,7 +59,7 @@ def activate_doc_from(opts):
 
 def send_back(data):
     """Go away."""
-    sys.stdout.write('MAGICTQMTRANSFERBYTES'+pickle.dumps(data))
+    sys.stdout.write('MAGICTQMTRANSFERBYTES' + pickle.dumps(data))
 
 
 if __name__ == '__main__':
