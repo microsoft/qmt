@@ -52,6 +52,7 @@ class Geo2DData(Data):
         super(Geo2DData, self).__init__()
         self.parts = {}
         self.edges = {}
+        self.build_order = []
 
     def add_part(self, part_name, part, overwrite=False):
         """
@@ -66,6 +67,7 @@ class Geo2DData(Data):
             raise ValueError("Attempted to overwrite the part " + part_name + ".")
         else:
             self.parts[part_name] = part
+            self.build_order += [part_name]
 
     def remove_part(self, part_name, ignore_if_absent=False):
         """
@@ -76,6 +78,7 @@ class Geo2DData(Data):
         """
         if part_name in self.parts:
             del self.parts[part_name]
+            self.build_order.remove(part_name)
         else:
             if not ignore_if_absent:
                 raise ValueError(
@@ -94,6 +97,7 @@ class Geo2DData(Data):
             raise ValueError("Attempted to overwrite the edge " + edge_name + ".")
         else:
             self.edges[edge_name] = edge
+            self.build_order += [edge_name]
 
     def remove_edge(self, edge_name, ignore_if_absent=False):
         """
@@ -104,6 +108,7 @@ class Geo2DData(Data):
         """
         if edge_name in self.edges:
             del self.edges[edge_name]
+            self.build_order.remove(edge_name)
         else:
             if not ignore_if_absent:
                 raise ValueError(
