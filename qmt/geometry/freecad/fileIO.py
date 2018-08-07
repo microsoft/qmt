@@ -5,39 +5,11 @@
 """Functions that deal with file i/o."""
 
 
+import os
+
 import FreeCAD
 import Part
 import Mesh
-import qmt as QMT
-
-
-# ~ def setupModelFile(fileName):
-    # ~ ''' Makes an empty json model file and sets up a spreadsheet to sync with it.
-    # ~ '''
-    # ~ doc = FreeCAD.ActiveDocument
-    # ~ objList = doc.Objects
-    # ~ objNames = [x.Name for x in objList]
-    # ~ if 'modelFilePath' in objNames:
-        # ~ doc.removeObject('modelFilePath')
-    # ~ doc.recompute()
-    # ~ spreadSheet = doc.addObject('Spreadsheet::Sheet', 'modelFilePath')
-    # ~ spreadSheet.set('A1', 'Path to model file:')
-    # ~ spreadSheet.set('B1', fileName)
-    # ~ spreadSheet.setAlias('B1', 'modelFilePath')
-    # ~ spreadSheet.setColumnWidth('A', 200)
-    # ~ myModelFile = QMT.Model(modelPath=fileName)
-    # ~ myModelFile.loadModel()
-    # ~ myModelFile.saveModel()
-    # ~ doc.recompute()
-
-
-# ~ def getModel():
-    # ~ ''' return the model file associated with the current FreeCAD document.
-    # ~ '''
-    # ~ modelPath = FreeCAD.ActiveDocument.modelFilePath.modelFilePath
-    # ~ myModel = QMT.Model(modelPath=modelPath)
-    # ~ myModel.loadModel()
-    # ~ return myModel
 
 
 def exportMeshed(obj, fileName):
@@ -53,15 +25,17 @@ def exportMeshed(obj, fileName):
     return meshedObj
 
 
-def exportCAD(obj, fileName):
-    ''' Export a STEP (Standard for the Exchange of Product Data) 3D CAD file
-    for the object.
+def exportCAD(obj_list, file_name):
+    ''' Export a STEP (Standard for the Exchange of Product Data) 3D CAD file.
+
+    :param list obj_list:       List of objects to export.
+    :param string file_name:    Name of file to create and export into.
     '''
     # The export format is determined by the extension, so we should check it:
-    if (fileName[-5:] == '.step') or (fileName[-4:] == '.stp'):
-        Part.export([obj], fileName)
+    if (file_name[-5:] == '.step') or (file_name[-4:] == '.stp'):
+        Part.export(obj_list, file_name)
     else:
-        raise ValueError(fileName + ' is not a supported extension (.stp, .step)')
+        raise ValueError(file_name + ' is not a supported extension (.stp, .step)')
 
 
 # TODO: this is general, not fileIO
@@ -76,7 +50,7 @@ def updateParams(doc, paramDict):
     # ~ else:
         # ~ myModel = passModel
     # ~ paramDict = myModel.modelDict['geometricParams']
-    
+
     # We only want to do something if geometric parameters are defined
     # in the model. This means that if we have old parameters sitting
     # in the FreeCAD file, they won't get wiped out if we comment out
@@ -105,45 +79,18 @@ def updateParams(doc, paramDict):
                 pass
             else:
                 raise ValueError('Unknown geometric parameter type.')
-        
+
         doc.recompute()
 
 
-# ~ def updateParams(passModel=None):
-    # ~ ''' Update the parameters in the modelParams spreadsheet to reflect the
-        # ~ current value in the model file.
-    # ~ '''
-    # ~ doc = FreeCAD.ActiveDocument
-    # ~ if passModel is None:
-        # ~ myModel = getModel()
-    # ~ else:
-        # ~ myModel = passModel
-    # ~ paramDict = myModel.modelDict['geometricParams']
-    # ~ # We only want to do something if geometric parameters are defined
-    # ~ # in the model. This means that if we have old parameters sitting
-    # ~ # in the FreeCAD file, they won't get wiped out if we comment out
-    # ~ # a geometry sweep in the model script.
-    # ~ if paramDict:
-        # ~ # Internal: unconditional removeObject on spreadSheet breaks param dependencies.
-        # ~ try:
-            # ~ spreadSheet = doc.modelParams
-            # ~ spreadSheet.clearAll()  # clear existing spreadsheet
-        # ~ except:
-            # ~ doc.removeObject('modelParams')  # otherwise it was not a good spreadsheet
-            # ~ spreadSheet = doc.addObject('Spreadsheet::Sheet', 'modelParams')
-        # ~ spreadSheet.set('A1', 'paramName')
-        # ~ spreadSheet.set('B1', 'paramValue')
-        # ~ spreadSheet.setColumnWidth('A', 200)
-        # ~ spreadSheet.setStyle('A1:B1', 'bold', 'add')
-        # ~ for i, key in enumerate(paramDict):
-            # ~ paramType = paramDict[key][1]
-            # ~ if paramType == 'freeCAD':
-                # ~ idx = str(i + 2)
-                # ~ spreadSheet.set('A' + idx, key)
-                # ~ spreadSheet.set('B' + idx, str(paramDict[key][0]))
-                # ~ spreadSheet.setAlias('B' + idx, str(key))
-            # ~ elif paramType == 'python':
-                # ~ pass
-            # ~ else:
-                # ~ raise ValueError('Unknown geometric parameter type.')
-        # ~ doc.recompute()
+def store_serial(target_dict, target_label, save_fct, ext, obj):
+    '''Store a serialised representation of save_fct(obj, temporary_file.ext)
+    inside target_dict[target_label].
+    '''
+    import codecs
+    import uuid
+    tmp_path = 'tmp_' + uuid.uuid4().hex + '.' + ext
+    save_fct(obj, tmp_path)
+    with open(tmp_path, 'rb') as f:
+        target_dict[target_label] = codecs.encode(f.read(), 'base64')
+    os.remove(tmp_path)

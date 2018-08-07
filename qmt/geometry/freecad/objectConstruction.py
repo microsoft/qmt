@@ -22,70 +22,74 @@ from qmt.geometry.freecad.geomUtils import (extrude, copy_move, genUnion,
                                             crossSection)
 from qmt.geometry.freecad.sketchUtils import (findSegments, splitSketch, extendSketch,
                                               findEdgeCycles, draftOffset)
-from qmt.geometry.freecad.fileIO import (updateParams, exportCAD, exportMeshed)
+from qmt.geometry.freecad.fileIO import (updateParams, exportCAD, exportMeshed, store_serial)
 
 
 def build(opts):
+    '''Build the 3D geometry.
 
-    import codecs
-    import hashlib
-    instance_hash = hashlib.sha256(str(opts)).hexdigest()
+    :param dict opts:   Options dict in the QMT 3D geometry input format.
+    :return dict:       Modified options dict.
+    '''
     doc = FreeCAD.ActiveDocument
 
+    # Update the model parameters
     if 'params' in opts:
-        # extend params dictionary to original parts schema
+        # Extend params dictionary to original parts schema
         fcdict = {key: (value, 'freeCAD') for (key, value) in opts['params'].items()}
         updateParams(doc, fcdict)
 
-    # build the parts and store serialised STEP representations in opts
+    # Build the parts
     if 'input_parts' in opts:
-        built_parts = {}
-        for input_part in opts['input_parts']:
-            built_parts[input_part.label] = build_part(input_part)
+        built_parts = {}  # TODO: this can be folded
 
+        # TODO: these will return a part obj instead of parts list
+        for input_part in opts['input_parts']:
+            if input_part.directive == 'extrude':
+                parts = build_extrude(input_part)
+            elif input_part.directive == 'SAG':
+                parts = build_sag(input_part)
+            # ~ elif input_part.directive == 'wire':
+                # ~ part = build_wire(input_part)
+            # ~ elif input_part.directive == 'wireShell':
+                # ~ part = build_wireShell(input_part)
+            # ~ elif input_part.directive == 'lithography':
+                # ~ part = build_litho(input_part)
+            # TODO: part3d that just passes along
+            #       and drop trash
+            else:
+                raise ValueError('Directive ' + input_part.directive +
+                                 ' is not a recognized directive type.')
+            built_parts[input_part.label] = parts
+
+        doc.recompute()
+        # Store serialised STEP representations in opts
         if 'serial_stp_parts' not in opts:
             opts['serial_stp_parts'] = {}
         for label in built_parts:
-            tmp_path = 'tmp_' + label + '_' + instance_hash + '.stp'
-            exportCAD(built_parts[label], tmp_path)
-            with open(tmp_path, 'rb') as f:
-                opts['serial_stp_parts'][label] = codecs.encode(f.read(), 'base64')
-            os.remove(tmp_path)
+            store_serial(opts['serial_stp_parts'], label,
+                         exportCAD, 'stp', built_parts[label])
 
-    # store a serialised FreeCAD document representation in opts
-    tmp_path = 'tmp_built_' + instance_hash + '.fcstd'
-    doc.saveAs(tmp_path)
-    with open(tmp_path, 'rb') as f:
-        opts['serial_fcdoc'] = codecs.encode(f.read(), 'base64')
-    os.remove(tmp_path)
+        # ~ from uuid import uuid4
+        # ~ import codecs
+        # ~ import hashlib
+        # ~ instance_hash = hashlib.sha256(str(opts)).hexdigest()
+        # ~ if 'serial_stp_parts' not in opts:
+            # ~ opts['serial_stp_parts'] = {}
+        # ~ for label in built_parts:
+            # ~ tmp_path = 'tmp_' + label + '_' + instance_hash + '.stp'
+            # ~ exportCAD(built_parts[label], tmp_path)
+            # ~ with open(tmp_path, 'rb') as f:
+                # ~ opts['serial_stp_parts'][label] = codecs.encode(f.read(), 'base64')
+            # ~ os.remove(tmp_path)
+
+    doc.recompute()
+    store_serial(opts, 'serial_fcdoc', (lambda _,path: doc.saveAs(path)), 'fcstd', None)
 
     return opts
 
-
-def build_part(part):
-    # ~ partDict = self.model.modelDict['3DParts'][partName]
-    if part.directive == 'extrude':
-        obj = build_extrude(part)
-    # ~ elif part.directive == 'wire':
-        # ~ objs = self._build_wire(part)
-    # ~ elif part.directive == 'wireShell':
-        # ~ objs = self._build_wire_shell(part)
-    elif part.directive == 'SAG':
-        obj = build_SAG(part)
-    # ~ elif part.directive == 'lithography':
-        # ~ objs = self._build_litho(part)
-    else:
-        raise ValueError('Directive ' + part.directive +
-                         ' is not a recognized directive type.')
-    # ~ self._buildPartsDict[partName] = objs
-    # ~ for obj in objs:
-        # ~ self.model.registerCadPart(partName, obj.Name, None)
-    return obj
-
-
 def build_extrude(part):
-    """Build an extrude part."""
-    # ~ partDict = self.model.modelDict['3DParts'][partName]
+    '''Build an extrude part.'''
     assert part.directive == 'extrude'
     z0 = part.z0
     deltaz = part.thickness
@@ -93,14 +97,16 @@ def build_extrude(part):
     sketch = doc.getObject(part.fc_name)
     splitSketches = splitSketch(sketch)
     extParts = []
-    for sketch in splitSketches:
+    for sketch in splitSketches:  # ToDo: re-union the extParts
         extParts.append(extrudeBetween(sketch, z0, z0 + deltaz, name=part.label))
         delete(sketch)
     doc.recompute()
     return extParts
 
 
-def build_SAG(part, offset=0.):
+def build_sag(part, offset=0.):
+    '''Build a SAG part.'''
+    assert part.directive == 'SAG'
     zBot = part.z0
     zMid = part.z_middle
     zTop = part.thickness + zBot
@@ -108,9 +114,25 @@ def build_SAG(part, offset=0.):
     tOut = part.t_out
     doc = FreeCAD.ActiveDocument
     sketch = doc.getObject(part.fc_name)
-    SAG = makeSAG(sketch, zBot, zMid, zTop, tIn, tOut, offset=offset)
-    SAG.Label = part.label
-    return [SAG]
+    sag = makeSAG(sketch, zBot, zMid, zTop, tIn, tOut, offset=offset)
+    sag.Label = part.label
+    doc.recompute()
+    return [sag]
+
+
+def build_wire(part, offset=0.):
+    '''Build a wire part.'''
+    # ~ partDict = self.model.modelDict['3DParts'][partName]
+    # ~ zBottom = self._fetch_geo_param(partDict['z0'])
+    # ~ width = self._fetch_geo_param(partDict['thickness'])
+    # ~ sketch = self.doc.getObject(partDict['fcName'])
+    assert part.directive == 'wire'
+    zBottom = part.z0
+    width = part.thickness
+    sketch = part.fc_name
+    wire = buildWire(sketch, zBottom, width, offset=offset)
+    wire.Label = partName
+    return [wire]
 
 
 ################################################################################
@@ -236,17 +258,11 @@ def makeSAG(sketch, zBot, zMid, zTop, tIn, tOut, offset=0.):
 
     sketchList = splitSketch(sketch)
     returnParts = []
-    import sys
-    sys.stderr.write("CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC")
-    sys.stderr.write(str(sketchList))
-    sys.stderr.write("DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD")
     for tempSketch in sketchList:
         # TODO: right now, if we try to taper the top of the SAG wire to a point, this
         # breaks, since the offset of topSketch is empty. We should detect and handle this.
         # For now, just make sure that the wire has a small flat top.
         botSketch = draftOffset(tempSketch, offset)  # the base of the wire
-        sys.stderr.write("AAAAAAAAAAAAAAAAAAAAAAAA")
-        sys.stderr.write(str(f + d - tIn))
         midSketch = draftOffset(tempSketch, f + d - tIn)  # the base of the cap
         topSketch = draftOffset(tempSketch, -tIn + f)  # the top of the cap
         delete(tempSketch)  # remove the copied sketch part
@@ -308,30 +324,30 @@ class modelBuilder:
         for obj in objs:
             self.model.registerCadPart(partName, obj.Name, None)
 
-    def exportBuiltParts(self, stepFileDir=None, stlFileDir=None):
-        # Now that we are ready to export, we first want to merge all of the
-        # 3D renders corresponding to a single shape into one entity:
-        totalObjsDict = {}
-        for partName in self._buildPartsDict.keys():
-            objsList = self._buildPartsDict[partName]
-            mergedObj = genUnion(objsList, consumeInputs=True)
-            mergedObj.Label = partName
-            totalObjsDict[partName] = mergedObj
-        # Now that we have merged the objects, we want to center them  in the x-y
-        # plane so the distances aren't ridiculous:
-        centerObjects(totalObjsDict.values())
-        # Finally, we go through the dictionary and export:
-        for partName in totalObjsDict.keys():
-            obj = totalObjsDict[partName]
-            objFCName = obj.Name
-            if stepFileDir is not None:
-                filePath = stepFileDir + '/' + partName + '.step'
-                exportCAD(obj, filePath)
-                self.model.registerCadPart(
-                    partName, objFCName, filePath, reset=True)
-            if stlFileDir is not None:
-                filePath = stlFileDir + '/' + partName + '.stl'
-                exportMeshed(obj, filePath)
+    # ~ def exportBuiltParts(self, stepFileDir=None, stlFileDir=None):
+        # ~ # Now that we are ready to export, we first want to merge all of the
+        # ~ # 3D renders corresponding to a single shape into one entity:
+        # ~ totalObjsDict = {}
+        # ~ for partName in self._buildPartsDict.keys():
+            # ~ objsList = self._buildPartsDict[partName]
+            # ~ mergedObj = genUnion(objsList, consumeInputs=True)
+            # ~ mergedObj.Label = partName
+            # ~ totalObjsDict[partName] = mergedObj
+        # ~ # Now that we have merged the objects, we want to center them  in the x-y
+        # ~ # plane so the distances aren't ridiculous:
+        # ~ centerObjects(totalObjsDict.values())
+        # ~ # Finally, we go through the dictionary and export:
+        # ~ for partName in totalObjsDict.keys():
+            # ~ obj = totalObjsDict[partName]
+            # ~ objFCName = obj.Name
+            # ~ if stepFileDir is not None:
+                # ~ filePath = stepFileDir + '/' + partName + '.step'
+                # ~ exportCAD(obj, filePath)
+                # ~ self.model.registerCadPart(
+                    # ~ partName, objFCName, filePath, reset=True)
+            # ~ if stlFileDir is not None:
+                # ~ filePath = stlFileDir + '/' + partName + '.stl'
+                # ~ exportMeshed(obj, filePath)
 
     def saveFreeCADState(self, fileName):
         """Save a copy of the freeCAD model and do garbage collection."""

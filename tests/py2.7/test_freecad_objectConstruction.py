@@ -21,6 +21,7 @@ def test_build(fix_exampleDir, fix_FCDoc):
     }
     fix_FCDoc.load(opts['file_path'])
     build(opts)
+    #TODO
 
 
 def test_build_extrude(fix_FCDoc, fix_hexagon_sketch):
@@ -29,6 +30,7 @@ def test_build_extrude(fix_FCDoc, fix_hexagon_sketch):
     input_part = Part3D('label', sketch.Name, 'extrude', 'metal_gate',
                         material='Au', thickness=10)
     built_part = build_extrude(input_part)
+    #TODO
 
 # ~ def setup_function():
     # ~ global myDoc

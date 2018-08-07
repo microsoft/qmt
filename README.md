@@ -16,7 +16,7 @@ and then use `pip` inside this repository
 
     pip install .
 
-Optionally in development mode (symlinks) and per user (not system wide)
+Optionally per user (not system wide) and in development mode (symlinks)
 
     pip install --user -e .
 

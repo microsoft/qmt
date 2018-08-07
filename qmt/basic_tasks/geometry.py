@@ -84,9 +84,11 @@ class Geometry3D(Task):
 
         geo = Geo3DData()
         geo.serial_fcdoc = ret['serial_fcdoc']
+        # ~ print([p.label + ":" + p.fc_name for p in current_options['input_parts'] ])
+        # ~ print(ret['serial_stp_parts'].keys())
         for part in current_options['input_parts']:
-            geo.build_order.append(part.label)
             part.serial_stp = ret['serial_stp_parts'][part.label]
             geo.add_part(part.label, part)
+            geo.build_order.append(part.label)
 
         return geo

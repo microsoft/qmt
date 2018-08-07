@@ -178,7 +178,7 @@
 <span class="sd">        :param options: Dict containing information on the meshing of the object. This should be of the form...</span>
 <span class="sd">        :param name: Name of the task</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">Mesh1D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">([</span><span class="n">geo_task</span><span class="p">],</span> <span class="n">options</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Mesh</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">([</span><span class="n">geo_task</span><span class="p">],</span> <span class="n">options</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_solve_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_result_list</span><span class="p">,</span> <span class="n">current_options</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -198,16 +198,24 @@
 <span class="sd">        :param options: Dict containing information on the meshing of the object. This should be of the form...</span>
 <span class="sd">        :param name: Name of the task</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">Mesh2D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">([</span><span class="n">geo_task</span><span class="p">],</span> <span class="n">options</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Mesh</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">([</span><span class="n">geo_task</span><span class="p">],</span> <span class="n">options</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
         <span class="c1"># assert type(geo_task) is Geometry2D</span>
     <span class="k">def</span> <span class="nf">_solve_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_result_list</span><span class="p">,</span> <span class="n">current_options</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        :param list input_result_list: Singleton list with a Geo1DData element.</span>
 <span class="sd">        :param dict current_options: Dict from above.</span>
-<span class="sd">        :return Mesh2DData mesh_1d: Output mesh</span>
+<span class="sd">        :return Mesh2DData mesh_2d: Output mesh</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">qms.meshing</span> <span class="k">import</span> <span class="n">Mesh2dData</span>
         <span class="n">geo_result_instance</span> <span class="o">=</span> <span class="n">input_result_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">geo_result_instance</span></div>
+        <span class="n">mesh_2d</span> <span class="o">=</span> <span class="n">Mesh2dData</span><span class="p">(</span><span class="n">geo_result_instance</span><span class="o">.</span><span class="n">parts</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">current_options</span><span class="p">[</span><span class="s1">&#39;mesh_type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;difference&#39;</span><span class="p">:</span>
+            <span class="n">mesh_2d</span><span class="o">.</span><span class="n">construct_difference</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">current_options</span><span class="p">[</span><span class="s1">&#39;mesh_type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;element&#39;</span><span class="p">:</span>
+            <span class="n">mesh_2d</span><span class="o">.</span><span class="n">construct_element</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unrecognized meshing type: &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">current_options</span><span class="p">[</span><span class="s1">&#39;mesh_type&#39;</span><span class="p">]))</span>
+        <span class="k">return</span> <span class="n">mesh_2d</span></div>
 
 
 <div class="viewcode-block" id="Mesh3D"><a class="viewcode-back" href="../../../source/qmt.ms_tasks.html#qmt.ms_tasks.mesh.Mesh3D">[docs]</a><span class="k">class</span> <span class="nc">Mesh3D</span><span class="p">(</span><span class="n">Mesh</span><span class="p">):</span>
@@ -218,7 +226,7 @@
 <span class="sd">        :param options: Dict containing information on the meshing of the object. This should be of the form...</span>
 <span class="sd">        :param name: Name of the task</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">Mesh3D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">([</span><span class="n">geo_task</span><span class="p">],</span> <span class="n">options</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Mesh</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">([</span><span class="n">geo_task</span><span class="p">],</span> <span class="n">options</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
         <span class="c1"># assert type(geo_task) is Geometry3D</span>
     <span class="k">def</span> <span class="nf">_solve_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_result_list</span><span class="p">,</span> <span class="n">current_options</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>

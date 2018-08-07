@@ -108,8 +108,6 @@ class Part3D(object):
         self.serial_stp = None # This gets set on geometry build
 
 
-
-
     def write_stp(self, file_path=None):
         """Write part geometry to a STEP file.
 

@@ -1,5 +1,5 @@
-import pickle
 from qmt.task_framework import Data
+
 
 class Geo1DData(Data):
     def __init__(self):
@@ -111,6 +111,7 @@ class Geo2DData(Data):
             else:
                 pass
 
+
 class Geo3DData(Data):
     def __init__(self):
         """
@@ -121,15 +122,9 @@ class Geo3DData(Data):
         super(Geo3DData, self).__init__()
         self.build_order = []
         self.parts = {}
-        # ~ self.serial_FCdoc
-        # ~ self.parts = {label: part}
 
-    def get_parts():
+    def get_parts(self):
         return self.parts
-        # ~ parts[0].label == build_order[0]
-        # TODO with only part names: self.build_order
-
-    # TODO: serialisation
 
     def add_part(self, part_name, part, overwrite=False):
         """
@@ -142,7 +137,6 @@ class Geo3DData(Data):
             raise ValueError("Attempted to overwrite the part " + part_name + ".")
         else:
             self.parts[part_name] = part
-
 
     def remove_part(self, part_name, ignore_if_absent=False):
         """
@@ -160,13 +154,8 @@ class Geo3DData(Data):
             else:
                 pass
 
-    def write_fcstd(self, file_path=None):
-        """Write geometry to a fcstd file.
-
-        Returns the fcstd file path.
-        """
-        if file_path == None:
-            file_path = self.label + '.fcstd'
+    def write_fcstd(self, file_path):
+        """Write geometry to a fcstd file."""
         import codecs
         data = codecs.decode(self.serial_fcdoc.encode(), 'base64')
         with open(file_path, 'wb') as of:

@@ -158,22 +158,141 @@
 <span class="sd">&quot;&quot;&quot;Functions that perform composite executions.&quot;&quot;&quot;</span>
 
 
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">six</span> <span class="k">import</span> <span class="n">iteritems</span><span class="p">,</span> <span class="n">text_type</span>
+<span class="kn">import</span> <span class="nn">pickle</span>
+
 <span class="kn">import</span> <span class="nn">FreeCAD</span>
 <span class="kn">import</span> <span class="nn">Draft</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">six</span> <span class="k">import</span> <span class="n">iteritems</span><span class="p">,</span> <span class="n">text_type</span>
 
 <span class="c1"># TODO: use namespace in code</span>
 <span class="kn">from</span> <span class="nn">qmt.geometry.freecad.auxiliary</span> <span class="k">import</span> <span class="o">*</span>
-<span class="kn">from</span> <span class="nn">qmt.geometry.freecad.geomUtils</span> <span class="k">import</span> <span class="p">(</span><span class="n">extrude</span><span class="p">,</span> <span class="n">copy</span><span class="p">,</span> <span class="n">genUnion</span><span class="p">,</span>
-                                  <span class="n">getBB</span><span class="p">,</span> <span class="n">makeBB</span><span class="p">,</span> <span class="n">makeHexFace</span><span class="p">,</span>
-                                  <span class="n">extrudeBetween</span><span class="p">,</span> <span class="n">centerObjects</span><span class="p">,</span> <span class="n">intersect</span><span class="p">,</span>
-                                  <span class="n">checkOverlap</span><span class="p">,</span> <span class="n">subtract</span><span class="p">,</span>
-                                  <span class="n">crossSection</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">qmt.geometry.freecad.geomUtils</span> <span class="k">import</span> <span class="p">(</span><span class="n">extrude</span><span class="p">,</span> <span class="n">copy_move</span><span class="p">,</span> <span class="n">genUnion</span><span class="p">,</span>
+                                            <span class="n">getBB</span><span class="p">,</span> <span class="n">makeBB</span><span class="p">,</span> <span class="n">makeHexFace</span><span class="p">,</span>
+                                            <span class="n">extrudeBetween</span><span class="p">,</span> <span class="n">centerObjects</span><span class="p">,</span> <span class="n">intersect</span><span class="p">,</span>
+                                            <span class="n">checkOverlap</span><span class="p">,</span> <span class="n">subtract</span><span class="p">,</span>
+                                            <span class="n">crossSection</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">qmt.geometry.freecad.sketchUtils</span> <span class="k">import</span> <span class="p">(</span><span class="n">findSegments</span><span class="p">,</span> <span class="n">splitSketch</span><span class="p">,</span> <span class="n">extendSketch</span><span class="p">,</span>
                                               <span class="n">findEdgeCycles</span><span class="p">,</span> <span class="n">draftOffset</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">qmt.geometry.freecad.fileIO</span> <span class="k">import</span> <span class="p">(</span><span class="n">updateParams</span><span class="p">,</span> <span class="n">exportCAD</span><span class="p">,</span> <span class="n">exportMeshed</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">qmt.geometry.freecad.fileIO</span> <span class="k">import</span> <span class="p">(</span><span class="n">updateParams</span><span class="p">,</span> <span class="n">exportCAD</span><span class="p">,</span> <span class="n">exportMeshed</span><span class="p">,</span> <span class="n">store_serial</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="build"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.build">[docs]</a><span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="n">opts</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Build the 3D geometry.</span>
+
+<span class="sd">    :param dict opts:   Options dict in the QMT 3D geometry input format.</span>
+<span class="sd">    :return dict:       Modified options dict.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span>
+
+    <span class="c1"># Update the model parameters</span>
+    <span class="k">if</span> <span class="s1">&#39;params&#39;</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">:</span>
+        <span class="c1"># Extend params dictionary to original parts schema</span>
+        <span class="n">fcdict</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;freeCAD&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="n">updateParams</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">fcdict</span><span class="p">)</span>
+
+    <span class="c1"># Build the parts</span>
+    <span class="k">if</span> <span class="s1">&#39;input_parts&#39;</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">:</span>
+        <span class="n">built_parts</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># TODO: this can be folded</span>
+        <span class="c1"># ~ print(opts[&#39;input_parts&#39;])</span>
+        <span class="k">for</span> <span class="n">input_part</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">[</span><span class="s1">&#39;input_parts&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">input_part</span><span class="o">.</span><span class="n">directive</span> <span class="o">==</span> <span class="s1">&#39;extrude&#39;</span><span class="p">:</span>
+                <span class="n">parts</span> <span class="o">=</span> <span class="n">build_extrude</span><span class="p">(</span><span class="n">input_part</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">input_part</span><span class="o">.</span><span class="n">directive</span> <span class="o">==</span> <span class="s1">&#39;SAG&#39;</span><span class="p">:</span>
+                <span class="n">parts</span> <span class="o">=</span> <span class="n">build_sag</span><span class="p">(</span><span class="n">input_part</span><span class="p">)</span>
+            <span class="c1"># ~ elif input_part.directive == &#39;wire&#39;:</span>
+                <span class="c1"># ~ part = build_wire(input_part)</span>
+            <span class="c1"># ~ elif input_part.directive == &#39;wireShell&#39;:</span>
+                <span class="c1"># ~ part = build_wireShell(input_part)</span>
+            <span class="c1"># ~ elif input_part.directive == &#39;wireShell&#39;:</span>
+                <span class="c1"># ~ part = build_wireShell(input_part)</span>
+            <span class="c1"># ~ elif input_part.directive == &#39;lithography&#39;:</span>
+                <span class="c1"># ~ part = build_litho(input_part)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Directive &#39;</span> <span class="o">+</span> <span class="n">input_part</span><span class="o">.</span><span class="n">directive</span> <span class="o">+</span>
+                                 <span class="s1">&#39; is not a recognized directive type.&#39;</span><span class="p">)</span>
+            <span class="n">built_parts</span><span class="p">[</span><span class="n">input_part</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">parts</span>
+
+        <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
+        <span class="c1"># Store serialised STEP representations in opts</span>
+        <span class="k">if</span> <span class="s1">&#39;serial_stp_parts&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">:</span>
+            <span class="n">opts</span><span class="p">[</span><span class="s1">&#39;serial_stp_parts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;AAAAAAAAAA&quot;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">built_parts</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">built_parts</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">sub_part</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">built_parts</span><span class="p">[</span><span class="n">label</span><span class="p">]):</span>
+                <span class="n">store_serial</span><span class="p">(</span><span class="n">opts</span><span class="p">[</span><span class="s1">&#39;serial_stp_parts&#39;</span><span class="p">],</span> <span class="n">label</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
+                             <span class="n">exportCAD</span><span class="p">,</span> <span class="s1">&#39;stp&#39;</span><span class="p">,</span> <span class="n">sub_part</span><span class="p">)</span>
+
+        <span class="c1"># ~ from uuid import uuid4</span>
+        <span class="c1"># ~ import codecs</span>
+        <span class="c1"># ~ import hashlib</span>
+        <span class="c1"># ~ instance_hash = hashlib.sha256(str(opts)).hexdigest()</span>
+        <span class="c1"># ~ if &#39;serial_stp_parts&#39; not in opts:</span>
+            <span class="c1"># ~ opts[&#39;serial_stp_parts&#39;] = {}</span>
+        <span class="c1"># ~ for label in built_parts:</span>
+            <span class="c1"># ~ tmp_path = &#39;tmp_&#39; + label + &#39;_&#39; + instance_hash + &#39;.stp&#39;</span>
+            <span class="c1"># ~ exportCAD(built_parts[label], tmp_path)</span>
+            <span class="c1"># ~ with open(tmp_path, &#39;rb&#39;) as f:</span>
+                <span class="c1"># ~ opts[&#39;serial_stp_parts&#39;][label] = codecs.encode(f.read(), &#39;base64&#39;)</span>
+            <span class="c1"># ~ os.remove(tmp_path)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;BBBBBB&quot;</span><span class="p">)</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
+    <span class="n">store_serial</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="s1">&#39;serial_fcdoc&#39;</span><span class="p">,</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">_</span><span class="p">,</span><span class="n">path</span><span class="p">:</span> <span class="n">doc</span><span class="o">.</span><span class="n">saveAs</span><span class="p">(</span><span class="n">path</span><span class="p">)),</span> <span class="s1">&#39;fcstd&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">opts</span></div>
+
+<div class="viewcode-block" id="build_extrude"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.build_extrude">[docs]</a><span class="k">def</span> <span class="nf">build_extrude</span><span class="p">(</span><span class="n">part</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Build an extrude part.&#39;&#39;&#39;</span>
+    <span class="k">assert</span> <span class="n">part</span><span class="o">.</span><span class="n">directive</span> <span class="o">==</span> <span class="s1">&#39;extrude&#39;</span>
+    <span class="n">z0</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">z0</span>
+    <span class="n">deltaz</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">thickness</span>
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span>
+    <span class="n">sketch</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">getObject</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">fc_name</span><span class="p">)</span>
+    <span class="n">splitSketches</span> <span class="o">=</span> <span class="n">splitSketch</span><span class="p">(</span><span class="n">sketch</span><span class="p">)</span>
+    <span class="n">extParts</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">sketch</span> <span class="ow">in</span> <span class="n">splitSketches</span><span class="p">:</span>
+        <span class="n">extParts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">extrudeBetween</span><span class="p">(</span><span class="n">sketch</span><span class="p">,</span> <span class="n">z0</span><span class="p">,</span> <span class="n">z0</span> <span class="o">+</span> <span class="n">deltaz</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">part</span><span class="o">.</span><span class="n">label</span><span class="p">))</span>
+        <span class="n">delete</span><span class="p">(</span><span class="n">sketch</span><span class="p">)</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">extParts</span></div>
+
+
+<div class="viewcode-block" id="build_sag"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.build_sag">[docs]</a><span class="k">def</span> <span class="nf">build_sag</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Build a SAG part.&#39;&#39;&#39;</span>
+    <span class="k">assert</span> <span class="n">part</span><span class="o">.</span><span class="n">directive</span> <span class="o">==</span> <span class="s1">&#39;SAG&#39;</span>
+    <span class="n">zBot</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">z0</span>
+    <span class="n">zMid</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">z_middle</span>
+    <span class="n">zTop</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">thickness</span> <span class="o">+</span> <span class="n">zBot</span>
+    <span class="n">tIn</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">t_in</span>
+    <span class="n">tOut</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">t_out</span>
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span>
+    <span class="n">sketch</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">getObject</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">fc_name</span><span class="p">)</span>
+    <span class="n">sag</span> <span class="o">=</span> <span class="n">makeSAG</span><span class="p">(</span><span class="n">sketch</span><span class="p">,</span> <span class="n">zBot</span><span class="p">,</span> <span class="n">zMid</span><span class="p">,</span> <span class="n">zTop</span><span class="p">,</span> <span class="n">tIn</span><span class="p">,</span> <span class="n">tOut</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">)</span>
+    <span class="n">sag</span><span class="o">.</span><span class="n">Label</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">label</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">sag</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="build_wire"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.build_wire">[docs]</a><span class="k">def</span> <span class="nf">build_wire</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Build a wire part.&#39;&#39;&#39;</span>
+    <span class="c1"># ~ partDict = self.model.modelDict[&#39;3DParts&#39;][partName]</span>
+    <span class="c1"># ~ zBottom = self._fetch_geo_param(partDict[&#39;z0&#39;])</span>
+    <span class="c1"># ~ width = self._fetch_geo_param(partDict[&#39;thickness&#39;])</span>
+    <span class="c1"># ~ sketch = self.doc.getObject(partDict[&#39;fcName&#39;])</span>
+    <span class="k">assert</span> <span class="n">part</span><span class="o">.</span><span class="n">directive</span> <span class="o">==</span> <span class="s1">&#39;wire&#39;</span>
+    <span class="n">zBottom</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">z0</span>
+    <span class="n">width</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">thickness</span>
+    <span class="n">sketch</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">fc_name</span>
+    <span class="n">wire</span> <span class="o">=</span> <span class="n">buildWire</span><span class="p">(</span><span class="n">sketch</span><span class="p">,</span> <span class="n">zBottom</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">)</span>
+    <span class="n">wire</span><span class="o">.</span><span class="n">Label</span> <span class="o">=</span> <span class="n">partName</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">wire</span><span class="p">]</span></div>
+
+
+<span class="c1">################################################################################</span>
 
 
 <div class="viewcode-block" id="buildWire"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.buildWire">[docs]</a><span class="k">def</span> <span class="nf">buildWire</span><span class="p">(</span><span class="n">sketch</span><span class="p">,</span> <span class="n">zBottom</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">faceOverride</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.0</span><span class="p">):</span>
@@ -192,7 +311,7 @@
     <span class="n">mySweepTemp</span><span class="o">.</span><span class="n">Spine</span> <span class="o">=</span> <span class="n">sketchForSweep</span>
     <span class="n">mySweepTemp</span><span class="o">.</span><span class="n">Solid</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
-    <span class="n">mySweep</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">mySweepTemp</span><span class="p">)</span>
+    <span class="n">mySweep</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">mySweepTemp</span><span class="p">)</span>
     <span class="n">deepRemove</span><span class="p">(</span><span class="n">mySweepTemp</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">mySweep</span></div>
 
@@ -252,7 +371,7 @@
             <span class="s2">&quot;Part::MultiFuse&quot;</span><span class="p">,</span> <span class="n">sketch</span><span class="o">.</span><span class="n">Name</span> <span class="o">+</span> <span class="s2">&quot;_coating&quot;</span><span class="p">)</span>
         <span class="n">coatingUnion</span><span class="o">.</span><span class="n">Shapes</span> <span class="o">=</span> <span class="n">shellList</span>
         <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
-        <span class="n">coatingUnionClone</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">coatingUnion</span><span class="p">)</span>
+        <span class="n">coatingUnionClone</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">coatingUnion</span><span class="p">)</span>
         <span class="n">doc</span><span class="o">.</span><span class="n">removeObject</span><span class="p">(</span><span class="n">coatingUnion</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">shell</span> <span class="ow">in</span> <span class="n">shellList</span><span class="p">:</span>
             <span class="n">doc</span><span class="o">.</span><span class="n">removeObject</span><span class="p">(</span><span class="n">shell</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span>
@@ -306,16 +425,16 @@
         <span class="n">delete</span><span class="p">(</span><span class="n">tempSketch</span><span class="p">)</span>  <span class="c1"># remove the copied sketch part</span>
         <span class="c1"># Make the bottom wire:</span>
         <span class="n">rectPartTemp</span> <span class="o">=</span> <span class="n">extrude</span><span class="p">(</span><span class="n">botSketch</span><span class="p">,</span> <span class="n">zMid</span> <span class="o">-</span> <span class="n">zBot</span><span class="p">)</span>
-        <span class="n">rectPart</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">rectPartTemp</span><span class="p">,</span> <span class="n">moveVec</span><span class="o">=</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">zBot</span> <span class="o">-</span> <span class="n">offset</span><span class="p">))</span>
+        <span class="n">rectPart</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">rectPartTemp</span><span class="p">,</span> <span class="n">moveVec</span><span class="o">=</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">zBot</span> <span class="o">-</span> <span class="n">offset</span><span class="p">))</span>
         <span class="n">delete</span><span class="p">(</span><span class="n">rectPartTemp</span><span class="p">)</span>
         <span class="c1"># make the cap of the wire:</span>
-        <span class="n">topSketchTemp</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">topSketch</span><span class="p">,</span> <span class="n">moveVec</span><span class="o">=</span><span class="p">(</span>
+        <span class="n">topSketchTemp</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">topSketch</span><span class="p">,</span> <span class="n">moveVec</span><span class="o">=</span><span class="p">(</span>
             <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">zTop</span> <span class="o">-</span> <span class="n">zMid</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">offset</span><span class="p">))</span>
         <span class="n">capPartTemp</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">addObject</span><span class="p">(</span><span class="s1">&#39;Part::Loft&#39;</span><span class="p">,</span> <span class="n">sketch</span><span class="o">.</span><span class="n">Name</span> <span class="o">+</span> <span class="s1">&#39;_cap&#39;</span><span class="p">)</span>
         <span class="n">capPartTemp</span><span class="o">.</span><span class="n">Sections</span> <span class="o">=</span> <span class="p">[</span><span class="n">midSketch</span><span class="p">,</span> <span class="n">topSketchTemp</span><span class="p">]</span>
         <span class="n">capPartTemp</span><span class="o">.</span><span class="n">Solid</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
-        <span class="n">capPart</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">capPartTemp</span><span class="p">,</span> <span class="n">moveVec</span><span class="o">=</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">zMid</span> <span class="o">-</span> <span class="n">offset</span><span class="p">))</span>
+        <span class="n">capPart</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">capPartTemp</span><span class="p">,</span> <span class="n">moveVec</span><span class="o">=</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">zMid</span> <span class="o">-</span> <span class="n">offset</span><span class="p">))</span>
         <span class="n">delete</span><span class="p">(</span><span class="n">capPartTemp</span><span class="p">)</span>
         <span class="n">delete</span><span class="p">(</span><span class="n">topSketchTemp</span><span class="p">)</span>
         <span class="n">delete</span><span class="p">(</span><span class="n">topSketch</span><span class="p">)</span>
@@ -504,7 +623,7 @@
         <span class="k">if</span> <span class="n">treatment</span> <span class="o">==</span> <span class="s1">&#39;standard&#39;</span><span class="p">:</span>
             <span class="c1"># Apparently the offset function is buggy for very small offsets...</span>
             <span class="k">if</span> <span class="n">offsetVal</span> <span class="o">&lt;</span> <span class="mf">1e-5</span><span class="p">:</span>
-                <span class="n">offsetDupe</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+                <span class="n">offsetDupe</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">addObject</span><span class="p">(</span><span class="s2">&quot;Part::Offset&quot;</span><span class="p">)</span>
                 <span class="n">offset</span><span class="o">.</span><span class="n">Source</span> <span class="o">=</span> <span class="n">obj</span>
@@ -512,7 +631,7 @@
                 <span class="n">offset</span><span class="o">.</span><span class="n">Mode</span> <span class="o">=</span> <span class="mi">0</span>
                 <span class="n">offset</span><span class="o">.</span><span class="n">Join</span> <span class="o">=</span> <span class="mi">2</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
-                <span class="n">offsetDupe</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span>
+                <span class="n">offsetDupe</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
                 <span class="n">delete</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">treatment</span> <span class="o">==</span> <span class="s1">&#39;wire&#39;</span><span class="p">:</span>
@@ -782,7 +901,7 @@
                          <span class="n">consumeInputs</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">trash</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">H</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fillShells</span><span class="p">:</span>
-                <span class="n">G</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">H</span><span class="p">)</span>
+                <span class="n">G</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">H</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">U</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gen_U</span><span class="p">(</span><span class="n">layerNum</span><span class="p">,</span> <span class="n">objID</span><span class="p">)</span>
                 <span class="n">G</span> <span class="o">=</span> <span class="n">subtract</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">U</span><span class="p">)</span>
