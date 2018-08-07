@@ -121,7 +121,9 @@ class Geo3DData(Data):
         """
         super(Geo3DData, self).__init__()
         self.build_order = []
-        self.parts = {}
+        self.parts = {}   # dict of parts in this geometry
+        self.mesh = None  # Holding container for the meshed geometry
+        self.serial_fcdoc = None  # serialized FreeCAD document for this geometry
 
     def get_parts(self):
         return self.parts
@@ -155,7 +157,10 @@ class Geo3DData(Data):
                 pass
 
     def write_fcstd(self, file_path):
-        """Write geometry to a fcstd file."""
+        """Write geometry to a fcstd file.
+
+        Returns the fcstd file path.
+        """
         import codecs
         data = codecs.decode(self.serial_fcdoc.encode(), 'base64')
         with open(file_path, 'wb') as of:

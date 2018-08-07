@@ -3,6 +3,7 @@
 
 from qmt.task_framework import Task
 from qmt.geometry import Geo1DData, Geo2DData, Geo3DData
+from shapely.geometry import Polygon, LineString
 
 class Geometry1D(Task):
     def __init__(self, options=None, name='geometry_1d_task'):
