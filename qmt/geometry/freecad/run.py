@@ -37,7 +37,7 @@ def main():
 
 
 def activate_doc_from(opts):
-    """Activate a valid FreeCAD document frop options.
+    """Activate a valid FreeCAD document from options.
 
     :param dict opts:   QMT Geometry3D opts dict.
     :return:            A FCStd doc loaded from the file_path or serialised document.

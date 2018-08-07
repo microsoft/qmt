@@ -32,13 +32,13 @@ def exportCAD(obj_list, file_name):
     :param string file_name:    Name of file to create and export into.
     '''
     # The export format is determined by the extension, so we should check it:
-    if (file_name[-5:] == '.step') or (file_name[-4:] == '.stp'):
+    if file_name.endswith('.step') or file_name.endswith('.stp'):
         Part.export(obj_list, file_name)
     else:
         raise ValueError(file_name + ' is not a supported extension (.stp, .step)')
 
 
-# TODO: this is general, not fileIO
+# TODO: this is sketchUtils or geomUtils, not fileIO
 def updateParams(doc, paramDict):
     ''' Update the parameters in the modelParams spreadsheet to reflect the
         current value in the dict.

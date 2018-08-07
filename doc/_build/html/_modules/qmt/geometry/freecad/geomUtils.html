@@ -198,10 +198,8 @@
 
 
 <div class="viewcode-block" id="copy_move"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.copy_move">[docs]</a><span class="k">def</span> <span class="nf">copy_move</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">moveVec</span><span class="o">=</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">),</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Create a duplciate of the object using a draft move operation.</span>
+    <span class="sd">&#39;&#39;&#39;Create a duplciate of the object using a draft move operation.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-
     <span class="n">f</span> <span class="o">=</span> <span class="n">Draft</span><span class="o">.</span><span class="n">move</span><span class="p">([</span><span class="n">obj</span><span class="p">],</span> <span class="n">vec</span><span class="p">(</span><span class="n">moveVec</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">moveVec</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">moveVec</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span> <span class="n">copy</span><span class="o">=</span><span class="n">copy</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">Vertexes</span><span class="p">:</span>
         <span class="n">f</span><span class="o">.</span><span class="n">Shape</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">removeSplitter</span><span class="p">()</span>  <span class="c1"># get rid of redundant lines</span>
@@ -210,7 +208,7 @@
 
 
 <div class="viewcode-block" id="makeHexFace"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.makeHexFace">[docs]</a><span class="k">def</span> <span class="nf">makeHexFace</span><span class="p">(</span><span class="n">sketch</span><span class="p">,</span> <span class="n">zBottom</span><span class="p">,</span> <span class="n">width</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39; Given a sketch for a wire, make the first face. Also need to make sure it</span>
+    <span class="sd">&#39;&#39;&#39;Given a sketch for a wire, make the first face. Also need to make sure it</span>
 <span class="sd">    is placed normal to the initial line segment in the sketch. This will ensure</span>
 <span class="sd">    that the wire and shell can be constructed with sweep operations.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -268,7 +266,7 @@
             <span class="k">if</span> <span class="n">isNonempty</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
                 <span class="n">nonZeroList</span> <span class="o">+=</span> <span class="p">[</span><span class="n">obj</span><span class="p">]</span>
         <span class="n">union</span><span class="o">.</span><span class="n">Shapes</span> <span class="o">=</span> <span class="n">nonZeroList</span>
-        <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>  <span class="c1"># crucial recompute</span>
         <span class="n">unionDupe</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">union</span><span class="p">)</span>
         <span class="n">doc</span><span class="o">.</span><span class="n">removeObject</span><span class="p">(</span><span class="n">union</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span>
         <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>

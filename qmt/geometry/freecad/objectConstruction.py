@@ -7,7 +7,6 @@
 import os
 import numpy as np
 from six import iteritems, text_type
-import pickle
 
 import FreeCAD
 import Draft
@@ -15,6 +14,9 @@ import Draft
 
 # TODO: use namespace in code
 from qmt.geometry.freecad.auxiliary import *
+import qmt.geometry.freecad.geomUtils
+import qmt.geometry.freecad.sketchUtils
+import qmt.geometry.freecad.fileIO
 from qmt.geometry.freecad.geomUtils import (extrude, copy_move, genUnion,
                                             getBB, makeBB, makeHexFace,
                                             extrudeBetween, centerObjects, intersect,
@@ -33,60 +35,64 @@ def build(opts):
     '''
     doc = FreeCAD.ActiveDocument
 
+    # Schedule for deletion all objects not explicitly selected by the user
+    input_parts_names = [part.fc_name for part in opts['input_parts']]
+    blacklist = []
+    for obj in doc.Objects:
+        if (obj.Name not in input_parts_names) and (obj.TypeId != 'Spreadsheet::Sheet'):
+            blacklist.append(obj)
+
     # Update the model parameters
     if 'params' in opts:
         # Extend params dictionary to original parts schema
         fcdict = {key: (value, 'freeCAD') for (key, value) in opts['params'].items()}
         updateParams(doc, fcdict)
 
-    # Build the parts
-    if 'input_parts' in opts:
-        built_parts = {}  # TODO: this can be folded
+    if 'built_part_names' not in opts:
+        opts['built_part_names'] = {}
+    if 'serial_stp_parts' not in opts:
+        opts['serial_stp_parts'] = {}
 
-        # TODO: these will return a part obj instead of parts list
-        for input_part in opts['input_parts']:
-            if input_part.directive == 'extrude':
-                parts = build_extrude(input_part)
-            elif input_part.directive == 'SAG':
-                parts = build_sag(input_part)
-            # ~ elif input_part.directive == 'wire':
-                # ~ part = build_wire(input_part)
-            # ~ elif input_part.directive == 'wireShell':
-                # ~ part = build_wireShell(input_part)
-            # ~ elif input_part.directive == 'lithography':
-                # ~ part = build_litho(input_part)
-            # TODO: part3d that just passes along
-            #       and drop trash
-            else:
-                raise ValueError('Directive ' + input_part.directive +
-                                 ' is not a recognized directive type.')
-            built_parts[input_part.label] = parts
+    # Build the parts
+    for input_part in opts['input_parts']:
+
+        if input_part.directive == 'extrude':
+            part = build_extrude(input_part)
+        elif input_part.directive == 'SAG':
+            part = build_sag(input_part)
+        elif input_part.directive == 'wire':
+            part = build_wire(input_part)
+        elif input_part.directive == 'wire_shell':
+            part = build_wire_shell(input_part)
+        elif input_part.directive == 'lithography':
+            part = build_lithography(input_part)
+        elif input_part.directive == '3d_shape':
+            part = build_pass(input_part)
+        else:
+            raise ValueError('Directive ' + input_part.directive +
+                             ' is not a recognized directive type.')
 
         doc.recompute()
-        # Store serialised STEP representations in opts
-        if 'serial_stp_parts' not in opts:
-            opts['serial_stp_parts'] = {}
-        for label in built_parts:
-            store_serial(opts['serial_stp_parts'], label,
-                         exportCAD, 'stp', built_parts[label])
+        opts['built_part_names'][input_part.label] = part.Name
+        store_serial(opts['serial_stp_parts'], input_part.label,
+                     exportCAD, 'stp',  [ part ] )
 
-        # ~ from uuid import uuid4
-        # ~ import codecs
-        # ~ import hashlib
-        # ~ instance_hash = hashlib.sha256(str(opts)).hexdigest()
-        # ~ if 'serial_stp_parts' not in opts:
-            # ~ opts['serial_stp_parts'] = {}
-        # ~ for label in built_parts:
-            # ~ tmp_path = 'tmp_' + label + '_' + instance_hash + '.stp'
-            # ~ exportCAD(built_parts[label], tmp_path)
-            # ~ with open(tmp_path, 'rb') as f:
-                # ~ opts['serial_stp_parts'][label] = codecs.encode(f.read(), 'base64')
-            # ~ os.remove(tmp_path)
-
+    for obj in blacklist:
+        delete(obj)
     doc.recompute()
-    store_serial(opts, 'serial_fcdoc', (lambda _,path: doc.saveAs(path)), 'fcstd', None)
+    def _save_helper(doc, path):
+        doc.saveAs(path)
+        #make_objects_visible(path)  # freecadcmd doesn't create GuiDocument.xml
+    store_serial(opts, 'serial_fcdoc', _save_helper, 'fcstd', doc)
 
     return opts
+
+
+def build_pass(part):
+    '''Pas a part unchanged.'''
+    assert part.directive == '3d_shape'
+    return FreeCAD.ActiveDocument.getObject(part.fc_name)
+
 
 def build_extrude(part):
     '''Build an extrude part.'''
@@ -97,11 +103,11 @@ def build_extrude(part):
     sketch = doc.getObject(part.fc_name)
     splitSketches = splitSketch(sketch)
     extParts = []
-    for sketch in splitSketches:  # ToDo: re-union the extParts
+    for sketch in splitSketches:
         extParts.append(extrudeBetween(sketch, z0, z0 + deltaz, name=part.label))
         delete(sketch)
     doc.recompute()
-    return extParts
+    return genUnion(extParts, consumeInputs=True)
 
 
 def build_sag(part, offset=0.):
@@ -117,22 +123,67 @@ def build_sag(part, offset=0.):
     sag = makeSAG(sketch, zBot, zMid, zTop, tIn, tOut, offset=offset)
     sag.Label = part.label
     doc.recompute()
-    return [sag]
+    return sag
 
 
 def build_wire(part, offset=0.):
     '''Build a wire part.'''
-    # ~ partDict = self.model.modelDict['3DParts'][partName]
-    # ~ zBottom = self._fetch_geo_param(partDict['z0'])
-    # ~ width = self._fetch_geo_param(partDict['thickness'])
-    # ~ sketch = self.doc.getObject(partDict['fcName'])
     assert part.directive == 'wire'
+    doc = FreeCAD.ActiveDocument
     zBottom = part.z0
     width = part.thickness
-    sketch = part.fc_name
+    sketch = doc.getObject(part.fc_name)
     wire = buildWire(sketch, zBottom, width, offset=offset)
-    wire.Label = partName
-    return [wire]
+    wire.Label = part.label
+    return wire
+
+def build_wire_shell(part, offset=0.):
+    '''Build a wire shell part.'''
+    assert part.directive == 'wire_shell'
+    doc = FreeCAD.ActiveDocument
+    zBottom = part.z0
+    radius = part.thickness_of_wire
+    wireSketch = doc.getObject(part.fc_name)
+    shell_verts = part.shell_verts
+    thickness = part.thickness
+    depoZoneName = part.depo_zone
+    etchZoneName = part.etch_zone
+    if depoZoneName is not None:
+        depoZone = doc.getObject(depoZoneName)
+    else:
+        depoZone = None
+    if etchZoneName is not None:
+        etchZone = doc.getObject(etchZoneName)
+    else:
+        etchZone = None
+    shell = buildAlShell(
+        wireSketch,
+        zBottom,
+        radius,
+        shell_verts,
+        thickness,
+        depoZone=depoZone,
+        etchZone=etchZone,
+        offset=offset)
+    shell.Label = part.label
+    return shell
+
+
+def build_lithography(part):
+    """Build a lithography part."""
+    assert part.directive == 'litoghraphy'
+    raise NotImplementedError()
+    doc = FreeCAD.ActiveDocument
+    if not self.lithoSetup:
+        lithoDict = _initialize_lithography(fillShells=part.fillLitho)
+        lithoSetup = True
+    layerNum = part.layerNum
+    returnObjs = []
+    for objID in lithoDict['layers'][layerNum]['objIDs']:
+        if partName == lithoDict['layers'][layerNum]['objIDs'][
+                objID]['partName']:
+            returnObjs.append(self._gen_G(layerNum, objID))
+    return returnObjs
 
 
 ################################################################################

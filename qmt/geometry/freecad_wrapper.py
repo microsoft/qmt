@@ -17,6 +17,7 @@ def fcwrapper(pyenv='python2', instruction=None, data=None):
     :param str pyenv:       Python interpreter, defaults to 'python2'.
     :param str instruction: A registered instruction for the QMT FreeCAD module.
     :param     data:        Any data type serialisable through pickle.
+    :return:                Any data type serialisable through pickle.
     """
 
     qmtPath = os.path.join(os.path.dirname(qmt.__file__))

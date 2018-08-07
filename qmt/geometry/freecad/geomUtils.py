@@ -44,10 +44,8 @@ def extrude(sketch, length, reverse=False, name=None):
 
 
 def copy_move(obj, moveVec=(0., 0., 0.), copy=True):
+    '''Create a duplciate of the object using a draft move operation.
     '''
-    Create a duplciate of the object using a draft move operation.
-    '''
-
     f = Draft.move([obj], vec(moveVec[0], moveVec[1], moveVec[2]), copy=copy)
     if f.Shape.Vertexes:
         f.Shape = f.Shape.removeSplitter()  # get rid of redundant lines
@@ -56,7 +54,7 @@ def copy_move(obj, moveVec=(0., 0., 0.), copy=True):
 
 
 def makeHexFace(sketch, zBottom, width):
-    ''' Given a sketch for a wire, make the first face. Also need to make sure it
+    '''Given a sketch for a wire, make the first face. Also need to make sure it
     is placed normal to the initial line segment in the sketch. This will ensure
     that the wire and shell can be constructed with sweep operations.
     '''
@@ -114,7 +112,7 @@ def genUnion(objList, consumeInputs=False):
             if isNonempty(obj):
                 nonZeroList += [obj]
         union.Shapes = nonZeroList
-        doc.recompute()
+        doc.recompute()  # crucial recompute
         unionDupe = copy_move(union)
         doc.removeObject(union.Name)
         doc.recompute()

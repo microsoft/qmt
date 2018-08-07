@@ -179,18 +179,20 @@
     <span class="k">return</span> <span class="n">meshedObj</span></div>
 
 
-<div class="viewcode-block" id="exportCAD"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.fileIO.exportCAD">[docs]</a><span class="k">def</span> <span class="nf">exportCAD</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">fileName</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39; Export a STEP (Standard for the Exchange of Product Data) 3D CAD file</span>
-<span class="sd">    for the object.</span>
+<div class="viewcode-block" id="exportCAD"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.fileIO.exportCAD">[docs]</a><span class="k">def</span> <span class="nf">exportCAD</span><span class="p">(</span><span class="n">obj_list</span><span class="p">,</span> <span class="n">file_name</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Export a STEP (Standard for the Exchange of Product Data) 3D CAD file.</span>
+
+<span class="sd">    :param list obj_list:       List of objects to export.</span>
+<span class="sd">    :param string file_name:    Name of file to create and export into.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="c1"># The export format is determined by the extension, so we should check it:</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">fileName</span><span class="p">[</span><span class="o">-</span><span class="mi">5</span><span class="p">:]</span> <span class="o">==</span> <span class="s1">&#39;.step&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">fileName</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">==</span> <span class="s1">&#39;.stp&#39;</span><span class="p">):</span>
-        <span class="n">Part</span><span class="o">.</span><span class="n">export</span><span class="p">([</span><span class="n">obj</span><span class="p">],</span> <span class="n">fileName</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.step&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.stp&#39;</span><span class="p">):</span>
+        <span class="n">Part</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">obj_list</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">fileName</span> <span class="o">+</span> <span class="s1">&#39; is not a supported extension (.stp, .step)&#39;</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">file_name</span> <span class="o">+</span> <span class="s1">&#39; is not a supported extension (.stp, .step)&#39;</span><span class="p">)</span></div>
 
 
-<span class="c1"># TODO: this is general, not fileIO</span>
+<span class="c1"># TODO: this is sketchUtils or geomUtils, not fileIO</span>
 <div class="viewcode-block" id="updateParams"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.fileIO.updateParams">[docs]</a><span class="k">def</span> <span class="nf">updateParams</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">paramDict</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39; Update the parameters in the modelParams spreadsheet to reflect the</span>
 <span class="sd">        current value in the dict.</span>
@@ -243,8 +245,6 @@
     <span class="kn">import</span> <span class="nn">uuid</span>
     <span class="n">tmp_path</span> <span class="o">=</span> <span class="s1">&#39;tmp_&#39;</span> <span class="o">+</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="n">ext</span>
     <span class="n">save_fct</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;.......................................::&quot;</span><span class="p">)</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">target_dict</span><span class="p">[</span><span class="n">target_label</span><span class="p">]</span> <span class="o">=</span> <span class="n">codecs</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="s1">&#39;base64&#39;</span><span class="p">)</span>
     <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">)</span></div>

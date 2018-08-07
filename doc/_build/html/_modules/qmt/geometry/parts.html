@@ -163,7 +163,7 @@
             <span class="n">layer_num</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">litho_base</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">fill_litho</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mesh_max_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mesh_min_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mesh_growth_rate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">mesh_scale_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">boundary_condition</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subtract_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">ns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">phi_nl</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ds</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="n">ns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">phi_nl</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">thickness_of_wire</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a geometric part to the model.</span>
 <span class="sd">        :param str label: The descriptive name of this new part.</span>
@@ -244,6 +244,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">target_wire</span> <span class="o">=</span> <span class="n">target_wire</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">shell_verts</span> <span class="o">=</span> <span class="n">shell_verts</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">depo_zone</span> <span class="o">=</span> <span class="n">depo_zone</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">etch_zone</span> <span class="o">=</span> <span class="n">etch_zone</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">z_middle</span> <span class="o">=</span> <span class="n">z_middle</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">t_in</span> <span class="o">=</span> <span class="n">t_in</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">t_out</span> <span class="o">=</span> <span class="n">t_out</span>
@@ -259,9 +260,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">ns</span> <span class="o">=</span> <span class="n">ns</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">phi_nl</span> <span class="o">=</span> <span class="n">phi_nl</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">serial_stp</span> <span class="o">=</span> <span class="kc">None</span> <span class="c1"># This gets set on geometry build</span>
-
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">serial_stp</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># This gets set on geometry build</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">built_fc_name</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># This gets set on geometry build</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thickness_of_wire</span> <span class="o">=</span> <span class="n">thickness_of_wire</span>  <span class="c1"># TODO: sanitise &amp; document</span>
 
 
 <div class="viewcode-block" id="Part3D.write_stp"><a class="viewcode-back" href="../../../source/qmt.geometry.html#qmt.geometry.parts.Part3D.write_stp">[docs]</a>    <span class="k">def</span> <span class="nf">write_stp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>

@@ -76,19 +76,23 @@ class Geometry3D(Task):
         :param dict current_options: The dictionary specifying parts from above.
         :return geo_3d: A Geo3DData object.
         """
-
-        pyenv = current_options['pyenv'] if 'pyenv' in current_options else 'python2'
         from qmt.geometry.freecad_wrapper import fcwrapper
+        pyenv = current_options['pyenv'] if 'pyenv' in current_options else 'python2'
+
+        # Convert NumPy3 floats to something that Python2 can unpickle
+        current_options['params'] = {k: float(v) for k, v in current_options['params'].items()}
+
+        # Send off the instructions
         ret = fcwrapper(pyenv, 'build3d',
                         {'input_result_list': input_result_list,
                          'current_options': current_options})
 
+        # Build a geometry object with from the returned results
         geo = Geo3DData()
         geo.serial_fcdoc = ret['serial_fcdoc']
-        # ~ print([p.label + ":" + p.fc_name for p in current_options['input_parts'] ])
-        # ~ print(ret['serial_stp_parts'].keys())
         for part in current_options['input_parts']:
             part.serial_stp = ret['serial_stp_parts'][part.label]
+            part.built_fc_name = ret['built_part_names'][part.label]
             geo.add_part(part.label, part)
             geo.build_order.append(part.label)
 

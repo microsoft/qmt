@@ -173,6 +173,12 @@
 <dd><p>Remove a targeted object and recursively delete all its sub-objects.</p>
 </dd></dl>
 
+<dl class="function">
+<dt id="qmt.geometry.freecad.auxiliary.make_objects_visible">
+<code class="descclassname">qmt.geometry.freecad.auxiliary.</code><code class="descname">make_objects_visible</code><span class="sig-paren">(</span><em>zipfname</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/auxiliary.html#make_objects_visible"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.auxiliary.make_objects_visible" title="Permalink to this definition">¶</a></dt>
+<dd><p>Make objects visible in a fcstd file with GuiDocument.xml.</p>
+</dd></dl>
+
 </div>
 <div class="section" id="module-qmt.geometry.freecad.fileIO">
 <span id="qmt-geometry-freecad-fileio-module"></span><h2>qmt.geometry.freecad.fileIO module<a class="headerlink" href="#module-qmt.geometry.freecad.fileIO" title="Permalink to this headline">¶</a></h2>
@@ -185,9 +191,20 @@
 
 <dl class="function">
 <dt id="qmt.geometry.freecad.fileIO.exportCAD">
-<code class="descclassname">qmt.geometry.freecad.fileIO.</code><code class="descname">exportCAD</code><span class="sig-paren">(</span><em>obj</em>, <em>fileName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/fileIO.html#exportCAD"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.fileIO.exportCAD" title="Permalink to this definition">¶</a></dt>
-<dd><p>Export a STEP (Standard for the Exchange of Product Data) 3D CAD file
-for the object.</p>
+<code class="descclassname">qmt.geometry.freecad.fileIO.</code><code class="descname">exportCAD</code><span class="sig-paren">(</span><em>obj_list</em>, <em>file_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/fileIO.html#exportCAD"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.fileIO.exportCAD" title="Permalink to this definition">¶</a></dt>
+<dd><p>Export a STEP (Standard for the Exchange of Product Data) 3D CAD file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>obj_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – List of objects to export.</li>
+<li><strong>file_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/string.html#module-string" title="(in Python v3.7)"><em>string</em></a>) – Name of file to create and export into.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -330,6 +347,12 @@ centered about the origin.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="qmt.geometry.freecad.objectConstruction.build_pass">
+<code class="descclassname">qmt.geometry.freecad.objectConstruction.</code><code class="descname">build_pass</code><span class="sig-paren">(</span><em>part</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/objectConstruction.html#build_pass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.objectConstruction.build_pass" title="Permalink to this definition">¶</a></dt>
+<dd><p>Pas a part unchanged.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="qmt.geometry.freecad.objectConstruction.build_extrude">
 <code class="descclassname">qmt.geometry.freecad.objectConstruction.</code><code class="descname">build_extrude</code><span class="sig-paren">(</span><em>part</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/objectConstruction.html#build_extrude"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.objectConstruction.build_extrude" title="Permalink to this definition">¶</a></dt>
 <dd><p>Build an extrude part.</p>
@@ -345,6 +368,18 @@ centered about the origin.</p>
 <dt id="qmt.geometry.freecad.objectConstruction.build_wire">
 <code class="descclassname">qmt.geometry.freecad.objectConstruction.</code><code class="descname">build_wire</code><span class="sig-paren">(</span><em>part</em>, <em>offset=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/objectConstruction.html#build_wire"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.objectConstruction.build_wire" title="Permalink to this definition">¶</a></dt>
 <dd><p>Build a wire part.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="qmt.geometry.freecad.objectConstruction.build_wire_shell">
+<code class="descclassname">qmt.geometry.freecad.objectConstruction.</code><code class="descname">build_wire_shell</code><span class="sig-paren">(</span><em>part</em>, <em>offset=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/objectConstruction.html#build_wire_shell"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.objectConstruction.build_wire_shell" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a wire shell part.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="qmt.geometry.freecad.objectConstruction.build_lithography">
+<code class="descclassname">qmt.geometry.freecad.objectConstruction.</code><code class="descname">build_lithography</code><span class="sig-paren">(</span><em>part</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/objectConstruction.html#build_lithography"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.objectConstruction.build_lithography" title="Permalink to this definition">¶</a></dt>
+<dd><p>Build a lithography part.</p>
 </dd></dl>
 
 <dl class="function">
@@ -381,11 +416,6 @@ already taken up by the wire.</p>
 <dd></dd></dl>
 
 <dl class="method">
-<dt id="qmt.geometry.freecad.objectConstruction.modelBuilder.exportBuiltParts">
-<code class="descname">exportBuiltParts</code><span class="sig-paren">(</span><em>stepFileDir=None</em>, <em>stlFileDir=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/objectConstruction.html#modelBuilder.exportBuiltParts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.objectConstruction.modelBuilder.exportBuiltParts" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
 <dt id="qmt.geometry.freecad.objectConstruction.modelBuilder.saveFreeCADState">
 <code class="descname">saveFreeCADState</code><span class="sig-paren">(</span><em>fileName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/objectConstruction.html#modelBuilder.saveFreeCADState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.objectConstruction.modelBuilder.saveFreeCADState" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save a copy of the freeCAD model and do garbage collection.</p>
@@ -419,7 +449,7 @@ already taken up by the wire.</p>
 <dl class="function">
 <dt id="qmt.geometry.freecad.run.activate_doc_from">
 <code class="descclassname">qmt.geometry.freecad.run.</code><code class="descname">activate_doc_from</code><span class="sig-paren">(</span><em>opts</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/run.html#activate_doc_from"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.run.activate_doc_from" title="Permalink to this definition">¶</a></dt>
-<dd><p>Activate a valid FreeCAD document frop options.</p>
+<dd><p>Activate a valid FreeCAD document from options.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
