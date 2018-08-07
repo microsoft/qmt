@@ -1,4 +1,4 @@
-import pickle
+import pickle,os,shutil,codecs
 from qmt.task_framework import Data
 
 class Geo1DData(Data):
@@ -121,7 +121,11 @@ class Geo3DData(Data):
         super(Geo3DData, self).__init__()
         self.build_order = []
         self.parts = {}
-        self.mesh = None # Holding container for the meshed geometry
+        self.serial_mesh = None # Holding container for the serialized xml of the meshed geometry
+        self.serial_region_marker = None # Holding container for the serialized xml of the region
+        # marker
+        # function
+        self.fenics_ids = None # dictionary with part name keys mapping to fenics ids.
         self.serial_FCdoc = None # serialized FreeCAD document for this geometry
         self.parts = {} # dict of parts in this geometry
 
@@ -160,6 +164,75 @@ class Geo3DData(Data):
                     "Attempted to remove the part " + part_name + ", which doesn't exist.")
             else:
                 pass
+
+    def set_data(self,data_name,data,scratch_dir='tmp'):
+        """
+        Set data to a serial format that is easily portable.
+        :param str data_name: Options are:
+                            "fcdoc", freeCAD document
+                            "mesh", for a fenics mesh
+                            "rmf", for a fenics region marker function
+        :param data: The corresponding data that we would like to set.
+        :param str file_path: File path for a scratch folder. Default is "tmp"; must be empty.
+        """
+        os.mkdir(scratch_dir)
+        if data_name == 'fcdoc':
+            tmp_path = os.path.join(scratch_dir,'tmp_doc_'+str(hash(data))+'.fcstd')
+            data.saveAs(tmp_path)
+        elif data_name == 'mesh' or data_name == 'rmf':
+            import fenics as fn
+            tmp_path = os.path.join(scratch_dir,'tmp_fenics_'+str(hash(data))+'.xml')
+            fn.File(tmp_path) << data
+        else:
+            raise ValueError(str(data_name)+' was not a valid data_name.')
+        with open(tmp_path, 'rb') as f:
+            serial_data = codecs.encode(f.read(), 'base64')
+        if data_name == 'fcdoc':
+            self.serial_FCdoc = serial_data
+        elif data_name == 'mesh':
+            self.serial_mesh = serial_data
+        elif data_name == 'rmf':
+            self.serial_region_marker = serial_data
+        shutil.rmtree(scratch_dir)
+
+    def get_data(self,data_name,scratch_dir='tmp'):
+        """
+        Get data from stored serial format.
+        :param str data_name: Options are:
+                            "fcdoc", freeCAD document
+                            "mesh", for a fenics mesh
+                            "rmf", for a fenics region marker function
+        :param str file_path: File path for a scratch folder. Default is "tmp"; must be empty.
+        :return data: The freeCAD document or fenics object that was stored.
+        """
+        os.mkdir(scratch_dir)
+        if data_name == 'fcdoc':
+            serial_data = self.serial_FCdoc
+            tmp_path = os.path.join(scratch_dir,'tmp_doc_'+str(hash(serial_data))+'.fcstd')
+        elif data_name == 'mesh' or data_name == 'rmf':
+            if data_name == 'mesh':
+                serial_data = self.serial_mesh
+            else:
+                serial_data = self.serial_region_marker
+            tmp_path = os.path.join(scratch_dir, 'tmp_fenics_' + str(hash(serial_data)) + '.xml')
+        else:
+            raise ValueError(str(data_name) + ' was not a valid data_name.')
+        decoded_data = codecs.decode(serial_data, 'base64')
+        with open(tmp_path, 'wb') as of:
+            of.write(decoded_data)
+        if data_name == 'fcdoc':
+            import FreeCAD
+            data = FreeCAD.newDocument('instance')
+            FreeCAD.setActiveDocument('instance')
+            data.load(tmp_path)
+        elif data_name == 'mesh':
+            import fenics as fn
+            data = fn.Mesh(tmp_path)
+        else:
+            import fenics as fn
+            data = fn.CellFunction(tmp_path)
+        shutil.rmtree(scratch_dir)
+        return data
 
     def write_fcstd(self, file_path=None):
         """Write geometry to a fcstd file.
