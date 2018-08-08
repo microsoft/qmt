@@ -1,4 +1,4 @@
-import pickle
+import pickle,os,shutil,codecs
 from qmt.task_framework import Data
 
 class Geo1DData(Data):
@@ -52,6 +52,7 @@ class Geo2DData(Data):
         super(Geo2DData, self).__init__()
         self.parts = {}
         self.edges = {}
+        self.build_order = []
 
     def add_part(self, part_name, part, overwrite=False):
         """
@@ -60,12 +61,13 @@ class Geo2DData(Data):
         :param Polygon part: Polygon object from shapely.geometry. This must be a valid Polygon.
         :param bool overwrite: Should we allow this to overwrite?
         """
-        if not part.is_valid():
+        if not part.is_valid:
             raise ValueError("Part " + part_name + " is not a valid polygon.")
         if (part_name in self.parts) and (not overwrite):
             raise ValueError("Attempted to overwrite the part " + part_name + ".")
         else:
             self.parts[part_name] = part
+            self.build_order += [part_name]
 
     def remove_part(self, part_name, ignore_if_absent=False):
         """
@@ -76,6 +78,7 @@ class Geo2DData(Data):
         """
         if part_name in self.parts:
             del self.parts[part_name]
+            self.build_order.remove(part_name)
         else:
             if not ignore_if_absent:
                 raise ValueError(
@@ -94,6 +97,7 @@ class Geo2DData(Data):
             raise ValueError("Attempted to overwrite the edge " + edge_name + ".")
         else:
             self.edges[edge_name] = edge
+            self.build_order += [edge_name]
 
     def remove_edge(self, edge_name, ignore_if_absent=False):
         """
@@ -104,6 +108,7 @@ class Geo2DData(Data):
         """
         if edge_name in self.edges:
             del self.edges[edge_name]
+            self.build_order.remove(edge_name)
         else:
             if not ignore_if_absent:
                 raise ValueError(
@@ -120,16 +125,17 @@ class Geo3DData(Data):
         """
         super(Geo3DData, self).__init__()
         self.build_order = []
-        self.parts = {}
-        # ~ self.serial_FCdoc
-        # ~ self.parts = {label: part}
+        self.parts = {}   # dict of parts in this geometry
+        self.serial_fcdoc = None  # serialized FreeCAD document for this geometry
+        self.mesh = None  # Holding container for the meshed geometry
+        self.serial_mesh = None # Holding container for the serialized xml of the meshed geometry
+        self.serial_region_marker = None # Holding container for the serialized xml of the region
+        # marker
+        # function
+        self.fenics_ids = None # dictionary with part name keys mapping to fenics ids.
 
-    def get_parts():
+    def get_parts(self):
         return self.parts
-        # ~ parts[0].label == build_order[0]
-        # TODO with only part names: self.build_order
-
-    # TODO: serialisation
 
     def add_part(self, part_name, part, overwrite=False):
         """
@@ -142,7 +148,6 @@ class Geo3DData(Data):
             raise ValueError("Attempted to overwrite the part " + part_name + ".")
         else:
             self.parts[part_name] = part
-
 
     def remove_part(self, part_name, ignore_if_absent=False):
         """
@@ -160,14 +165,84 @@ class Geo3DData(Data):
             else:
                 pass
 
+    def set_data(self,data_name,data,scratch_dir='tmp'):
+        """
+        Set data to a serial format that is easily portable.
+        :param str data_name: Options are:
+                            "fcdoc", freeCAD document
+                            "mesh", for a fenics mesh
+                            "rmf", for a fenics region marker function
+        :param data: The corresponding data that we would like to set.
+        :param str file_path: File path for a scratch folder. Default is "tmp"; must be empty.
+        """
+        os.mkdir(scratch_dir)
+        if data_name == 'fcdoc':
+            tmp_path = os.path.join(scratch_dir,'tmp_doc_'+str(hash(data))+'.fcstd')
+            data.saveAs(tmp_path)
+        elif data_name == 'mesh' or data_name == 'rmf':
+            import fenics as fn
+            tmp_path = os.path.join(scratch_dir,'tmp_fenics_'+str(hash(data))+'.xml')
+            fn.File(tmp_path) << data
+        else:
+            raise ValueError(str(data_name)+' was not a valid data_name.')
+        with open(tmp_path, 'rb') as f:
+            serial_data = codecs.encode(f.read(), 'base64')
+        if data_name == 'fcdoc':
+            self.serial_FCdoc = serial_data
+        elif data_name == 'mesh':
+            self.serial_mesh = serial_data
+        elif data_name == 'rmf':
+            self.serial_region_marker = serial_data
+        shutil.rmtree(scratch_dir)
+
+    def get_data(self,data_name,scratch_dir='tmp'):
+        """
+        Get data from stored serial format.
+        :param str data_name: Options are:
+                            "fcdoc", freeCAD document
+                            "mesh", for a fenics mesh
+                            "rmf", for a fenics region marker function
+        :param str file_path: File path for a scratch folder. Default is "tmp"; must be empty.
+        :return data: The freeCAD document or fenics object that was stored.
+        """
+        os.mkdir(scratch_dir)
+        if data_name == 'fcdoc':
+            serial_data = self.serial_FCdoc
+            tmp_path = os.path.join(scratch_dir,'tmp_doc_'+str(hash(serial_data))+'.fcstd')
+        elif data_name == 'mesh' or data_name == 'rmf':
+            if data_name == 'mesh':
+                serial_data = self.serial_mesh
+            else:
+                serial_data = self.serial_region_marker
+            tmp_path = os.path.join(scratch_dir, 'tmp_fenics_' + str(hash(serial_data)) + '.xml')
+        else:
+            raise ValueError(str(data_name) + ' was not a valid data_name.')
+        decoded_data = codecs.decode(serial_data, 'base64')
+        with open(tmp_path, 'wb') as of:
+            of.write(decoded_data)
+        if data_name == 'fcdoc':
+            import FreeCAD
+            data = FreeCAD.newDocument('instance')
+            FreeCAD.setActiveDocument('instance')
+            data.load(tmp_path)
+        elif data_name == 'mesh':
+            import fenics as fn
+            data = fn.Mesh(tmp_path)
+        else:
+            import fenics as fn
+            data = fn.CellFunction(tmp_path)
+        shutil.rmtree(scratch_dir)
+        return data
+
     def write_fcstd(self, file_path=None):
         """Write geometry to a fcstd file.
 
         Returns the fcstd file path.
         """
         if file_path == None:
-            file_path = self.label + '.fcstd'
-        data = pickle.loads(self.serial_fcdoc)
+            file_path = str(self.build_order) + '.fcstd'
+        import codecs
+        data = codecs.decode(self.serial_fcdoc.encode(), 'base64')
         with open(file_path, 'wb') as of:
             of.write(data)
         return file_path

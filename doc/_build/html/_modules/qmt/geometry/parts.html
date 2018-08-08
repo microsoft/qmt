@@ -152,128 +152,129 @@
            <div itemprop="articleBody">
             
   <h1>Source code for qmt.geometry.parts</h1><div class="highlight"><pre>
-<span></span>
+<span></span><span class="kn">import</span> <span class="nn">pickle</span>
+
 
 <div class="viewcode-block" id="Part3D"><a class="viewcode-back" href="../../../source/qmt.geometry.html#qmt.geometry.parts.Part3D">[docs]</a><span class="k">class</span> <span class="nc">Part3D</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">fcName</span><span class="p">,</span> <span class="n">directive</span><span class="p">,</span> <span class="n">domainType</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">material</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">z0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">targetWire</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shellVerts</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">depoZone</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">etchZone</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">zMiddle</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tIn</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tOut</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">layerNum</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lithoBase</span><span class="o">=</span><span class="p">[],</span>
-        <span class="n">fillLitho</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">meshMaxSize</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">meshGrowthRate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">meshScaleVector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">boundaryCondition</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subtractList</span><span class="o">=</span><span class="p">[],</span>
-        <span class="n">Ns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Phi_NL</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">Ds</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Add a geometric part to the model.</span>
-<span class="sd">        @param label: The descriptive name of this new part.</span>
-<span class="sd">        @param fcName: The name of the 2D freeCAD object that this is built from.</span>
-<span class="sd">        @param directive: The freeCAD directive is used to construct this part.</span>
-<span class="sd">                            Valid options for this are:</span>
-<span class="sd">                                extrude -- simple extrusion</span>
-<span class="sd">                                wire -- hexagonal nanowire about a polyline</span>
-<span class="sd">                                wireShell -- shell coating a specified nanowire</span>
-<span class="sd">                                SAG -- SAG structure</span>
-<span class="sd">                                lithography -- masked layer deposited on top</span>
-<span class="sd">        @param material:    The material of the resulting part</span>
-<span class="sd">        @param domainType: The type of domain this part represents:</span>
-<span class="sd">                            Valid options are:</span>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">fc_name</span><span class="p">,</span> <span class="n">directive</span><span class="p">,</span> <span class="n">domain_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">material</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">z0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">target_wire</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shell_verts</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">depo_zone</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">etch_zone</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">z_middle</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">t_in</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">t_out</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">layer_num</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">litho_base</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">fill_litho</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">mesh_max_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mesh_min_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mesh_growth_rate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">mesh_scale_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">boundary_condition</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subtract_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+            <span class="n">ns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">phi_nl</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">thickness_of_wire</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a geometric part to the model.</span>
+<span class="sd">        :param str label: The descriptive name of this new part.</span>
+<span class="sd">        :param str fc_name: The name of the 2D/3D freeCAD object that this is built from.</span>
+<span class="sd">        :param str directive: The freeCAD directive is used to construct this part. Valid</span>
+<span class="sd">                              options for this are:</span>
+<span class="sd">                              extrude -- simple extrusion</span>
+<span class="sd">                              wire -- hexagonal nanowire about a polyline</span>
+<span class="sd">                              wire_shell -- shell coating a specified nanowire</span>
+<span class="sd">                              sag -- SAG structure</span>
+<span class="sd">                              lithography -- masked layer deposited on top</span>
+<span class="sd">                              3d_shape -- just take the 3D shapre directly.</span>
+<span class="sd">        :param str domain_type: The type of domain this part represents. Valid options are:</span>
 <span class="sd">                                semiconductor -- region permitted to self-consistently accumulate</span>
-<span class="sd">                                metalGate -- an electrode</span>
+<span class="sd">                                metal_gate -- an electrode</span>
 <span class="sd">                                virtual -- a part just used for selection (ignores material)</span>
 <span class="sd">                                dielectric -- no charge accumulation allowed</span>
-<span class="sd">        @param z0:          The starting z coordinate. Required for extrude,</span>
-<span class="sd">                            wire, SAG, and lithography directives.</span>
-<span class="sd">        @param thickness:   The total thickness. Required for all</span>
-<span class="sd">                            directives. On wireShell, this is interpreted</span>
-<span class="sd">                            as the layer thickness.</span>
-<span class="sd">        @param targetWire:  Target wire directive for a coating directive.</span>
-<span class="sd">        @param shellVerts:  Vertices to use when rendering the coating. Required</span>
-<span class="sd">                            for the shell directive.</span>
-<span class="sd">        @param depoZone:    Sketch defining the (positive) mask for the deposition</span>
-<span class="sd">                            of a wire coating. Note that only one of depoZone or</span>
-<span class="sd">                            etchZone may be used</span>
-<span class="sd">        @param etchZone:	Sketch defining the (negative) amsek for the depostion</span>
-<span class="sd">                                            of a wire coating. Note that only one of depoZone or</span>
-<span class="sd">                                            etchZone may be used.</span>
-<span class="sd">        @param zMiddle:     The location for the &quot;flare out&quot; of the SAG directive.</span>
-<span class="sd">        @param tIN:         The lateral distance from the 2D profile to the</span>
-<span class="sd">                            edge of the top bevel for the SAG directive.</span>
-<span class="sd">        @param tOut:        The lateral distance from the 2D profile to the</span>
-<span class="sd">                            furtheset &quot;flare out&quot; location for the SAG directive.</span>
-<span class="sd">        @param layerNum:    The layer (int) number used by the lithography directive.</span>
-<span class="sd">                            Lower numbers go down first, with higher numbers</span>
-<span class="sd">                            deposited last.</span>
-<span class="sd">        @param lithoBase:   The base partNames to use for the lithography directive.</span>
-<span class="sd">                            For multi-step lithography, the bases are just all merged,</span>
-<span class="sd">                            so there is no need to list this more than once.</span>
-<span class="sd">        @param fillLitho:   Bool, defaulting to true. If set to false, will attempt</span>
-<span class="sd">                            to hollow out lithography steps by subtracting the base</span>
-<span class="sd">                            and subsequent lithography layers, but this can sometimes</span>
-<span class="sd">                            fail in opencascade. COMSOL takes care of this using</span>
-<span class="sd">                            parasolid if left to True.</span>
-<span class="sd">        @param meshMaxSize: The maximum allowable mesh size for this part, in microns.</span>
-<span class="sd">        @param meshGrowthRate: The maximum allowable mesh growth rate for this part</span>
-<span class="sd">        @param meshScaleVector: 3D list with scaling factors for the mesh in x, y, z direction</span>
-<span class="sd">        @param boundaryCondition: One or more boundary conditions, if applicable, of the form of</span>
-<span class="sd">                            a type -&gt; value mapping. For example, this could be {&#39;voltage&#39;:1.0}</span>
-<span class="sd">                            or, more explicitly, {&#39;voltage&#39;: {&#39;type&#39;: &#39;dirichlet&#39;, &#39;value&#39;: 1.0,</span>
-<span class="sd">                                                              &#39;unit&#39;: &#39;V&#39;}}.</span>
-<span class="sd">        @param subtractList: A list of partNames that should be subtracted from the</span>
-<span class="sd">                             current part when forming the final 3D objects. This</span>
-<span class="sd">                             subtraction is carried out in 3D using the COMSOL parasolid</span>
-<span class="sd">                             kernel or using shapely in 2D.</span>
-<span class="sd">        @param Ns:           Volume charge density of a part, applicable to semiconductor</span>
-<span class="sd">                             and dielectric parts. The units for this are 1/cm^3.</span>
-<span class="sd">        @param Phi_NL:       The neutral level for interface traps, measured in units of</span>
-<span class="sd">                             eV above the valence band maximum (semiconductor only).</span>
-<span class="sd">        @param Ds:           Density of interface traps; units are 1/(cm^2*eV).</span>
+<span class="sd">        :param str material: The material of the resulting part.</span>
+<span class="sd">        :param float z0: The starting z coordinate. Required for extrude, wire,</span>
+<span class="sd">                         SAG, and lithographydirectives.</span>
+<span class="sd">        :param float thickness: The total thickness. Required for all directives.</span>
+<span class="sd">                                On wireShell, this is interpreted as the layer thickness.</span>
+<span class="sd">        :param str target_wire: Target wire directive for a coating directive.</span>
+<span class="sd">        :param list shell_verts: Vertices to use when rendering the coating. Required</span>
+<span class="sd">                                 for the shell directive.</span>
+<span class="sd">        :param str depo_zone: FreeCAD sketch defining the (positive) mask for the deposition</span>
+<span class="sd">                              of a wire coating. Note that only one of depoZone or etchZone may be used.</span>
+<span class="sd">        :param str etch_zone: FreeCAD sketch defining the (negative) amsek for the deposition of a</span>
+<span class="sd">                              wire coating. Note that only one of depoZone or etchZone may be used.</span>
+<span class="sd">        :param float z_middle: The location for the &quot;flare out&quot; of the SAG directive.</span>
+<span class="sd">        :param float t_in: The lateral distance from the 2D profile to the edge of the top bevel</span>
+<span class="sd">                           for the SAG directive.</span>
+<span class="sd">        :param float t_out: The lateral distance from the 2D profile to the furthest &quot;flare out&quot;</span>
+<span class="sd">                            location for the SAG directive.</span>
+<span class="sd">        :param int layer_num: The layer number used by the lithography directive. Lower numbers</span>
+<span class="sd">                              go down first, with higher numbers deposited last.</span>
+<span class="sd">        :param list litho_base: The base partNames to use for the lithography directive.</span>
+<span class="sd">                                For multi-step lithography, the bases are just all merged,</span>
+<span class="sd">                                so there is no need to list this more than once.</span>
+<span class="sd">        :param bool fill_litho: If set to false, will attempt to hollow out lithography</span>
+<span class="sd">                                steps by subtracting the base and subsequent lithography</span>
+<span class="sd">                                layers, but this can sometimes fail in opencascade.</span>
+<span class="sd">        :param float mesh_max_size: The maximum allowable mesh size for this part, in microns.</span>
+<span class="sd">        :param float mesh_min_size: The minimum allowable mesh size for this part, in microns.</span>
+<span class="sd">        :param float mesh_growth_rate: The maximum allowable mesh growth rate for this part.</span>
+<span class="sd">        :param tuple mesh_scale_vector: 3D list with scaling factors for the mesh in</span>
+<span class="sd">                                        x, y, z direction.</span>
+<span class="sd">        :param dict boundary_condition: One or more boundary conditions, if applicable, of</span>
+<span class="sd">                                        the form of a type -&gt; value mapping. For example, this could be {&#39;voltage&#39;:1.0} or,</span>
+<span class="sd">                                        more explicitly, {&#39;voltage&#39;: {&#39;type&#39;: &#39;dirichlet&#39;, &#39;value&#39;: 1.0,&#39;unit&#39;: &#39;V&#39;}}.</span>
+<span class="sd">        :param list subtract_list: A list of partNames that should be subtracted from the current</span>
+<span class="sd">                                   part when forming the final 3D objects. This subtraction is carried out when boundary</span>
+<span class="sd">                                   conditions are set.</span>
+<span class="sd">        :param float ns: Volume charge density of a part, applicable to semiconductor and</span>
+<span class="sd">                         dielectric parts. The units for this are 1/cm^3.</span>
+<span class="sd">        :param float phi_nl: The neutral level for interface traps, measured in units of eV above</span>
+<span class="sd">                             the valence band maximum (semiconductor only).</span>
+<span class="sd">        :param float ds: Density of interface traps; units are 1/(cm^2*eV).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+
         <span class="c1"># Input validation</span>
-        <span class="c1"># ~ if partName in self.modelDict[&#39;3DParts&#39;]:</span>
-            <span class="c1"># ~ raise NameError(&#39;Error - partName &#39; + partName +&#39; was duplicated!&#39;)</span>
-        <span class="k">if</span> <span class="n">directive</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;extrude&#39;</span><span class="p">,</span> <span class="s1">&#39;wire&#39;</span><span class="p">,</span> <span class="s1">&#39;wireShell&#39;</span><span class="p">,</span> <span class="s1">&#39;SAG&#39;</span><span class="p">,</span> <span class="s1">&#39;lithography&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">directive</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;extrude&#39;</span><span class="p">,</span> <span class="s1">&#39;wire&#39;</span><span class="p">,</span> <span class="s1">&#39;wire_shell&#39;</span><span class="p">,</span> <span class="s1">&#39;SAG&#39;</span><span class="p">,</span> <span class="s1">&#39;lithography&#39;</span><span class="p">,</span> <span class="s1">&#39;3d_shape&#39;</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span><span class="s1">&#39;Error - directive &#39;</span> <span class="o">+</span> <span class="n">directive</span> <span class="o">+</span> <span class="s1">&#39; is not a valid directive!&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">domainType</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;semiconductor&#39;</span><span class="p">,</span> <span class="s1">&#39;metalGate&#39;</span><span class="p">,</span> <span class="s1">&#39;virtual&#39;</span><span class="p">,</span> <span class="s1">&#39;dielectric&#39;</span><span class="p">]:</span>
-            <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span><span class="s1">&#39;Error - domainType &#39;</span> <span class="o">+</span> <span class="n">domainType</span> <span class="o">+</span> <span class="s1">&#39; not valid!&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">etchZone</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">depoZone</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">domain_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;semiconductor&#39;</span><span class="p">,</span> <span class="s1">&#39;metal_gate&#39;</span><span class="p">,</span> <span class="s1">&#39;virtual&#39;</span><span class="p">,</span> <span class="s1">&#39;dielectric&#39;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span><span class="s1">&#39;Error - domainType &#39;</span> <span class="o">+</span> <span class="n">domain_type</span> <span class="o">+</span> <span class="s1">&#39; not valid!&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">etch_zone</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">depo_zone</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span>
-                <span class="s1">&#39;Error - etchZone and depoZone cannot both be set!&#39;</span><span class="p">)</span>
+                <span class="s1">&#39;Error - etch_zone and depo_zone cannot both be set!&#39;</span><span class="p">)</span>
 
         <span class="c1"># Input storage</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">label</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fcName</span> <span class="o">=</span> <span class="n">fcName</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fc_name</span> <span class="o">=</span> <span class="n">fc_name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">directive</span> <span class="o">=</span> <span class="n">directive</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">domainType</span> <span class="o">=</span> <span class="n">domainType</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">domain_type</span> <span class="o">=</span> <span class="n">domain_type</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">material</span> <span class="o">=</span> <span class="n">material</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">z0</span> <span class="o">=</span> <span class="n">z0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">thickness</span> <span class="o">=</span> <span class="n">thickness</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">targetWire</span> <span class="o">=</span> <span class="n">targetWire</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">shellVerts</span> <span class="o">=</span> <span class="n">shellVerts</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">depoZone</span> <span class="o">=</span> <span class="n">depoZone</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">zMiddle</span> <span class="o">=</span> <span class="n">zMiddle</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tIn</span> <span class="o">=</span> <span class="n">tIn</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tOut</span> <span class="o">=</span> <span class="n">tOut</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layerNum</span> <span class="o">=</span> <span class="n">layerNum</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lithoBase</span> <span class="o">=</span> <span class="n">lithoBase</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fillLitho</span> <span class="o">=</span> <span class="n">fillLitho</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">meshMaxSize</span> <span class="o">=</span> <span class="n">meshMaxSize</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">meshGrowthRate</span> <span class="o">=</span> <span class="n">meshGrowthRate</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">meshScaleVector</span> <span class="o">=</span> <span class="n">meshScaleVector</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">boundaryCondition</span> <span class="o">=</span> <span class="n">boundaryCondition</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">subtractList</span> <span class="o">=</span> <span class="n">subtractList</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">Ns</span> <span class="o">=</span> <span class="n">Ns</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">Phi_NL</span> <span class="o">=</span> <span class="n">Phi_NL</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">Ds</span> <span class="o">=</span> <span class="n">Ds</span>
-        <span class="c1"># ~ self.step_pickle = pickle(load(filepath))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_wire</span> <span class="o">=</span> <span class="n">target_wire</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">shell_verts</span> <span class="o">=</span> <span class="n">shell_verts</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">depo_zone</span> <span class="o">=</span> <span class="n">depo_zone</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">etch_zone</span> <span class="o">=</span> <span class="n">etch_zone</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z_middle</span> <span class="o">=</span> <span class="n">z_middle</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t_in</span> <span class="o">=</span> <span class="n">t_in</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t_out</span> <span class="o">=</span> <span class="n">t_out</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layer_num</span> <span class="o">=</span> <span class="n">layer_num</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">litho_base</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">litho_base</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">litho_base</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fill_litho</span> <span class="o">=</span> <span class="n">fill_litho</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh_max_size</span> <span class="o">=</span> <span class="n">mesh_max_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh_min_size</span> <span class="o">=</span> <span class="n">mesh_min_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh_growth_rate</span> <span class="o">=</span> <span class="n">mesh_growth_rate</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh_scale_vector</span> <span class="o">=</span> <span class="n">mesh_scale_vector</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">boundary_condition</span> <span class="o">=</span> <span class="n">boundary_condition</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">subtract_list</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">subtract_list</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">subtract_list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ns</span> <span class="o">=</span> <span class="n">ns</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">phi_nl</span> <span class="o">=</span> <span class="n">phi_nl</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ds</span> <span class="o">=</span> <span class="n">ds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">serial_stp</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># This gets set on geometry build</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">built_fc_name</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># This gets set on geometry build</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">thickness_of_wire</span> <span class="o">=</span> <span class="n">thickness_of_wire</span>  <span class="c1"># TODO: sanitise &amp; document</span>
 
-    <span class="c1"># ~ def write_stp(file_path = self.label):   # &lt;- todo</span>
-<div class="viewcode-block" id="Part3D.write_stp"><a class="viewcode-back" href="../../../source/qmt.geometry.html#qmt.geometry.parts.Part3D.write_stp">[docs]</a>    <span class="k">def</span> <span class="nf">write_stp</span><span class="p">():</span>
+
+<div class="viewcode-block" id="Part3D.write_stp"><a class="viewcode-back" href="../../../source/qmt.geometry.html#qmt.geometry.parts.Part3D.write_stp">[docs]</a>    <span class="k">def</span> <span class="nf">write_stp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Write part geometry to a STEP file.</span>
 
 <span class="sd">        Returns the STEP file path.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">file_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">label</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="n">pickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serial_stp</span><span class="p">)</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">of</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">file_path</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">file_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">+</span> <span class="s1">&#39;.stp&#39;</span>
+        <span class="kn">import</span> <span class="nn">codecs</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">codecs</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serial_stp</span><span class="o">.</span><span class="n">encode</span><span class="p">(),</span> <span class="s1">&#39;base64&#39;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">of</span><span class="p">:</span>
             <span class="n">of</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">file_path</span></div></div>
 </pre></div>

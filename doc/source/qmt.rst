@@ -9,8 +9,8 @@ Subpackages
     qmt.basic_tasks
     qmt.geometry
     qmt.ms_tasks
-    qmt.old_code
     qmt.task_framework
+    qmt.visualization
 
 Submodules
 ----------

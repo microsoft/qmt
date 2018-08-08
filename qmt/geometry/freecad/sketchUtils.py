@@ -165,7 +165,7 @@ def findEdgeCycles2(sketch):
     """Find the list of edges in a sketch and separate them into cycles."""
     return sketch.Shape.Wires
 
-def splitSketch(sketch):
+def splitSketch_old(sketch):
     '''Splits a sketch into several, returning a list of names of the new sketches.
     '''
     doc = FreeCAD.ActiveDocument
@@ -179,11 +179,13 @@ def splitSketch(sketch):
         cycleSketchList += [cycleSketch]
     return cycleSketchList
 
-def splitSketch2(sketch):
+def splitSketch(sketch):
     '''Splits a sketch into several, returning a list of names of the new sketches.
     '''
-    if len(sketch.Shape.Wires) < 2:
-        return sketch
+    if not sketch.Shape.Wires:
+        raise ValueError("No wires in sketch.")
+    # ~ if len(sketch.Shape.Wires) < 2:  # some code relies on copied sketch
+    # ~     return [sketch]
     sketchList = []
     for i,wire in enumerate(sketch.Shape.Wires):
         sketchList.append(addCycleSketch2(sketch.Name + '_' + str(i), wire))
@@ -262,15 +264,15 @@ def draftOffset(inputSketch,t):
     ''' Attempt to offset the draft figure by a thickness t. Positive t is an
     inflation, while negative t is a deflation.
     '''
-    from qmt.geometry.freecad.geomUtils import extrude,copy,subtract,delete    
+    from qmt.geometry.freecad.geomUtils import extrude, copy_move, subtract, delete    
 
     if t == 0.:
-        return copy(inputSketch)
+        return copy_move(inputSketch)
     deltaT = np.abs(t)
     offsetVec1 = vec(-deltaT,-deltaT,0.)
     offsetVec2 = vec(deltaT,deltaT,0.)
     
-    offset0 = copy(inputSketch)
+    offset0 = copy_move(inputSketch)
     offset1 = Draft.offset(inputSketch,offsetVec1,copy=True)
     offset2 = Draft.offset(inputSketch,offsetVec2,copy=True)
 
@@ -311,9 +313,9 @@ def draftOffset(inputSketch,t):
     delete(solid1)
     delete(solid2)
     if t<0 and littleSketch is not None:
-        returnSketch = copy(littleSketch)
+        returnSketch = copy_move(littleSketch)
     elif t>0 and bigSketch is not None:
-        returnSketch = copy(bigSketch)
+        returnSketch = copy_move(bigSketch)
     else:
         raise ValueError('Failed to offset the sketch '+str(inputSketch.Name)+' by amount '+str(t))
     
@@ -336,14 +338,14 @@ def draftOffset(inputSketch,t):
     # delete(diff20)
     # if t > 0:
     #     if positiveOffsetIndex == 1:
-    #         returnSketch = copy(offset1)
+    #         returnSketch = copy_move(offset1)
     #     else:
-    #         returnSketch = copy(offset2)
+    #         returnSketch = copy_move(offset2)
     # elif t<0:
     #     if positiveOffsetIndex == 1:
-    #         returnSketch = copy(offset2)
+    #         returnSketch = copy_move(offset2)
     #     else:
-    #         returnSketch = copy(offset1)
+    #         returnSketch = copy_move(offset1)
     delete(offset0)
     delete(offset1)
     delete(offset2)

@@ -319,7 +319,7 @@
     <span class="sd">&quot;&quot;&quot;Find the list of edges in a sketch and separate them into cycles.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">sketch</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">Wires</span></div>
 
-<div class="viewcode-block" id="splitSketch"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.sketchUtils.splitSketch">[docs]</a><span class="k">def</span> <span class="nf">splitSketch</span><span class="p">(</span><span class="n">sketch</span><span class="p">):</span>
+<div class="viewcode-block" id="splitSketch_old"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.sketchUtils.splitSketch_old">[docs]</a><span class="k">def</span> <span class="nf">splitSketch_old</span><span class="p">(</span><span class="n">sketch</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Splits a sketch into several, returning a list of names of the new sketches.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">doc</span> <span class="o">=</span> <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span>
@@ -333,11 +333,13 @@
         <span class="n">cycleSketchList</span> <span class="o">+=</span> <span class="p">[</span><span class="n">cycleSketch</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">cycleSketchList</span></div>
 
-<div class="viewcode-block" id="splitSketch2"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.sketchUtils.splitSketch2">[docs]</a><span class="k">def</span> <span class="nf">splitSketch2</span><span class="p">(</span><span class="n">sketch</span><span class="p">):</span>
+<div class="viewcode-block" id="splitSketch"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.sketchUtils.splitSketch">[docs]</a><span class="k">def</span> <span class="nf">splitSketch</span><span class="p">(</span><span class="n">sketch</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Splits a sketch into several, returning a list of names of the new sketches.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">sketch</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">Wires</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">sketch</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sketch</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">Wires</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No wires in sketch.&quot;</span><span class="p">)</span>
+    <span class="c1"># ~ if len(sketch.Shape.Wires) &lt; 2:  # some code relies on copied sketch</span>
+    <span class="c1"># ~     return [sketch]</span>
     <span class="n">sketchList</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">wire</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sketch</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">Wires</span><span class="p">):</span>
         <span class="n">sketchList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">addCycleSketch2</span><span class="p">(</span><span class="n">sketch</span><span class="o">.</span><span class="n">Name</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">wire</span><span class="p">))</span>
@@ -416,15 +418,15 @@
     <span class="sd">&#39;&#39;&#39; Attempt to offset the draft figure by a thickness t. Positive t is an</span>
 <span class="sd">    inflation, while negative t is a deflation.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
-    <span class="kn">from</span> <span class="nn">qmt.geometry.freecad.geomUtils</span> <span class="k">import</span> <span class="n">extrude</span><span class="p">,</span><span class="n">copy</span><span class="p">,</span><span class="n">subtract</span><span class="p">,</span><span class="n">delete</span>    
+    <span class="kn">from</span> <span class="nn">qmt.geometry.freecad.geomUtils</span> <span class="k">import</span> <span class="n">extrude</span><span class="p">,</span> <span class="n">copy_move</span><span class="p">,</span> <span class="n">subtract</span><span class="p">,</span> <span class="n">delete</span>    
 
     <span class="k">if</span> <span class="n">t</span> <span class="o">==</span> <span class="mf">0.</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">copy</span><span class="p">(</span><span class="n">inputSketch</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">inputSketch</span><span class="p">)</span>
     <span class="n">deltaT</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
     <span class="n">offsetVec1</span> <span class="o">=</span> <span class="n">vec</span><span class="p">(</span><span class="o">-</span><span class="n">deltaT</span><span class="p">,</span><span class="o">-</span><span class="n">deltaT</span><span class="p">,</span><span class="mf">0.</span><span class="p">)</span>
     <span class="n">offsetVec2</span> <span class="o">=</span> <span class="n">vec</span><span class="p">(</span><span class="n">deltaT</span><span class="p">,</span><span class="n">deltaT</span><span class="p">,</span><span class="mf">0.</span><span class="p">)</span>
     
-    <span class="n">offset0</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">inputSketch</span><span class="p">)</span>
+    <span class="n">offset0</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">inputSketch</span><span class="p">)</span>
     <span class="n">offset1</span> <span class="o">=</span> <span class="n">Draft</span><span class="o">.</span><span class="n">offset</span><span class="p">(</span><span class="n">inputSketch</span><span class="p">,</span><span class="n">offsetVec1</span><span class="p">,</span><span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">offset2</span> <span class="o">=</span> <span class="n">Draft</span><span class="o">.</span><span class="n">offset</span><span class="p">(</span><span class="n">inputSketch</span><span class="p">,</span><span class="n">offsetVec2</span><span class="p">,</span><span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
@@ -465,9 +467,9 @@
     <span class="n">delete</span><span class="p">(</span><span class="n">solid1</span><span class="p">)</span>
     <span class="n">delete</span><span class="p">(</span><span class="n">solid2</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">t</span><span class="o">&lt;</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">littleSketch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">returnSketch</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">littleSketch</span><span class="p">)</span>
+        <span class="n">returnSketch</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">littleSketch</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">t</span><span class="o">&gt;</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">bigSketch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">returnSketch</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">bigSketch</span><span class="p">)</span>
+        <span class="n">returnSketch</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">bigSketch</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Failed to offset the sketch &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">inputSketch</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39; by amount &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
     
@@ -490,14 +492,14 @@
     <span class="c1"># delete(diff20)</span>
     <span class="c1"># if t &gt; 0:</span>
     <span class="c1">#     if positiveOffsetIndex == 1:</span>
-    <span class="c1">#         returnSketch = copy(offset1)</span>
+    <span class="c1">#         returnSketch = copy_move(offset1)</span>
     <span class="c1">#     else:</span>
-    <span class="c1">#         returnSketch = copy(offset2)</span>
+    <span class="c1">#         returnSketch = copy_move(offset2)</span>
     <span class="c1"># elif t&lt;0:</span>
     <span class="c1">#     if positiveOffsetIndex == 1:</span>
-    <span class="c1">#         returnSketch = copy(offset2)</span>
+    <span class="c1">#         returnSketch = copy_move(offset2)</span>
     <span class="c1">#     else:</span>
-    <span class="c1">#         returnSketch = copy(offset1)</span>
+    <span class="c1">#         returnSketch = copy_move(offset1)</span>
     <span class="n">delete</span><span class="p">(</span><span class="n">offset0</span><span class="p">)</span>
     <span class="n">delete</span><span class="p">(</span><span class="n">offset1</span><span class="p">)</span>
     <span class="n">delete</span><span class="p">(</span><span class="n">offset2</span><span class="p">)</span>

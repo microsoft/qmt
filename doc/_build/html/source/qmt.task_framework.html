@@ -158,6 +158,31 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
+<div class="section" id="module-qmt.task_framework.data_template">
+<span id="qmt-task-framework-data-template-module"></span><h2>qmt.task_framework.data_template module<a class="headerlink" href="#module-qmt.task_framework.data_template" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="qmt.task_framework.data_template.Data">
+<em class="property">class </em><code class="descclassname">qmt.task_framework.data_template.</code><code class="descname">Data</code><a class="reference internal" href="../_modules/qmt/task_framework/data_template.html#Data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.task_framework.data_template.Data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dl class="method">
+<dt id="qmt.task_framework.data_template.Data.save">
+<code class="descname">save</code><span class="sig-paren">(</span><em>azure_info=None</em>, <em>file_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/task_framework/data_template.html#Data.save"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.task_framework.data_template.Data.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the data to Azure or disk. Azure takes precedence over local disk if specified.
+:param azure_info: Key information for Azure store
+:param file_path: File path for an hdf5 file in local storage.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.task_framework.data_template.Data.load">
+<code class="descname">load</code><span class="sig-paren">(</span><em>azure_info=None</em>, <em>file_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/task_framework/data_template.html#Data.load"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.task_framework.data_template.Data.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the data from Azure or disk. Azure takes precedence over local disk if specified.
+:param azure_info: Key information for Azure store
+:param file_path: File path for an hdf5 file in local storage.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 <div class="section" id="module-qmt.task_framework.sweep">
 <span id="qmt-task-framework-sweep-module"></span><h2>qmt.task_framework.sweep module<a class="headerlink" href="#module-qmt.task_framework.sweep" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
@@ -342,6 +367,11 @@ list_of_tags: The tags corresponding to the part of the sweep that this</p>
 <em class="property">class </em><code class="descclassname">qmt.task_framework.sweep.</code><code class="descname">SweepTag</code><span class="sig-paren">(</span><em>tag_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/task_framework/sweep.html#SweepTag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.task_framework.sweep.SweepTag" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <p>Unique tag for id’ing parameters in the sweep.</p>
+<dl class="method">
+<dt id="qmt.task_framework.sweep.SweepTag.replace">
+<code class="descname">replace</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/task_framework/sweep.html#SweepTag.replace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.task_framework.sweep.SweepTag.replace" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 <dl class="function">
@@ -354,8 +384,27 @@ as values at any level
 </dd></dl>
 
 <dl class="function">
+<dt id="qmt.task_framework.sweep.gen_tag_extract_list">
+<code class="descclassname">qmt.task_framework.sweep.</code><code class="descname">gen_tag_extract_list</code><span class="sig-paren">(</span><em>nested_list_of_tags</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/task_framework/sweep.html#gen_tag_extract_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.task_framework.sweep.gen_tag_extract_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract all tags from nested dictionary that may have tags
+as values at any level
+:param nested_list_of_tags: exactly what it sounds like
+:return: a generator that yields all the tags in the dictionary</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="qmt.task_framework.sweep.replace_tag_with_value">
 <code class="descclassname">qmt.task_framework.sweep.</code><code class="descname">replace_tag_with_value</code><span class="sig-paren">(</span><em>name_to_tag_mapping</em>, <em>tag</em>, <em>new_value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/task_framework/sweep.html#replace_tag_with_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.task_framework.sweep.replace_tag_with_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a copy of name_to_tag_mapping with values of tag replaced with new_value.
+:param name_to_tag_mapping: Dictionary mapping parameter names to SweepTags.
+:param tag: The SweepTag to replace.
+:param new_value: the value to replace it with.
+:return: a copy of name_to_tag_mapping with values of tag replaced with new_value</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="qmt.task_framework.sweep.replace_tag_with_value_list">
+<code class="descclassname">qmt.task_framework.sweep.</code><code class="descname">replace_tag_with_value_list</code><span class="sig-paren">(</span><em>name_to_tag_mapping</em>, <em>tag</em>, <em>new_value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/task_framework/sweep.html#replace_tag_with_value_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.task_framework.sweep.replace_tag_with_value_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a copy of name_to_tag_mapping with values of tag replaced with new_value.
 :param name_to_tag_mapping: Dictionary mapping parameter names to SweepTags.
 :param tag: The SweepTag to replace.

@@ -7,7 +7,6 @@
 import os
 import numpy as np
 from six import iteritems, text_type
-import pickle
 
 import FreeCAD
 import Draft
@@ -15,98 +14,180 @@ import Draft
 
 # TODO: use namespace in code
 from qmt.geometry.freecad.auxiliary import *
-from qmt.geometry.freecad.geomUtils import (extrude, copy, genUnion,
-                                  getBB, makeBB, makeHexFace,
-                                  extrudeBetween, centerObjects, intersect,
-                                  checkOverlap, subtract,
-                                  crossSection)
+import qmt.geometry.freecad.geomUtils
+import qmt.geometry.freecad.sketchUtils
+import qmt.geometry.freecad.fileIO
+from qmt.geometry.freecad.geomUtils import (extrude, copy_move, genUnion,
+                                            getBB, makeBB, makeHexFace,
+                                            extrudeBetween, centerObjects, intersect,
+                                            checkOverlap, subtract,
+                                            crossSection)
 from qmt.geometry.freecad.sketchUtils import (findSegments, splitSketch, extendSketch,
                                               findEdgeCycles, draftOffset)
-from qmt.geometry.freecad.fileIO import (updateParams, exportCAD, exportMeshed)
+from qmt.geometry.freecad.fileIO import (updateParams, exportCAD, exportMeshed, store_serial)
 
 
+def build(opts):
+    '''Build the 3D geometry.
 
-def build3d(opts):  # TODO: smarter name, this is the full 3D build
-
-    import hashlib
-    instance_hash = hashlib.sha256(str(opts)).hexdigest()
+    :param dict opts:   Options dict in the QMT 3D geometry input format.
+    :return dict:       Modified options dict.
+    '''
     doc = FreeCAD.ActiveDocument
 
+    # Schedule for deletion all objects not explicitly selected by the user
+    input_parts_names = [part.fc_name for part in opts['input_parts']]
+    blacklist = []
+    for obj in doc.Objects:
+        if (obj.Name not in input_parts_names) and (obj.TypeId != 'Spreadsheet::Sheet'):
+            blacklist.append(obj)
+
+    # Update the model parameters
     if 'params' in opts:
-        # extend params dictionary to original parts schema
+        # Extend params dictionary to original parts schema
         fcdict = {key: (value, 'freeCAD') for (key, value) in opts['params'].items()}
         updateParams(doc, fcdict)
 
-    # build the parts and store serialised STEP representations in opts
-    if 'input_parts' in opts:
-        built_parts = {}
-        for input_part in opts['input_parts']:
-            built_parts[input_part.label] = buildPart(input_part)
+    if 'built_part_names' not in opts:
+        opts['built_part_names'] = {}
+    if 'serial_stp_parts' not in opts:
+        opts['serial_stp_parts'] = {}
 
-        if 'serial_stp_parts' not in opts:
-            opts['serial_stp_parts'] = {}
-        for label in built_parts:
-            tmp_path = 'tmp_' + label + '_' + instance_hash + '.stp'
-            exportCAD(built_parts[label], tmp_path)
-            with open(tmp_path, 'rb') as f:
-                opts['serial_stp_parts'][label] = pickle.dumps(f.read())
-            os.remove(tmp_path)
+    # Build the parts
+    for input_part in opts['input_parts']:
 
-    # store a serialised FreeCAD document representation in opts
-    tmp_path = 'tmp_built_' + instance_hash + '.fcstd'
-    doc.saveAs(tmp_path)
-    with open(tmp_path, 'rb') as f:
-        opts['serial_fcdoc'] = pickle.dumps(f.read())
-    os.remove(tmp_path)
+        if input_part.directive == 'extrude':
+            part = build_extrude(input_part)
+        elif input_part.directive == 'SAG':
+            part = build_sag(input_part)
+        elif input_part.directive == 'wire':
+            part = build_wire(input_part)
+        elif input_part.directive == 'wire_shell':
+            part = build_wire_shell(input_part)
+        elif input_part.directive == 'lithography':
+            part = build_lithography(input_part)
+        elif input_part.directive == '3d_shape':
+            part = build_pass(input_part)
+        else:
+            raise ValueError('Directive ' + input_part.directive +
+                             ' is not a recognized directive type.')
+
+        doc.recompute()
+        opts['built_part_names'][input_part.label] = part.Name
+        store_serial(opts['serial_stp_parts'], input_part.label,
+                     exportCAD, 'stp',  [ part ] )
+
+    for obj in blacklist:
+        delete(obj)
+    doc.recompute()
+    def _save_helper(doc, path):
+        doc.saveAs(path)
+        #make_objects_visible(path)  # freecadcmd doesn't create GuiDocument.xml
+    store_serial(opts, 'serial_fcdoc', _save_helper, 'fcstd', doc)
 
     return opts
 
 
+def build_pass(part):
+    '''Pas a part unchanged.'''
+    assert part.directive == '3d_shape'
+    return FreeCAD.ActiveDocument.getObject(part.fc_name)
 
-
-def buildPart(part):
-    # ~ partDict = self.model.modelDict['3DParts'][partName]
-    if part.directive == 'extrude':
-        obj = build_extrude(part)
-    # ~ elif part.directive == 'wire':
-        # ~ objs = self._build_wire(part)
-    # ~ elif part.directive == 'wireShell':
-        # ~ objs = self._build_wire_shell(part)
-    # ~ elif part.directive == 'SAG':
-        # ~ objs = self._build_SAG(part)
-    # ~ elif part.directive == 'lithography':
-        # ~ objs = self._build_litho(part)
-    else:
-        raise ValueError('Directive ' + part.directive +
-                         ' is not a recognized directive type.')
-    # ~ self._buildPartsDict[partName] = objs
-    # ~ for obj in objs:
-        # ~ self.model.registerCadPart(partName, obj.Name, None)
-    return obj
 
 def build_extrude(part):
-    """Build an extrude part."""
-    # ~ partDict = self.model.modelDict['3DParts'][partName]
+    '''Build an extrude part.'''
     assert part.directive == 'extrude'
-    # ~ z0 = self._fetch_geo_param(partDict['z0'])
-    # ~ deltaz = self._fetch_geo_param(partDict['thickness'])
-
+    z0 = part.z0
     deltaz = part.thickness
     doc = FreeCAD.ActiveDocument
-    sketch = doc.getObject(part.fcName)
-    # ~ splitSketches = splitSketch(sketch)
-    obj = extrudeBetween(sketch, 0, deltaz)
-    # ~ extParts = []
-    # ~ for mySplitSketch in splitSketches:
-        # ~ extPart = extrudeBetween(mySplitSketch, z0, z0 + deltaz)
-        # ~ extPart.Label = partName
-        # ~ extParts.append(extPart)
-        # ~ delete(mySplitSketch)
-    # ~ return extParts
+    sketch = doc.getObject(part.fc_name)
+    splitSketches = splitSketch(sketch)
+    extParts = []
+    for sketch in splitSketches:
+        extParts.append(extrudeBetween(sketch, z0, z0 + deltaz, name=part.label))
+        delete(sketch)
     doc.recompute()
-    return obj
+    return genUnion(extParts, consumeInputs=True)
+
+
+def build_sag(part, offset=0.):
+    '''Build a SAG part.'''
+    assert part.directive == 'SAG'
+    zBot = part.z0
+    zMid = part.z_middle
+    zTop = part.thickness + zBot
+    tIn = part.t_in
+    tOut = part.t_out
+    doc = FreeCAD.ActiveDocument
+    sketch = doc.getObject(part.fc_name)
+    sag = makeSAG(sketch, zBot, zMid, zTop, tIn, tOut, offset=offset)
+    sag.Label = part.label
+    doc.recompute()
+    return sag
+
+
+def build_wire(part, offset=0.):
+    '''Build a wire part.'''
+    assert part.directive == 'wire'
+    doc = FreeCAD.ActiveDocument
+    zBottom = part.z0
+    width = part.thickness
+    sketch = doc.getObject(part.fc_name)
+    wire = buildWire(sketch, zBottom, width, offset=offset)
+    wire.Label = part.label
+    return wire
+
+def build_wire_shell(part, offset=0.):
+    '''Build a wire shell part.'''
+    assert part.directive == 'wire_shell'
+    doc = FreeCAD.ActiveDocument
+    zBottom = part.z0
+    radius = part.thickness_of_wire
+    wireSketch = doc.getObject(part.fc_name)
+    shell_verts = part.shell_verts
+    thickness = part.thickness
+    depoZoneName = part.depo_zone
+    etchZoneName = part.etch_zone
+    if depoZoneName is not None:
+        depoZone = doc.getObject(depoZoneName)
+    else:
+        depoZone = None
+    if etchZoneName is not None:
+        etchZone = doc.getObject(etchZoneName)
+    else:
+        etchZone = None
+    shell = buildAlShell(
+        wireSketch,
+        zBottom,
+        radius,
+        shell_verts,
+        thickness,
+        depoZone=depoZone,
+        etchZone=etchZone,
+        offset=offset)
+    shell.Label = part.label
+    return shell
+
+
+def build_lithography(part):
+    """Build a lithography part."""
+    assert part.directive == 'litoghraphy'
+    raise NotImplementedError()
+    doc = FreeCAD.ActiveDocument
+    if not self.lithoSetup:
+        lithoDict = _initialize_lithography(fillShells=part.fillLitho)
+        lithoSetup = True
+    layerNum = part.layerNum
+    returnObjs = []
+    for objID in lithoDict['layers'][layerNum]['objIDs']:
+        if partName == lithoDict['layers'][layerNum]['objIDs'][
+                objID]['partName']:
+            returnObjs.append(self._gen_G(layerNum, objID))
+    return returnObjs
+
 
 ################################################################################
+
 
 def buildWire(sketch, zBottom, width, faceOverride=None, offset=0.0):
     """Given a line segment, build a nanowire of given cross-sectional width
@@ -124,7 +205,7 @@ def buildWire(sketch, zBottom, width, faceOverride=None, offset=0.0):
     mySweepTemp.Spine = sketchForSweep
     mySweepTemp.Solid = True
     doc.recompute()
-    mySweep = copy(mySweepTemp)
+    mySweep = copy_move(mySweepTemp)
     deepRemove(mySweepTemp)
     return mySweep
 
@@ -184,7 +265,7 @@ def buildAlShell(sketch, zBottom, width, verts, thickness,
             "Part::MultiFuse", sketch.Name + "_coating")
         coatingUnion.Shapes = shellList
         doc.recompute()
-        coatingUnionClone = copy(coatingUnion)
+        coatingUnionClone = copy_move(coatingUnion)
         doc.removeObject(coatingUnion.Name)
         for shell in shellList:
             doc.removeObject(shell.Name)
@@ -238,16 +319,16 @@ def makeSAG(sketch, zBot, zMid, zTop, tIn, tOut, offset=0.):
         delete(tempSketch)  # remove the copied sketch part
         # Make the bottom wire:
         rectPartTemp = extrude(botSketch, zMid - zBot)
-        rectPart = copy(rectPartTemp, moveVec=(0., 0., zBot - offset))
+        rectPart = copy_move(rectPartTemp, moveVec=(0., 0., zBot - offset))
         delete(rectPartTemp)
         # make the cap of the wire:
-        topSketchTemp = copy(topSketch, moveVec=(
+        topSketchTemp = copy_move(topSketch, moveVec=(
             0., 0., zTop - zMid + 2 * offset))
         capPartTemp = doc.addObject('Part::Loft', sketch.Name + '_cap')
         capPartTemp.Sections = [midSketch, topSketchTemp]
         capPartTemp.Solid = True
         doc.recompute()
-        capPart = copy(capPartTemp, moveVec=(0., 0., zMid - offset))
+        capPart = copy_move(capPartTemp, moveVec=(0., 0., zMid - offset))
         delete(capPartTemp)
         delete(topSketchTemp)
         delete(topSketch)
@@ -294,30 +375,30 @@ class modelBuilder:
         for obj in objs:
             self.model.registerCadPart(partName, obj.Name, None)
 
-    def exportBuiltParts(self, stepFileDir=None, stlFileDir=None):
-        # Now that we are ready to export, we first want to merge all of the
-        # 3D renders corresponding to a single shape into one entity:
-        totalObjsDict = {}
-        for partName in self._buildPartsDict.keys():
-            objsList = self._buildPartsDict[partName]
-            mergedObj = genUnion(objsList, consumeInputs=True)
-            mergedObj.Label = partName
-            totalObjsDict[partName] = mergedObj
-        # Now that we have merged the objects, we want to center them  in the x-y
-        # plane so the distances aren't ridiculous:
-        centerObjects(totalObjsDict.values())
-        # Finally, we go through the dictionary and export:
-        for partName in totalObjsDict.keys():
-            obj = totalObjsDict[partName]
-            objFCName = obj.Name
-            if stepFileDir is not None:
-                filePath = stepFileDir + '/' + partName + '.step'
-                exportCAD(obj, filePath)
-                self.model.registerCadPart(
-                    partName, objFCName, filePath, reset=True)
-            if stlFileDir is not None:
-                filePath = stlFileDir + '/' + partName + '.stl'
-                exportMeshed(obj, filePath)
+    # ~ def exportBuiltParts(self, stepFileDir=None, stlFileDir=None):
+        # ~ # Now that we are ready to export, we first want to merge all of the
+        # ~ # 3D renders corresponding to a single shape into one entity:
+        # ~ totalObjsDict = {}
+        # ~ for partName in self._buildPartsDict.keys():
+            # ~ objsList = self._buildPartsDict[partName]
+            # ~ mergedObj = genUnion(objsList, consumeInputs=True)
+            # ~ mergedObj.Label = partName
+            # ~ totalObjsDict[partName] = mergedObj
+        # ~ # Now that we have merged the objects, we want to center them  in the x-y
+        # ~ # plane so the distances aren't ridiculous:
+        # ~ centerObjects(totalObjsDict.values())
+        # ~ # Finally, we go through the dictionary and export:
+        # ~ for partName in totalObjsDict.keys():
+            # ~ obj = totalObjsDict[partName]
+            # ~ objFCName = obj.Name
+            # ~ if stepFileDir is not None:
+                # ~ filePath = stepFileDir + '/' + partName + '.step'
+                # ~ exportCAD(obj, filePath)
+                # ~ self.model.registerCadPart(
+                    # ~ partName, objFCName, filePath, reset=True)
+            # ~ if stlFileDir is not None:
+                # ~ filePath = stlFileDir + '/' + partName + '.stl'
+                # ~ exportMeshed(obj, filePath)
 
     def saveFreeCADState(self, fileName):
         """Save a copy of the freeCAD model and do garbage collection."""
@@ -436,7 +517,7 @@ class modelBuilder:
         if treatment == 'standard':
             # Apparently the offset function is buggy for very small offsets...
             if offsetVal < 1e-5:
-                offsetDupe = copy(obj)
+                offsetDupe = copy_move(obj)
             else:
                 offset = self.doc.addObject("Part::Offset")
                 offset.Source = obj
@@ -444,7 +525,7 @@ class modelBuilder:
                 offset.Mode = 0
                 offset.Join = 2
                 self.doc.recompute()
-                offsetDupe = copy(offset)
+                offsetDupe = copy_move(offset)
                 self.doc.recompute()
                 delete(offset)
         elif treatment == 'wire':
@@ -714,7 +795,7 @@ class modelBuilder:
                          consumeInputs=False)
             self.trash.append(H)
             if self.fillShells:
-                G = copy(H)
+                G = copy_move(H)
             else:
                 U = self._gen_U(layerNum, objID)
                 G = subtract(H, U)

@@ -69,7 +69,7 @@ def test_exportCAD(fix_testDir, fix_FCDoc):
 
     with pytest.raises(ValueError) as err:
         exportCAD(testShape, 'not_a_step_file')
-    assert 'does not end' in str(err.value)
+    assert 'not a supported extension' in str(err.value)
 
 
 # ~ def test_updateParams(fix_modelPath, fix_FCDoc):

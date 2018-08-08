@@ -157,7 +157,7 @@
 
 <span class="kn">from</span> <span class="nn">qmt.task_framework</span> <span class="k">import</span> <span class="n">Task</span>
 <span class="kn">from</span> <span class="nn">qmt.geometry</span> <span class="k">import</span> <span class="n">Geo1DData</span><span class="p">,</span> <span class="n">Geo2DData</span><span class="p">,</span> <span class="n">Geo3DData</span>
-
+<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="k">import</span> <span class="n">Polygon</span><span class="p">,</span> <span class="n">LineString</span>
 
 <div class="viewcode-block" id="Geometry1D"><a class="viewcode-back" href="../../../source/qmt.basic_tasks.html#qmt.basic_tasks.geometry.Geometry1D">[docs]</a><span class="k">class</span> <span class="nc">Geometry1D</span><span class="p">(</span><span class="n">Task</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;geometry_1d_task&#39;</span><span class="p">):</span>
@@ -186,11 +186,12 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Builds a geometry in 2D.</span>
 <span class="sd">        :param dict options: The dictionary holding parts and edges. It should be of the form:</span>
-<span class="sd">        {&#39;parts&#39;:{&#39;part_name&#39;:Polygon}, &#39;edges&#39;:{&#39;edge_name&#39;:LineString}, where Polygon and</span>
-<span class="sd">        LineString are instances of shapely.geometry.</span>
+<span class="sd">        {&#39;parts&#39;:{&#39;part_name&#39;:list of 2d points}, &#39;edges&#39;:{&#39;edge_name&#39;:list of 2d points}, where these lists are turned into Polygon and</span>
+<span class="sd">        LineString objects, which are instances of shapely.geometry.</span>
 <span class="sd">        &quot;part_name&quot;:Part3D}</span>
 <span class="sd">        :param str name: The name of this task.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="k">import</span> <span class="n">Polygon</span><span class="p">,</span> <span class="n">LineString</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Geometry2D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">([],</span> <span class="n">options</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_solve_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_result_list</span><span class="p">,</span> <span class="n">current_options</span><span class="p">):</span>
@@ -201,9 +202,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">geo_2d</span> <span class="o">=</span> <span class="n">Geo2DData</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">part_name</span> <span class="ow">in</span> <span class="n">current_options</span><span class="p">[</span><span class="s1">&#39;parts&#39;</span><span class="p">]:</span>
-            <span class="n">geo_2d</span><span class="o">.</span><span class="n">add_part</span><span class="p">(</span><span class="n">part_name</span><span class="p">,</span> <span class="n">current_options</span><span class="p">[</span><span class="s1">&#39;parts&#39;</span><span class="p">][</span><span class="n">part_name</span><span class="p">])</span>
+            <span class="n">geo_2d</span><span class="o">.</span><span class="n">add_part</span><span class="p">(</span><span class="n">part_name</span><span class="p">,</span> <span class="n">Polygon</span><span class="p">(</span><span class="n">current_options</span><span class="p">[</span><span class="s1">&#39;parts&#39;</span><span class="p">][</span><span class="n">part_name</span><span class="p">]))</span>
         <span class="k">for</span> <span class="n">edge_name</span> <span class="ow">in</span> <span class="n">current_options</span><span class="p">[</span><span class="s1">&#39;edges&#39;</span><span class="p">]:</span>
-            <span class="n">geo_2d</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">edge_name</span><span class="p">,</span> <span class="n">current_options</span><span class="p">[</span><span class="s1">&#39;edges&#39;</span><span class="p">][</span><span class="n">edge_name</span><span class="p">])</span>
+            <span class="n">geo_2d</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">edge_name</span><span class="p">,</span> <span class="n">LineString</span><span class="p">(</span><span class="n">current_options</span><span class="p">[</span><span class="s1">&#39;edges&#39;</span><span class="p">][</span><span class="n">edge_name</span><span class="p">]))</span>
         <span class="k">return</span> <span class="n">geo_2d</span></div>
 
 
@@ -229,24 +230,26 @@
 <span class="sd">        :param dict current_options: The dictionary specifying parts from above.</span>
 <span class="sd">        :return geo_3d: A Geo3DData object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">pyenv</span> <span class="o">=</span> <span class="n">current_options</span><span class="p">[</span><span class="s1">&#39;pyenv&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;pyenv&#39;</span> <span class="ow">in</span> <span class="n">current_options</span> <span class="k">else</span> <span class="s1">&#39;python2&#39;</span>
         <span class="kn">from</span> <span class="nn">qmt.geometry.freecad_wrapper</span> <span class="k">import</span> <span class="n">fcwrapper</span>
+        <span class="n">pyenv</span> <span class="o">=</span> <span class="n">current_options</span><span class="p">[</span><span class="s1">&#39;pyenv&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="s1">&#39;pyenv&#39;</span> <span class="ow">in</span> <span class="n">current_options</span> <span class="k">else</span> <span class="s1">&#39;python2&#39;</span>
+
+        <span class="c1"># Convert NumPy3 floats to something that Python2 can unpickle</span>
+        <span class="n">current_options</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">current_options</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+        <span class="c1"># Send off the instructions</span>
         <span class="n">ret</span> <span class="o">=</span> <span class="n">fcwrapper</span><span class="p">(</span><span class="n">pyenv</span><span class="p">,</span> <span class="s1">&#39;build3d&#39;</span><span class="p">,</span>
                         <span class="p">{</span><span class="s1">&#39;input_result_list&#39;</span><span class="p">:</span> <span class="n">input_result_list</span><span class="p">,</span>
                          <span class="s1">&#39;current_options&#39;</span><span class="p">:</span> <span class="n">current_options</span><span class="p">})</span>
-        <span class="c1"># ~ return ret</span>
 
+        <span class="c1"># Build a geometry object with from the returned results</span>
         <span class="n">geo</span> <span class="o">=</span> <span class="n">Geo3DData</span><span class="p">()</span>
+        <span class="n">geo</span><span class="o">.</span><span class="n">serial_fcdoc</span> <span class="o">=</span> <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;serial_fcdoc&#39;</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">current_options</span><span class="p">[</span><span class="s1">&#39;input_parts&#39;</span><span class="p">]:</span>
-            <span class="n">geo</span><span class="o">.</span><span class="n">build_order</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
-            <span class="c1"># ~ part.serial_stp = ret[&#39;serial_stp_parts&#39;][part.label]</span>
+            <span class="n">part</span><span class="o">.</span><span class="n">serial_stp</span> <span class="o">=</span> <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;serial_stp_parts&#39;</span><span class="p">][</span><span class="n">part</span><span class="o">.</span><span class="n">label</span><span class="p">]</span>
+            <span class="n">part</span><span class="o">.</span><span class="n">built_fc_name</span> <span class="o">=</span> <span class="n">ret</span><span class="p">[</span><span class="s1">&#39;built_part_names&#39;</span><span class="p">][</span><span class="n">part</span><span class="o">.</span><span class="n">label</span><span class="p">]</span>
             <span class="n">geo</span><span class="o">.</span><span class="n">add_part</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">part</span><span class="p">)</span>
-        <span class="c1"># ~ for part in ret[&#39;built_parts&#39;]:</span>
-            <span class="c1"># ~ geo.add_part(part.label, part)</span>
-        <span class="c1"># fill geo with parts and serialised fcfile</span>
-        <span class="c1"># ~ for part_name in ret[&#39;serial_parts&#39;]:</span>
-            <span class="c1"># ~ geo.add_part(part_name, ret[&#39;serial_parts&#39;][part_name])</span>
+            <span class="n">geo</span><span class="o">.</span><span class="n">build_order</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="n">geo</span></div>
 </pre></div>
 

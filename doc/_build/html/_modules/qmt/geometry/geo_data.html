@@ -154,6 +154,7 @@
   <h1>Source code for qmt.geometry.geo_data</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">qmt.task_framework</span> <span class="k">import</span> <span class="n">Data</span>
 
+
 <div class="viewcode-block" id="Geo1DData"><a class="viewcode-back" href="../../../source/qmt.geometry.html#qmt.geometry.geo_data.Geo1DData">[docs]</a><span class="k">class</span> <span class="nc">Geo1DData</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -172,7 +173,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">start_point</span><span class="p">,</span> <span class="n">end_point</span><span class="p">])</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">part_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">overwrite</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Attempted to overwrite then part &quot;</span> <span class="o">+</span> <span class="n">part_name</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Attempted to overwrite the part &quot;</span> <span class="o">+</span> <span class="n">part_name</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="n">part_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span></div>
 
@@ -213,7 +214,7 @@
 <span class="sd">        :param Polygon part: Polygon object from shapely.geometry. This must be a valid Polygon.</span>
 <span class="sd">        :param bool overwrite: Should we allow this to overwrite?</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">part</span><span class="o">.</span><span class="n">is_valid</span><span class="p">():</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">part</span><span class="o">.</span><span class="n">is_valid</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Part &quot;</span> <span class="o">+</span> <span class="n">part_name</span> <span class="o">+</span> <span class="s2">&quot; is not a valid polygon.&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">part_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">overwrite</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Attempted to overwrite the part &quot;</span> <span class="o">+</span> <span class="n">part_name</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
@@ -264,6 +265,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">pass</span></div></div>
 
+
 <div class="viewcode-block" id="Geo3DData"><a class="viewcode-back" href="../../../source/qmt.geometry.html#qmt.geometry.geo_data.Geo3DData">[docs]</a><span class="k">class</span> <span class="nc">Geo3DData</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -273,16 +275,12 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Geo3DData</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">build_order</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">parts</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="c1"># ~ self.serial_FCdoc</span>
-        <span class="c1"># ~ self.parts = {label: part}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parts</span> <span class="o">=</span> <span class="p">{}</span>   <span class="c1"># dict of parts in this geometry</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mesh</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Holding container for the meshed geometry</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">serial_fcdoc</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># serialized FreeCAD document for this geometry</span>
 
-<div class="viewcode-block" id="Geo3DData.get_parts"><a class="viewcode-back" href="../../../source/qmt.geometry.html#qmt.geometry.geo_data.Geo3DData.get_parts">[docs]</a>    <span class="k">def</span> <span class="nf">get_parts</span><span class="p">():</span>
+<div class="viewcode-block" id="Geo3DData.get_parts"><a class="viewcode-back" href="../../../source/qmt.geometry.html#qmt.geometry.geo_data.Geo3DData.get_parts">[docs]</a>    <span class="k">def</span> <span class="nf">get_parts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span></div>
-        <span class="c1"># ~ parts[0].label == build_order[0]</span>
-        <span class="c1"># TODO with only part names: self.build_order</span>
-
-    <span class="c1"># TODO: serialisation</span>
 
 <div class="viewcode-block" id="Geo3DData.add_part"><a class="viewcode-back" href="../../../source/qmt.geometry.html#qmt.geometry.geo_data.Geo3DData.add_part">[docs]</a>    <span class="k">def</span> <span class="nf">add_part</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part_name</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -295,7 +293,6 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Attempted to overwrite the part &quot;</span> <span class="o">+</span> <span class="n">part_name</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="n">part_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">part</span></div>
-
 
 <div class="viewcode-block" id="Geo3DData.remove_part"><a class="viewcode-back" href="../../../source/qmt.geometry.html#qmt.geometry.geo_data.Geo3DData.remove_part">[docs]</a>    <span class="k">def</span> <span class="nf">remove_part</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part_name</span><span class="p">,</span> <span class="n">ignore_if_absent</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -311,7 +308,18 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="s2">&quot;Attempted to remove the part &quot;</span> <span class="o">+</span> <span class="n">part_name</span> <span class="o">+</span> <span class="s2">&quot;, which doesn&#39;t exist.&quot;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">pass</span></div></div>
+                <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Geo3DData.write_fcstd"><a class="viewcode-back" href="../../../source/qmt.geometry.html#qmt.geometry.geo_data.Geo3DData.write_fcstd">[docs]</a>    <span class="k">def</span> <span class="nf">write_fcstd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Write geometry to a fcstd file.</span>
+
+<span class="sd">        Returns the fcstd file path.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">import</span> <span class="nn">codecs</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">codecs</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serial_fcdoc</span><span class="o">.</span><span class="n">encode</span><span class="p">(),</span> <span class="s1">&#39;base64&#39;</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">of</span><span class="p">:</span>
+            <span class="n">of</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">file_path</span></div></div>
 </pre></div>
 
            </div>

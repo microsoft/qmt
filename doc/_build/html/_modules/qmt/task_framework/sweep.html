@@ -154,6 +154,7 @@
   <h1>Source code for qmt.task_framework.sweep</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">dask</span>
 <span class="kn">import</span> <span class="nn">dask.distributed</span>
+<span class="kn">from</span> <span class="nn">six</span> <span class="k">import</span> <span class="n">iteritems</span>
 
 
 <div class="viewcode-block" id="SweepManager"><a class="viewcode-back" href="../../../source/qmt.task_framework.html#qmt.task_framework.sweep.SweepManager">[docs]</a><span class="k">class</span> <span class="nc">SweepManager</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -386,7 +387,9 @@
             <span class="n">new_point</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">point_small_index</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">small_sweep_point</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tagged_value_list</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">small_sweep_point</span><span class="o">.</span><span class="n">viewitems</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">sweep_point</span><span class="o">.</span><span class="n">viewitems</span><span class="p">():</span>
+                <span class="c1">#TODO - this should be done in a way that is also py27 compatible. Using</span>
+                <span class="c1"># six.iteritems doesn&#39;t work.</span>
+                <span class="k">if</span> <span class="n">small_sweep_point</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">sweep_point</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                     <span class="n">new_point</span> <span class="o">=</span> <span class="kc">False</span>
                     <span class="n">point_small_index</span> <span class="o">=</span> <span class="n">j</span>
 
@@ -435,6 +438,7 @@
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag_name</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">tag_name</span> <span class="o">=</span> <span class="n">tag_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tag_function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span>
 
     <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag_name</span>
@@ -448,7 +452,48 @@
         <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tag_name</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">SweepTag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tag_name</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">tag_function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag_function</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">other</span>
+        <span class="k">return</span> <span class="n">out</span>
+    
+    <span class="k">def</span> <span class="nf">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">SweepTag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tag_name</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">tag_function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag_function</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">other</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="nf">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">SweepTag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tag_name</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">tag_function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag_function</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">other</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="nf">__truediv__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">SweepTag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tag_name</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">tag_function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag_function</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="n">other</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="nf">__pow__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">SweepTag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tag_name</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">tag_function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag_function</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">**</span><span class="n">other</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="nf">__neg__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">SweepTag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tag_name</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">tag_function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">tag_function</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="nf">__abs__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">SweepTag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tag_name</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">tag_function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tag_function</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+<div class="viewcode-block" id="SweepTag.replace"><a class="viewcode-back" href="../../../source/qmt.task_framework.html#qmt.task_framework.sweep.SweepTag.replace">[docs]</a>    <span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag_function</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="gen_tag_extract"><a class="viewcode-back" href="../../../source/qmt.task_framework.html#qmt.task_framework.sweep.gen_tag_extract">[docs]</a><span class="k">def</span> <span class="nf">gen_tag_extract</span><span class="p">(</span><span class="n">nested_dictionary_of_tags</span><span class="p">):</span>
@@ -458,14 +503,34 @@
 <span class="sd">    :param nested_dictionary_of_tags: exactly what it sounds like</span>
 <span class="sd">    :return: a generator that yields all the tags in the dictionary</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">nested_dictionary_of_tags</span><span class="p">,</span> <span class="s1">&#39;iteritems&#39;</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">nested_dictionary_of_tags</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">SweepTag</span><span class="p">):</span>
-                <span class="k">yield</span> <span class="n">v</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-                <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">gen_tag_extract</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
-                    <span class="k">yield</span> <span class="n">result</span></div>
+    <span class="c1"># if hasattr(nested_dictionary_of_tags, &#39;iteritems&#39;): # doesn&#39;t work with python3</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">iteritems</span><span class="p">(</span><span class="n">nested_dictionary_of_tags</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">SweepTag</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="n">v</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">gen_tag_extract</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">result</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">gen_tag_extract_list</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">result</span></div>
 
+<div class="viewcode-block" id="gen_tag_extract_list"><a class="viewcode-back" href="../../../source/qmt.task_framework.html#qmt.task_framework.sweep.gen_tag_extract_list">[docs]</a><span class="k">def</span> <span class="nf">gen_tag_extract_list</span><span class="p">(</span><span class="n">nested_list_of_tags</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract all tags from nested dictionary that may have tags</span>
+<span class="sd">    as values at any level</span>
+<span class="sd">    :param nested_list_of_tags: exactly what it sounds like</span>
+<span class="sd">    :return: a generator that yields all the tags in the dictionary</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># if hasattr(nested_dictionary_of_tags, &#39;iteritems&#39;): # doesn&#39;t work with python3</span>
+    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">nested_list_of_tags</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">SweepTag</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="n">v</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">gen_tag_extract</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">result</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">gen_tag_extract_list</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">result</span></div>
 
 <div class="viewcode-block" id="replace_tag_with_value"><a class="viewcode-back" href="../../../source/qmt.task_framework.html#qmt.task_framework.sweep.replace_tag_with_value">[docs]</a><span class="k">def</span> <span class="nf">replace_tag_with_value</span><span class="p">(</span><span class="n">name_to_tag_mapping</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">new_value</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -476,14 +541,37 @@
 <span class="sd">    :return: a copy of name_to_tag_mapping with values of tag replaced with new_value</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">var_copy</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">name_to_tag_mapping</span><span class="p">,</span> <span class="s1">&#39;iteritems&#39;</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">name_to_tag_mapping</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">v</span> <span class="o">==</span> <span class="n">tag</span><span class="p">:</span>
-                <span class="n">var_copy</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-                <span class="n">var_copy</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">replace_tag_with_value</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">new_value</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">var_copy</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+    <span class="c1"># if hasattr(name_to_tag_mapping, &#39;iteritems&#39;):</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">iteritems</span><span class="p">(</span><span class="n">name_to_tag_mapping</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">v</span> <span class="o">==</span> <span class="n">tag</span><span class="p">:</span>
+            <span class="n">var_copy</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">new_value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">var_copy</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">replace_tag_with_value</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">new_value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">var_copy</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">replace_tag_with_value_list</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">new_value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">var_copy</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+    <span class="k">return</span> <span class="n">var_copy</span></div>
+
+<div class="viewcode-block" id="replace_tag_with_value_list"><a class="viewcode-back" href="../../../source/qmt.task_framework.html#qmt.task_framework.sweep.replace_tag_with_value_list">[docs]</a><span class="k">def</span> <span class="nf">replace_tag_with_value_list</span><span class="p">(</span><span class="n">name_to_tag_mapping</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">new_value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a copy of name_to_tag_mapping with values of tag replaced with new_value.</span>
+<span class="sd">    :param name_to_tag_mapping: Dictionary mapping parameter names to SweepTags.</span>
+<span class="sd">    :param tag: The SweepTag to replace.</span>
+<span class="sd">    :param new_value: the value to replace it with.</span>
+<span class="sd">    :return: a copy of name_to_tag_mapping with values of tag replaced with new_value</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">var_copy</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># if hasattr(name_to_tag_mapping, &#39;iteritems&#39;):</span>
+    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">name_to_tag_mapping</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">v</span> <span class="o">==</span> <span class="n">tag</span><span class="p">:</span>
+            <span class="n">var_copy</span> <span class="o">+=</span> <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">new_value</span><span class="p">)]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">var_copy</span> <span class="o">+=</span> <span class="p">[</span><span class="n">replace_tag_with_value</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">new_value</span><span class="p">)]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">var_copy</span> <span class="o">+=</span> <span class="p">[</span><span class="n">replace_tag_with_value_list</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">new_value</span><span class="p">)]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">var_copy</span> <span class="o">+=</span> <span class="p">[</span><span class="n">v</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">var_copy</span></div>
 </pre></div>
 

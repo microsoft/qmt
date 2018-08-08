@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>qmt.old_code package &mdash; QMT 1.0 documentation</title>
+  <title>qmt.visualization package &mdash; QMT 1.0 documentation</title>
   
 
   
@@ -134,13 +134,13 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
-      <li>qmt.old_code package</li>
+      <li>qmt.visualization package</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../_sources/source/qmt.old_code.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../_sources/source/qmt.visualization.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -153,35 +153,37 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="qmt-old-code-package">
-<h1>qmt.old_code package<a class="headerlink" href="#qmt-old-code-package" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="subpackages">
-<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="qmt.old_code.freecad.html">qmt.old_code.freecad package</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="qmt.old_code.freecad.html#submodules">Submodules</a></li>
-<li class="toctree-l2"><a class="reference internal" href="qmt.old_code.freecad.html#qmt-old-code-freecad-fileio-module">qmt.old_code.freecad.fileIO module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="qmt.old_code.freecad.html#qmt-old-code-freecad-geomutils-module">qmt.old_code.freecad.geomUtils module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="qmt.old_code.freecad.html#qmt-old-code-freecad-objectconstruction-module">qmt.old_code.freecad.objectConstruction module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="qmt.old_code.freecad.html#qmt-old-code-freecad-sketchutils-module">qmt.old_code.freecad.sketchUtils module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="qmt.old_code.freecad.html#module-contents">Module contents</a></li>
-</ul>
-</li>
-</ul>
-</div>
-</div>
+  <div class="section" id="qmt-visualization-package">
+<h1>qmt.visualization package<a class="headerlink" href="#qmt-visualization-package" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="qmt-old-code-batchharness-module">
-<h2>qmt.old_code.batchHarness module<a class="headerlink" href="#qmt-old-code-batchharness-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-qmt.visualization.density_1d_plot">
+<span id="qmt-visualization-density-1d-plot-module"></span><h2>qmt.visualization.density_1d_plot module<a class="headerlink" href="#module-qmt.visualization.density_1d_plot" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="qmt.visualization.density_1d_plot.generate_1d_density_plot">
+<code class="descclassname">qmt.visualization.density_1d_plot.</code><code class="descname">generate_1d_density_plot</code><span class="sig-paren">(</span><em>generic_task</em>, <em>filename</em>, <em>dask_client=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/visualization/density_1d_plot.html#generate_1d_density_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.visualization.density_1d_plot.generate_1d_density_plot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </div>
-<div class="section" id="qmt-old-code-batchmodel-module">
-<h2>qmt.old_code.batchModel module<a class="headerlink" href="#qmt-old-code-batchmodel-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-qmt.visualization.plot">
+<span id="qmt-visualization-plot-module"></span><h2>qmt.visualization.plot module<a class="headerlink" href="#module-qmt.visualization.plot" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="qmt.visualization.plot.plot">
+<code class="descclassname">qmt.visualization.plot.</code><code class="descname">plot</code><span class="sig-paren">(</span><em>filename</em>, <em>hv</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/visualization/plot.html#plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.visualization.plot.plot" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </div>
-<div class="section" id="module-contents">
-<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-qmt.visualization.plot_helpers">
+<span id="qmt-visualization-plot-helpers-module"></span><h2>qmt.visualization.plot_helpers module<a class="headerlink" href="#module-qmt.visualization.plot_helpers" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="qmt.visualization.plot_helpers.save_relevant_data">
+<code class="descclassname">qmt.visualization.plot_helpers.</code><code class="descname">save_relevant_data</code><span class="sig-paren">(</span><em>generic_task</em>, <em>filename</em>, <em>dask_client</em>, <em>get_relevant_data</em>, <em>plot_type</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/visualization/plot_helpers.html#save_relevant_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.visualization.plot_helpers.save_relevant_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-qmt.visualization">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-qmt.visualization" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 

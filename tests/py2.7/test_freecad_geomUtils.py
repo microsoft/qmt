@@ -23,12 +23,12 @@ def test_extrude(fix_FCDoc, fix_two_cycle_sketch):
     assert pad.TypeId == 'Part::Extrusion'
 
 
-def test_copy(fix_FCDoc, fix_hexagon_sketch):
+def test_copy_move(fix_FCDoc, fix_hexagon_sketch):
     '''Test copy.'''
     # TODO: warning.
     #~ sketch = aux_two_cycle_sketch() # WARNING: multi-cycle sketches don't get moved correctly -> need sanitation
     sketch = fix_hexagon_sketch()
-    sketch2 = copy(sketch, vec(0,0,20), copy=True)
+    sketch2 = copy_move(sketch, vec(0,0,20), copy=True)
     fix_FCDoc.recompute()
     assert sketch.Shape.Edges[0].Vertexes[0].Point[2] + 20 == sketch2.Shape.Edges[0].Vertexes[0].Point[2]
 

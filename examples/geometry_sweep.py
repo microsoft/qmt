@@ -7,35 +7,50 @@
 import os
 import numpy as np
 
-import qmt.task_framework as qtf
+from qmt.task_framework import SweepTag, SweepManager
 from qmt.geometry.parts import Part3D
 from qmt.basic_tasks.geometry import Geometry3D
 
 
 # Set up geometry task
-tag = qtf.SweepTag('thickness')
-myPart = Part3D('block_of_gold', 'Sketch', 'extrude', 'metalGate',
-                material='Au', thickness=10)
+tag1 = SweepTag('d1 thickness')
+block1 = Part3D('Parametrised block', 'Sketch', 'extrude', 'dielectric',
+                material='air', thickness=5.0, z0=-2.5)
+block2 = Part3D('Two blocks', 'Sketch001', 'extrude', 'metal_gate',
+                material='Au', thickness=0.5)
+sag = Part3D('Garage', 'Sketch002', 'SAG', 'metal_gate',
+             material='Au', z0=0, z_middle=5, thickness=6,
+             t_in=2.5, t_out=0.5)
+wire = Part3D('Nanowire', 'Sketch003', 'wire', 'semiconductor',
+              z0=0, thickness=0.5)
+shell = Part3D('Wire cover', 'Sketch003', 'wire_shell', 'metal_gate',
+               z0=0, thickness_of_wire=0.5, thickness=0.2, shell_verts=[1,2],
+               depo_zone='Sketch004')
+block3 = Part3D('Passthrough', 'Box', '3d_shape', 'metal_gate')
+
 freecad_dict = {
     'pyenv': 'python2',
-    'file_path': 'geometry_sweep.fcstd',
-    'params': {'d1': tag},
-    'input_parts': [myPart]
+    'file_path': 'geometry_sweep_showcase.fcstd',
+    'params': {'d1': tag1},
+    'input_parts': [block1, block2, sag, wire, shell, block3]
 }
 geo_task = Geometry3D(options=freecad_dict)
 
 # Run sweeps
-sweeps = [{tag: val} for val in np.arange(2, 10, 2)]
-result = qtf.SweepManager(sweeps).run(geo_task)
+# ~ sweeps = [{tag1: val} for val in np.arange(2, 8, 2.5)]
+sweeps = [{tag1: val} for val in np.linspace(2, 7, 3)]
+result = SweepManager(sweeps).run(geo_task)
 
 # Investigate results
 if not os.path.exists('tmp'):
     os.mkdirs('tmp')
 print("Writing in directory tmp:")
+
 for i, future in enumerate(result.futures):
     geo = future.result()
     print('Writing instance ' + str(i) + ' to FreeCAD file.')
     geo.write_fcstd('tmp/' + str(i) + '.fcstd')
-    for label in geo.parts:
-        print('Writing instance ' + str(i) + ' of ' + label + ' to STEP file.')
-        geo.parts[label].write_stp('tmp/' + label + str(i) + '.stp')
+    for label, part in geo.parts.items():
+        print(str(i) + ': ' + label +
+              ' (' + part.fc_name + ' -> ' + part.built_fc_name + ') to STEP file.')
+        part.write_stp('tmp/' + label + str(i) + '.stp')

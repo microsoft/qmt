@@ -4,44 +4,32 @@
 """Utilities to work with general geometries."""
 
 
-import FreeCAD
-import Draft
-import Part
 import numpy as np
-from auxiliary import *
-from sketchUtils import findSegments
 
-# ~ def extrude(sketch, length,reverse=False,name=None):
-    # ~ '''
-    # ~ Extrude sketch up to given length. Optional name (default: append '_extr').
-    # ~ Return handle to extrude.
-    # ~ '''
-    # ~ doc = FreeCAD.ActiveDocument
-    # ~ if name is None:
-        # ~ f = doc.addObject('PartDesign::Pad')
-    # ~ else:
-        # ~ f = doc.addObject('PartDesign::Pad',name)
-    # ~ f.Sketch = sketch
-    # ~ f.Length = length
-    # ~ if reverse:
-        # ~ f.Reversed = 1
-    # ~ doc.recompute()
-    # ~ return f
+from qmt.geometry.freecad import FreeCAD
+from qmt.geometry.freecad import Draft
+from qmt.geometry.freecad import Part
 
-def extrude_partwb(sketch, length,reverse=False,name=None):
+from .auxiliary import *
+from .sketchUtils import findSegments
+
+vec = FreeCAD.Vector
+
+
+def extrude_partwb(sketch, length, reverse=False, name=None):
     '''Extrude via Part workbench.'''
     doc = FreeCAD.ActiveDocument
     if name is None:
         f = doc.addObject('Part::Extrusion')
     else:
-        f = doc.addObject('Part::Extrusion',name)
+        f = doc.addObject('Part::Extrusion', name)
     f.Base = sketch
     f.DirMode = "Normal"
     f.DirLink = None
     f.LengthFwd = length
     f.LengthRev = 0.
     f.Solid = True
-    f.Reversed = True if reverse else False
+    f.Reversed = reverse
     f.Symmetric = False
     f.TaperAngle = 0.
     f.TaperAngleRev = 0.
@@ -49,53 +37,55 @@ def extrude_partwb(sketch, length,reverse=False,name=None):
     doc.recompute()
     return f
 
-def extrude(sketch, length,reverse=False,name=None):
+
+def extrude(sketch, length, reverse=False, name=None):
     '''Selector for extrude method.'''
     return extrude_partwb(sketch, length, reverse, name)
 
-def copy(obj, moveVec=(0., 0., 0.), copy=True):
-    '''
-    Create a duplciate of the object using a draft move operation.
-    '''
 
-    f = Draft.move([obj], FreeCAD.Vector(moveVec[0], moveVec[1], moveVec[2]), copy=copy)
-    if len(f.Shape.Vertexes)>0:
-        f.Shape = f.Shape.removeSplitter() # get rid of redundant lines
+def copy_move(obj, moveVec=(0., 0., 0.), copy=True):
+    '''Create a duplciate of the object using a draft move operation.
+    '''
+    f = Draft.move([obj], vec(moveVec[0], moveVec[1], moveVec[2]), copy=copy)
+    if f.Shape.Vertexes:
+        f.Shape = f.Shape.removeSplitter()  # get rid of redundant lines
     FreeCAD.ActiveDocument.recompute()
     return f
 
 
 def makeHexFace(sketch, zBottom, width):
-    ''' Given a sketch for a wire, make the first face. Also need to make sure it
+    '''Given a sketch for a wire, make the first face. Also need to make sure it
     is placed normal to the initial line segment in the sketch. This will ensure
     that the wire and shell can be constructed with sweep operations.
     '''
     doc = FreeCAD.ActiveDocument
     lineSegments = findSegments(sketch)
     lineSegment = lineSegments[0]
-    x0, y0, z0 = lineSegment[0];
-    x1, y1, z1 = lineSegment[1]
-    dx = x1 - x0;
+    # ~ x0, y0, z0 = lineSegment[0]
+    # ~ x1, y1, z1 = lineSegment[1]
+    x0, y0, _ = lineSegment[0]
+    x1, y1, _ = lineSegment[1]
+    dx = x1 - x0
     dy = y1 - y0
-    xBar = 0.5 * (x0 + x1);
-    yBar = 0.5 * (y0 + y1)
+    # ~ xBar = 0.5 * (x0 + x1)
+    # ~ yBar = 0.5 * (y0 + y1)
     # First, make the initial face:
     face = Draft.makePolygon(6, radius=width * 0.5, inscribed=False, face=True)
     doc.recompute()
     # Spin the face so that its faces are oriented normal to the path:
     alpha = 90 - np.arctan(-dy / dx) * 180. / np.pi
-    center = FreeCAD.Vector(0., 0., 0.)
-    axis = FreeCAD.Vector(0., 0., 1.)
+    center = vec(0., 0., 0.)
+    axis = vec(0., 0., 1.)
     face1 = Draft.rotate(face, alpha, center, axis=axis, copy=True)
     doc.recompute()
     # Rotate the wire into the proper plane:
     alpha = 90.
-    center = FreeCAD.Vector(0., 0., 0.)
-    axis = FreeCAD.Vector(-dy, dx, 0)
+    center = vec(0., 0., 0.)
+    axis = vec(-dy, dx, 0)
     face2 = Draft.rotate(face1, 90., center, axis=axis, copy=True)
     doc.recompute()
     # Finally, move it into position:
-    rVec = FreeCAD.Vector(x0, y0, 0.5 * width + zBottom)
+    rVec = vec(x0, y0, 0.5 * width + zBottom)
     face3 = Draft.move(face2, rVec, copy=True)
     delete(face)
     delete(face1)
@@ -108,10 +98,10 @@ def genUnion(objList, consumeInputs=False):
     '''Generates a Union non-destructively.
     '''
     doc = FreeCAD.ActiveDocument
-    if len(objList) == 0:
+    if not objList:
         return None
     elif len(objList) == 1:
-        returnObj = copy(objList[0])
+        returnObj = copy_move(objList[0])
         if consumeInputs:
             delete(objList[0])
         return returnObj
@@ -122,8 +112,8 @@ def genUnion(objList, consumeInputs=False):
             if isNonempty(obj):
                 nonZeroList += [obj]
         union.Shapes = nonZeroList
-        doc.recompute()
-        unionDupe = copy(union)
+        doc.recompute()  # crucial recompute
+        unionDupe = copy_move(union)
         doc.removeObject(union.Name)
         doc.recompute()
         if consumeInputs:
@@ -151,9 +141,9 @@ def makeBB(BB):
     doc = FreeCAD.ActiveDocument
     xMin, xMax, yMin, yMax, zMin, zMax = BB
     box = doc.addObject("Part::Box")
-    centerVector = FreeCAD.Vector(xMin, yMin, zMin)
-    box.Placement = FreeCAD.Placement(centerVector, \
-                                      FreeCAD.Rotation(FreeCAD.Vector(0., 0., 0.), 0.))
+    centerVector = vec(xMin, yMin, zMin)
+    box.Placement = FreeCAD.Placement(centerVector,
+                                      FreeCAD.Rotation(vec(0., 0., 0.), 0.))
     box.Length = xMax - xMin
     box.Width = yMax - yMin
     box.Height = zMax - zMin
@@ -169,7 +159,7 @@ def subtract(obj0, obj1, consumeInputs=False):
     tempObj.Base = obj0
     tempObj.Tool = obj1
     doc.recompute()
-    returnObj = copy(tempObj)
+    returnObj = copy_move(tempObj)
     doc.removeObject(tempObj.Name)
     doc.recompute()
     if consumeInputs:
@@ -183,11 +173,11 @@ def subtractParts(domainObj, partList):
     ''' Subtract given part objects from a domain.
     '''
     doc = FreeCAD.ActiveDocument
-    diffObj = copy(domainObj)
+    diffObj = copy_move(domainObj)
     for obj in partList:
         diffObjTemp = Draft.downgrade([diffObj, obj], delete=True)[0][0]
         doc.recompute()
-        diffObj = copy(diffObjTemp)
+        diffObj = copy_move(diffObjTemp)
         delete(diffObjTemp)
     # TODO : This routine is leaving some nuisance objects around that should be deleted.
     return diffObj
@@ -200,7 +190,7 @@ def intersect(objList, consumeInputs=False):
     intersectTemp = doc.addObject("Part::MultiCommon")
     intersectTemp.Shapes = objList
     doc.recompute()
-    returnObj = copy(intersectTemp)
+    returnObj = copy_move(intersectTemp)
     doc.removeObject(intersectTemp.Name)
     doc.recompute()
     if consumeInputs:
@@ -213,31 +203,31 @@ def intersect(objList, consumeInputs=False):
 def checkOverlap(objList):
     ''' Checks if a list of objects, when intersected, contains a finite volume.abs
     Returns true if it does, returns false if the intersection is empty.
-    
     '''
     intObj = intersect(objList)
-    if len(intObj.Shape.Vertexes) == 0:
+    if not intObj.Shape.Vertexes:
         overlap = False
     else:
         overlap = True
     delete(intObj)
     return overlap
 
+
 def isNonempty(obj):
     ''' Checks if an object is nonempty (returns True) or empty (returns False).
     '''
-    if len(obj.Shape.Vertexes) == 0:
+    if not obj.Shape.Vertexes:
         return False
     else:
         return True
 
 
-def extrudeBetween(sketch, zMin, zMax):
+def extrudeBetween(sketch, zMin, zMax, name=None):
     ''' Non-destructively extrude a sketch between zMin and zMax.
     '''
     doc = FreeCAD.ActiveDocument
-    tempExt = extrude(sketch, zMax - zMin)
-    ext = copy(tempExt, moveVec=(0., 0., zMin))
+    tempExt = extrude(sketch, zMax - zMin, name=name)
+    ext = copy_move(tempExt, moveVec=(0., 0., zMin))
     doc.recompute()
     doc.removeObject(tempExt.Name)
     doc.recompute()
@@ -245,11 +235,11 @@ def extrudeBetween(sketch, zMin, zMax):
 
 
 def liftObject(obj, d, consumeInputs=False):
-    ''' Create a new solid by lifting an object by a distance d along z, filling 
-    in the space swept out. 
+    ''' Create a new solid by lifting an object by a distance d along z, filling
+    in the space swept out.
     '''
     objBB = getBB(obj)
-    liftedObj = copy(obj, moveVec=(0., 0., d))  # lift up the original sketch
+    liftedObj = copy_move(obj, moveVec=(0., 0., d))  # lift up the original sketch
     fillBB = np.array(objBB)
     fillBB[5] = fillBB[4] + d  # Make a new BB defining the missing space
     fillObj = makeBB(tuple(fillBB))  # Make a box to fill the space
@@ -260,27 +250,29 @@ def liftObject(obj, d, consumeInputs=False):
 
 
 def centerObjects(objsList):
-    ''' Move all the objects in the list in the x-y plane so that they are 
+    ''' Move all the objects in the list in the x-y plane so that they are
     centered about the origin.
     '''
-    if len(objsList) == 0:
-        return None
+    if not objsList:
+        return
     wholeObj = genUnion(objsList)
     wholeBB = getBB(wholeObj)
     x0 = 0.5 * (wholeBB[0] + wholeBB[1])
     y0 = 0.5 * (wholeBB[2] + wholeBB[3])
     for obj in objsList:
-        copy(obj, moveVec=(-x0, -y0, 0.), copy=False)
+        copy_move(obj, moveVec=(-x0, -y0, 0.), copy=False)
     delete(wholeObj)
 
-def crossSection(obj,axis=(1.,0.,0.),d=1.0,name=None):
+
+def crossSection(obj, axis=(1., 0., 0.), d=1.0, name=None):
+    '''Return cross section of object along axis.'''
     doc = FreeCAD.ActiveDocument
     if name is None:
-        name = obj.Name+'_section'
-    wires=list()
-    shape=obj.Shape
-    for i in shape.slice(FreeCAD.Vector(axis[0],axis[1],axis[2]),d):
+        name = obj.Name + '_section'
+    wires = list()
+    shape = obj.Shape
+    for i in shape.slice(vec(axis[0], axis[1], axis[2]), d):
         wires.append(i)
-    returnObj=doc.addObject("Part::Feature",name)
-    returnObj.Shape=Part.Compound(wires)
+    returnObj = doc.addObject("Part::Feature", name)
+    returnObj.Shape = Part.Compound(wires)
     return returnObj

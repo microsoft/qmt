@@ -4,11 +4,11 @@
 """Landing script for Python 2.7 calls to FreeCAD."""
 
 
-import os
 import sys
 import pickle
 
 import qmt.geometry.freecad as cad
+
 
 def main():
     """Fetch input data and dispatch instructions.
@@ -21,26 +21,26 @@ def main():
 
     if instruction == 'build3d':
         activate_doc_from(data['current_options'])
-        new_opts = cad.objectConstruction.build3d(data['current_options'])
+        new_opts = cad.objectConstruction.build(data['current_options'])
         send_back(new_opts)
 
     elif instruction == 'writeFCfile':
         pass
 
-    elif instruction == 'regionMap':
-        from qms.fem.python2.make_region_marker_wrapper import makeRegionMarkerFunctionInsideWrapper
-
-        names_to_ids, region_marker_filename = makeRegionMarkerFunctionInsideWrapper(data["mesh_filename"], data["geo_data"])
-        send_back((names_to_ids, region_marker_filename))
+    elif instruction == 'region_map_function':
+        from qms.fem.python2 import make_region_marker_function
+        new_data=make_region_marker_function(data,'tmp') # the updated Geo3DData object
+        send_back(new_data)
 
     else:
         raise ValueError('Not a registered FreeCAD QMT instruction')
 
 
 def activate_doc_from(opts):
-    """Activate a valid FreeCAD document given a QMT Geometry3D opts dict.
+    """Activate a valid FreeCAD document from options.
 
-    Returns a FCStd doc loaded from the file_path or serialised document.
+    :param dict opts:   QMT Geometry3D opts dict.
+    :return:            A FCStd doc loaded from the file_path or serialised document.
     """
     doc = cad.FreeCAD.newDocument('instance')
     cad.FreeCAD.setActiveDocument('instance')
@@ -59,7 +59,7 @@ def activate_doc_from(opts):
 
 def send_back(data):
     """Go away."""
-    sys.stdout.write('MAGICTQMTRANSFERBYTES'+pickle.dumps(data))
+    sys.stdout.write('MAGICQMTRANSFERBYTES' + pickle.dumps(data))
 
 
 if __name__ == '__main__':

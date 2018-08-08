@@ -1,5 +1,6 @@
 import dask
 import dask.distributed
+from six import iteritems
 
 
 class SweepManager(object):
@@ -232,7 +233,9 @@ class ReducedSweep(object):
             new_point = True
             point_small_index = None
             for j, small_sweep_point in enumerate(tagged_value_list):
-                if small_sweep_point.viewitems() <= sweep_point.viewitems():
+                #TODO - this should be done in a way that is also py27 compatible. Using
+                # six.iteritems doesn't work.
+                if small_sweep_point.items() <= sweep_point.items():
                     new_point = False
                     point_small_index = j
 
@@ -281,6 +284,7 @@ class SweepTag(object):
 
     def __init__(self, tag_name):
         self.tag_name = tag_name
+        self.tag_function = lambda x: x
 
     def __str__(self):
         return self.tag_name
@@ -298,6 +302,44 @@ class SweepTag(object):
 
     def __hash__(self):
         return hash(self.tag_name)
+    
+    def __add__(self, other):
+        out = SweepTag(self.tag_name)
+        out.tag_function = lambda x: self.tag_function(x) + other
+        return out
+    
+    def __sub__(self, other):
+        out = SweepTag(self.tag_name)
+        out.tag_function = lambda x: self.tag_function(x) - other
+        return out
+
+    def __mul__(self, other):
+        out = SweepTag(self.tag_name)
+        out.tag_function = lambda x: self.tag_function(x) * other
+        return out
+
+    def __truediv__(self, other):
+        out = SweepTag(self.tag_name)
+        out.tag_function = lambda x: self.tag_function(x)/other
+        return out
+
+    def __pow__(self, other):
+        out = SweepTag(self.tag_name)
+        out.tag_function = lambda x: self.tag_function(x)**other
+        return out
+
+    def __neg__(self):
+        out = SweepTag(self.tag_name)
+        out.tag_function = lambda x: -self.tag_function(x)
+        return out
+
+    def __abs__(self):
+        out = SweepTag(self.tag_name)
+        out.tag_function = lambda x: abs(self.tag_function(x))
+        return out
+
+    def replace(self,value):
+        return self.tag_function(value)
 
 
 def gen_tag_extract(nested_dictionary_of_tags):
@@ -307,14 +349,34 @@ def gen_tag_extract(nested_dictionary_of_tags):
     :param nested_dictionary_of_tags: exactly what it sounds like
     :return: a generator that yields all the tags in the dictionary
     """
-    if hasattr(nested_dictionary_of_tags, 'iteritems'):
-        for k, v in nested_dictionary_of_tags.iteritems():
-            if isinstance(v, SweepTag):
-                yield v
-            if isinstance(v, dict):
-                for result in gen_tag_extract(v):
-                    yield result
+    # if hasattr(nested_dictionary_of_tags, 'iteritems'): # doesn't work with python3
+    for k, v in iteritems(nested_dictionary_of_tags):
+        if isinstance(v, SweepTag):
+            yield v
+        if isinstance(v, dict):
+            for result in gen_tag_extract(v):
+                yield result
+        if isinstance(v, list):
+            for result in gen_tag_extract_list(v):
+                yield result
 
+def gen_tag_extract_list(nested_list_of_tags):
+    """
+    Extract all tags from nested dictionary that may have tags
+    as values at any level
+    :param nested_list_of_tags: exactly what it sounds like
+    :return: a generator that yields all the tags in the dictionary
+    """
+    # if hasattr(nested_dictionary_of_tags, 'iteritems'): # doesn't work with python3
+    for v in nested_list_of_tags:
+        if isinstance(v, SweepTag):
+            yield v
+        if isinstance(v, dict):
+            for result in gen_tag_extract(v):
+                yield result
+        if isinstance(v, list):
+            for result in gen_tag_extract_list(v):
+                yield result
 
 def replace_tag_with_value(name_to_tag_mapping, tag, new_value):
     """
@@ -325,12 +387,35 @@ def replace_tag_with_value(name_to_tag_mapping, tag, new_value):
     :return: a copy of name_to_tag_mapping with values of tag replaced with new_value
     """
     var_copy = {}
-    if hasattr(name_to_tag_mapping, 'iteritems'):
-        for k, v in name_to_tag_mapping.iteritems():
-            if v == tag:
-                var_copy[k] = new_value
-            elif isinstance(v, dict):
-                var_copy[k] = replace_tag_with_value(v, tag, new_value)
-            else:
-                var_copy[k] = v
+    # if hasattr(name_to_tag_mapping, 'iteritems'):
+    for k, v in iteritems(name_to_tag_mapping):
+        if v == tag:
+            var_copy[k] = v.replace(new_value)
+        elif isinstance(v, dict):
+            var_copy[k] = replace_tag_with_value(v, tag, new_value)
+        elif isinstance(v, list):
+            var_copy[k] = replace_tag_with_value_list(v, tag, new_value)
+        else:
+            var_copy[k] = v
+    return var_copy
+
+def replace_tag_with_value_list(name_to_tag_mapping, tag, new_value):
+    """
+    Returns a copy of name_to_tag_mapping with values of tag replaced with new_value.
+    :param name_to_tag_mapping: Dictionary mapping parameter names to SweepTags.
+    :param tag: The SweepTag to replace.
+    :param new_value: the value to replace it with.
+    :return: a copy of name_to_tag_mapping with values of tag replaced with new_value
+    """
+    var_copy = []
+    # if hasattr(name_to_tag_mapping, 'iteritems'):
+    for v in name_to_tag_mapping:
+        if v == tag:
+            var_copy += [v.replace(new_value)]
+        elif isinstance(v, dict):
+            var_copy += [replace_tag_with_value(v, tag, new_value)]
+        elif isinstance(v, list):
+            var_copy += [replace_tag_with_value_list(v, tag, new_value)]
+        else:
+            var_copy += [v]
     return var_copy
