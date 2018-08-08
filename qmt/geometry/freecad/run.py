@@ -10,7 +10,6 @@ import pickle
 
 import qmt.geometry.freecad as cad
 
-
 def main():
     """Fetch input data and dispatch instructions.
 
@@ -29,7 +28,10 @@ def main():
         pass
 
     elif instruction == 'regionMap':
-        pass
+        from qms.fem.python2.make_region_marker_wrapper import makeRegionMarkerFunctionInsideWrapper
+
+        names_to_ids, region_marker_filename = makeRegionMarkerFunctionInsideWrapper(data["mesh_filename"], data["geo_data"])
+        send_back((names_to_ids, region_marker_filename))
 
     else:
         raise ValueError('Not a registered FreeCAD QMT instruction')
