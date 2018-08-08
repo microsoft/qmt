@@ -127,11 +127,9 @@ class Geo3DData(Data):
         self.build_order = []
         self.parts = {}   # dict of parts in this geometry
         self.serial_fcdoc = None  # serialized FreeCAD document for this geometry
-        self.mesh = None  # Holding container for the meshed geometry
         self.serial_mesh = None # Holding container for the serialized xml of the meshed geometry
         self.serial_region_marker = None # Holding container for the serialized xml of the region
-        # marker
-        # function
+        # marker function
         self.fenics_ids = None # dictionary with part name keys mapping to fenics ids.
 
     def get_parts(self):
@@ -186,9 +184,11 @@ class Geo3DData(Data):
         else:
             raise ValueError(str(data_name)+' was not a valid data_name.')
         with open(tmp_path, 'rb') as f:
-            serial_data = codecs.encode(f.read(), 'base64')
+            # The data is encoded in base64 then decoded as a string so that it can be passed
+            # safely over subprocess pipes.
+            serial_data = codecs.encode(f.read(), 'base64').decode()
         if data_name == 'fcdoc':
-            self.serial_FCdoc = serial_data
+            self.serial_fcdoc = serial_data
         elif data_name == 'mesh':
             self.serial_mesh = serial_data
         elif data_name == 'rmf':
@@ -207,7 +207,7 @@ class Geo3DData(Data):
         """
         os.mkdir(scratch_dir)
         if data_name == 'fcdoc':
-            serial_data = self.serial_FCdoc
+            serial_data = self.serial_fcdoc
             tmp_path = os.path.join(scratch_dir,'tmp_doc_'+str(hash(serial_data))+'.fcstd')
         elif data_name == 'mesh' or data_name == 'rmf':
             if data_name == 'mesh':
@@ -217,7 +217,7 @@ class Geo3DData(Data):
             tmp_path = os.path.join(scratch_dir, 'tmp_fenics_' + str(hash(serial_data)) + '.xml')
         else:
             raise ValueError(str(data_name) + ' was not a valid data_name.')
-        decoded_data = codecs.decode(serial_data, 'base64')
+        decoded_data = codecs.decode(serial_data.encode(), 'base64')
         with open(tmp_path, 'wb') as of:
             of.write(decoded_data)
         if data_name == 'fcdoc':
@@ -230,7 +230,8 @@ class Geo3DData(Data):
             data = fn.Mesh(tmp_path)
         else:
             import fenics as fn
-            data = fn.CellFunction(tmp_path)
+            # data = fn.CellFunction(tmp_path)
+            data = fn.MeshFunction(tmp_path)
         shutil.rmtree(scratch_dir)
         return data
 
