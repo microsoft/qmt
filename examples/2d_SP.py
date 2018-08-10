@@ -24,65 +24,65 @@ AlThickness = 10.
 deviceHeight = substrateHeight+triangleHeight+AlThickness*np.sqrt(3.)/2.+oxideHeight*np.sqrt(3.)
 
 #points = []
-#points += [map(lambda x: x*1.e0,[0.,0.])]
-#points += [map(lambda x: x*1.e0,[deviceWidth,0.])]
-#points += [map(lambda x: x*1.e0,[deviceWidth,deviceHeight])]
-#points += [map(lambda x: x*1.e0,[0.,deviceHeight])]
+#points += [[0.,0.]]
+#points += [[deviceWidth,0.]]
+#points += [[deviceWidth,deviceHeight]]
+#points += [[0.,deviceHeight]]
 #geo_dict['parts']['background'] = points
 
 points = []
-points += [map(lambda x: x*1.e0,[0.,0.])]
-points += [map(lambda x: x*1.e0,[deviceWidth,0.])]
-points += [map(lambda x: x*1.e0,[deviceWidth,substrateHeight])]
-points += [map(lambda x: x*1.e0,[0.,substrateHeight])]
+points += [[0.,0.]]
+points += [[deviceWidth,0.]]
+points += [[deviceWidth,substrateHeight]]
+points += [[0.,substrateHeight]]
 geo_dict['parts']['substrate_layer'] = points
 
 points = []
 triangleHeight = np.sqrt(3.)/2.*triangleLeg
-points += [map(lambda x: x*1.e0,[deviceWidth/2.-triangleLeg/2.,substrateHeight])]
-points += [map(lambda x: x*1.e0,[deviceWidth/2.+triangleLeg/2.,substrateHeight])]
-points += [map(lambda x: x*1.e0,[deviceWidth/2.+triangleLeg/2.-bufferHeight/np.sqrt(3.),substrateHeight+bufferHeight])]
-points += [map(lambda x: x*1.e0,[deviceWidth/2.-triangleLeg/2.+bufferHeight/np.sqrt(3.),substrateHeight+bufferHeight])]
+points += [[deviceWidth/2.-triangleLeg/2.,substrateHeight]]
+points += [[deviceWidth/2.+triangleLeg/2.,substrateHeight]]
+points += [[deviceWidth/2.+triangleLeg/2.-bufferHeight/np.sqrt(3.),substrateHeight+bufferHeight]]
+points += [[deviceWidth/2.-triangleLeg/2.+bufferHeight/np.sqrt(3.),substrateHeight+bufferHeight]]
 geo_dict['parts']['buffer_layer'] = points
 
 points = []
-points += [map(lambda x: x*1.e0,[deviceWidth/2.+triangleLeg/2.-bufferHeight/np.sqrt(3.),substrateHeight+bufferHeight])]
-points += [map(lambda x: x*1.e0,[deviceWidth/2.-triangleLeg/2.+bufferHeight/np.sqrt(3.),substrateHeight+bufferHeight])]
-points += [map(lambda x: x*1.e0,[deviceWidth/2,substrateHeight+triangleHeight])]
+points += [[deviceWidth/2.+triangleLeg/2.-bufferHeight/np.sqrt(3.),substrateHeight+bufferHeight]]
+points += [[deviceWidth/2.-triangleLeg/2.+bufferHeight/np.sqrt(3.),substrateHeight+bufferHeight]]
+points += [[deviceWidth/2,substrateHeight+triangleHeight]]
 geo_dict['parts']['wire_layer'] = points
 
 points = []
-points += [map(lambda x: x*1.e0,[deviceWidth/2.-triangleLeg/2.,substrateHeight])]
-points += [map(lambda x: x*1.e0,[deviceWidth/2,substrateHeight+triangleHeight])]
-points += [map(lambda x: x*1.e0,[deviceWidth/2-AlThickness/2.,substrateHeight+triangleHeight+AlThickness*np.sqrt(3.)/2.])]
-points += [map(lambda x: x*1.e0,[deviceWidth/2.-triangleLeg/2.-AlThickness/np.sqrt(3.)*2.,substrateHeight])]
+points += [[deviceWidth/2.-triangleLeg/2.,substrateHeight]]
+points += [[deviceWidth/2,substrateHeight+triangleHeight]]
+points += [[deviceWidth/2-AlThickness/2.,substrateHeight+triangleHeight+AlThickness*np.sqrt(3.)/2.]]
+points += [[deviceWidth/2.-triangleLeg/2.-AlThickness/np.sqrt(3.)*2.,substrateHeight]]
 geo_dict['parts']['aluminum_layer'] = points
 
 backGateHeight = 1.
 points = []
-points += [map(lambda x: x*1.e0,[0.,backGateHeight])]
-points += [map(lambda x: x*1.e0,[deviceWidth,backGateHeight])]
+points += [[0.,backGateHeight]]
+points += [[deviceWidth,backGateHeight]]
 geo_dict['edges']['back_gate'] = points
 
 points = []
-points += [map(lambda x: x*1.e0,[deviceWidth,substrateHeight])]
-points += [map(lambda x: x*1.e0,[deviceWidth,substrateHeight+oxideHeight])]
-points += [map(lambda x: x*1.e0,[deviceWidth/2.+triangleLeg/2.+oxideHeight/np.sqrt(3.),substrateHeight+oxideHeight])]
-points += [map(lambda x: x*1.e0,[deviceWidth/2-AlThickness/2.,substrateHeight+triangleHeight+AlThickness*np.sqrt(3.)/2.+oxideHeight*np.sqrt(3.)])]
-points += [map(lambda x: x*1.e0,[deviceWidth/2.-triangleLeg/2.-AlThickness/np.sqrt(3.)*2.-oxideHeight/np.sqrt(3.),substrateHeight+oxideHeight])]
-points += [map(lambda x: x*1.e0,[0.,substrateHeight+oxideHeight])]
-points += [map(lambda x: x*1.e0,[0.,substrateHeight])]
-points += [map(lambda x: x*1.e0,[deviceWidth/2.-triangleLeg/2.-AlThickness/np.sqrt(3.)*2.,substrateHeight])]
-points += [map(lambda x: x*1.e0,[deviceWidth/2-AlThickness/2.,substrateHeight+triangleHeight+AlThickness*np.sqrt(3.)/2.])]
-points += [map(lambda x: x*1.e0,[deviceWidth/2.+triangleLeg/2.,substrateHeight])]
+points += [[deviceWidth,substrateHeight]]
+points += [[deviceWidth,substrateHeight+oxideHeight]]
+points += [[deviceWidth/2.+triangleLeg/2.+oxideHeight/np.sqrt(3.),substrateHeight+oxideHeight]]
+points += [[deviceWidth/2-AlThickness/2.,substrateHeight+triangleHeight+AlThickness*np.sqrt(3.)/2.+oxideHeight*np.sqrt(3.)]]
+points += [[deviceWidth/2.-triangleLeg/2.-AlThickness/np.sqrt(3.)*2.-oxideHeight/np.sqrt(3.),substrateHeight+oxideHeight]]
+points += [[0.,substrateHeight+oxideHeight]]
+points += [[0.,substrateHeight]]
+points += [[deviceWidth/2.-triangleLeg/2.-AlThickness/np.sqrt(3.)*2.,substrateHeight]]
+points += [[deviceWidth/2-AlThickness/2.,substrateHeight+triangleHeight+AlThickness*np.sqrt(3.)/2.]]
+points += [[deviceWidth/2.+triangleLeg/2.,substrateHeight]]
 geo_dict['parts']['oxide_layer'] = points
 
 points = []
-points += [map(lambda x: x*1.e0,[deviceWidth,substrateHeight+oxideHeight])]
-points += [map(lambda x: x*1.e0,[deviceWidth/2.+triangleLeg/2.+oxideHeight/np.sqrt(3.),substrateHeight+oxideHeight])]
-points += [map(lambda x: x*1.e0,[deviceWidth/2-AlThickness/2.,substrateHeight+triangleHeight+AlThickness*np.sqrt(3.)/2.+oxideHeight*np.sqrt(3.)])]
-points += [map(lambda x: x*1.e0,[deviceWidth/2.-triangleLeg/2.-AlThickness/np.sqrt(3.)*2.-oxideHeight/np.sqrt(3.),substrateHeight+oxideHeight])]
-points += [map(lambda x: x*1.e0,[0.,substrateHeight+oxideHeight])]
+points += [[deviceWidth,substrateHeight+oxideHeight]]
+points += [[deviceWidth/2.+triangleLeg/2.+oxideHeight/np.sqrt(3.),substrateHeight+oxideHeight]]
+points += [[deviceWidth/2-AlThickness/2.,substrateHeight+triangleHeight+AlThickness*np.sqrt(3.)/2.+oxideHeight*np.sqrt(3.)]]
+points += [[deviceWidth/2.-triangleLeg/2.-AlThickness/np.sqrt(3.)*2.-oxideHeight/np.sqrt(3.),substrateHeight+oxideHeight]]
+points += [[0.,substrateHeight+oxideHeight]]
 geo_dict['edges']['top_gate'] = points
 
 geo_task = qbt.Geometry2D(options=geo_dict)
