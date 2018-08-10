@@ -8,7 +8,7 @@ import qms.tasks as qmst
 from qms.tasks.combine_for_fem.poisson import PoissonTask2D
 from qms.tasks.combine_for_fem.thomas_fermi import ThomasFermi2D
 
-triangleLeg = 50.#qtf.SweepTag('triangle leg length')
+triangleLeg = qtf.SweepTag('triangle leg length')
 gateVoltage = qtf.SweepTag('gate voltage')
 
 geo_dict = {'parts' : {}, 'edges' : {}}
@@ -105,8 +105,8 @@ tf_dict['material_properties']['Al'] = {'workFunction' : 4280.}
 
 tf_task = ThomasFermi2D(geo_task, mesh_task, tf_dict)
 
-#sweeps = [{triangleLeg : l, gateVoltage : v} for l in np.linspace(50.,150.,1) for v in np.linspace(1.,1.,1)]
-sweeps = [{gateVoltage : 1.}]
+sweeps = [{triangleLeg : l, gateVoltage : v} for l in np.linspace(50.,150.,1) for v in np.linspace(1.,1.,1)]
+#sweeps = [{gateVoltage : 1.}]
 
 sweep_man = qtf.SweepManager(sweeps)
 

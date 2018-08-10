@@ -316,6 +316,11 @@ class SweepTag(object):
         out.tag_function = lambda x: self.tag_function(x) - other
         return out
 
+    def __rsub__(self, other):
+        out = SweepTag(self.tag_name)
+        out.tag_function = lambda x: other - self.tag_function(x)
+        return out
+
     def __mul__(self, other):
         out = SweepTag(self.tag_name)
         out.tag_function = lambda x: self.tag_function(x) * other
