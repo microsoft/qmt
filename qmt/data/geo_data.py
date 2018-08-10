@@ -1,5 +1,5 @@
 import pickle,os,shutil,codecs
-from qmt.task_framework import Data
+from qmt.data import Data
 
 class Geo1DData(Data):
     def __init__(self):

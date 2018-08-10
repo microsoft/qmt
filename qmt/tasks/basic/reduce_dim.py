@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-from qmt.task_framework import Task
+from qmt.tasks import Task
 
 
 class ReduceDim3D(Task):

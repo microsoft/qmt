@@ -3,4 +3,3 @@
 
 from .poisson_task import PoissonTask
 from .mesh import Mesh, Mesh1D, Mesh2D, Mesh3D
-from .density_data import Density1D

@@ -1,7 +1,8 @@
 import pickle
+from qmt.data import Data
 
 
-class Part3D(object):
+class Part3DData(Data):
     def __init__(
             self, label, fc_name, directive, domain_type=None, material=None,
             z0=0, thickness=None, target_wire=None, shell_verts=None,
@@ -69,7 +70,7 @@ class Part3D(object):
                              the valence band maximum (semiconductor only).
         :param float ds: Density of interface traps; units are 1/(cm^2*eV).
         """
-
+        super(Part3DData, self).__init__()
         # Input validation
         if directive not in ['extrude', 'wire', 'wire_shell', 'SAG', 'lithography', '3d_shape']:
             raise NameError('Error - directive ' + directive + ' is not a valid directive!')

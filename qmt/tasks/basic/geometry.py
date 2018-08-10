@@ -1,8 +1,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-from qmt.task_framework import Task
-from qmt.geometry import Geo1DData, Geo2DData, Geo3DData
+from qmt.tasks import Task
+from qmt.data import Geo1DData, Geo2DData, Geo3DData
 from shapely.geometry import Polygon, LineString
 
 class Geometry1D(Task):

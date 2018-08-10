@@ -1,9 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-from qmt.task_framework import Data
+from qmt.data import Data
 
-class Density1D(Data):
+class Density1DData(Data):
     def __init__(self, densities, density_units, bands, band_units, mesh, mesh_units):
         """
         Constructs Data object stores density information for 1d.
