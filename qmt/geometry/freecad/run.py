@@ -29,7 +29,7 @@ def main():
 
     elif instruction == 'region_map_function':
         from qms.fem.python2 import make_region_marker_function
-        new_data=make_region_marker_function(data,'tmp') # the updated Geo3DData object
+        new_data=make_region_marker_function(data) # the updated Geo3DData object
         send_back(new_data)
 
     else:
