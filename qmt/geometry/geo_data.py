@@ -230,8 +230,8 @@ class Geo3DData(Data):
             data = fn.Mesh(tmp_path)
         else:
             import fenics as fn
-            # data = fn.CellFunction(tmp_path)
-            data = fn.MeshFunction(tmp_path)
+            data = fn.CellFunction(tmp_path)
+            # data = fn.MeshFunction(tmp_path)
         shutil.rmtree(scratch_dir)
         return data
 
