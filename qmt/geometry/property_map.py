@@ -36,7 +36,10 @@ class PropertyMap(object):
 
         unique_parts = np.unique(parts)
         unique_props = [self.propMap(p) for p in unique_parts]
-        result = np.zeros(np.shape(parts), dtype=type(unique_props[0]))
+        obj_type = type(unique_props[0])
+        if obj_type is str:
+            obj_type = object
+        result = np.empty(np.shape(parts), dtype=obj_type)
         for part, prop in zip(unique_parts, unique_props):
             result[parts == part] = prop
         return result
@@ -64,9 +67,13 @@ class MaterialPropertyMap(PropertyMap):
         for p, mat in iteritems(self.materialsDict):
             try:
                 if prop_name == 'conductionBandMinimum':
-                    self.partProps[p] = mat_lib.conductionBandMinimum(mat)
+                    self.partProps[p] = mat_lib.conduction_band_minimum(mat)
                 elif prop_name == 'valenceBandMaximum':
-                    self.partProps[p] = mat_lib.valenceBandMaximum(mat)
+                    self.partProps[p] = mat_lib.valence_band_maximum(mat)
+                elif prop_name == 'lightHoleMass':
+                    self.partProps[p] = mat.hole_mass('light','dos')
+                elif prop_name == 'heavyHoleMass':
+                    self.partProps[p] = mat.hole_mass('heavy','dos')
                 else:
                     self.partProps[p] = mat[prop_name]
             except KeyError:
