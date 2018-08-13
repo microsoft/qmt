@@ -198,7 +198,7 @@ class Geo3DData(Data):
             self.serial_region_marker = serial_data
         shutil.rmtree(scratch_dir)
 
-    def get_data(self,data_name,scratch_dir=None):
+    def get_data(self,data_name, mesh=None, scratch_dir=None):
         """
         Get data from stored serial format.
         :param str data_name: Options are:
@@ -236,10 +236,9 @@ class Geo3DData(Data):
             data = fn.Mesh(tmp_path)
         else:
             import fenics as fn
-            mesh = self.get_data("mesh", scratch_dir='tmp_rmf_mesh')
+            assert mesh, 'Need to specify a mesh on which to generate the region marker function'
             data = fn.CellFunction('size_t', mesh)
             fn.File(tmp_path) >> data
-            # data = fn.MeshFunction(tmp_path)
         shutil.rmtree(scratch_dir)
         return data
 
