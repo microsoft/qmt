@@ -124,7 +124,7 @@ class ReducedSweepFutures(object):
 
     def get_object(self, total_index):
         return self.futures[self.sweep.convert_to_reduced_index(total_index)]
-    
+
     def get_gathered_results(self):
         gathered =[]
         for future in self.futures:
