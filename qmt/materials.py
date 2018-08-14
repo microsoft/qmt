@@ -64,7 +64,7 @@ class Material(collections.Mapping):
             raise KeyError(
                 "KeyError: material '{}' has no '{}'".format(self.name, key))
         if key in (
-            'workFunction', 'electronAffinity', 'directBandGap',
+            'workFunction', 'fermiEnergy', 'electronAffinity', 'directBandGap',
             'valenceBandOffset', 'chargeNeutralityLevel',
                 'interbandMatrixElement', 'spinOrbitSplitting'):
             value *= self.energyUnit
@@ -199,6 +199,7 @@ class Materials(collections.Mapping):
         set_property('electronMass')  # m_e* [in units of bare electron mass]
         if mat_type in ('metal', 'dielectric'):
             set_property('workFunction')  # Work function \Phi [in meV]
+            set_property('fermiEnergy')
         if mat_type == 'semi':
             set_property('electronAffinity')  # Electron affinity \chi [in meV]
             set_property('directBandGap')  # E_g(\Gamma) [in meV]
@@ -367,6 +368,11 @@ class Materials(collections.Mapping):
           `self.conduction_band_minimum(mat1) - self.conduction_band_minimum(mat2)`
         """
         ref_name = 'InSb'
+        if mat['type'] == 'metal':
+            return -mat['workFunction'] - mat['fermiEnergy']
+        elif mat['type'] == 'dielectric':
+            return 0.*mat.energyUnit #vacuum energy
+        assert mat['type'] == 'semi'
         try:
             cbo = mat['valenceBandOffset'] + mat['directBandGap']
             ref = self.matDict[ref_name]
@@ -406,6 +412,11 @@ class Materials(collections.Mapping):
         - valence_band_offset(mat1, mat2) is equivalent to
           `self.valence_band_maximum(mat1) - self.valence_band_maximum(mat2)`
         """
+        if mat['type'] == 'metal':
+            return -10.e3*mat.energyUnit #very low
+        elif mat['type'] == 'dielectric':
+            return -10.e3*mat.energyUnit #very low
+        assert mat['type'] == 'semi'
         ref_name = 'InSb'
         try:
             vbo = mat['valenceBandOffset']
@@ -510,6 +521,7 @@ def write_database_to_markdown(out_file, mat_lib):
         mat = mat_lib.find(name, eunit='eV')
         if mat['type'] == 'metal':
             table.append([name, mat['workFunction']])
+            table.append([name, mat['fermiEnergy']])
     writer.header_list = ['metal', 'work function [eV]']
     writer.value_matrix = table
     writer.write_table()
@@ -592,6 +604,7 @@ def write_database_to_markdown(out_file, mat_lib):
         """), file=out_file)
     scale_factors = dict((p,
                           1e-3) for p in ('workFunction',
+                                          'fermiEnergy',
                                           'electronAffinity',
                                           'directBandGap',
                                           'valenceBandOffset',
@@ -636,18 +649,27 @@ if __name__ == '__main__':
     materials.add_material('Al', 'metal', relativePermittivity=1000,
                            # source? Wikipedia and others quote 4.06 - 4.26 eV
                            # depending on face.
-                           workFunction=4280.)
+                           workFunction=4280.,
+                           #Ashcroft and Mermin:
+                           fermiEnergy=11700.)
     materials.add_material('Au', 'metal', relativePermittivity=1000,
                            # source- Wikipedia quotes it as 5.1-5.47; this is the
                            # average.
-                           workFunction=5285.)
+                           workFunction=5285.,
+                           #Ashcroft and Mermin:
+                           fermiEnergy=5530.)
     materials.add_material('degenDopedSi', 'metal', relativePermittivity=1000,
                            # source - Ioffe Institute,
                            # http://www.ioffe.ru/SVA/NSM/Semicond/Si/basic.html
-                           workFunction=4050.)
+                           workFunction=4050.,
+                           #unknown / probably depends on doping density; setting
+                           #it to Au for now.
+                           fermiEnergy=5530.)
     materials.add_material('NbTiN', 'metal', relativePermittivity=1000,
                            # Unknown; just setting it to Al for now.
-                           workFunction=4280.)
+                           workFunction=4280.,
+                           # Unknown; just setting it to Au for now.
+                           fermiEnergy=5530.)
 
     # === Dielectrics ===
     # Sources:

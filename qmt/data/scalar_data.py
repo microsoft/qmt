@@ -2,8 +2,7 @@
 # Licensed under the MIT License.
 
 import qmt.physics_constants as qc
-
-from qmt.task_framework import Data
+from qmt.data import Data
 
 # Abstract class
 class ScalarData(Data):
