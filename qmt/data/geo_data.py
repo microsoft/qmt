@@ -12,12 +12,6 @@ class Geo1DData(Data):
         self.parts = {}
         self.materials_database = Materials()
 
-    def get_material(self, part_name):
-        return self.materials_database[self.parts[part_name].material]
-
-    def get_material_mapping(self):
-        return {name: self.get_material(name) for name in self.parts.keys()}
-
     def add_part(self, part_name, start_point, end_point, overwrite=False):
         """
         Add a part to this geometry.
@@ -140,6 +134,12 @@ class Geo3DData(Data):
         self.serial_region_marker = None # Holding container for the serialized xml of the region
         # marker function
         self.fenics_ids = None # dictionary with part name keys mapping to fenics ids.
+
+    def get_material(self, part_name):
+        return self.materials_database[self.parts[part_name].material]
+
+    def get_material_mapping(self):
+        return {name: self.get_material(name) for name in self.parts.keys()}
 
     def get_parts(self):
         return self.parts
