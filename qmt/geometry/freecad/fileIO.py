@@ -92,5 +92,6 @@ def store_serial(target_dict, target_label, save_fct, ext, obj):
     tmp_path = 'tmp_' + uuid.uuid4().hex + '.' + ext
     save_fct(obj, tmp_path)
     with open(tmp_path, 'rb') as f:
-        target_dict[target_label] = codecs.encode(f.read(), 'base64')
+        # ~ target_dict[target_label] = codecs.encode(f.read(), 'base64')
+        target_dict[target_label] = codecs.encode(f.read(), 'base64').decode()  # TODO test
     os.remove(tmp_path)

@@ -25,7 +25,7 @@ wire = Part3D('Nanowire', 'Sketch003', 'wire', 'semiconductor',
               z0=0, thickness=0.5)
 shell = Part3D('Wire cover', 'Sketch003', 'wire_shell', 'metal_gate',
                z0=0, thickness_of_wire=0.5, thickness=0.2, shell_verts=[1,2],
-               depo_zone='Sketch004')
+               depo_zone='Sketch004')  # TODO: use Part3D.target_wire
 block3 = Part3D('Passthrough', 'Box', '3d_shape', 'metal_gate')
 
 freecad_dict = {

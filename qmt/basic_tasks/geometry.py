@@ -87,6 +87,7 @@ class Geometry3D(Task):
                         {'input_result_list': input_result_list,
                          'current_options': current_options})
 
+        # TODO: use Geo3DData.get_data() and set_data() from within wrapper
         # Build a geometry object with from the returned results
         geo = Geo3DData()
         geo.serial_fcdoc = ret['serial_fcdoc']
