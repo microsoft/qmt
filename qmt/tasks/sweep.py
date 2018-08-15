@@ -101,6 +101,13 @@ class ReducedSweepWithData(object):
         self._data = data
         self.tagged_value_list = sweep.tagged_value_list
 
+
+    @staticmethod
+    def sweep_and_empty_data_from_manager_and_tags(sweep_manager, tags):
+        sweep = ReducedSweep.create_from_manager_and_tags(sweep_manager, tags)
+        data = sweep.empty_data()
+        return sweep, data
+
     def _get_datum(self, total_index):
         return self._data[self.sweep.convert_to_reduced_index(total_index)]
 
@@ -153,7 +160,7 @@ class ReducedSweepFutures(ReducedSweepWithData):
 
 class ReducedSweepDelayed(ReducedSweepWithData):
     def __init__(self, sweep, dask_client):
-        self.delayed_results = [None] * len(self.sweep)
+        self.delayed_results = sweep.empty_data()
         super(ReducedSweepWithData, self).__init__(sweep, self.delayed_results)
         self.dask_client = dask_client
 
@@ -204,6 +211,11 @@ class ReducedSweepResults(ReducedSweepWithData):
     def __init__(self, sweep, results):
         super(ReducedSweepWithData, self).__init__(sweep, results)
         self.results = self._data
+
+    def create_empty_from_manager_and_tags(self, manager, tags):
+        sweep = ReducedSweep.create_from_manager_and_tags(manager, tags)
+        empty_results = sweep.empty_data()
+        return ReducedSweepResults(sweep, empty_results)
 
 
 class ReducedSweep(object):
@@ -294,6 +306,9 @@ class ReducedSweep(object):
 
     def __len__(self):
         return len(self._index_in_sweep)
+
+    def empty_data(self):
+        return [None for i in range(len(self))]
 
 
 # TODO refactor the creation of sweeps and sweepTags to make script less noisy
