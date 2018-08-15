@@ -27,7 +27,7 @@ def main():
     elif instruction == 'writeFCfile':
         pass
 
-    elif instruction == 'region_map_function':
+    elif instruction == 'RegionMapFunction':
         from qms.fem.python2 import make_region_marker_function
         new_data=make_region_marker_function(data) # the updated Geo3DData object
         send_back(new_data)
