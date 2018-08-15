@@ -124,7 +124,7 @@ class ReducedSweepFutures(ReducedSweepWithData):
     """
 
     def __init__(self, sweep, futures):
-        super(ReducedSweepWithData, self).__init__(sweep, futures)
+        super(ReducedSweepFutures, self).__init__(sweep, futures)
         self.futures = self._data
 
     # TODO deprecate?
@@ -161,7 +161,7 @@ class ReducedSweepFutures(ReducedSweepWithData):
 class ReducedSweepDelayed(ReducedSweepWithData):
     def __init__(self, sweep, dask_client):
         self.delayed_results = sweep.empty_data()
-        super(ReducedSweepWithData, self).__init__(sweep, self.delayed_results)
+        super(ReducedSweepDelayed, self).__init__(sweep, self.delayed_results)
         self.dask_client = dask_client
 
     @staticmethod
@@ -209,7 +209,7 @@ class ReducedSweepDelayed(ReducedSweepWithData):
 
 class ReducedSweepResults(ReducedSweepWithData):
     def __init__(self, sweep, results):
-        super(ReducedSweepWithData, self).__init__(sweep, results)
+        super(ReducedSweepResults, self).__init__(sweep, results)
         self.results = self._data
 
     def create_empty_from_manager_and_tags(self, manager, tags):
