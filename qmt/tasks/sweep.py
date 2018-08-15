@@ -127,6 +127,7 @@ class ReducedSweepWithData(object):
         data = sweep.empty_data()
         return sweep, data
 
+    # TODO make private
     def get_datum(self, total_index):
         """
         Get the datum associated with index total_index in the total sweep.
