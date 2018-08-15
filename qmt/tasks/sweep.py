@@ -1,3 +1,5 @@
+import collections
+
 import dask
 import dask.distributed
 from six import iteritems
@@ -100,6 +102,7 @@ class ReducedSweepWithData(object):
         self.sweep = sweep
         self._data = data
         self.tagged_value_list = sweep.tagged_value_list
+        self.tags_to_data = {self.tagged_value_list[i]: self._data[i] for i in range(len(self))}
         assert len(self._data) == len(self.tagged_value_list)
 
 
@@ -133,8 +136,12 @@ class ReducedSweepWithData(object):
         assert len(self._data) == 1
         return self._data[0]
 
+    # Don't modify result.
     def tags_to_data(self):
-        return {self.tagged_value_list[i]: self._data[i] for i in range(len(self))}
+        return self.tags_to_data
+    
+    def get_data_at_tags(self, tags):
+        return self.tags_to_data[tags]
 
 
 class ReducedSweepDelayed(ReducedSweepWithData):
