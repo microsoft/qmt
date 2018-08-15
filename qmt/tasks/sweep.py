@@ -100,6 +100,7 @@ class ReducedSweepWithData(object):
         self.sweep = sweep
         self._data = data
         self.tagged_value_list = sweep.tagged_value_list
+        assert len(self._data) == len(self.tagged_value_list)
 
 
     @staticmethod
@@ -125,9 +126,15 @@ class ReducedSweepWithData(object):
     def __str__(self):
         return str(self._data)
 
+    def __len__(self):
+        return len(self._data)
+
     def only(self):
         assert len(self._data) == 1
         return self._data[0]
+
+    def tags_to_data(self):
+        return {self.tagged_value_list[i]: self._data[i] for i in range(len(self))}
 
 
 class ReducedSweepDelayed(ReducedSweepWithData):
