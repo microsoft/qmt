@@ -162,7 +162,6 @@ class Geo3DData(Data):
             raise ValueError("Attempted to overwrite the part " + part_name + ".")
         else:
             self.parts[part_name] = part
-            self.build_order.append(part_name)
 
     def remove_part(self, part_name, ignore_if_absent=False):
         """
