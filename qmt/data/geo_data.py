@@ -130,6 +130,8 @@ class Geo3DData(Data):
             - build_order is a list of strings indicating the construction order.
         """
         super(Geo3DData, self).__init__()
+
+        # TODO should I pass this in or infer it?!
         self.build_order = []
         self.parts = {}   # dict of parts in this geometry
         self.serial_fcdoc = None  # serialized FreeCAD document for this geometry
@@ -160,6 +162,7 @@ class Geo3DData(Data):
             raise ValueError("Attempted to overwrite the part " + part_name + ".")
         else:
             self.parts[part_name] = part
+            self.build_order.append(part)
 
     def remove_part(self, part_name, ignore_if_absent=False):
         """
