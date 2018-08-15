@@ -127,7 +127,7 @@ class ReducedSweepWithData(object):
         data = sweep.empty_data()
         return sweep, data
 
-    def _get_datum(self, total_index):
+    def get_datum(self, total_index):
         """
         Get the datum associated with index total_index in the total sweep.
 
@@ -221,7 +221,7 @@ class ReducedSweepDelayed(ReducedSweepWithData):
         :param total_index: index in the total sweep
         :return: the delayed object at total_index in the total sweep
         """
-        return self._get_datum(total_index)
+        return self.get_datum(total_index)
 
     def calculate_futures(self, resources):
         """
@@ -318,7 +318,7 @@ class ReducedSweepFutures(ReducedSweepWithData):
         return self.calculate_completed_results()
 
     def get_future(self, total_index):
-        return self._get_datum(total_index)
+        return self.get_datum(total_index)
 
     def get_completed_result(self, total_index):
         """
@@ -326,7 +326,7 @@ class ReducedSweepFutures(ReducedSweepWithData):
         :param total_index: index in the total sweep
         :return: the completed result in local memory
         """
-        return self._get_datum(total_index).result()
+        return self.get_datum(total_index).result()
 
     # TODO Reduce function goes here
 
@@ -361,7 +361,7 @@ class ReducedSweepResults(ReducedSweepWithData):
         :param total_index:
         :return:
         """
-        return self._get_datum(total_index)
+        return self.get_datum(total_index)
 
 
 class ReducedSweep(object):

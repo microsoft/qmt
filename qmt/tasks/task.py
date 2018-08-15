@@ -198,8 +198,7 @@ class Task(object):
                 total_index = self.delayed_result.sweep.convert_to_total_indices(sweep_holder_index)[0]
 
                 # Use this index to get the appropriate results in dependent tasks
-                # TODO fix hack of accessing private field
-                input_result_list = [task.delayed_result._get_datum(total_index) for task in self.previous_tasks]
+                input_result_list = [task.delayed_result.get_datum(total_index) for task in self.previous_tasks]
                 list_of_input_result_lists += [input_result_list]
                 
                 if not self.gather:
