@@ -226,6 +226,9 @@ class ReducedSweepResults(ReducedSweepWithData):
         empty_results = sweep.empty_data()
         return ReducedSweepResults(sweep, empty_results)
 
+    def get_object(self, total_index):
+        return self._get_datum(total_index)
+
 
 class ReducedSweep(object):
     """
