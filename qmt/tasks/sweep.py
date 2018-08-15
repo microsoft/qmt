@@ -220,7 +220,8 @@ class ReducedSweepResults(ReducedSweepWithData):
         super(ReducedSweepResults, self).__init__(sweep, results)
         self.results = self._data
 
-    def create_empty_from_manager_and_tags(self, manager, tags):
+    @staticmethod
+    def create_empty_from_manager_and_tags(manager, tags):
         sweep = ReducedSweep.create_from_manager_and_tags(manager, tags)
         empty_results = sweep.empty_data()
         return ReducedSweepResults(sweep, empty_results)
