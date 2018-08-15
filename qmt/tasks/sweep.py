@@ -94,39 +94,40 @@ class SweepManager(object):
     def __str__(self):
         return "<SweepManager with " + str(len(self.sweep_list)) + " entries>"
 
-class ReducedSweepFutures(object):
+
+class ReducedSweepWithData(object):
+    def __init__(self, sweep, data):
+        self.sweep = sweep
+        self._data = data
+        self.tagged_value_list = sweep.tagged_value_list
+
+    def _get_datum(self, total_index):
+        return self._data[self.sweep.convert_to_reduced_index(total_index)]
+
+    def __iter__(self):
+        return iter(self._data)
+
+    def __str__(self):
+        return str(self._data)
+
+
+class ReducedSweepFutures(ReducedSweepWithData):
     """
     Contains sweep information and results in the form of Dask futures.
     """
-    def __init__(self, sweep, futures):
-        self.sweep = sweep
-        self.futures = futures
-        self.results = []
 
-    def wait(self):
-        return dask.distributed.wait(self.futures)
+    def __init__(self, sweep, futures):
+        super(ReducedSweepWithData, self).__init__(sweep, futures)
+        self.futures = self._data
+
+    # TODO deprecate?
+    # def wait(self):
+    #     return dask.distributed.wait(self.futures)
 
     # TODO deprecate?
     # @staticmethod
     # def get_each_element_function(self):
     #     return self.sweep, [future.result() for future in self.futures]
-
-    def __iter__(self):
-        return iter(self.futures)
-
-    def __str__(self):
-        return str(self.futures)
-    
-    def add(self, item, object_list_index):
-        """
-        Adds the result item to the results of this restricted sweep.
-        :param item: the result to add
-        :param object_list_index: the index of the result IN THE RESTRICTED SWEEP
-        """
-        self.futures[object_list_index] = item
-
-    def get_object(self, total_index):
-        return self.futures[self.sweep.convert_to_reduced_index(total_index)]
 
     # TODO deprecate? No usages.
     # def get_gathered_results(self):
@@ -136,53 +137,46 @@ class ReducedSweepFutures(object):
     #
     #     return gathered
 
-    def wait_for_completed_results(self):
-        if not self.results:
-            for future in self.futures:
-                self.results.append(future.result())
+    def calculate_completed_results(self):
+        completed_results = []
+        for future in self.futures:
+            completed_results.append(future.result())
+
+        return ReducedSweepResults(self.sweep, completed_results)
+        # if not self.results:
+        #     for future in self.futures:
+        #         self.results.append(future.result())
 
     def get_completed_result(self, total_index):
-        return self.get_object(total_index).result()
+        return self._get_datum(total_index).result()
 
 
-
-class ReducedSweepDelayed(object):
+class ReducedSweepDelayed(ReducedSweepWithData):
     def __init__(self, sweep, dask_client):
-        self.sweep = sweep
+        self.delayed_results = [None] * len(self.sweep)
+        super(ReducedSweepWithData, self).__init__(sweep, self.delayed_results)
         self.dask_client = dask_client
-        self.delayed_results = [None]*len(self.sweep)
-
-        # TODO replace accesses to these by accesses to the sweep
-        self.tagged_value_list = sweep.tagged_value_list
 
     @staticmethod
     def create_from_reduced_sweep_and_manager(sweep, manager):
         sweep = sweep
         dask_client = manager.dask_client
-    # contains a ReducedSweep and forwards its methods
-    # needs to take the dask client as well
-    # has methods for producing the list of delayed objects
-    # and reducing over itself using an arbitrary function.
-    # This reduction can then be used in conjunction with the ReducedSweep
-    # contained in this.
+        # contains a ReducedSweep and forwards its methods
+        # needs to take the dask client as well
+        # has methods for producing the list of delayed objects
+        # and reducing over itself using an arbitrary function.
+        # This reduction can then be used in conjunction with the ReducedSweep
+        # contained in this.
         return ReducedSweepDelayed(sweep, dask_client)
-
-    def add(self, item, object_list_index):
-        """
-        Adds the result item to the results of this restricted sweep.
-        :param item: the result to add
-        :param object_list_index: the index of the result IN THE RESTRICTED SWEEP
-        """
-        self.delayed_results[object_list_index] = item
 
     # TODO deprecate? No uses.
     # def copy_empty(self):
     #     return self.__init__(self.sweep, self.dask_client)
 
     def get_object(self, total_index):
-        return self.delayed_results[self.sweep.convert_to_reduced_index(total_index)]
+        return self._get_datum(total_index)
 
-    def calculate_futures(self,resources):
+    def calculate_futures(self, resources):
         """
         Triggers the execution of the sweep.
         """
@@ -190,7 +184,7 @@ class ReducedSweepDelayed(object):
         assert self.delayed_results[0] is not None
         futures = []
         for delayed_result in self.delayed_results:
-            futures.append(self.dask_client.compute(delayed_result,resources=resources))
+            futures.append(self.dask_client.compute(delayed_result, resources=resources))
 
         return ReducedSweepFutures(self.sweep, futures)
 
@@ -205,8 +199,12 @@ class ReducedSweepDelayed(object):
             self.delayed_results[0].visualize(filename=filename)
         return self.delayed_results[0].visualize()
 
-    def __iter__(self):
-        return iter(self.delayed_results)
+
+class ReducedSweepResults(ReducedSweepWithData):
+    def __init__(self, sweep, results):
+        super(ReducedSweepWithData, self).__init__(sweep, results)
+        self.results = self._data
+
 
 class ReducedSweep(object):
     """
@@ -255,7 +253,7 @@ class ReducedSweep(object):
             new_point = True
             point_small_index = None
             for j, small_sweep_point in enumerate(tagged_value_list):
-                #TODO - this should be done in a way that is also py27 compatible. Using
+                # TODO - this should be done in a way that is also py27 compatible. Using
                 # six.iteritems doesn't work.
                 if small_sweep_point.items() <= sweep_point.items():
                     new_point = False
@@ -324,7 +322,7 @@ class SweepTag(object):
 
     def __hash__(self):
         return hash(self.tag_name)
-    
+
     def __add__(self, other):
         out = SweepTag(self.tag_name)
         out.tag_function = lambda x: self.tag_function(x) + other
@@ -353,12 +351,12 @@ class SweepTag(object):
 
     def __truediv__(self, other):
         out = SweepTag(self.tag_name)
-        out.tag_function = lambda x: self.tag_function(x)/other
+        out.tag_function = lambda x: self.tag_function(x) / other
         return out
 
     def __pow__(self, other):
         out = SweepTag(self.tag_name)
-        out.tag_function = lambda x: self.tag_function(x)**other
+        out.tag_function = lambda x: self.tag_function(x) ** other
         return out
 
     def __neg__(self):
@@ -371,7 +369,7 @@ class SweepTag(object):
         out.tag_function = lambda x: abs(self.tag_function(x))
         return out
 
-    def replace(self,value):
+    def replace(self, value):
         return self.tag_function(value)
 
 
@@ -393,6 +391,7 @@ def gen_tag_extract(nested_dictionary_of_tags):
             for result in gen_tag_extract_list(v):
                 yield result
 
+
 def gen_tag_extract_list(nested_list_of_tags):
     """
     Extract all tags from nested dictionary that may have tags
@@ -410,6 +409,7 @@ def gen_tag_extract_list(nested_list_of_tags):
         if isinstance(v, list):
             for result in gen_tag_extract_list(v):
                 yield result
+
 
 def replace_tag_with_value(name_to_tag_mapping, tag, new_value):
     """
@@ -431,6 +431,7 @@ def replace_tag_with_value(name_to_tag_mapping, tag, new_value):
         else:
             var_copy[k] = v
     return var_copy
+
 
 def replace_tag_with_value_list(name_to_tag_mapping, tag, new_value):
     """
