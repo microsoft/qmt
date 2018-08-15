@@ -125,6 +125,10 @@ class ReducedSweepWithData(object):
     def __str__(self):
         return str(self._data)
 
+    def only(self):
+        assert len(self._data) == 1
+        return self._data[0]
+
 
 class ReducedSweepDelayed(ReducedSweepWithData):
     def __init__(self, sweep, dask_client):
@@ -211,8 +215,14 @@ class ReducedSweepFutures(ReducedSweepWithData):
         #     for future in self.futures:
         #         self.results.append(future.result())
 
+    # for consistency with Dask API
+    def result(self):
+        return self.calculate_completed_results()
+
     def get_completed_result(self, total_index):
         return self._get_datum(total_index).result()
+
+    # TODO Reduce function goes here
 
 
 
