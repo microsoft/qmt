@@ -111,6 +111,14 @@ class ReducedSweepWithData(object):
     def _get_datum(self, total_index):
         return self._data[self.sweep.convert_to_reduced_index(total_index)]
 
+    def add(self, item, object_list_index):
+        """
+        Adds the result item to the results of this restricted sweep.
+        :param item: the result to add
+        :param object_list_index: the index of the result IN THE RESTRICTED SWEEP
+        """
+        self._data[object_list_index] = item
+
     def __iter__(self):
         return iter(self._data)
 
