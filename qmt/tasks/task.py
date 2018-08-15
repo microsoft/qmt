@@ -30,10 +30,11 @@ How to use, in a nutshell:
     and return this result.
 
     Finally, to run a task, use the run() method,
-    and extract the results (over a sweep) from the .computed_result field as an iterable SweepHolder.
-    These results will be Dask futures. You can call reduce() on the Task to wait for the results
-    and bring them into local memory (a blocking operation). If you only want to compute
-    on some of the data, and/or do postprocessing, you will need to hand reduce() a reduceFunction to use.
+    which begins the actual calculation. run() returns immediately and stores pointers to the results undergoing
+    computation in a SweepHolderFutures object in the .computed_result field of the task. This object
+    associates sweep parameters with the results being computed. You can iterate over results being computed,
+    wait for the results to be computed with calculate_completed_results(), or wait for any particular result
+    with get_completed_result().
 
     For an example of how to set up a sweep, see ./tests/test_tasks_sweep.py and refer
     to the documentation of the sweeping classes in sweep.py.
@@ -197,7 +198,7 @@ class Task(object):
                 total_index = self.delayed_result.sweep.convert_to_total_indices(sweep_holder_index)[0]
 
                 # Use this index to get the appropriate results in dependent tasks
-                input_result_list = [task.delayed_result.get_object(total_index) for task in self.previous_tasks]
+                input_result_list = [task.delayed_result.get_delayed(total_index) for task in self.previous_tasks]
                 list_of_input_result_lists += [input_result_list]
                 
                 if not self.gather:

@@ -98,6 +98,15 @@ class SweepManager(object):
 
 
 class ReducedSweepWithData(object):
+    """
+    Represents a reduced sweep (see ReducedSweep) where each sweep element is associated with a datum.
+
+    Public attributes:
+        sweep: ReducedSweep: the reduced sweep
+        tagged_value_list: list: the sweep elements
+        tags_with_data: [(tag, data)] association of sweep elements with data
+    """
+
     def __init__(self, sweep, data):
         self.sweep = sweep
         self._data = data
@@ -108,11 +117,23 @@ class ReducedSweepWithData(object):
 
     @staticmethod
     def sweep_and_empty_data_from_manager_and_tags(sweep_manager, tags):
+        """
+        Construct a ReducedSweepWithData representing the reduction of sweep_manager to tags with None data.
+        :param sweep_manager: the sweep_manager representing the total sweep
+        :param tags: the tags being swept over
+        :return:
+        """
         sweep = ReducedSweep.create_from_manager_and_tags(sweep_manager, tags)
         data = sweep.empty_data()
         return sweep, data
 
     def _get_datum(self, total_index):
+        """
+        Get the datum associated with index total_index in the total sweep.
+
+        :param total_index: index in the total sweep
+        :return: the datum associated with total_index
+        """
         return self._data[self.sweep.convert_to_reduced_index(total_index)]
 
     def add(self, item, object_list_index):
@@ -124,24 +145,49 @@ class ReducedSweepWithData(object):
         self._data[object_list_index] = item
 
     def __iter__(self):
+        """
+        Iterate over the data values of this.
+        :return:
+        """
         return iter(self._data)
 
     def __str__(self):
         return str(self._data)
 
     def __len__(self):
+        """
+        The number of sweep points in this.
+        :return: The number of sweep points in this.
+        """
         return len(self._data)
 
     def only(self):
+        """
+        Convenience method to get the only data value in this if this has only one sweep element.
+
+        Precondition: this is a sweep with only one sweep element.
+        :return: the only data value in this.
+        """
         assert len(self._data) == 1
         return self._data[0]
 
     # Don't modify result.
-    def tags_with_data(self):
+    def get_tags_with_data(self):
+        """
+        Get the association between tags and values in this.
+        :return: [(tag, value)] the association between tags and values in this.
+        """
         return self.tags_with_data
 
 
 class ReducedSweepDelayed(ReducedSweepWithData):
+    """
+    Represents a reduced sweep with associated delayed objects.
+
+    Public attributes:
+    delayed_results: [dask.Delayed]: the delayed objects
+    dask_client: dask.distributed.Client: the client to be used to compute the delayed objects
+    """
     def __init__(self, sweep, dask_client):
         self.delayed_results = sweep.empty_data()
         super(ReducedSweepDelayed, self).__init__(sweep, self.delayed_results)
@@ -149,6 +195,12 @@ class ReducedSweepDelayed(ReducedSweepWithData):
 
     @staticmethod
     def create_from_reduced_sweep_and_manager(sweep, manager):
+        """
+        Create a ReducedSweepDelayed from the ReducedSweep sweep, with empty data.
+        :param sweep:
+        :param manager:
+        :return: ReducedSweepDelayed sweeping over the entries in sweep, with empty data.
+        """
         sweep = sweep
         dask_client = manager.dask_client
         # contains a ReducedSweep and forwards its methods
@@ -163,12 +215,18 @@ class ReducedSweepDelayed(ReducedSweepWithData):
     # def copy_empty(self):
     #     return self.__init__(self.sweep, self.dask_client)
 
-    def get_object(self, total_index):
+    def get_delayed(self, total_index):
+        """
+        Return the delayed object at total_index in the total sweep.
+        :param total_index: index in the total sweep
+        :return: the delayed object at total_index in the total sweep
+        """
         return self._get_datum(total_index)
 
     def calculate_futures(self, resources):
         """
-        Triggers the execution of the sweep.
+        Triggers the execution of the sweep. Returns a ReducedSweepFutures representing the in-process result.
+        :param resources: the computational resources that the dask_client should use #TODO what data type?
         """
 
         assert self.delayed_results[0] is not None
@@ -179,12 +237,29 @@ class ReducedSweepDelayed(ReducedSweepWithData):
         return ReducedSweepFutures(self.sweep, futures)
 
     def visualize_entire_sweep(self, filename=None):
+        """
+       Return a visualization of the entire task graph of the sweep rooted at this as an IPython image object.
+
+       If filename is given, also exports the visualization to the given file.
+       Supported
+
+       :param filename: Optional file to export the visualization to
+       :return: A visualization of he entire task graph of the sweep rooted at this as an IPython image object.
+       """
         delayed_proxy = dask.delayed(id)(self.delayed_results)
         if filename:
             delayed_proxy.visualize(filename=filename)
         return delayed_proxy.visualize()
 
     def visualize_single_sweep_element(self, filename=None):
+        """
+        Return a visualization of task graph of one element of the sweep rooted at this as an IPython image object.
+
+        If filename is given, also exports the visualization to the given file.
+        :param filename: Optional file to export the visualization to
+        :return: a visualization of task graph of one element of the sweep rooted at this as an IPython image object.
+
+        """
         if filename:
             self.delayed_results[0].visualize(filename=filename)
         return self.delayed_results[0].visualize()
@@ -192,7 +267,10 @@ class ReducedSweepDelayed(ReducedSweepWithData):
 
 class ReducedSweepFutures(ReducedSweepWithData):
     """
-    Contains sweep information and results in the form of Dask futures.
+    Represents a reduced sweep with associated Futures--results in computation.
+
+    Public attributes:
+    futures: [dask.Future]: the future objects
     """
 
     def __init__(self, sweep, futures):
@@ -217,6 +295,10 @@ class ReducedSweepFutures(ReducedSweepWithData):
     #     return gathered
 
     def calculate_completed_results(self):
+        """
+        Get another sweep with the futures in this converted to results in local memory.
+        :return: another sweep with the futures in this converted to results in local memory
+        """
         completed_results = []
         for future in self.futures:
             completed_results.append(future.result())
@@ -228,28 +310,57 @@ class ReducedSweepFutures(ReducedSweepWithData):
 
     # for consistency with Dask API
     def result(self):
+        """
+        Get another sweep with the futures in this converted to results in local memory.
+
+        :return: another sweep with the futures in this converted to results in local memory
+        """
         return self.calculate_completed_results()
 
+    def get_future(self, total_index):
+        return self._get_datum(total_index)
+
     def get_completed_result(self, total_index):
+        """
+        Get the completed result associated with total_index in the total sweep in local memory.
+        :param total_index: index in the total sweep
+        :return: the completed result in local memory
+        """
         return self._get_datum(total_index).result()
 
     # TODO Reduce function goes here
 
 
-
-
 class ReducedSweepResults(ReducedSweepWithData):
+    """
+    Represents a reduced sweep with associated results in local memory.
+
+    Public attributes:
+    results: []: the results of the calculation
+    """
+
     def __init__(self, sweep, results):
         super(ReducedSweepResults, self).__init__(sweep, results)
         self.results = self._data
 
     @staticmethod
     def create_empty_from_manager_and_tags(manager, tags):
+        """
+        Create a ReducedSweepResults corresponding to manager restricted to tags, with empty data.
+        :param manager: SweepManager: the total sweep
+        :param tags: the tags being swept over
+        Create a ReducedSweepResults corresponding to manager restricted to tags, with empty data.
+        """
         sweep = ReducedSweep.create_from_manager_and_tags(manager, tags)
         empty_results = sweep.empty_data()
         return ReducedSweepResults(sweep, empty_results)
 
-    def get_object(self, total_index):
+    def get_result(self, total_index):
+        """
+
+        :param total_index:
+        :return:
+        """
         return self._get_datum(total_index)
 
 
