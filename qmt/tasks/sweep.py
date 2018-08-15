@@ -126,46 +126,6 @@ class ReducedSweepWithData(object):
         return str(self._data)
 
 
-class ReducedSweepFutures(ReducedSweepWithData):
-    """
-    Contains sweep information and results in the form of Dask futures.
-    """
-
-    def __init__(self, sweep, futures):
-        super(ReducedSweepFutures, self).__init__(sweep, futures)
-        self.futures = self._data
-
-    # TODO deprecate?
-    # def wait(self):
-    #     return dask.distributed.wait(self.futures)
-
-    # TODO deprecate?
-    # @staticmethod
-    # def get_each_element_function(self):
-    #     return self.sweep, [future.result() for future in self.futures]
-
-    # TODO deprecate? No usages.
-    # def get_gathered_results(self):
-    #     gathered =[]
-    #     for future in self.futures:
-    #         gathered.append(future.result())
-    #
-    #     return gathered
-
-    def calculate_completed_results(self):
-        completed_results = []
-        for future in self.futures:
-            completed_results.append(future.result())
-
-        return ReducedSweepResults(self.sweep, completed_results)
-        # if not self.results:
-        #     for future in self.futures:
-        #         self.results.append(future.result())
-
-    def get_completed_result(self, total_index):
-        return self._get_datum(total_index).result()
-
-
 class ReducedSweepDelayed(ReducedSweepWithData):
     def __init__(self, sweep, dask_client):
         self.delayed_results = sweep.empty_data()
@@ -213,6 +173,48 @@ class ReducedSweepDelayed(ReducedSweepWithData):
         if filename:
             self.delayed_results[0].visualize(filename=filename)
         return self.delayed_results[0].visualize()
+
+
+class ReducedSweepFutures(ReducedSweepWithData):
+    """
+    Contains sweep information and results in the form of Dask futures.
+    """
+
+    def __init__(self, sweep, futures):
+        super(ReducedSweepFutures, self).__init__(sweep, futures)
+        self.futures = self._data
+
+    # TODO deprecate?
+    # def wait(self):
+    #     return dask.distributed.wait(self.futures)
+
+    # TODO deprecate?
+    # @staticmethod
+    # def get_each_element_function(self):
+    #     return self.sweep, [future.result() for future in self.futures]
+
+    # TODO deprecate? No usages.
+    # def get_gathered_results(self):
+    #     gathered =[]
+    #     for future in self.futures:
+    #         gathered.append(future.result())
+    #
+    #     return gathered
+
+    def calculate_completed_results(self):
+        completed_results = []
+        for future in self.futures:
+            completed_results.append(future.result())
+
+        return ReducedSweepResults(self.sweep, completed_results)
+        # if not self.results:
+        #     for future in self.futures:
+        #         self.results.append(future.result())
+
+    def get_completed_result(self, total_index):
+        return self._get_datum(total_index).result()
+
+
 
 
 class ReducedSweepResults(ReducedSweepWithData):

@@ -258,25 +258,22 @@ class Task(object):
 
         return self.computed_result
 
-    # TODO should be in Sweep
-    def reduce(self, reduce_function=None):
-        assert self.computed_result is not None
+    # Deprecated. See visualization/plot_helpers
+    # def reduce(self, reduce_function=None):
+    #     assert self.computed_result is not None
+    #
+    #     if reduce_function is None:
+    #         reduce_function = Task.gather_futures
+    #     if self.gather:
+    #         return reduce_function([self.computed_result])
+    #     else:
+    #         return reduce_function(self.computed_result)
+    #
+    # def results(self):
+    #     return self.reduce()
 
-        if reduce_function is None:
-            reduce_function = Task.gather_futures
-        if self.gather:
-            return reduce_function([self.computed_result])
-        else:
-            return reduce_function(self.computed_result)
+    def get_results_as_local_objects(self):
+        if not self.computed_result:
+            self._run()
 
-    def results(self):
-        return self.reduce()
-
-    # TODO make private?
-    @staticmethod
-    def gather_futures(sweep_results):
-        presents = []
-        #sweep_results.wait()
-        for future in sweep_results:
-            presents.append(future.result())
-        return presents
+        return self.computed_result.calculate_completed_results()

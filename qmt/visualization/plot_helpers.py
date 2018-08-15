@@ -1,6 +1,7 @@
 import h5py
 import dask
 
+# TODO refactor this into a special case of a more general reduce method
 def save_relevant_data(generic_task, filename, dask_client, get_relevant_data, plot_type):
     #get_relevant_data is function that gets the bands
     sweep_holder = generic_task.computed_result #sweepholder containing list of futures
