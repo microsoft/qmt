@@ -131,7 +131,6 @@ class Geo3DData(Data):
         """
         super(Geo3DData, self).__init__()
 
-        # TODO should I pass this in or infer it?!
         self.build_order = []
         self.parts = {}   # dict of parts in this geometry
         self.serial_fcdoc = None  # serialized FreeCAD document for this geometry
@@ -161,6 +160,7 @@ class Geo3DData(Data):
         if (part_name in self.parts) and (not overwrite):
             raise ValueError("Attempted to overwrite the part " + part_name + ".")
         else:
+            self.build_order.append(part.label)
             self.parts[part_name] = part
 
     def remove_part(self, part_name, ignore_if_absent=False):

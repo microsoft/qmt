@@ -207,6 +207,7 @@ class Task(object):
             if self.gather:
                 self.delayed_result = delayed(self._solve_gathered)(list_of_input_result_lists, list_of_current_options, dask_key_name=self.name)
 
+    # TODO retest
     def visualize_entire_sweep(self, filename=None):
         """
         Return a visualization of the entire task graph of the sweep rooted at this as an IPython image object.
@@ -236,7 +237,8 @@ class Task(object):
 
         return self.delayed_result.visualize_single_sweep_element(filename=filename)
 
-    def run(self):
+    # TODO split off the gathered tasks and normal tasks into subclasses
+    def _run(self):
         """
         Runs the task DAG graph whose root is this and returns the results.
 
@@ -248,7 +250,7 @@ class Task(object):
 
         if self.computed_result is None:
             for task in self.previous_tasks:
-                task.run()
+                task._run()
             if self.gather:
                 self.computed_result = self.sweep_manager.dask_client.compute(self.delayed_result)
             else:
@@ -256,6 +258,7 @@ class Task(object):
 
         return self.computed_result
 
+    # TODO should be in Sweep
     def reduce(self, reduce_function=None):
         assert self.computed_result is not None
 
@@ -266,6 +269,10 @@ class Task(object):
         else:
             return reduce_function(self.computed_result)
 
+    def results(self):
+        return self.reduce()
+
+    # TODO make private?
     @staticmethod
     def gather_futures(sweep_results):
         presents = []
@@ -273,55 +280,3 @@ class Task(object):
         for future in sweep_results:
             presents.append(future.result())
         return presents
-
-# DEPRECATED serialization
-# @staticmethod
-# def from_dict(dict_representation):
-#     taskName, data = dict_representation.items()[0]
-#     className = data['class']
-#     target_class = TaskMetaclass.class_registry[className]
-#     kwargs = {}
-#     for argName, argValue in data['argumentDictionary'].items():
-#         if Task.isTaskRepresentation(argValue):
-#             kwargs[argName] = Task.from_dict(argValue)
-#         else:
-#             kwargs[argName] = argValue
-#     print(target_class)
-#     return target_class(name=taskName, **kwargs)
-#
-# def save(self, file_name):
-#     raise NotImplementedError("json serialization not yet implemented")
-#     # TODO add serialization
-
-# def to_dict(self):
-#     result = OrderedDict()
-#     result_data = OrderedDict()
-#     result_data['class'] = self.__class__.__name__
-#     result_data['argumentDictionary'] = self.dependencies_dict()
-#     result[self.name] = result_data
-#     return result
-
-# with open(file_name, 'w') as jsonFile:
-#     json.dump(self.to_dict(), jsonFile)
-#
-# def dependencies_dict(self):
-#     result = {}
-#     for argName, argValue in self.argumentDictionary.items():
-#         if isinstance(argValue, Task):
-#             result[argName] = argValue.to_dict()
-#         else:
-#             result[argName] = argValue
-#
-#     return result
-
-# @staticmethod
-# def remove_self_argument(init_arguments):
-#     init_arguments.pop('self', None)
-#     return init_arguments
-#
-# @staticmethod
-# def isTaskRepresentation(argValue):
-#     # check if it has form {name:otherDict}
-#     hasSingleItem = isinstance(argValue, dict) and len(argValue.items()) == 1
-#     # check if it has the class to reconstitute the task from
-#     return hasSingleItem and "class" in argValue.values()[0]

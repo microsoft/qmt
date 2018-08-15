@@ -89,7 +89,7 @@ class SweepManager(object):
                 set_sweep_manager(child_task)
 
         set_sweep_manager(task)
-        return task.run()
+        return task._run()
 
     def __str__(self):
         return "<SweepManager with " + str(len(self.sweep_list)) + " entries>"
@@ -101,12 +101,15 @@ class ReducedSweepFutures(object):
     def __init__(self, sweep, futures):
         self.sweep = sweep
         self.futures = futures
+        self.results = []
 
     def wait(self):
         return dask.distributed.wait(self.futures)
-    @staticmethod
-    def get_each_element_function(self):
-        return self.sweep, [future.result() for future in self.futures]
+
+    # TODO deprecate?
+    # @staticmethod
+    # def get_each_element_function(self):
+    #     return self.sweep, [future.result() for future in self.futures]
 
     def __iter__(self):
         return iter(self.futures)
@@ -125,15 +128,24 @@ class ReducedSweepFutures(object):
     def get_object(self, total_index):
         return self.futures[self.sweep.convert_to_reduced_index(total_index)]
 
-    def get_gathered_results(self):
-        gathered =[]
-        for future in self.futures:
-            gathered.append(future.result())
+    # TODO deprecate? No usages.
+    # def get_gathered_results(self):
+    #     gathered =[]
+    #     for future in self.futures:
+    #         gathered.append(future.result())
+    #
+    #     return gathered
 
-        return gathered
+    def wait_for_completed_results(self):
+        if not self.results:
+            for future in self.futures:
+                self.results.append(future.result())
+
+    def get_completed_result(self, total_index):
+        return self.get_object(total_index).result()
 
 
-# TODO
+
 class ReducedSweepDelayed(object):
     def __init__(self, sweep, dask_client):
         self.sweep = sweep
@@ -163,8 +175,9 @@ class ReducedSweepDelayed(object):
         """
         self.delayed_results[object_list_index] = item
 
-    def copy_empty(self):
-        return self.__init__(self, self.sweep, self.dask_client)
+    # TODO deprecate? No uses.
+    # def copy_empty(self):
+    #     return self.__init__(self.sweep, self.dask_client)
 
     def get_object(self, total_index):
         return self.delayed_results[self.sweep.convert_to_reduced_index(total_index)]
@@ -192,6 +205,9 @@ class ReducedSweepDelayed(object):
             self.delayed_results[0].visualize(filename=filename)
         return self.delayed_results[0].visualize()
 
+    def __iter__(self):
+        return iter(self.delayed_results)
+
 class ReducedSweep(object):
     """
     Represents the output of a sweep, restricted to the relevant subset of the input tags.
@@ -203,7 +219,6 @@ class ReducedSweep(object):
         sweep_manager: The whole sweep being performed.
         list_of_tags: The tags corresponding to the part of the sweep that this
             SweepHolder is restricted to.
-        delayed_object_list: the result objects corresponding to elements in the restricted sweep
     """
 
     def __init__(self, list_of_tags, sweep_list, tagged_value_list, index_in_sweep):
