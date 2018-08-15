@@ -119,6 +119,8 @@ class Task(object):
         self.delayed_result = None
         self.computed_result = None
 
+        self.daskless_result = None
+
     def _compile(self):
         """
         Constructs the Dask task graph corresponding to this and its dependencies.
@@ -273,6 +275,16 @@ class Task(object):
         for future in sweep_results:
             presents.append(future.result())
         return presents
+
+    # Precondition: there is no sweep (i.e. no tags in the options)
+    def run_daskless(self):
+        for task in self.previous_tasks:
+            task.run_daskless()
+
+        input_result_list = [task.daskless_result for task in self.previous_tasks]
+        self.daskless_result = self._solve_instance(self.input_result_list, self.options)
+
+        return self.daskless_result
 
 # DEPRECATED serialization
 # @staticmethod
