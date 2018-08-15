@@ -3,6 +3,10 @@ import pickle,os,shutil,codecs
 from qmt import Materials
 from qmt.data import Data
 
+# TODO factor out geo superclass
+class GeoData(Data):
+    pass
+
 class Geo1DData(Data):
     def __init__(self):
         """
