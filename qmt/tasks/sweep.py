@@ -411,7 +411,9 @@ class ReducedSweep(object):
             # of the relevant tags has already been encountered in the sweep
             new_point = True
             point_small_index = None
-            for j, small_sweep_point in enumerate(tagged_value_list):
+            for j in range(len(tagged_value_list)):
+                small_sweep_point = tagged_value_list[j]
+            # for j, small_sweep_point in enumerate(tagged_value_list):
                 # TODO - this should be done in a way that is also py27 compatible. Using
                 # six.iteritems doesn't work.
                 if small_sweep_point.items() <= sweep_point.items():
