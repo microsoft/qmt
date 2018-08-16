@@ -187,8 +187,7 @@ class Task(object):
             # TODO
             # rearrange sweeps
             reduced_sweep = ReducedSweep.create_from_manager_and_tags(self.sweep_manager, self.list_of_tags)
-            print("sweep = " + reduced_sweep)
-            print("sweep_len = " + len(reduced_sweep))
+
             self.delayed_result = ReducedSweepDelayed.create_from_reduced_sweep_and_manager(reduced_sweep,
                                                                                        self.sweep_manager)
             list_of_current_options = []
