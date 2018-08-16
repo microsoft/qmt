@@ -95,6 +95,5 @@ class Geometry3D(Task):
             part.serial_stp = ret['serial_stp_parts'][part.label]
             part.built_fc_name = ret['built_part_names'][part.label]
             geo.add_part(part.label, part)
-            geo.build_order.append(part.label)  # TODO: can be in add_part
 
         return geo

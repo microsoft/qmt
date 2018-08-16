@@ -30,10 +30,11 @@ How to use, in a nutshell:
     and return this result.
 
     Finally, to run a task, use the run() method,
-    and extract the results (over a sweep) from the .computed_result field as an iterable SweepHolder.
-    These results will be Dask futures. You can call reduce() on the Task to wait for the results
-    and bring them into local memory (a blocking operation). If you only want to compute
-    on some of the data, and/or do postprocessing, you will need to hand reduce() a reduceFunction to use.
+    which begins the actual calculation. run() returns immediately and stores pointers to the results undergoing
+    computation in a SweepHolderFutures object in the .computed_result field of the task. This object
+    associates sweep parameters with the results being computed. You can iterate over results being computed,
+    wait for the results to be computed with calculate_completed_results(), or wait for any particular result
+    with get_completed_result().
 
     For an example of how to set up a sweep, see ./tests/test_tasks_sweep.py and refer
     to the documentation of the sweeping classes in sweep.py.
@@ -197,7 +198,7 @@ class Task(object):
                 total_index = self.delayed_result.sweep.convert_to_total_indices(sweep_holder_index)[0]
 
                 # Use this index to get the appropriate results in dependent tasks
-                input_result_list = [task.delayed_result.get_object(total_index) for task in self.previous_tasks]
+                input_result_list = [task.delayed_result.get_datum(total_index) for task in self.previous_tasks]
                 list_of_input_result_lists += [input_result_list]
                 
                 if not self.gather:
@@ -207,6 +208,7 @@ class Task(object):
             if self.gather:
                 self.delayed_result = delayed(self._solve_gathered)(list_of_input_result_lists, list_of_current_options, dask_key_name=self.name)
 
+    # TODO retest
     def visualize_entire_sweep(self, filename=None):
         """
         Return a visualization of the entire task graph of the sweep rooted at this as an IPython image object.
@@ -236,7 +238,8 @@ class Task(object):
 
         return self.delayed_result.visualize_single_sweep_element(filename=filename)
 
-    def run(self):
+    # TODO split off the gathered tasks and normal tasks into subclasses
+    def _run(self):
         """
         Runs the task DAG graph whose root is this and returns the results.
 
@@ -248,7 +251,7 @@ class Task(object):
 
         if self.computed_result is None:
             for task in self.previous_tasks:
-                task.run()
+                task._run()
             if self.gather:
                 self.computed_result = self.sweep_manager.dask_client.compute(self.delayed_result)
             else:
@@ -256,72 +259,22 @@ class Task(object):
 
         return self.computed_result
 
-    def reduce(self, reduce_function=None):
-        assert self.computed_result is not None
+    # Deprecated. See visualization/plot_helpers
+    # def reduce(self, reduce_function=None):
+    #     assert self.computed_result is not None
+    #
+    #     if reduce_function is None:
+    #         reduce_function = Task.gather_futures
+    #     if self.gather:
+    #         return reduce_function([self.computed_result])
+    #     else:
+    #         return reduce_function(self.computed_result)
+    #
+    # def results(self):
+    #     return self.reduce()
 
-        if reduce_function is None:
-            reduce_function = Task.gather_futures
-        if self.gather:
-            return reduce_function([self.computed_result])
-        else:
-            return reduce_function(self.computed_result)
+    def get_results_as_local_objects(self):
+        if not self.computed_result:
+            self._run()
 
-    @staticmethod
-    def gather_futures(sweep_results):
-        presents = []
-        #sweep_results.wait()
-        for future in sweep_results:
-            presents.append(future.result())
-        return presents
-
-# DEPRECATED serialization
-# @staticmethod
-# def from_dict(dict_representation):
-#     taskName, data = dict_representation.items()[0]
-#     className = data['class']
-#     target_class = TaskMetaclass.class_registry[className]
-#     kwargs = {}
-#     for argName, argValue in data['argumentDictionary'].items():
-#         if Task.isTaskRepresentation(argValue):
-#             kwargs[argName] = Task.from_dict(argValue)
-#         else:
-#             kwargs[argName] = argValue
-#     print(target_class)
-#     return target_class(name=taskName, **kwargs)
-#
-# def save(self, file_name):
-#     raise NotImplementedError("json serialization not yet implemented")
-#     # TODO add serialization
-
-# def to_dict(self):
-#     result = OrderedDict()
-#     result_data = OrderedDict()
-#     result_data['class'] = self.__class__.__name__
-#     result_data['argumentDictionary'] = self.dependencies_dict()
-#     result[self.name] = result_data
-#     return result
-
-# with open(file_name, 'w') as jsonFile:
-#     json.dump(self.to_dict(), jsonFile)
-#
-# def dependencies_dict(self):
-#     result = {}
-#     for argName, argValue in self.argumentDictionary.items():
-#         if isinstance(argValue, Task):
-#             result[argName] = argValue.to_dict()
-#         else:
-#             result[argName] = argValue
-#
-#     return result
-
-# @staticmethod
-# def remove_self_argument(init_arguments):
-#     init_arguments.pop('self', None)
-#     return init_arguments
-#
-# @staticmethod
-# def isTaskRepresentation(argValue):
-#     # check if it has form {name:otherDict}
-#     hasSingleItem = isinstance(argValue, dict) and len(argValue.items()) == 1
-#     # check if it has the class to reconstitute the task from
-#     return hasSingleItem and "class" in argValue.values()[0]
+        return self.computed_result.calculate_completed_results()

@@ -1,5 +1,11 @@
 import pickle,os,shutil,codecs
+
+from qmt import Materials
 from qmt.data import Data
+
+# TODO factor out geo superclass
+class GeoData(Data):
+    pass
 
 class Geo1DData(Data):
     def __init__(self):
@@ -124,6 +130,7 @@ class Geo3DData(Data):
             - build_order is a list of strings indicating the construction order.
         """
         super(Geo3DData, self).__init__()
+
         self.build_order = []
         self.parts = {}   # dict of parts in this geometry
         self.serial_fcdoc = None  # serialized FreeCAD document for this geometry
@@ -131,6 +138,14 @@ class Geo3DData(Data):
         self.serial_region_marker = None # Holding container for the serialized xml of the region
         # marker function
         self.fenics_ids = None # dictionary with part name keys mapping to fenics ids.
+        self.materials_database = Materials()
+
+
+    def get_material(self, part_name):
+        return self.materials_database[self.parts[part_name].material]
+
+    def get_material_mapping(self):
+        return {name: self.get_material(name) for name in self.parts.keys()}
 
     def get_parts(self):
         return self.parts
@@ -145,6 +160,7 @@ class Geo3DData(Data):
         if (part_name in self.parts) and (not overwrite):
             raise ValueError("Attempted to overwrite the part " + part_name + ".")
         else:
+            self.build_order.append(part.label)
             self.parts[part_name] = part
 
     def remove_part(self, part_name, ignore_if_absent=False):
