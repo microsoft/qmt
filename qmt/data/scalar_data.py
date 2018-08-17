@@ -37,6 +37,9 @@ class InterpolatableScalarData3D(ScalarData3D):
     def evaluate(self, point):
         return self.evaluate_point_function(point)
 
+    # def as_fenics_expression(self):
+
+
 class FenicsPotentialData3D(InterpolatableScalarData3D):
     def __init__(self, fenics_potential, fenics_mesh, coords_units=qc.units.nm, data_units=qc.units.meV):
         coords = fenics_mesh.coordinates()

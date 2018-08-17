@@ -226,7 +226,7 @@ class Task(object):
 
         return self.delayed_result.visualize_entire_sweep(filename=filename)
 
-    def visualize_single_sweep_element(self, filename):
+    def visualize_single_sweep_element(self, filename=None):
         """
         Return a visualization of task graph of one element of the sweep rooted at this as an IPython image object.
 
