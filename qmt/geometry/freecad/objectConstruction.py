@@ -91,7 +91,9 @@ def build(opts):
 def build_pass(part):
     '''Pas a part unchanged.'''
     assert part.directive == '3d_shape'
-    print >> sys.stderr, part.fc_name
+
+    # TODO remove
+    sys.stderr.write("Part Name: " + part.fc_name)
     result = FreeCAD.ActiveDocument.getObject(part.fc_name)
     assert result is not None
     return result
