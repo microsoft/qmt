@@ -94,8 +94,13 @@ def build_pass(part):
     assert part.directive == '3d_shape'
 
     # TODO remove
-    sys.stderr.write("Part Name: " + part.fc_name)
+    sys.stderr.write("Part Name: " + part.fc_name + "\n")
     result = FreeCAD.ActiveDocument.getObject(part.fc_name)
+
+    for object in FreeCAD.ActiveDocument.Objects:
+        sys.stderr.write("Object: " + str(object) + "\n")
+        sys.stderr.write("Name: " + object.name + "\n")
+
     assert result is not None
     return result
 
