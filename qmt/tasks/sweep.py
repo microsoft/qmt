@@ -45,7 +45,8 @@ class SweepManager(object):
         self.results = None
 
     # TODO test
-    def createEmptySweep(self, dask_client=None):
+    @staticmethod
+    def create_empty_sweep(dask_client=None):
         return SweepManager([{}], dask_client)
 
     @staticmethod
