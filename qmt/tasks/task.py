@@ -120,6 +120,8 @@ class Task(object):
         self.delayed_result = None
         self.computed_result = None
 
+        self.daskless_result = None
+
     def _compile(self):
         """
         Constructs the Dask task graph corresponding to this and its dependencies.
@@ -187,6 +189,7 @@ class Task(object):
             # TODO
             # rearrange sweeps
             reduced_sweep = ReducedSweep.create_from_manager_and_tags(self.sweep_manager, self.list_of_tags)
+
             self.delayed_result = ReducedSweepDelayed.create_from_reduced_sweep_and_manager(reduced_sweep,
                                                                                        self.sweep_manager)
             list_of_current_options = []
@@ -208,7 +211,6 @@ class Task(object):
             if self.gather:
                 self.delayed_result = delayed(self._solve_gathered)(list_of_input_result_lists, list_of_current_options, dask_key_name=self.name)
 
-    # TODO retest
     def visualize_entire_sweep(self, filename=None):
         """
         Return a visualization of the entire task graph of the sweep rooted at this as an IPython image object.
@@ -224,7 +226,7 @@ class Task(object):
 
         return self.delayed_result.visualize_entire_sweep(filename=filename)
 
-    def visualize_single_sweep_element(self, filename):
+    def visualize_single_sweep_element(self, filename=None):
         """
         Return a visualization of task graph of one element of the sweep rooted at this as an IPython image object.
 
@@ -269,9 +271,16 @@ class Task(object):
     #         return reduce_function([self.computed_result])
     #     else:
     #         return reduce_function(self.computed_result)
-    #
-    # def results(self):
-    #     return self.reduce()
+
+    # Precondition: there is no sweep (i.e. no tags in the options)
+    def run_daskless(self):
+        for task in self.previous_tasks:
+            task.run_daskless()
+
+        input_result_list = [task.daskless_result for task in self.previous_tasks]
+        self.daskless_result = self._solve_instance(self.input_result_list, self.options)
+
+        return self.daskless_result
 
     def get_results_as_local_objects(self):
         if not self.computed_result:
