@@ -278,12 +278,7 @@ class Task(object):
             task.run_daskless()
 
         input_result_list = [task.daskless_result for task in self.previous_tasks]
-        self.daskless_result = self._solve_instance(self.input_result_list, self.options)
+        self.daskless_result = self._solve_instance(input_result_list, self.options)
 
         return self.daskless_result
 
-    def get_results_as_local_objects(self):
-        if not self.computed_result:
-            self._run()
-
-        return self.computed_result.calculate_completed_results()
