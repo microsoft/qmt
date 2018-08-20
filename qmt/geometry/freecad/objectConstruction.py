@@ -99,7 +99,7 @@ def build_pass(part):
 
     for object in FreeCAD.ActiveDocument.Objects:
         sys.stderr.write("Object: " + str(object) + "\n")
-        sys.stderr.write("Name: " + object.name + "\n")
+        sys.stderr.write("Name: " + object.Name + "\n")
 
     assert result is not None
     return result
