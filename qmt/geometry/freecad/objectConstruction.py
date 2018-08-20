@@ -72,6 +72,7 @@ def build(opts):
             raise ValueError('Directive ' + input_part.directive +
                              ' is not a recognized directive type.')
 
+        assert part is not None
         doc.recompute()
         opts['built_part_names'][input_part.label] = part.Name
         store_serial(opts['serial_stp_parts'], input_part.label,
