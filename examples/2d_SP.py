@@ -3,7 +3,7 @@
 
 import numpy as np
 from qmt.tasks import SweepTag, SweepManager
-from qmt.tasks.basic import Geometry2D
+from qmt.tasks.basic.geometry import Geometry2D
 from qms.tasks.mesh import Mesh2D
 from qms.tasks.poisson import Poisson2D
 from qms.tasks.thomas_fermi import ThomasFermi2D

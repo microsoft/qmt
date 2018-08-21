@@ -59,7 +59,7 @@ class Data(object):
         Serializes a unit instance (e.g. units.meV -> 'meV')
         :param unit_instance: An instance of a unit (e.g. units.meV)
         """
-        from qmt import units
+        from qmt.physics_constants import units
         for k,v in iteritems(units.__dict__):
             if v==unit_instance:
                 return k
@@ -69,5 +69,5 @@ class Data(object):
         De-serializes a unit instance (e.g. 'meV' -> units.meV)
         :param unit_string: String corresponding with unit (e.g. 'meV')
         """
-        from qmt import units
+        from qmt.physics_constants import units
         return units.__dict__[unit_string]
