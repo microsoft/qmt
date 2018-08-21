@@ -44,11 +44,13 @@ Classes:
     TaskMetaclass
 """
 
+import copy
+
 from dask import delayed
 
 from qmt.tasks import SweepManager
 from .sweep import ReducedSweep, ReducedSweepDelayed, gen_tag_extract, replace_tag_with_value
-import copy
+
 
 class TaskMetaclass(type):
     """
