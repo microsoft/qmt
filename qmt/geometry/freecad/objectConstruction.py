@@ -3,28 +3,22 @@
 
 """Functions that perform composite executions."""
 
+import FreeCAD
 
-import os
+import Draft
 import numpy as np
 from six import iteritems, text_type
 
-import FreeCAD
-import Draft
-
-
 # TODO: use namespace in code
 from qmt.geometry.freecad.auxiliary import *
-import qmt.geometry.freecad.geomUtils
-import qmt.geometry.freecad.sketchUtils
-import qmt.geometry.freecad.fileIO
+from qmt.geometry.freecad.fileIO import (updateParams, exportCAD, store_serial)
 from qmt.geometry.freecad.geomUtils import (extrude, copy_move, genUnion,
                                             getBB, makeBB, makeHexFace,
-                                            extrudeBetween, centerObjects, intersect,
+                                            extrudeBetween, intersect,
                                             checkOverlap, subtract,
                                             crossSection)
 from qmt.geometry.freecad.sketchUtils import (findSegments, splitSketch, extendSketch,
                                               findEdgeCycles, draftOffset)
-from qmt.geometry.freecad.fileIO import (updateParams, exportCAD, exportMeshed, store_serial)
 
 
 def build(opts):

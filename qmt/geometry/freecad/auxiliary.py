@@ -5,7 +5,6 @@
 """General FreeCAD helper functions."""
 
 import os
-import sys
 import shutil
 import tempfile
 import zipfile

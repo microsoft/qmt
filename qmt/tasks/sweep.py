@@ -1,5 +1,3 @@
-import collections
-
 import dask
 import dask.distributed
 from six import iteritems

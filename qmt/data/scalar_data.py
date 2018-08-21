@@ -4,7 +4,6 @@
 import qmt.physics_constants as qc
 # from qms.fem.fenics_utilities import PermittivityExpression
 from qmt.data import Data
-import fenics as fn
 
 
 # Abstract class

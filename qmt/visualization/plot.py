@@ -1,6 +1,6 @@
 import h5py
+
 from .density_1d_plot import _plot_1d_density
-import dask
 
 
 def plot(filename, hv):

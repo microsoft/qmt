@@ -1,4 +1,3 @@
-import pickle
 from qmt.data import Data
 
 

@@ -6,11 +6,12 @@
 ###
 
 import FreeCAD
+from copy import deepcopy
+
 import Draft
 import Part
 import Sketcher
 import numpy as np
-from copy import deepcopy
 
 
 def deepRemove_impl(obj):
@@ -248,7 +249,7 @@ def draftOffset(inputSketch,t):
     ''' Attempt to offset the draft figure by a thickness t. Positive t is an
     inflation, while negative t is a deflation.
     '''
-    from qmt.freecad import extrude,copy,subtract,delete    
+    from qmt.freecad import extrude,copy, delete
 
     if t == 0.:
         return copy(inputSketch)

@@ -1,7 +1,10 @@
-import pickle,os,shutil,codecs
+import codecs
+import os
+import shutil
 
 from qmt import Materials
 from qmt.data import Data
+
 
 # TODO factor out geo superclass
 class GeoData(Data):

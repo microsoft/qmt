@@ -5,10 +5,9 @@
 
 
 from __future__ import absolute_import, division, print_function
+
 import pytest
 
-import qmt
-from qmt.geometry.freecad import FreeCAD
 from qmt.geometry.freecad import Part
 from qmt.geometry.freecad.sketchUtils import *
 

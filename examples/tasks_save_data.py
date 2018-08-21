@@ -1,12 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import qmt.task_framework as qtf
-from qmt.task_framework import Task
 import numpy as np
+import qmt.task_framework as qtf
 from qmt.ms_tasks import Density1D
+from qmt.task_framework import Task
+
 from qmt import units
 from qmt.visualization import generate_1d_density_plot
+
 
 class GeometryTaskExample(Task):
 

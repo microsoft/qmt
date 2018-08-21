@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-import qmt.task_framework as qtf
 import qmt.basic_tasks as qbt
-import qms.tasks as qmst
-from qms.tasks.combine_for_fem.poisson import PoissonTask2D
+import qmt.task_framework as qtf
 from qms.tasks.combine_for_fem.thomas_fermi import ThomasFermi2D
+
+import qms.tasks as qmst
 
 triangleLeg = qtf.SweepTag('triangle leg length')
 gateVoltage = qtf.SweepTag('gate voltage')

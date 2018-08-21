@@ -1,5 +1,6 @@
-import h5py
 import dask
+import h5py
+
 
 # TODO refactor this into a special case of a more general reduce method
 def save_relevant_data(generic_task, filename, dask_client, get_relevant_data, plot_type):

@@ -5,11 +5,13 @@
 
 
 import FreeCAD
+from copy import deepcopy
+
 import Draft
 import Part
 import Sketcher
 import numpy as np
-from copy import deepcopy
+
 from .auxiliary import *
 
 vec = FreeCAD.Vector
@@ -264,7 +266,7 @@ def draftOffset(inputSketch,t):
     ''' Attempt to offset the draft figure by a thickness t. Positive t is an
     inflation, while negative t is a deflation.
     '''
-    from qmt.geometry.freecad.geomUtils import extrude, copy_move, subtract, delete    
+    from qmt.geometry.freecad.geomUtils import extrude, copy_move, delete
 
     if t == 0.:
         return copy_move(inputSketch)

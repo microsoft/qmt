@@ -7,15 +7,18 @@
 #
 
 from __future__ import absolute_import, division, print_function
-from six import iteritems, text_type
-import qmt as QMT
-import os
-import sys
+
 import glob
-import subprocess
 import itertools
-from copy import deepcopy
+import os
+import subprocess
+import sys
 import time
+from copy import deepcopy
+
+from six import iteritems, text_type
+
+import qmt as QMT
 
 
 class Harness:

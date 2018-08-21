@@ -7,15 +7,17 @@
 #
 
 from __future__ import absolute_import, division, print_function
-import json
-import re
-import os
-import sys
+
 import collections
-from six import iteritems, itervalues
-from ast import literal_eval
+import json
+import os
+import re
+import sys
 import textwrap
+from ast import literal_eval
+
 import numpy as np
+from six import iteritems, itervalues
 
 try:
     import qmt.physics_constants as pc

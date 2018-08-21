@@ -6,17 +6,16 @@
 ###
 
 import FreeCAD
+
 import Draft
-
 import numpy as np
-from six import iteritems, text_type
-
 from qmt.freecad import (extrude, copy, delete, genUnion, getBB,
                          makeBB, splitSketch, makeHexFace, extendSketch,
                          exportCAD, exportMeshed, updateParams,
                          deepRemove, findSegments, extrudeBetween,
                          centerObjects, intersect, checkOverlap, subtract,
                          getModel, crossSection, findEdgeCycles, draftOffset)
+from six import iteritems, text_type
 
 
 def buildWire(sketch, zBottom, width, faceOverride=None, offset=0.0):
