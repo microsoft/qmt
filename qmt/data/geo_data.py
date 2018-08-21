@@ -3,7 +3,7 @@ import os
 import shutil
 
 from qmt import Materials
-from qmt.data import Data
+from qmt.data.template import Data
 
 
 # TODO factor out geo superclass
