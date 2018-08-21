@@ -3,7 +3,7 @@
 
 """FreeCAD routines running in a Python 2.7 environment."""
 import FreeCAD
-# import Draft
+import Draft
 import Part
 
 import auxiliary
