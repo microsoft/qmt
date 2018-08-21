@@ -53,9 +53,9 @@ class FenicsPotentialData3D(InterpolatableScalarData3D):
         super(FenicsPotentialData3D, self).__init__(coords, data, coords_units, data_units, fenics_potential)
         self.phi = self.evaluate_point_function
         # TODO initialize surface and volume integrals
-        self.charge_density = self._initialize_charge_density(solver_input)
-        self.parts_to_volume_charge_integrals = self._initialize_volume_integrals()
-        self.parts_to_boundary_charge_integrals = self._initialize_boundary_integrals()
+        # self.charge_density = self._initialize_charge_density(solver_input)
+        # self.parts_to_volume_charge_integrals = self._initialize_volume_integrals()
+        # self.parts_to_boundary_charge_integrals = self._initialize_boundary_integrals()
 
     # Figure out how to do this
     def _initialize_charge_density(self):
