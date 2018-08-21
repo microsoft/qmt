@@ -455,7 +455,7 @@ class ReducedSweep(object):
         return len(self._index_in_sweep)
 
     def empty_data(self):
-        pass
+        return [None for i in range(len(self))]
 
 
 # TODO refactor the creation of sweeps and sweepTags to make script less noisy
