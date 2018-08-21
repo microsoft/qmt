@@ -278,7 +278,11 @@ class Task(object):
             task.run_daskless()
 
         input_result_list = [task.daskless_result for task in self.previous_tasks]
-        self.daskless_result = self._solve_instance(input_result_list, self.options)
+
+        if self.gather:
+            self.daskless_result = self._solve_gathered([input_result_list], [self.options])
+        else:
+            self.daskless_result = self._solve_instance(input_result_list, self.options)
 
         return self.daskless_result
 
