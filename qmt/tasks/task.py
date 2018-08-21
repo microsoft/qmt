@@ -176,7 +176,7 @@ class Task(object):
         IMPORTANT: object references in both list_of_current_options and list_of_input_result_list
         must be treated as read-only or copied before modification, since they are shared across parameter sweeps.
 
-        :param list_of_input_result_list: The list of results produced by dependent tasks, in the order
+        :param list_of_input_result_lists: The list of results produced by dependent tasks, in the order
         that the dependent tasks were given in the call to the Task base class constructor.
         :param list_of_current_options: The list of options of this corresponding to the current sweep iteration.
         """
