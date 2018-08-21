@@ -45,6 +45,8 @@ Classes:
 """
 
 from dask import delayed
+
+from qmt.tasks import SweepManager
 from .sweep import ReducedSweep, ReducedSweepDelayed, gen_tag_extract, replace_tag_with_value
 import copy
 
@@ -280,6 +282,7 @@ class Task(object):
         input_result_list = [task.daskless_result for task in self.previous_tasks]
 
         if self.gather:
+            self.sweep_manager = SweepManager.create_empty_sweep(dask_client=None)
             self.daskless_result = self._solve_gathered([input_result_list], [self.options])
         else:
             self.daskless_result = self._solve_instance(input_result_list, self.options)
