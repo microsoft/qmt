@@ -185,12 +185,12 @@ class Geo3DData(Data):
     def set_data(self,data_name,data,scratch_dir=None):
         """
         Set data to a serial format that is easily portable.
+        :param scratch_dir:
         :param str data_name: Options are:
                             "fcdoc", freeCAD document
                             "mesh", for a fenics mesh
                             "rmf", for a fenics region marker function
         :param data: The corresponding data that we would like to set.
-        :param str file_path: File path for a scratch folder. Default is "tmp"; must be empty.
         """
         if scratch_dir is None:
             import uuid
@@ -220,11 +220,12 @@ class Geo3DData(Data):
     def get_data(self,data_name, mesh=None, scratch_dir=None):
         """
         Get data from stored serial format.
+        :param scratch_dir:
+        :param mesh:
         :param str data_name: Options are:
                             "fcdoc", freeCAD document
                             "mesh", for a fenics mesh
                             "rmf", for a fenics region marker function
-        :param str file_path: File path for a scratch folder. Default is "tmp"; must be empty.
         :return data: The freeCAD document or fenics object that was stored.
         """
         if scratch_dir is None:
@@ -276,7 +277,6 @@ class Geo3DData(Data):
 
 
     def get_names_to_region_ids(self):
-        names = self.parts.keys()
         return {name: i + 1 for i, name in enumerate(self.build_order)}
 
     def get_region_ids_to_names(self):
