@@ -113,7 +113,6 @@ class ReducedSweepWithData(object):
         self.tags_with_data = [(self.tagged_value_list[i], self._data[i]) for i in range(len(self))]
         assert len(self._data) == len(self.tagged_value_list)
 
-
     @staticmethod
     def sweep_and_empty_data_from_manager_and_tags(sweep_manager, tags):
         """
@@ -188,6 +187,7 @@ class ReducedSweepDelayed(ReducedSweepWithData):
     delayed_results: [dask.Delayed]: the delayed objects
     dask_client: dask.distributed.Client: the client to be used to compute the delayed objects
     """
+
     def __init__(self, sweep, dask_client):
         self.delayed_results = sweep.empty_data()
         super(ReducedSweepDelayed, self).__init__(sweep, self.delayed_results)
@@ -412,7 +412,7 @@ class ReducedSweep(object):
             point_small_index = None
             for j in range(len(tagged_value_list)):
                 small_sweep_point = tagged_value_list[j]
-            # for j, small_sweep_point in enumerate(tagged_value_list):
+                # for j, small_sweep_point in enumerate(tagged_value_list):
                 # TODO - this should be done in a way that is also py27 compatible. Using
                 # six.iteritems doesn't work.
                 if small_sweep_point.items() <= sweep_point.items():
@@ -429,7 +429,6 @@ class ReducedSweep(object):
                 index_in_sweep[point_small_index] += [i]
 
         index_in_sweep = index_in_sweep
-        delayed_object_list = [None] * len(index_in_sweep)
 
         return ReducedSweep(list_of_tags, sweep_list, tagged_value_list, index_in_sweep)
 
@@ -456,7 +455,7 @@ class ReducedSweep(object):
         return len(self._index_in_sweep)
 
     def empty_data(self):
-        return [None for i in range(len(self))]
+        pass
 
 
 # TODO refactor the creation of sweeps and sweepTags to make script less noisy

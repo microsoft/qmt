@@ -93,7 +93,7 @@ class Task(object):
     __metaclass__ = TaskMetaclass
     current_instance_id = 0
 
-    def __init__(self, task_list, options, name, gather = False):
+    def __init__(self, task_list, options, name, gather=False):
         """
         Constructs a new Task.
         :param task_list: the tasks that this depends on.
@@ -195,7 +195,7 @@ class Task(object):
             reduced_sweep = ReducedSweep.create_from_manager_and_tags(self.sweep_manager, self.list_of_tags)
 
             self.delayed_result = ReducedSweepDelayed.create_from_reduced_sweep_and_manager(reduced_sweep,
-                                                                                       self.sweep_manager)
+                                                                                            self.sweep_manager)
             list_of_current_options = []
             list_of_input_result_lists = []
             for sweep_holder_index, tag_values in enumerate(self.delayed_result.tagged_value_list):
@@ -207,13 +207,15 @@ class Task(object):
                 # Use this index to get the appropriate results in dependent tasks
                 input_result_list = [task.delayed_result.get_datum(total_index) for task in self.previous_tasks]
                 list_of_input_result_lists += [input_result_list]
-                
+
                 if not self.gather:
                     # Create a delayed object for this task's computation.
-                    output = delayed(self._solve_instance)(input_result_list, current_options, dask_key_name=self.name+'_'+str(sweep_holder_index))
+                    output = delayed(self._solve_instance)(input_result_list, current_options,
+                                                           dask_key_name=self.name + '_' + str(sweep_holder_index))
                     self.delayed_result.add(output, sweep_holder_index)
             if self.gather:
-                self.delayed_result = delayed(self._solve_gathered)(list_of_input_result_lists, list_of_current_options, dask_key_name=self.name)
+                self.delayed_result = delayed(self._solve_gathered)(list_of_input_result_lists, list_of_current_options,
+                                                                    dask_key_name=self.name)
 
     def visualize_entire_sweep(self, filename=None):
         """
@@ -290,4 +292,3 @@ class Task(object):
             self.daskless_result = self._solve_instance(input_result_list, self.options)
 
         return self.daskless_result
-
