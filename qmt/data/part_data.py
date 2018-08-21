@@ -1,4 +1,4 @@
-from qmt.data import Data
+from qmt.data.template import Data
 
 
 class Part3DData(Data):
