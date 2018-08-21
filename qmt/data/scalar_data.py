@@ -2,7 +2,9 @@
 # Licensed under the MIT License.
 
 import qmt.physics_constants as qc
+from qms.fem.fenics_utilities import PermittivityExpression
 from qmt.data import Data
+import fenics as fn
 
 
 # Abstract class
@@ -44,23 +46,31 @@ class InterpolatableScalarData3D(ScalarData3D):
 
 
 class FenicsPotentialData3D(InterpolatableScalarData3D):
-    def __init__(self, fenics_potential, fenics_mesh, region_mapping, boundary_mapping, coords_units=qc.units.nm,
+    def __init__(self, fenics_potential, solver_input, coords_units=qc.units.nm,
                  data_units=qc.units.meV):
+        fenics_mesh = solver_input.mesh
         coords = fenics_mesh.coordinates()
         data = fenics_potential.compute_vertex_values()
         super(FenicsPotentialData3D, self).__init__(coords, data, coords_units, data_units, fenics_potential)
-        self.fenics_potential = self.evaluate_point_function
+        self.phi = self.evaluate_point_function
         # TODO initialize surface and volume integrals
-        self.charge_density = self._initialize_charge_density()
+        self.charge_density = self._initialize_charge_density(solver_input)
         self.parts_to_volume_charge_integrals = self._initialize_volume_integrals()
         self.parts_to_boundary_charge_integrals = self._initialize_boundary_integrals()
 
     # Figure out how to do this
     def _initialize_charge_density(self):
-        pass
+        # solve linear problem
+        # Is this just an inverse Poisson solve?
+
+        charge = PermittivityExpression()
+        result = fn.assemble()
 
     def _initialize_volume_integrals(self):
+        # integrate solution of linear problem?
+        # TODO include contained boundary?
         pass
 
     def _initialize_boundary_integrals(self):
+        # integrate up normal derivative :P
         pass
