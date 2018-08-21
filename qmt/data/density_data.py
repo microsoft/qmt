@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-from qmt.data import Data
+from qmt.data.template import Data
 
 class Density1DData(Data):
     def __init__(self, densities, density_units, bands, band_units, mesh, mesh_units):
