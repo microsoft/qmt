@@ -2,7 +2,7 @@
 # Licensed under the MIT License.
 
 import qmt.physics_constants as qc
-from qms.fem.fenics_utilities import PermittivityExpression
+# from qms.fem.fenics_utilities import PermittivityExpression
 from qmt.data import Data
 import fenics as fn
 
@@ -63,8 +63,9 @@ class FenicsPotentialData3D(InterpolatableScalarData3D):
         # solve linear problem
         # Is this just an inverse Poisson solve?
 
-        charge = PermittivityExpression()
-        result = fn.assemble()
+        # charge = PermittivityExpression()
+        # result = fn.assemble()
+        pass
 
     def _initialize_volume_integrals(self):
         # integrate solution of linear problem?
