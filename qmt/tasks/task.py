@@ -48,9 +48,7 @@ import copy
 
 from dask import delayed
 
-from qmt.tasks import SweepManager
-from .sweep import ReducedSweep, ReducedSweepDelayed, gen_tag_extract, replace_tag_with_value
-
+from qmt.tasks.sweep import SweepManager, ReducedSweep, ReducedSweepDelayed, gen_tag_extract, replace_tag_with_value
 
 class TaskMetaclass(type):
     """
