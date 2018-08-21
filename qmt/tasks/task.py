@@ -285,7 +285,7 @@ class Task(object):
 
         if self.gather:
             self.sweep_manager = SweepManager.create_empty_sweep(dask_client=None)
-            self.daskless_result = self._solve_gathered([input_result_list], [self.options])
+            self.daskless_result = self._solve_gathered([input_result_list], [self.options]).only()
         else:
             self.daskless_result = self._solve_instance(input_result_list, self.options)
 
