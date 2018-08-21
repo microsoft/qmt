@@ -2,7 +2,7 @@ import codecs
 import os
 import shutil
 
-from qmt import Materials
+from qmt.materials import Materials
 from qmt.data.template import Data
 
 
