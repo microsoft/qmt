@@ -151,15 +151,15 @@ class _Entity(_Call):
 		else:parent=self
 		result =''
 		if parent.paperspace==1: result+='  67\n1\n'
-		if parent.layer!=None: result+='  8\n%s\n'%parent.layer
-		if parent.color!=None: result+=' 62\n%s\n'%parent.color
-		if parent.lineType!=None: result+='  6\n%s\n'%parent.lineType
+		if parent.layer is not None: result+= '  8\n%s\n' % parent.layer
+		if parent.color is not None: result+= ' 62\n%s\n' % parent.color
+		if parent.lineType is not None: result+= '  6\n%s\n' % parent.lineType
 		# TODO: if parent.lineWeight!=None: result+='370\n%s\n'%parent.lineWeight
 		# TODO: if parent.visible!=None: result+='60\n%s\n'%parent.visible
-		if parent.lineTypeScale!=None: result+=' 48\n%s\n'%parent.lineTypeScale
-		if parent.elevation!=None: result+=' 38\n%s\n'%parent.elevation
-		if parent.thickness!=None: result+=' 39\n%s\n'%parent.thickness
-		if parent.extrusion!=None: result+='%s\n'%_point(parent.extrusion,200)
+		if parent.lineTypeScale is not None: result+= ' 48\n%s\n' % parent.lineTypeScale
+		if parent.elevation is not None: result+= ' 38\n%s\n' % parent.elevation
+		if parent.thickness is not None: result+= ' 39\n%s\n' % parent.thickness
+		if parent.extrusion is not None: result+= '%s\n' % _point(parent.extrusion, 200)
 		return result
 
 #--------------------------
@@ -331,14 +331,14 @@ class Insert(_Entity):
 	def __str__(self):
 		result='  0\nINSERT\n  2\n%s\n%s%s\n'%\
 				(self.name,self._common(),_point(self.point))
-		if self.xscale!=None:result+=' 41\n%s\n'%self.xscale
-		if self.yscale!=None:result+=' 42\n%s\n'%self.yscale
-		if self.zscale!=None:result+=' 43\n%s\n'%self.zscale
+		if self.xscale is not None:result+= ' 41\n%s\n' % self.xscale
+		if self.yscale is not None:result+= ' 42\n%s\n' % self.yscale
+		if self.zscale is not None:result+= ' 43\n%s\n' % self.zscale
 		if self.rotation:result+=' 50\n%s\n'%self.rotation
-		if self.cols!=None:result+=' 70\n%s\n'%self.cols
-		if self.colspacing!=None:result+=' 44\n%s\n'%self.colspacing
-		if self.rows!=None:result+=' 71\n%s\n'%self.rows
-		if self.rowspacing!=None:result+=' 45\n%s\n'%self.rowspacing
+		if self.cols is not None:result+= ' 70\n%s\n' % self.cols
+		if self.colspacing is not None:result+= ' 44\n%s\n' % self.colspacing
+		if self.rows is not None:result+= ' 71\n%s\n' % self.rows
+		if self.rowspacing is not None:result+= ' 45\n%s\n' % self.rowspacing
 		return result
 
 #-----------------------------------------------
@@ -388,7 +388,7 @@ class PolyLine(_Entity):
 			result+=' 71\n%s\n' %self.p_count
 			result+=' 72\n%s\n' %self.f_count
 		elif self.polyline2d:
-			if self.width!=None: result+=' 40\n%s\n 41\n%s\n' %(self.width[0],self.width[1])
+			if self.width is not None: result+= ' 40\n%s\n 41\n%s\n' % (self.width[0], self.width[1])
 		if self.pflag75:
 			result+=' 75\n%s\n' %self.pflag75
 		for point in self.points:
@@ -402,8 +402,8 @@ class PolyLine(_Entity):
 				flag = point[1]
 				if len(point)>2:
 					[width1, width2] = point[2]
-					if width1!=None: result+=' 40\n%s\n' %width1
-					if width2!=None: result+=' 41\n%s\n' %width2
+					if width1 is not None: result+= ' 40\n%s\n' % width1
+					if width2 is not None: result+= ' 41\n%s\n' % width2
 				if len(point)==4:
 					bulge = point[3]
 					if bulge: result+=' 42\n%s\n' %bulge
@@ -444,14 +444,14 @@ class LwPolyLine(_Entity):
 		result+=' 90\n%s\n' % len(self.points)
 		result+=' 70\n%s\n' %(self.flag)
 		result+='%s\n' %_point(self.org_point)
-		if self.width!=None:
+		if self.width is not None:
 			result+=' 40\n%s\n 41\n%s\n' %(self.width[0],self.width[1])
 		for point in self.points:
 			result+='%s\n' %_point(point[0:2])
 			if len(point)>4:
 				width1, width2 = point[3], point[4]
-			if width1!=None: result+=' 40\n%s\n' %width1
-			if width2!=None: result+=' 41\n%s\n' %width2
+			if width1 is not None: result+= ' 40\n%s\n' % width1
+			if width2 is not None: result+= ' 41\n%s\n' % width2
 			if len(point)==6:
 				bulge = point[5]
 				if bulge: 

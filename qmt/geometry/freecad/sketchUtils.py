@@ -94,7 +94,7 @@ def findCycle(lineSegments, startingIndex, availSegIDs):
 def addCycleSketch(name, doc, cycleSegIndList, lineSegments):
     ''' Add a sketch of a cycle to a FC document.
     '''
-    if (doc.getObject(name) != None):  # this name already exists
+    if (doc.getObject(name) is not None):  # this name already exists
         raise ValueError("Error: sketch " + name + " already exists.")
     obj = doc.addObject('Sketcher::SketchObject', name)
     # obj.MapMode = 'FlatFace'
@@ -118,7 +118,7 @@ def addCycleSketch2(name, wire):
     '''
     assert wire.isClosed()
     doc = FreeCAD.ActiveDocument
-    if (doc.getObject(name) != None):
+    if (doc.getObject(name) is not None):
         raise ValueError("Error: sketch " + name + " already exists.")
     sketch = doc.addObject('Sketcher::SketchObject', name)
     for i,edge in enumerate(wire.Edges):
@@ -134,7 +134,7 @@ def addCycleSketch2(name, wire):
 def addPolyLineSketch(name, doc, segmentOrder, lineSegments):
     ''' Add a sketch given segment order and line segments
     '''
-    if (doc.getObject(name) != None):  # this name already exists
+    if (doc.getObject(name) is not None):  # this name already exists
         raise ValueError("Error: sketch " + name + " already exists.")
     obj = doc.addObject('Sketcher::SketchObject', name)
     for segIndex, segment in enumerate(lineSegments):

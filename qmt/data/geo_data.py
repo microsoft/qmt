@@ -266,10 +266,31 @@ class Geo3DData(Data):
 
         Returns the fcstd file path.
         """
-        if file_path == None:
+        if file_path is None:
             file_path = str(self.build_order) + '.fcstd'
         import codecs
         data = codecs.decode(self.serial_fcdoc.encode(), 'base64')
         with open(file_path, 'wb') as of:
             of.write(data)
         return file_path
+
+
+    def get_names_to_region_ids(self):
+        names = self.parts.keys()
+        return {name: i + 1 for i, name in enumerate(self.build_order)}
+
+    def get_region_ids_to_names(self):
+        return {id: name for name, id in self.get_names_to_region_ids().items()}
+
+    def get_names_to_dirichlet_bc_values(self):
+        results = {}
+        for part, data in self.parts.items():
+            if data.boundary_condition and "voltage" in data.boundary_condition:
+                results[part] = data.boundary_condition["voltage"]
+
+            # try:
+            #     results[part] = data.boundary_condition["voltage"]
+            # except (KeyError, TypeError) as e:
+            #     pass
+        return results
+
