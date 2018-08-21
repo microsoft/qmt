@@ -3,7 +3,7 @@
 
 import qmt.physics_constants as qc
 # from qms.fem.fenics_utilities import PermittivityExpression
-from qmt.data import Data
+from qmt.data.template import Data
 
 
 # Abstract class
