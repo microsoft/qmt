@@ -1,5 +1,5 @@
-from qmt.tasks import Task
 from qmt.tasks import Geometry1D
+from qmt.tasks import Task
 
 
 class PoissonTask(Task):

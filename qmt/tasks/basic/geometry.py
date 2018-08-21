@@ -1,9 +1,11 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-from qmt.tasks import Task
-from qmt.data import Geo1DData, Geo2DData, Geo3DData
 from shapely.geometry import Polygon, LineString
+
+from qmt.data.geo_data import Geo1DData, Geo2DData, Geo3DData
+from qmt.tasks.task import Task
+
 
 class Geometry1D(Task):
     def __init__(self, options=None, name='geometry_1d_task'):
@@ -37,7 +39,6 @@ class Geometry2D(Task):
         "part_name":Part3D}
         :param str name: The name of this task.
         """
-        from shapely.geometry import Polygon, LineString
         super(Geometry2D, self).__init__([], options, name)
 
     def _solve_instance(self, input_result_list, current_options):

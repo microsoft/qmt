@@ -4,10 +4,12 @@
 ####################
 ####################
 
+import os
+
+import numpy as np
+
 # Load the modules:
 import qmt
-import numpy as np
-import os
 
 # Path information -- change this to your configuration!
 rootPath = 'PATH_TO_QMT/qmt/examples/1_3D_2DEG'

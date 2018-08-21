@@ -4,13 +4,15 @@
 """Testing QMT batch harness class."""
 
 
+import FreeCAD
 import os
 import shutil
+
 import numpy as np
 import pytest
-import FreeCAD
-import qmt
 from qmt.freecad.fileIO import setupModelFile, getModel
+
+import qmt
 
 
 def test_setupRun(fix_testDir, fix_modelPath, fix_FCDoc):

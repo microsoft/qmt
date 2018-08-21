@@ -2,10 +2,13 @@
 # Licensed under the MIT License.
 
 from __future__ import absolute_import, division, print_function
-import numpy as np
-import os
+
 import json
+import os
+
+import numpy as np
 from six import itervalues
+
 import qmt
 
 

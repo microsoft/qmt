@@ -5,12 +5,11 @@
 
 
 import os
+
 import numpy as np
-
-from qmt.task_framework import SweepTag, SweepManager
-from qmt.geometry.parts import Part3D
 from qmt.basic_tasks.geometry import Geometry3D
-
+from qmt.geometry.parts import Part3D
+from qmt.task_framework import SweepTag, SweepManager
 
 # Set up geometry task
 tag1 = SweepTag('d1 thickness')

@@ -1,8 +1,9 @@
 import h5py
+
 from .density_1d_plot import _plot_1d_density
 from .density_2d_plot import _plot_2d_density
 import dask
-
+#do we need to import dask here?
 
 def plot(filename, hv):
     with h5py.File(filename, 'r') as data_file:

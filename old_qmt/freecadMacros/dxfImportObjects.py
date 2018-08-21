@@ -1279,7 +1279,7 @@ def get_layer(data):
             if item[0] == 8:
                 value = item[1]
                 break
-    if value == None:
+    if value is None:
         return [8,'0'], ['0'], 0
     return item, value, i
 

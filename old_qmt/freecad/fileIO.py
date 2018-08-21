@@ -6,8 +6,10 @@
 ###
 
 import FreeCAD
-import Part
+
 import Mesh
+import Part
+
 import qmt as QMT
 
 

@@ -2,6 +2,6 @@
 # Licensed under the MIT License.
 
 from .fileIO import *
-from .sketchUtils import *
 from .geomUtils import *
 from .objectConstruction import *
+from .sketchUtils import *

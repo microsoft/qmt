@@ -6,10 +6,9 @@
 
 import numpy as np
 
-from qmt.geometry.freecad import FreeCAD
 from qmt.geometry.freecad import Draft
+from qmt.geometry.freecad import FreeCAD
 from qmt.geometry.freecad import Part
-
 from .auxiliary import *
 from .sketchUtils import findSegments
 
