@@ -3,7 +3,7 @@
 
 from shapely.geometry import Polygon, LineString
 
-from qmt.data import Geo1DData, Geo2DData, Geo3DData
+from qmt.data.geo_data import Geo1DData, Geo2DData, Geo3DData
 from qmt.tasks.task import Task
 
 
