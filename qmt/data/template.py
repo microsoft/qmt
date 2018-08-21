@@ -1,5 +1,5 @@
 import h5py
-
+from six import iteritems
 
 class Data(object):
     def __init__(self):
@@ -60,7 +60,7 @@ class Data(object):
         :param unit_instance: An instance of a unit (e.g. units.meV)
         """
         from qmt import units
-        for k,v in units.__dict__.iteritems():
+        for k,v in iteritems(units.__dict__):
             if v==unit_instance:
                 return k
 
