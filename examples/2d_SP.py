@@ -116,7 +116,7 @@ sp_dict = {}
 
 sp_task = SchrodingerPoisson2D(tf_task, sp_dict)
 
-sweeps = [{triangleLeg : l, gateVoltage : v} for l in np.linspace(50.,150.,1) for v in np.linspace(0.,-1.,1)]
+sweeps = [{triangleLeg : l, gateVoltage : v} for l in np.linspace(50.,150.,1) for v in np.linspace(0.,-.5,4)]
 #sweeps = [{gateVoltage : 1.}]
 
 sweep_man = SweepManager(sweeps)

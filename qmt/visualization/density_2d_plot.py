@@ -8,9 +8,9 @@ def generate_2d_density_plot(generic_task, filename, dask_client = None):
     def _get_relevant_data(density_data):
         density_data._serialize()
         output = {}
-        output['densities'] = density_data.content['densities']
-        output['density_units'] = density_data.content['density_units']
-        output['mesh'] = density_data.content['mesh']
+        output['rho'] = density_data.content['rho']
+        output['rho_units'] = density_data.content['rho_units']
+        output['mesh'] = density_data.content['mesh'].meshgrid()
         output['mesh_units'] = density_data.content['mesh_units']
         return output
     
@@ -21,8 +21,8 @@ def _plot_2d_density(filename, hv):
     data_file = h5py.File(filename, 'r')
     kdims = data_file['list_of_tags']
     points = data_file['tagged_value_list']
-    densities = [data_file[str(index)+'_densities'] for index in range(len(points))]
-    density_units = [data_file[str(index)+'_density_units'][()] for index in range(len(points))]
+    densities = [data_file[str(index)+'_rho'] for index in range(len(points))]
+    density_units = [data_file[str(index)+'_rho_units'][()] for index in range(len(points))]
     meshes = [data_file[str(index)+'_mesh'] for index in range(len(points))]
     mesh_units = [data_file[str(index)+'_mesh_units'][()] for index in range(len(points))]
     def density_plot(index):
