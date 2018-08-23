@@ -36,10 +36,12 @@ class Part3DData(Data):
         :param str target_wire: Target wire directive for a coating directive.
         :param list shell_verts: Vertices to use when rendering the coating. Required
                                  for the shell directive.
-        :param str depo_zone: FreeCAD sketch defining the (positive) mask for the deposition
-                              of a wire coating. Note that only one of depoZone or etchZone may be used.
-        :param str etch_zone: FreeCAD sketch defining the (negative) amsek for the deposition of a
-                              wire coating. Note that only one of depoZone or etchZone may be used.
+        # ~ :param str depo_zone: FreeCAD sketch defining the (positive) mask for the deposition
+                              # ~ of a wire coating. Note that only one of depoZone or etchZone may be used.
+        # ~ :param str etch_zone: FreeCAD sketch defining the (negative) amsek for the deposition of a
+                              # ~ wire coating. Note that only one of depoZone or etchZone may be used.
+        :param str depo_mode:  'depo' or 'etch' defines the positive or negative mask for the deposition
+                                of a wire coating.
         :param float z_middle: The location for the "flare out" of the SAG directive.
         :param float t_in: The lateral distance from the 2D profile to the edge of the top bevel
                            for the SAG directive.
@@ -76,9 +78,9 @@ class Part3DData(Data):
             raise NameError('Error - directive ' + directive + ' is not a valid directive!')
         if domain_type not in ['semiconductor', 'metal_gate', 'virtual', 'dielectric']:
             raise NameError('Error - domainType ' + domain_type + ' not valid!')
-        if (etch_zone is not None) and (depo_zone is not None):
-            raise NameError(
-                'Error - etch_zone and depo_zone cannot both be set!')
+        # ~ if (etch_zone is not None) and (depo_zone is not None):
+            # ~ raise NameError(
+                # ~ 'Error - etch_zone and depo_zone cannot both be set!')
 
         # Input storage
         self.label = label
@@ -90,8 +92,9 @@ class Part3DData(Data):
         self.thickness = thickness
         self.target_wire = target_wire
         self.shell_verts = shell_verts
-        self.depo_zone = depo_zone
-        self.etch_zone = etch_zone
+        # ~ self.depo_zone = depo_zone
+        # ~ self.etch_zone = etch_zone
+        self.depo_mode = depo_mode
         self.z_middle = z_middle
         self.t_in = t_in
         self.t_out = t_out
@@ -109,7 +112,7 @@ class Part3DData(Data):
         self.ds = ds
         self.serial_stp = None  # This gets set on geometry build
         self.built_fc_name = None  # This gets set on geometry build
-        self.thickness_of_wire = thickness_of_wire  # TODO: sanitise & document
+        # ~ self.thickness_of_wire = thickness_of_wire  # TODO: sanitise & document
 
 
     def write_stp(self, file_path=None):

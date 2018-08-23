@@ -141,21 +141,33 @@ def build_wire_shell(part, offset=0.):
     '''Build a wire shell part.'''
     assert part.directive == 'wire_shell'
     doc = FreeCAD.ActiveDocument
-    zBottom = part.z0
+    # ~ zBottom = part.z0
+    zBottom = part.target_wire.z0
     radius = part.thickness_of_wire
-    wireSketch = doc.getObject(part.fc_name)
+    # ~ wireSketch = doc.getObject(part.fc_name)
+    wireSketch = doc.getObject(part.target_wire.fc_name)
     shell_verts = part.shell_verts
     thickness = part.thickness
-    depoZoneName = part.depo_zone
-    etchZoneName = part.etch_zone
-    if depoZoneName is not None:
-        depoZone = doc.getObject(depoZoneName)
-    else:
-        depoZone = None
-    if etchZoneName is not None:
-        etchZone = doc.getObject(etchZoneName)
-    else:
+
+    # ~ depoZoneName = part.depo_zone
+    # ~ etchZoneName = part.etch_zone
+    # ~ if depoZoneName is not None:
+        # ~ depoZone = doc.getObject(depoZoneName)
+    # ~ else:
+        # ~ depoZone = None
+    # ~ if etchZoneName is not None:
+        # ~ etchZone = doc.getObject(etchZoneName)
+    # ~ else:
+        # ~ etchZone = None
+    if part.depo_mode == 'depo':
+        depoZone = doc.getObject(part.fc_name)
         etchZone = None
+    elif part.depo_mode == 'etch':
+        depoZone = None
+        etchZone = doc.getObject(part.fc_name)
+    else:
+        raise ValueError('Unknown depo_mode ' + depo_mode)
+
     shell = buildAlShell(
         wireSketch,
         zBottom,
