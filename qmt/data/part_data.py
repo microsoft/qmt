@@ -5,7 +5,7 @@ class Part3DData(Data):
     def __init__(
             self, label, fc_name, directive, domain_type=None, material=None,
             z0=0, thickness=None, target_wire=None, shell_verts=None,
-            depo_zone=None, etch_zone=None, z_middle=None, t_in=None, t_out=None,
+            depo_mode=None, z_middle=None, t_in=None, t_out=None,
             layer_num=None, litho_base=None,
             fill_litho=True, mesh_max_size=None, mesh_min_size=None, mesh_growth_rate=None,
             mesh_scale_vector=None, boundary_condition=None, subtract_list=None,

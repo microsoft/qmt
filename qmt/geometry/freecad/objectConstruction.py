@@ -86,17 +86,9 @@ def build(opts):
 def build_pass(part):
     '''Pas a part unchanged.'''
     assert part.directive == '3d_shape'
-
-    # TODO remove
-    # sys.stderr.write("Part Name: " + part.fc_name + "\n")
-    result = FreeCAD.ActiveDocument.getObject(part.fc_name)
-
-    # for object in FreeCAD.ActiveDocument.Objects:
-    #     sys.stderr.write("Object: " + str(object) + "\n")
-    #     sys.stderr.write("Name: " + object.Name + "\n")
-
-    assert result is not None
-    return result
+    existing_part = FreeCAD.ActiveDocument.getObject(part.fc_name)
+    assert existing_part is not None
+    return existing_part
 
 
 def build_extrude(part):
@@ -148,7 +140,7 @@ def build_wire_shell(part, offset=0.):
     doc = FreeCAD.ActiveDocument
     # ~ zBottom = part.z0
     zBottom = part.target_wire.z0
-    radius = part.thickness_of_wire
+    radius = part.target_wire.thickness
     # ~ wireSketch = doc.getObject(part.fc_name)
     wireSketch = doc.getObject(part.target_wire.fc_name)
     shell_verts = part.shell_verts
@@ -185,22 +177,26 @@ def build_wire_shell(part, offset=0.):
     shell.Label = part.label
     return shell
 
-
+tmp_global_litho_setup_done = False  # TODO: repack
 def build_lithography(part):
     """Build a lithography part."""
-    assert part.directive == 'litoghraphy'
-    raise NotImplementedError()
-    doc = FreeCAD.ActiveDocument
-    if not self.lithoSetup:
-        lithoDict = _initialize_lithography(fillShells=part.fillLitho)
-        lithoSetup = True
-    layerNum = part.layerNum
+    global tmp_global_litho_setup_done
+    assert part.directive == 'lithography'
+    # ~ doc = FreeCAD.ActiveDocument
+    if not tmp_global_litho_setup_done:
+        lithoDict = initialize_lithography(Dummy(), fillShells=part.fill_litho)
+        tmp_global_litho_setup_done = True
+
+    layerNum = part.layer_num
     returnObjs = []
-    for objID in lithoDict['layers'][layerNum]['objIDs']:
-        if partName == lithoDict['layers'][layerNum]['objIDs'][
-                objID]['partName']:
-            returnObjs.append(self._gen_G(layerNum, objID))
-    return returnObjs
+    # ~ for objID in lithoDict['layers'][layerNum]['objIDs']:
+        # ~ if partName == lithoDict['layers'][layerNum]['objIDs'][objID]['partName']:
+            # ~ returnObjs.append(self._gen_G(layerNum, objID))
+    # ~ return returnObjs
+
+
+    part.directive = '3d_shape'
+    return build_pass(part)
 
 
 ################################################################################
@@ -354,6 +350,126 @@ def makeSAG(sketch, zBot, zMid, zTop, tIn, tOut, offset=0.):
         returnParts += [capPart, rectPart]
     returnPart = genUnion(returnParts, consumeInputs=True)
     return returnPart
+
+
+class Dummy:
+    def __init__(self):
+        pass
+
+def initialize_lithography(info, fillShells=True):
+    info.fillShells = fillShells
+    # The lithography step requires some infrastructure to track things
+    # throughout.
+    info.lithoDict = {}  # dictionary containing objects for the lithography step
+    info.lithoDict['layers'] = {}
+    # Dictionary for containing the substrate. () indicates un-offset objects,
+    # and subsequent tuples are offset by t_i for each index in the tuple.
+    info.lithoDict['substrate'] = {(): []}
+
+    raise ValueError("foo")
+    # To start, we need to collect up all the lithography directives, and
+    # organize them by layerNum and objectIDs within layers.
+    baseSubstratePartNames = []
+    for partName in self.model.modelDict['3DParts'].keys():
+        partDict = self.model.modelDict['3DParts'][partName]
+        # If this part is a litho step
+        if 'lithography' == partDict['directive']:
+            layerNum = partDict['layerNum']  # layerNum of this part
+            # Add the layerNum to the layer dictionary:
+            if layerNum not in self.lithoDict['layers']:
+                self.lithoDict['layers'][layerNum] = {'objIDs': {}}
+            layerDict = self.lithoDict['layers'][layerNum]
+            # Gennerate the base and thickness of the layer:
+            layerBase = self._fetch_geo_param(partDict['z0'])
+            layerThickness = self._fetch_geo_param(partDict['thickness'])
+            # All parts within a given layer number are required to have
+            # identical thickness and base, so check that:
+            if 'base' in layerDict:
+                assert layerBase == layerDict['base']
+            else:
+                layerDict['base'] = layerBase
+            if 'thickness' in layerDict:
+                assert layerThickness == layerDict['thickness']
+            else:
+                layerDict['thickness'] = layerThickness
+            # A given part references a base sketch. However, we need to split
+            # the sketch here into possibly disjoint sub-sketches to work
+            # with them:
+            sketch = self.doc.getObject(partDict['fcName'])
+            splitSketches = splitSketch(sketch)
+            for mySplitSketch in splitSketches:
+                objID = len(layerDict['objIDs'])
+                objDict = {}
+                objDict['partName'] = partName
+                objDict['sketch'] = mySplitSketch
+                self.trash.append(mySplitSketch)
+                self.lithoDict['layers'][layerNum]['objIDs'][objID] = objDict
+            # Add the base substrate to the appropriate dictionary
+            baseSubstratePartNames += partDict['lithoBase']
+    # Get rid of any duplicates:
+    baseSubstratePartNames = list(set(baseSubstratePartNames))
+    # Now convert the part names for the substrate into 3D freeCAD objects, which
+    # should have already been rendered.
+    for baseSubstratePartName in baseSubstratePartNames:
+        for baseSubstrateObjName in self.model.modelDict['3DParts'][
+                baseSubstratePartName]['fileNames'].keys():
+            self.lithoDict['substrate'][(
+            )] += [self.doc.getObject(baseSubstrateObjName)]
+    # Now that we have ordered the primitives, we need to compute a few
+    # aux quantities that we will need. First, we compute the total bounding
+    # box of the lithography procedure:
+    thicknesses = []
+    bases = []
+    for layerNum in self.lithoDict['layers'].keys():
+        thicknesses.append(self.lithoDict['layers'][layerNum]['thickness'])
+        bases.append(self.lithoDict['layers'][layerNum]['base'])
+    bottom = min(bases)
+    totalThickness = sum(thicknesses)
+    assert len(self.lithoDict['substrate'][
+        ()]) > 0  # Otherwise, we don't have a reference for the lateral BB
+    substrateUnion = genUnion(self.lithoDict['substrate'][()],
+                              consumeInputs=False)  # total substrate
+    BB = list(getBB(substrateUnion))  # bounding box
+    BB[4] = min([bottom, BB[4]])
+    BB[5] = max([BB[5] + totalThickness, bottom + totalThickness])
+    BB = tuple(BB)
+    constructionZone = makeBB(BB)  # box that encompases the whole domain.
+    self.lithoDict['boundingBox'] = [BB, constructionZone]
+    delete(substrateUnion)  # not needed for next steps
+    delete(constructionZone)  # not needed for next steps
+    # Next, we add two prisms for each sketch. The first, which we denote "B",
+    # is bounded by the base from the bottom and the layer thickness on the top.
+    # These serve as "stencils" that would be the deposited shape if no other.
+    # objects got in the way. The second set of prisms, denoted "C", covers the
+    # base of the layer to the top of the entire domain box. This is used for
+    # forming the volumes occupied when substrate objects are offset and
+    # checking for overlaps.
+    for layerNum in self.lithoDict['layers'].keys():
+        base = self.lithoDict['layers'][layerNum]['base']
+        thickness = self.lithoDict['layers'][layerNum]['thickness']
+        for objID in self.lithoDict['layers'][layerNum]['objIDs']:
+            sketch = self.lithoDict['layers'][layerNum]['objIDs'][objID]['sketch']
+            B = extrudeBetween(sketch, base, base + thickness)
+            C = extrudeBetween(sketch, base, BB[5])
+            self.lithoDict['layers'][layerNum]['objIDs'][objID]['B'] = B
+            self.lithoDict['layers'][layerNum]['objIDs'][objID]['C'] = C
+            self.trash.append(B)
+            self.trash.append(C)
+            # In addition, add a hook for the HDict, which will contain the "H"
+            # constructions for this object, but offset to thicknesses of various
+            # layers, according to the keys.
+            self.lithoDict['layers'][layerNum]['objIDs'][objID][
+                'HDict'] = {}
+
+
+
+
+
+
+
+
+
+################################################################################
 
 
 class modelBuilder:

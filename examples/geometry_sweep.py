@@ -7,9 +7,9 @@
 import os
 import numpy as np
 
-from qmt.task_framework import SweepTag, SweepManager
-from qmt.geometry.parts import Part3D
-from qmt.basic_tasks.geometry import Geometry3D
+from qmt.data.part_data import Part3DData
+from qmt.tasks.basic.geometry import Geometry3D
+from qmt.tasks.sweep import SweepTag, SweepManager
 
 
 # Set up geometry task
@@ -26,12 +26,14 @@ wire = Part3DData('Nanowire', 'Sketch003', 'wire', 'semiconductor',
 shell = Part3DData('Wire cover', 'Sketch004', 'wire_shell', 'metal_gate',
             depo_mode='depo', target_wire=wire, thickness=0.2, shell_verts=[1,2])
 block3 = Part3DData('Passthrough', 'Box', '3d_shape', 'metal_gate')
+wrap = Part3DData('First Layer', 'Sketch005', 'lithography', 'dielectric',
+            layer_num=1, fill_litho=True)
 
 freecad_dict = {
     'pyenv': 'python2',
     'file_path': 'geometry_sweep_showcase.fcstd',
     'params': {'d1': tag1},
-    'input_parts': [block1, block2, sag, wire, shell, block3]
+    'input_parts': [block1, block2, sag, wire, shell, block3, wrap]
 }
 geo_task = Geometry3D(options=freecad_dict)
 
