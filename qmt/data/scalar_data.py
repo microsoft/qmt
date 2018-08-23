@@ -1,8 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
+import fenics as fn
+
 import qmt.physics_constants as qc
-# from qms.fem.fenics_utilities import PermittivityExpression
 from qmt.data.template import Data
 
 
@@ -47,30 +48,68 @@ class InterpolatableScalarData3D(ScalarData3D):
 class FenicsPotentialData3D(InterpolatableScalarData3D):
     def __init__(self, fenics_potential, solver_input, coords_units=qc.units.nm,
                  data_units=qc.units.meV):
-        fenics_mesh = solver_input.mesh
-        coords = fenics_mesh.coordinates()
+        mesh = solver_input.mesh
+        # region_mapping = solver_input.region_mapping
+        coords = mesh.coordinates()
         data = fenics_potential.compute_vertex_values()
         super(FenicsPotentialData3D, self).__init__(coords, data, coords_units, data_units, fenics_potential)
         self.phi = self.evaluate_point_function
         # TODO initialize surface and volume integrals
-        # self.charge_density = self._initialize_charge_density(solver_input)
-        # self.parts_to_volume_charge_integrals = self._initialize_volume_integrals()
-        # self.parts_to_boundary_charge_integrals = self._initialize_boundary_integrals()
+        self.charge_density = self._initialize_charge_density(solver_input)
+        self.parts_to_volume_charge_integrals = self._initialize_volume_integrals(solver_input)
+        self.parts_to_boundary_charge_integrals = self._initialize_boundary_integrals(solver_input)
 
     # Figure out how to do this
-    def _initialize_charge_density(self):
+    def _initialize_charge_density(self, solver_input):
         # solve linear problem
         # Is this just an inverse Poisson solve?
 
         # charge = PermittivityExpression()
         # result = fn.assemble()
-        pass
+        # todo project onto different space?
+        # I think I have to project this. How do I get the right function space?
+        # I want a piecewise constant vector-valued function space
+        # or maybe, something derived from the vector space of phi?
+        # How about one lower degree?
+        # Waiit, I don't want to project the laplacian onto this space!!
+        V = self.phi.function_space()
+        # mesh = V.mesh()
+        # degree = V.ufl_element().degree() - 1
+        # element_type = 'DG' if degree == 0 else 'P'
+        # gradient_vector_space = fn.VectorFunctionSpace(mesh, element_type, degree)
+        # phi_laplacian = fn.div(fn.grad(self.phi))
+        # TODO try doing this manually!
+        rho = fn.TrialFunction(V)
+        v = fn.TestFunction(V)
+        L = fn.dot(fn.grad(self.phi), fn.grad(v)) * fn.dx
+        a = rho * v * fn.dx
+        rho = fn.Function(V)
+        fn.solve(a == L, rho)
+        return rho
+        # return fn.project(phi_laplacian, V)
 
-    def _initialize_volume_integrals(self):
+    def _initialize_volume_integrals(self, solver_input):
         # integrate solution of linear problem?
         # TODO include contained boundary?
-        pass
+        names_to_ids = solver_input.geo_3d_data.get_names_to_region_ids()
+        measure = fn.Measure("dx", domain=solver_input.mesh,
+                             subdomain_data=solver_input.region_mapping.region_mapping_function)
+        volume_integrals = {}
+        for name, region_id in names_to_ids.items():
+            volume_integrals[name] = fn.assemble(self.charge_density * measure(region_id))
+        return volume_integrals
 
-    def _initialize_boundary_integrals(self):
+    def _initialize_boundary_integrals(self, solver_input):
         # integrate up normal derivative :P
-        pass
+        names_to_ids = solver_input.geo_3d_data.get_names_to_region_ids()
+        normal_derivative = fn.grad(self.phi)
+
+        boundary_integrals = {}
+        for name, id in names_to_ids.items():
+            part_measure = fn.Measure("dS", domain=solver_input.mesh,
+                                      subdomain_data=solver_input.boundary_conditions.get_boundary(name))
+            n = fn.FacetNormal(solver_input.mesh)
+            boundary_integrals[name] = fn.assemble(
+                (fn.dot(normal_derivative('-'), n('-')) + fn.dot(normal_derivative('+'), n('+'))) * part_measure)
+
+        return boundary_integrals
