@@ -29,14 +29,16 @@ block3 = Part3DData('Passthrough', 'Box', '3d_shape', 'metal_gate')
 substrate = Part3DData('Substrate', 'Sketch005', 'extrude', 'dielectric',
                        z0=-2, thickness=2)
 wrap = Part3DData('First Layer', 'Sketch006', 'lithography', 'dielectric',
-                  z0=0, layer_num=0, thickness=4, litho_base=[substrate], fill_litho=True,
+                  z0=0, layer_num=1, thickness=4, litho_base=[substrate], fill_litho=True,
                   subtract_list=[wire.label])
+wrap2 = Part3DData('Second Layer', 'Sketch007', 'lithography', 'dielectric',
+                   layer_num=2, thickness=1, subtract_list=[wire.label, wrap.label])
 
 freecad_dict = {
     'pyenv': 'python2',
     'file_path': 'geometry_sweep_showcase.fcstd',
     'params': {'d1': tag1},
-    'input_parts': [block1, block2, sag, wire, shell, block3, substrate, wrap]
+    'input_parts': [block1, block2, sag, wire, shell, block3, substrate, wrap, wrap2]
 }
 geo_task = Geometry3D(options=freecad_dict)
 

@@ -21,6 +21,11 @@ from qmt.geometry.freecad.sketchUtils import (findSegments, splitSketch, extendS
                                               findEdgeCycles, draftOffset)
 
 
+class DummyInfo:
+    def __init__(self):
+        self.trash = []
+        self.litho_setup_done = False
+
 def build(opts):
     '''Build the 3D geometry.
 
@@ -47,6 +52,7 @@ def build(opts):
     if 'serial_stp_parts' not in opts:
         opts['serial_stp_parts'] = {}
 
+    info_holder = DummyInfo()  # temporary workaround to support old litho code
     # Build the parts
     for input_part in opts['input_parts']:
 
@@ -59,7 +65,7 @@ def build(opts):
         elif input_part.directive == 'wire_shell':
             part = build_wire_shell(input_part)
         elif input_part.directive == 'lithography':
-            part = build_lithography(input_part, opts)
+            part = build_lithography(input_part, opts, info_holder)
         elif input_part.directive == '3d_shape':
             part = build_pass(input_part)
         else:
@@ -71,6 +77,8 @@ def build(opts):
         opts['built_part_names'][input_part.label] = part.Name
         store_serial(opts['serial_stp_parts'], input_part.label,
                      exportCAD, 'stp',  [ part ] )
+
+    collect_garbarge(info_holder)
 
     for obj in blacklist:
         delete(obj)
@@ -165,22 +173,19 @@ def build_wire_shell(part, offset=0.):
     shell.Label = part.label
     return shell
 
-tmp_global_litho_setup_done = False  # TODO: repack
-def build_lithography(part, opts):
+
+def build_lithography(part, opts, info_holder):
     """Build a lithography part."""
-    global tmp_global_litho_setup_done
     assert part.directive == 'lithography'
-    info = Dummy()
-    if not tmp_global_litho_setup_done:
-        lithoDict = initialize_lithography(info, opts, fillShells=part.fill_litho)
-        tmp_global_litho_setup_done = True
+    if not info_holder.litho_setup_done:
+        initialize_lithography(info_holder, opts, fillShells=part.fill_litho)
+        info_holder.litho_setup_done = True
 
     layerNum = part.layer_num
     returnObjs = []
-    for objID in lithoDict['layers'][layerNum]['objIDs']:
-        if part.fc_name == lithoDict['layers'][layerNum]['objIDs'][objID]['partName']:
-            returnObjs.append(_gen_G(info, opts, layerNum, objID))
-    _collect_garbarge(info)
+    for objID in info_holder.lithoDict['layers'][layerNum]['objIDs']:
+        if part.fc_name == info_holder.lithoDict['layers'][layerNum]['objIDs'][objID]['partName']:
+            returnObjs.append(gen_G(info_holder, opts, layerNum, objID))
     return genUnion(returnObjs, consumeInputs=True)
 
 
@@ -336,11 +341,6 @@ def makeSAG(sketch, zBot, zMid, zTop, tIn, tOut, offset=0.):
     returnPart = genUnion(returnParts, consumeInputs=True)
     return returnPart
 
-
-class Dummy:
-    def __init__(self):
-        self.trash = []
-
 def initialize_lithography(info, opts, fillShells=True):
     doc = FreeCAD.ActiveDocument
     info.fillShells = fillShells
@@ -355,7 +355,6 @@ def initialize_lithography(info, opts, fillShells=True):
     # To start, we need to collect up all the lithography directives, and
     # organize them by layerNum and objectIDs within layers.
     baseSubstrateParts = []
-    import sys
     for part in opts['input_parts']:
         # If this part is a litho step
         if part.directive == 'lithography':
@@ -452,10 +451,8 @@ def initialize_lithography(info, opts, fillShells=True):
             # layers, according to the keys.
             info.lithoDict['layers'][layerNum]['objIDs'][objID]['HDict'] = {}
 
-    return info.lithoDict
 
-
-def _gen_offset(opts, obj, offsetVal):
+def gen_offset(opts, obj, offsetVal):
     """Generates an offset non-destructively."""
     doc = FreeCAD.ActiveDocument
     # First, we need to check if the object needs special treatment:
@@ -482,16 +479,16 @@ def _gen_offset(opts, obj, offsetVal):
             doc.recompute()
             delete(offset)
     elif treatment == 'wire':
-        offsetDupe = _build_wire(partName, offset=offsetVal)[0]
+        offsetDupe = build_wire(partName, offset=offsetVal)
     elif treatment == 'wireShell':
-        offsetDupe = _build_wire_shell(partName, offset=offsetVal)[0]
+        offsetDupe = build_wire_shell(partName, offset=offsetVal)
     elif treatment == 'SAG':
-        offsetDupe = _build_SAG(partName, offset=offsetVal)[0]
+        offsetDupe = build_sag(partName, offset=offsetVal)
     doc.recompute()
     return offsetDupe
 
 
-def _screened_H_union_list(info, obj, m, j, offsetTuple, checkOffsetTuple):
+def screened_H_union_list(info, opts, obj, m, j, offsetTuple, checkOffsetTuple):
     """Foremd the "screened union list" of obj with the layer m, objID j H object that has
     been offset according to offsetTuple. The screened union list is defined by checking
     first whether the object intersects with the components of the checkOffset version
@@ -506,12 +503,10 @@ def _screened_H_union_list(info, obj, m, j, offsetTuple, checkOffsetTuple):
     # offset, while other indices indicate an offset by summing the thicknesses
     # from corresponding layers.
     if checkOffsetTuple not in HDict:  # If we haven't computed this yet
-        HDict[checkOffsetTuple] = _H_offset(info, m, j, tList=list(
-            checkOffsetTuple))  # list of H parts
+        HDict[checkOffsetTuple] = H_offset(info, opts, m, j, tList=list(checkOffsetTuple))  # list of H parts
         info.trash += HDict[checkOffsetTuple]
     if offsetTuple not in HDict:  # If we haven't computed this yet
-        HDict[offsetTuple] = _H_offset(
-            info, m, j, tList=list(offsetTuple))  # list of H parts
+        HDict[offsetTuple] = H_offset(info, opts, m, j, tList=list(offsetTuple))  # list of H parts
         info.trash += HDict[offsetTuple]
     HObjCheckList = HDict[checkOffsetTuple]
     HObjList = HDict[offsetTuple]
@@ -522,7 +517,7 @@ def _screened_H_union_list(info, obj, m, j, offsetTuple, checkOffsetTuple):
             returnList.append(HObjList[i])
     return returnList
 
-def _screened_A_UnionList(info, opts, obj, t, ti, offsetTuple, checkOffsetTuple):
+def screened_A_UnionList(info, opts, obj, t, ti, offsetTuple, checkOffsetTuple):
     """Foremd the "screened union list" of obj with the substrate A that has
     been offset according to offsetTuple.
     """
@@ -530,13 +525,13 @@ def _screened_A_UnionList(info, opts, obj, t, ti, offsetTuple, checkOffsetTuple)
     if checkOffsetTuple not in info.lithoDict['substrate']:
         info.lithoDict['substrate'][checkOffsetTuple] = []
         for A in info.lithoDict['substrate'][()]:
-            AObj = _gen_offset(opts, A, t)
+            AObj = gen_offset(opts, A, t)
             info.trash.append(AObj)
             info.lithoDict['substrate'][checkOffsetTuple].append(AObj)
     if offsetTuple not in info.lithoDict['substrate']:
         info.lithoDict['substrate'][offsetTuple] = []
         for A in info.lithoDict['substrate'][()]:
-            AObj = _gen_offset(opts, A, t + ti)
+            AObj = gen_offset(opts, A, t + ti)
             info.trash.append(AObj)
             info.lithoDict['substrate'][offsetTuple].append(AObj)
 
@@ -547,7 +542,7 @@ def _screened_A_UnionList(info, opts, obj, t, ti, offsetTuple, checkOffsetTuple)
             returnList.append(info.lithoDict['substrate'][offsetTuple][i])
     return returnList
 
-def _H_offset(info, opts, layerNum, objID, tList=[]):
+def H_offset(info, opts, layerNum, objID, tList=[]):
     """For a given layerNum=n and ObjID=i, compute the deposited object.
 
     ```latex
@@ -581,8 +576,8 @@ def _H_offset(info, opts, layerNum, objID, tList=[]):
         'B']  # B prism for this layer & objID
     C = layers[layerNum]['objIDs'][objID][
         'C']  # C prism for this layer & ObjID
-    B_t = _gen_offset(opts, B, t)  # offset the B prism
-    C_t = _gen_offset(opts, C, t)  # offset the C prism
+    B_t = gen_offset(opts, B, t)  # offset the B prism
+    C_t = gen_offset(opts, C, t)  # offset the C prism
     info.trash.append(B_t)
     info.trash.append(C_t)
     # Build up the substrate due to previously deposited gates
@@ -590,11 +585,11 @@ def _H_offset(info, opts, layerNum, objID, tList=[]):
     for m in layers.keys():
         if m < layerNum:  # then this is a lower layer
             for j in layers[m]['objIDs'].keys():
-                HOffsetList += _screened_H_union_list(
-                    info, C_t, m, j, offsetTuple, checkOffsetTuple)
+                HOffsetList += screened_H_union_list(
+                    info, opts, C_t, m, j, offsetTuple, checkOffsetTuple)
                 # Next, build up the original substrate list:
     AOffsetList = []
-    AOffsetList += _screened_A_UnionList(
+    AOffsetList += screened_A_UnionList(
         info, opts, C_t, t, ti, offsetTuple, checkOffsetTuple)
     unionList = HOffsetList + AOffsetList
     returnList = [B_t]
@@ -606,7 +601,7 @@ def _H_offset(info, opts, layerNum, objID, tList=[]):
         checkOffsetTuple] = returnList
     return returnList
 
-def _gen_U(info, layerNum, objID):
+def gen_U(info, layerNum, objID):
     """For a given layerNum and objID, compute the quantity:
     ```latex
     U_{n,i}(t) = (\cup_{m<n;j} G_{m,j}) \cup (\cup_{k} A_k),
@@ -623,7 +618,7 @@ def _gen_U(info, layerNum, objID):
             for j in layers[m].keys():
                 if 'G' not in layers[layerNum][
                         'objIDs'][objID]:
-                    _gen_G(info, m, j)
+                    gen_G(info, m, j)
                 G = layers[layerNum]['objIDs'][objID]['G']
                 if checkOverlap([B, G]):
                     GList.append(G)
@@ -635,20 +630,20 @@ def _gen_U(info, layerNum, objID):
     unionObj = genUnion(unionList, consumeInputs=False)
     return unionObj
 
-def _gen_G(info, opts, layerNum, objID):
+def gen_G(info, opts, layerNum, objID):
     """Generate the gate deposition for a given layerNum and objID."""
     layer = info.lithoDict['layers'][layerNum]
     if 'G' not in layer['objIDs'][objID]:
         if () not in layer['objIDs'][objID]['HDict']:
             layer['objIDs'][objID][
-                'HDict'][()] = _H_offset(info, opts, layerNum, objID)
+                'HDict'][()] = H_offset(info, opts, layerNum, objID)
         H = genUnion(layer['objIDs'][objID]['HDict'][()],
                      consumeInputs=False)
         info.trash.append(H)
         if info.fillShells:
             G = copy_move(H)
         else:
-            U = _gen_U(info, layerNum, objID)
+            U = gen_U(info, layerNum, objID)
             G = subtract(H, U)
             delete(U)
         layer['objIDs'][objID]['G'] = G
@@ -657,8 +652,8 @@ def _gen_G(info, opts, layerNum, objID):
     G.Label = partName
     return G
 
-def _collect_garbarge(info):
-    """Delete all the objects in self.trash."""
+def collect_garbarge(info):
+    """Delete all the objects in trash."""
     for obj in info.trash:
         try:
             delete(obj)

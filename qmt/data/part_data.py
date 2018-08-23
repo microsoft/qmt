@@ -29,7 +29,7 @@ class Part3DData(Data):
                                 dielectric -- no charge accumulation allowed
         :param str material: The material of the resulting part.
         :param float z0: The starting z coordinate. Required for extrude, wire,
-                         SAG, and lithographydirectives.
+                         SAG, and lithography directives.
         :param float thickness: The total thickness. Required for all directives.
                                 On wireShell, this is interpreted as the layer thickness.
         :param str target_wire: Target wire directive for a coating directive.
