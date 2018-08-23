@@ -4,8 +4,8 @@
 """Landing script for Python 2.7 calls to FreeCAD."""
 
 
-import sys
 import pickle
+import sys
 
 import qmt.geometry.freecad as cad
 

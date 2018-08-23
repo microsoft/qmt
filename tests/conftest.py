@@ -4,6 +4,7 @@
 """Fixtures for QMT unit tests."""
 
 import os
+
 import pytest
 
 import qmt
@@ -105,7 +106,6 @@ def fix_hexagon_sketch():
     def aux_hexagon_sketch(r=1):
         '''Helper function to drop a hexagonal sketch.'''
         from qmt.geometry.freecad import FreeCAD
-        import Part
         import ProfileLib.RegularPolygon
         vec = FreeCAD.Vector
         doc = FreeCAD.ActiveDocument

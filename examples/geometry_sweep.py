@@ -7,9 +7,9 @@
 import os
 import numpy as np
 
-from qmt.tasks.sweep import SweepTag, SweepManager
-from qmt.data.part_data import Part3DData
-from qmt.tasks.basic.geometry import Geometry3D
+from qmt.task_framework import SweepTag, SweepManager
+from qmt.geometry.parts import Part3D
+from qmt.basic_tasks.geometry import Geometry3D
 
 
 # Set up geometry task
@@ -23,9 +23,6 @@ sag = Part3DData('Garage', 'Sketch002', 'SAG', 'metal_gate',
             t_in=2.5, t_out=0.5)
 wire = Part3DData('Nanowire', 'Sketch003', 'wire', 'semiconductor',
             z0=0, thickness=0.5)
-# ~ shell = Part3DData('Wire cover', 'Sketch003', 'wire_shell', 'metal_gate',
-            # ~ z0=0, thickness_of_wire=0.5, thickness=0.2, shell_verts=[1,2],
-            # ~ depo_zone='Sketch004')  # TODO: use Part3D.target_wire
 shell = Part3DData('Wire cover', 'Sketch004', 'wire_shell', 'metal_gate',
             depo_mode='depo', target_wire=wire, thickness=0.2, shell_verts=[1,2])
 block3 = Part3DData('Passthrough', 'Box', '3d_shape', 'metal_gate')

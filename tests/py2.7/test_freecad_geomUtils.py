@@ -6,7 +6,6 @@
 
 from __future__ import absolute_import, division, print_function
 
-from qmt.geometry.freecad import FreeCAD
 from qmt.geometry.freecad import Part
 from qmt.geometry.freecad.geomUtils import *
 

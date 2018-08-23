@@ -7,9 +7,8 @@
 
 import os
 
-import FreeCAD
-import Part
 import Mesh
+import Part
 
 
 def exportMeshed(obj, fileName):

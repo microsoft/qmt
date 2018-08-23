@@ -44,9 +44,11 @@ Classes:
     TaskMetaclass
 """
 
-from dask import delayed
-from .sweep import ReducedSweep, ReducedSweepDelayed, gen_tag_extract, replace_tag_with_value
 import copy
+
+from dask import delayed
+
+from qmt.tasks.sweep import SweepManager, ReducedSweep, ReducedSweepDelayed, gen_tag_extract, replace_tag_with_value
 
 class TaskMetaclass(type):
     """
@@ -89,7 +91,7 @@ class Task(object):
     __metaclass__ = TaskMetaclass
     current_instance_id = 0
 
-    def __init__(self, task_list, options, name, gather = False):
+    def __init__(self, task_list, options, name, gather=False):
         """
         Constructs a new Task.
         :param task_list: the tasks that this depends on.
@@ -172,7 +174,7 @@ class Task(object):
         IMPORTANT: object references in both list_of_current_options and list_of_input_result_list
         must be treated as read-only or copied before modification, since they are shared across parameter sweeps.
 
-        :param list_of_input_result_list: The list of results produced by dependent tasks, in the order
+        :param list_of_input_result_lists: The list of results produced by dependent tasks, in the order
         that the dependent tasks were given in the call to the Task base class constructor.
         :param list_of_current_options: The list of options of this corresponding to the current sweep iteration.
         """
@@ -191,7 +193,7 @@ class Task(object):
             reduced_sweep = ReducedSweep.create_from_manager_and_tags(self.sweep_manager, self.list_of_tags)
 
             self.delayed_result = ReducedSweepDelayed.create_from_reduced_sweep_and_manager(reduced_sweep,
-                                                                                       self.sweep_manager)
+                                                                                            self.sweep_manager)
             list_of_current_options = []
             list_of_input_result_lists = []
             for sweep_holder_index, tag_values in enumerate(self.delayed_result.tagged_value_list):
@@ -203,13 +205,15 @@ class Task(object):
                 # Use this index to get the appropriate results in dependent tasks
                 input_result_list = [task.delayed_result.get_datum(total_index) for task in self.previous_tasks]
                 list_of_input_result_lists += [input_result_list]
-                
+
                 if not self.gather:
                     # Create a delayed object for this task's computation.
-                    output = delayed(self._solve_instance)(input_result_list, current_options, dask_key_name=self.name+'_'+str(sweep_holder_index))
+                    output = delayed(self._solve_instance)(input_result_list, current_options,
+                                                           dask_key_name=self.name + '_' + str(sweep_holder_index))
                     self.delayed_result.add(output, sweep_holder_index)
             if self.gather:
-                self.delayed_result = delayed(self._solve_gathered)(list_of_input_result_lists, list_of_current_options, dask_key_name=self.name)
+                self.delayed_result = delayed(self._solve_gathered)(list_of_input_result_lists, list_of_current_options,
+                                                                    dask_key_name=self.name)
 
     def visualize_entire_sweep(self, filename=None):
         """
@@ -278,12 +282,11 @@ class Task(object):
             task.run_daskless()
 
         input_result_list = [task.daskless_result for task in self.previous_tasks]
-        self.daskless_result = self._solve_instance(self.input_result_list, self.options)
+
+        if self.gather:
+            self.sweep_manager = SweepManager.create_empty_sweep(dask_client=None)
+            self.daskless_result = self._solve_gathered([input_result_list], [self.options]).only()
+        else:
+            self.daskless_result = self._solve_instance(input_result_list, self.options)
 
         return self.daskless_result
-
-    def get_results_as_local_objects(self):
-        if not self.computed_result:
-            self._run()
-
-        return self.computed_result.calculate_completed_results()

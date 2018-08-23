@@ -1,7 +1,10 @@
-import pickle,os,shutil,codecs
+import codecs
+import os
+import shutil
 
-from qmt import Materials
-from qmt.data import Data
+from qmt.materials import Materials
+from qmt.data.template import Data
+
 
 # TODO factor out geo superclass
 class GeoData(Data):
@@ -182,12 +185,12 @@ class Geo3DData(Data):
     def set_data(self,data_name,data,scratch_dir=None):
         """
         Set data to a serial format that is easily portable.
+        :param scratch_dir:
         :param str data_name: Options are:
                             "fcdoc", freeCAD document
                             "mesh", for a fenics mesh
                             "rmf", for a fenics region marker function
         :param data: The corresponding data that we would like to set.
-        :param str file_path: File path for a scratch folder. Default is "tmp"; must be empty.
         """
         if scratch_dir is None:
             import uuid
@@ -217,11 +220,12 @@ class Geo3DData(Data):
     def get_data(self,data_name, mesh=None, scratch_dir=None):
         """
         Get data from stored serial format.
+        :param scratch_dir:
+        :param mesh:
         :param str data_name: Options are:
                             "fcdoc", freeCAD document
                             "mesh", for a fenics mesh
                             "rmf", for a fenics region marker function
-        :param str file_path: File path for a scratch folder. Default is "tmp"; must be empty.
         :return data: The freeCAD document or fenics object that was stored.
         """
         if scratch_dir is None:
@@ -263,10 +267,30 @@ class Geo3DData(Data):
 
         Returns the fcstd file path.
         """
-        if file_path == None:
+        if file_path is None:
             file_path = str(self.build_order) + '.fcstd'
         import codecs
         data = codecs.decode(self.serial_fcdoc.encode(), 'base64')
         with open(file_path, 'wb') as of:
             of.write(data)
         return file_path
+
+
+    def get_names_to_region_ids(self):
+        return {name: i + 1 for i, name in enumerate(self.build_order)}
+
+    def get_region_ids_to_names(self):
+        return {id: name for name, id in self.get_names_to_region_ids().items()}
+
+    def get_names_to_dirichlet_bc_values(self):
+        results = {}
+        for part, data in self.parts.items():
+            if data.boundary_condition and "voltage" in data.boundary_condition:
+                results[part] = data.boundary_condition["voltage"]
+
+            # try:
+            #     results[part] = data.boundary_condition["voltage"]
+            # except (KeyError, TypeError) as e:
+            #     pass
+        return results
+

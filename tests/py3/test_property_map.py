@@ -1,6 +1,7 @@
 import numpy as np
-from qmt.materials import Materials
+
 from qmt.geometry import PropertyMap, MaterialPropertyMap
+from qmt.materials import Materials
 
 
 class DummyPartMap:

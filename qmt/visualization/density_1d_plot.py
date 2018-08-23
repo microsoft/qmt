@@ -1,5 +1,7 @@
-from qmt.visualization.plot_helpers import save_relevant_data
 import h5py
+
+from qmt.visualization.plot_helpers import save_relevant_data
+
 
 def generate_1d_density_plot(generic_task, filename, dask_client = None):
     if dask_client is None:

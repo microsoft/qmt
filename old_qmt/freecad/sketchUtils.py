@@ -6,11 +6,12 @@
 ###
 
 import FreeCAD
+from copy import deepcopy
+
 import Draft
 import Part
 import Sketcher
 import numpy as np
-from copy import deepcopy
 
 
 def deepRemove_impl(obj):
@@ -109,7 +110,7 @@ def findCycle(lineSegments, startingIndex, availSegIDs):
 def addCycleSketch(name, fcDoc, cycleSegIndList, lineSegments):
     ''' Add a sketch of a cycle to a FC document.
     '''
-    if (fcDoc.getObject(name) != None):  # this name already exists
+    if (fcDoc.getObject(name) is not None):  # this name already exists
         raise ValueError("Error: sketch " + name + " already exists.")
     obj = fcDoc.addObject('Sketcher::SketchObject', name)
     vec = FreeCAD.Vector
@@ -132,7 +133,7 @@ def addCycleSketch(name, fcDoc, cycleSegIndList, lineSegments):
 def addPolyLineSketch(name, fcDoc, segmentOrder, lineSegments):
     ''' Add a sketch given segment order and line segments
     '''
-    if (fcDoc.getObject(name) != None):  # this name already exists
+    if (fcDoc.getObject(name) is not None):  # this name already exists
         raise ValueError("Error: sketch " + name + " already exists.")
     obj = fcDoc.addObject('Sketcher::SketchObject', name)
     for segIndex, segment in enumerate(lineSegments):
@@ -248,7 +249,7 @@ def draftOffset(inputSketch,t):
     ''' Attempt to offset the draft figure by a thickness t. Positive t is an
     inflation, while negative t is a deflation.
     '''
-    from qmt.freecad import extrude,copy,subtract,delete    
+    from qmt.freecad import extrude,copy, delete
 
     if t == 0.:
         return copy(inputSketch)

@@ -3,13 +3,14 @@
 
 """Example geometry sweeping in-memory."""
 
-from qmt.basic_tasks import GeoFreeCAD
-import qmt.task_framework as qtf
-import qmt.geometry.freecad as cad
-import ProfileLib.RegularPolygon
-import numpy as np
 import os
 
+import ProfileLib.RegularPolygon
+import numpy as np
+import qmt.task_framework as qtf
+from qmt.basic_tasks import GeoFreeCAD
+
+import qmt.geometry.freecad as cad
 
 # Craft some geometry
 vec = cad.FreeCAD.Vector

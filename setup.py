@@ -2,8 +2,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-from setuptools import setup, find_packages
-
+from setuptools import setup
 
 with open('requirements.txt') as f:
     requirements = [x.strip() for x in f.readlines()]

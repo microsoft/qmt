@@ -5,12 +5,10 @@
 """General FreeCAD helper functions."""
 
 import os
-import sys
 import shutil
 import tempfile
 import zipfile
 from xml.etree import ElementTree
-
 from qmt.geometry.freecad import FreeCAD
 
 

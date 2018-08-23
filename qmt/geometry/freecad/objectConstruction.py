@@ -3,28 +3,22 @@
 
 """Functions that perform composite executions."""
 
+import FreeCAD
 
-import os
+import Draft
 import numpy as np
 from six import iteritems, text_type
 
-import FreeCAD
-import Draft
-
-
 # TODO: use namespace in code
 from qmt.geometry.freecad.auxiliary import *
-import qmt.geometry.freecad.geomUtils
-import qmt.geometry.freecad.sketchUtils
-import qmt.geometry.freecad.fileIO
+from qmt.geometry.freecad.fileIO import (updateParams, exportCAD, store_serial)
 from qmt.geometry.freecad.geomUtils import (extrude, copy_move, genUnion,
                                             getBB, makeBB, makeHexFace,
-                                            extrudeBetween, centerObjects, intersect,
+                                            extrudeBetween, intersect,
                                             checkOverlap, subtract,
                                             crossSection)
 from qmt.geometry.freecad.sketchUtils import (findSegments, splitSketch, extendSketch,
                                               findEdgeCycles, draftOffset)
-from qmt.geometry.freecad.fileIO import (updateParams, exportCAD, exportMeshed, store_serial)
 
 
 def build(opts):
@@ -72,6 +66,7 @@ def build(opts):
             raise ValueError('Directive ' + input_part.directive +
                              ' is not a recognized directive type.')
 
+        assert part is not None
         doc.recompute()
         opts['built_part_names'][input_part.label] = part.Name
         store_serial(opts['serial_stp_parts'], input_part.label,
@@ -91,7 +86,17 @@ def build(opts):
 def build_pass(part):
     '''Pas a part unchanged.'''
     assert part.directive == '3d_shape'
-    return FreeCAD.ActiveDocument.getObject(part.fc_name)
+
+    # TODO remove
+    # sys.stderr.write("Part Name: " + part.fc_name + "\n")
+    result = FreeCAD.ActiveDocument.getObject(part.fc_name)
+
+    # for object in FreeCAD.ActiveDocument.Objects:
+    #     sys.stderr.write("Object: " + str(object) + "\n")
+    #     sys.stderr.write("Name: " + object.Name + "\n")
+
+    assert result is not None
+    return result
 
 
 def build_extrude(part):

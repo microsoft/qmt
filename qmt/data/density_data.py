@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-from qmt.data import Data
+from qmt.data.template import Data
 
 class Density1DData(Data):
     def __init__(self, densities, density_units, bands, band_units, mesh, mesh_units):
@@ -15,7 +15,7 @@ class Density1DData(Data):
         :param mesh: numpy array with the 1d mesh
         :param mesh_units: units of mesh points
         """
-        super(Density1D, self).__init__()
+        super(Density1DData, self).__init__()
         
         self.densities = densities
         self.density_units = density_units

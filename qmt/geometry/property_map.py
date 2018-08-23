@@ -1,5 +1,5 @@
-from six import iteritems
 import numpy as np
+from six import iteritems
 
 
 class PropertyMap(object):

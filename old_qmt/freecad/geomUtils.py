@@ -6,6 +6,7 @@
 ###
 
 import FreeCAD
+
 import Draft
 import Part
 import numpy as np

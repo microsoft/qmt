@@ -5,11 +5,13 @@
 
 
 import FreeCAD
+from copy import deepcopy
+
 import Draft
 import Part
 import Sketcher
 import numpy as np
-from copy import deepcopy
+
 from .auxiliary import *
 
 vec = FreeCAD.Vector
@@ -92,7 +94,7 @@ def findCycle(lineSegments, startingIndex, availSegIDs):
 def addCycleSketch(name, doc, cycleSegIndList, lineSegments):
     ''' Add a sketch of a cycle to a FC document.
     '''
-    if (doc.getObject(name) != None):  # this name already exists
+    if (doc.getObject(name) is not None):  # this name already exists
         raise ValueError("Error: sketch " + name + " already exists.")
     obj = doc.addObject('Sketcher::SketchObject', name)
     # obj.MapMode = 'FlatFace'
@@ -116,7 +118,7 @@ def addCycleSketch2(name, wire):
     '''
     assert wire.isClosed()
     doc = FreeCAD.ActiveDocument
-    if (doc.getObject(name) != None):
+    if (doc.getObject(name) is not None):
         raise ValueError("Error: sketch " + name + " already exists.")
     sketch = doc.addObject('Sketcher::SketchObject', name)
     for i,edge in enumerate(wire.Edges):
@@ -132,7 +134,7 @@ def addCycleSketch2(name, wire):
 def addPolyLineSketch(name, doc, segmentOrder, lineSegments):
     ''' Add a sketch given segment order and line segments
     '''
-    if (doc.getObject(name) != None):  # this name already exists
+    if (doc.getObject(name) is not None):  # this name already exists
         raise ValueError("Error: sketch " + name + " already exists.")
     obj = doc.addObject('Sketcher::SketchObject', name)
     for segIndex, segment in enumerate(lineSegments):
@@ -264,7 +266,7 @@ def draftOffset(inputSketch,t):
     ''' Attempt to offset the draft figure by a thickness t. Positive t is an
     inflation, while negative t is a deflation.
     '''
-    from qmt.geometry.freecad.geomUtils import extrude, copy_move, subtract, delete    
+    from qmt.geometry.freecad.geomUtils import extrude, copy_move, delete
 
     if t == 0.:
         return copy_move(inputSketch)

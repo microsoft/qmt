@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import time
+
 import qmt.task_framework as qtf
 from qmt.task_framework import Task
-import time
+
 
 class GeometryTaskExample(Task):
 

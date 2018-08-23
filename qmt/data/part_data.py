@@ -1,5 +1,4 @@
-import pickle
-from qmt.data import Data
+from qmt.data.template import Data
 
 
 class Part3DData(Data):
@@ -120,7 +119,7 @@ class Part3DData(Data):
 
         Returns the STEP file path.
         """
-        if file_path == None:
+        if file_path is None:
             file_path = self.label + '.stp'
         import codecs
         data = codecs.decode(self.serial_stp.encode(), 'base64')
