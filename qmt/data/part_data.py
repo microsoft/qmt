@@ -9,7 +9,7 @@ class Part3DData(Data):
             layer_num=None, litho_base=None,
             fill_litho=True, mesh_max_size=None, mesh_min_size=None, mesh_growth_rate=None,
             mesh_scale_vector=None, boundary_condition=None, subtract_list=None,
-            ns=None, phi_nl=None, ds=None, thickness_of_wire=None):
+            ns=None, phi_nl=None, ds=None):
         """
         Add a geometric part to the model.
         :param str label: The descriptive name of this new part.
@@ -91,8 +91,6 @@ class Part3DData(Data):
         self.thickness = thickness
         self.target_wire = target_wire
         self.shell_verts = shell_verts
-        # ~ self.depo_zone = depo_zone
-        # ~ self.etch_zone = etch_zone
         self.depo_mode = depo_mode
         self.z_middle = z_middle
         self.t_in = t_in
@@ -111,7 +109,6 @@ class Part3DData(Data):
         self.ds = ds
         self.serial_stp = None  # This gets set on geometry build
         self.built_fc_name = None  # This gets set on geometry build
-        # ~ self.thickness_of_wire = thickness_of_wire  # TODO: sanitise & document
 
 
     def write_stp(self, file_path=None):
