@@ -41,4 +41,4 @@ def _plot_2d_density(filename, hv):
         hv.opts("Image.holes (cmap='Blues') [colorbar=True,cbar_padding=0.1,title_format='Charge density']")
         return im1*im2
     plot_dict = {tuple(points[index]):density_plot(index) for index in range(len(points))}
-    return hv.HoloMap(plot_dict, kdims=list(kdims))
+    return hv.util.Dynamic(hv.HoloMap(plot_dict, kdims=list(kdims)))
