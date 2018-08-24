@@ -11,24 +11,6 @@ import pytest
 from qmt.geometry.freecad.fileIO import *
 
 
-# ~ def test_setupModelFile(fix_testDir, fix_modelPath, fix_FCDoc):
-    # ~ '''Test the setup function for model files.'''
-    # ~ dummy = fix_FCDoc.addObject("Part::Box", "modelFilePath")
-    # ~ setupModelFile(fix_modelPath)
-    # ~ assert 'testModel.json' in os.listdir(fix_testDir)
-    # ~ assert FreeCAD.ActiveDocument.modelFilePath.A1 == 'Path to model file:'
-    # ~ assert FreeCAD.ActiveDocument.modelFilePath.B1 == fix_modelPath
-    # ~ os.remove(fix_modelPath)
-
-
-# ~ def test_getModel(fix_modelPath, fix_FCDoc, fix_model):
-    # ~ '''Test model retrieval.'''
-    # ~ setupModelFile(fix_modelPath)
-    # ~ myModel = getModel()
-    # ~ assert myModel.modelDict == fix_model.modelDict
-    # ~ os.remove(fix_modelPath)
-
-
 def test_exportMeshed(fix_testDir, fix_FCDoc):
     '''Test mesh export/import.'''
     filePath = os.path.join(fix_testDir, 'testExport.stl')
@@ -50,24 +32,28 @@ def test_exportMeshed(fix_testDir, fix_FCDoc):
 
 def test_exportCAD(fix_testDir, fix_FCDoc):
     '''Test step export/import.'''
-    filePath = os.path.join(fix_testDir, 'testExport.step')
+    filePath = os.path.join(fix_testDir, 'tmp_testExport.stp')
     from qmt.geometry.freecad.geomUtils import makeBB
-    testBB = (-1., 1., -2., 2., -3., 3.)
+    testBB = (-1., 1.5, -2., 2.5, -3., 3.5)
     testShape = makeBB(testBB)
-    exportCAD(testShape, filePath)
-    Part.insert(filePath, 'testDoc')
-    CADImport = fix_FCDoc.getObject("testExport")
-    xMin = CADImport.Shape.BoundBox.XMin
-    xMax = CADImport.Shape.BoundBox.XMax
-    yMin = CADImport.Shape.BoundBox.YMin
-    yMax = CADImport.Shape.BoundBox.YMax
-    zMin = CADImport.Shape.BoundBox.ZMin
-    zMax = CADImport.Shape.BoundBox.ZMax
-    assert testBB == (xMin, xMax, yMin, yMax, zMin, zMax)
+    exportCAD([testShape], filePath)
+
+    Part.insert(filePath, fix_FCDoc.Name)
+    CADImport = fix_FCDoc.getObject("tmp_testExport")
+
+    import FreeCAD
+    transBB = testBB[0:][::2] + testBB[1:][::2]  # reformat to FreeCAD representation
+    refBB = FreeCAD.Base.BoundBox(*transBB)
+    assert repr(CADImport.Shape.BoundBox) == repr(refBB)
+
     os.remove(filePath)
 
+    with pytest.raises(TypeError) as err:
+        exportCAD(testShape, 'dummy.stp')
+    assert 'must be a list' in str(err.value)
+
     with pytest.raises(ValueError) as err:
-        exportCAD(testShape, 'not_a_step_file')
+        exportCAD([testShape], 'not_a_step_file')
     assert 'not a supported extension' in str(err.value)
 
 

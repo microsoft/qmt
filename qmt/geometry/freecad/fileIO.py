@@ -30,11 +30,15 @@ def exportCAD(obj_list, file_name):
     :param list obj_list:       List of objects to export.
     :param string file_name:    Name of file to create and export into.
     '''
+    if not isinstance(obj_list, list):
+        raise TypeError("obj_list must be a list of objects.")
     # The export format is determined by the extension, so we should check it:
-    if file_name.endswith('.step') or file_name.endswith('.stp'):
+    supported_ext = ('.step', '.stp')
+    if file_name.endswith(supported_ext):
         Part.export(obj_list, file_name)
     else:
-        raise ValueError(file_name + ' is not a supported extension (.stp, .step)')
+        raise ValueError(file_name + ' is not a supported extension ('
+                         + ', '.join(supported_ext) + ')')
 
 
 # TODO: this is sketchUtils or geomUtils, not fileIO
@@ -91,5 +95,6 @@ def store_serial(target_dict, target_label, save_fct, ext, obj):
     tmp_path = 'tmp_' + uuid.uuid4().hex + '.' + ext
     save_fct(obj, tmp_path)
     with open(tmp_path, 'rb') as f:
-        target_dict[target_label] = codecs.encode(f.read(), 'base64')
+        # ~ target_dict[target_label] = codecs.encode(f.read(), 'base64')
+        target_dict[target_label] = codecs.encode(f.read(), 'base64').decode()  # TODO test
     os.remove(tmp_path)
