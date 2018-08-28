@@ -135,6 +135,7 @@ class Geo3DData(Data):
         """
         super(Geo3DData, self).__init__()
 
+        self.exterior_neumann_boundary_condition_value = None
         self.build_order = []
         self.parts = {}   # dict of parts in this geometry
         self.serial_fcdoc = None  # serialized FreeCAD document for this geometry
@@ -280,7 +281,7 @@ class Geo3DData(Data):
 
     def get_names_to_region_ids(self):
         mapping = {name: i + 2 for i, name in enumerate(self.build_order)}
-        if self.exterior_boundary_condition_value is not None:
+        if self.exterior_boundary_condition_value is not None or self.exterior_neumann_boundary_condition_value is not None:
             mapping[Geo3DData.EXTERIOR_BC_NAME] = 1
         return mapping
 
@@ -289,6 +290,26 @@ class Geo3DData(Data):
 
     def add_exterior_boundary_condition(self, value):
         self.exterior_boundary_condition_value = value
+
+    def add_exterior_neumann_boundary_condition(self, value):
+        self.exterior_neumann_boundary_condition_value = value
+
+
+    def get_names_to_neumann_bc_values(self):
+        results = {}
+        for part, data in self.parts.items():
+            if data.boundary_condition and "neumann" in data.boundary_condition:
+                results[part] = data.boundary_condition["neumann"]
+
+        if self.exterior_neumann_boundary_condition_value is not None:
+            results[Geo3DData.EXTERIOR_BC_NAME] = self.exterior_neumann_boundary_condition_value
+
+            # try:
+            #     results[part] = data.boundary_condition["voltage"]
+            # except (KeyError, TypeError) as e:
+            #     pass
+        return results
+
 
     def get_names_to_dirichlet_bc_values(self):
         results = {}
