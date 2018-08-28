@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
+
+from qms.tasks.mesh import Mesh2D
+from qms.tasks.thomas_fermi import ThomasFermi2D
 from qmt.tasks import SweepTag, SweepManager
 from qmt.tasks.basic.geometry import Geometry2D
-from qms.tasks.mesh import Mesh2D
-from qms.tasks.poisson import Poisson2D
-from qms.tasks.thomas_fermi import ThomasFermi2D
 from qmt.visualization.density_2d_plot import generate_2d_density_plot
 
 triangleLeg = SweepTag('triangle leg length')
