@@ -28,7 +28,7 @@
 # --------------------------------------------------------------------------
 
 
-from dxfImportObjects import *
+from old_qmt.freecadMacros.dxfImportObjects import *
 
 class Object:
 	"""Empty container class for dxf objects"""

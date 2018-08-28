@@ -33,4 +33,4 @@ def _plot_1d_density(filename, hv):
         density_data = densities[index][0]
         return hv.Curve((mesh_data, density_data),kdims=[('x','x ('+str(mesh_units[index])+')'),('density','density ('+str(density_units[index])+')')])
     curve_dict_2D = {tuple(points[index]):density_plot(index) for index in range(len(points))}
-    return hv.HoloMap(curve_dict_2D, kdims=list(kdims))
+    return hv.util.Dynamic(hv.HoloMap(curve_dict_2D, kdims=list(kdims)))

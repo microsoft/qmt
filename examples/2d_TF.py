@@ -7,7 +7,6 @@ from qmt.tasks.basic.geometry import Geometry2D
 from qms.tasks.mesh import Mesh2D
 from qms.tasks.poisson import Poisson2D
 from qms.tasks.thomas_fermi import ThomasFermi2D
-from qms.tasks.schrodinger_poisson import SchrodingerPoisson2D
 from qmt.visualization.density_2d_plot import generate_2d_density_plot
 
 triangleLeg = SweepTag('triangle leg length')
@@ -112,18 +111,14 @@ tf_dict['material_properties']['Al'] = {'workFunction' : Al_WF- WF_shift}
 
 tf_task = ThomasFermi2D(geo_task, mesh_task, tf_dict)
 
-sp_dict = {}
-
-sp_task = SchrodingerPoisson2D(tf_task, sp_dict)
-
-sweeps = [{triangleLeg : l, gateVoltage : v} for l in np.linspace(50.,150.,1) for v in np.linspace(0.,-.5,4)]
+sweeps = [{triangleLeg : l, gateVoltage : v} for l in np.linspace(50.,150.,1) for v in np.linspace(0.,-1.,5)]
 #sweeps = [{gateVoltage : 1.}]
 
 sweep_man = SweepManager(sweeps)
 
-result = sweep_man.run(sp_task)
+result = sweep_man.run(tf_task)
 
 #print(result.result())
 
-generate_2d_density_plot(sp_task, 'sp_density_test.h5')
+generate_2d_density_plot(tf_task, 'tf_density_test.h5')
 

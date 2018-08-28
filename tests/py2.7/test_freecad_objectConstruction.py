@@ -7,12 +7,12 @@ from qmt.geometry.freecad.objectConstruction import *
 
 
 def test_build(fix_exampleDir, fix_FCDoc):
-    from qmt.geometry.parts import Part3D
-    myPart = Part3D('block_of_gold', 'Sketch', 'extrude', 'metal_gate',
-                    material='Au', thickness=10)
+    from qmt.data.part_data import Part3DData
+    myPart = Part3DData('block_of_gold', 'Sketch', 'extrude', 'metal_gate',
+                        material='Au', thickness=10)
     opts = {
         'pyenv': 'python2',
-        'file_path': os.path.join(fix_exampleDir, 'geometry_sweep.fcstd'),
+        'file_path': os.path.join(fix_exampleDir, 'geometry_sweep_showcase.fcstd'),
         'input_parts': [myPart]
     }
     fix_FCDoc.load(opts['file_path'])
@@ -21,10 +21,10 @@ def test_build(fix_exampleDir, fix_FCDoc):
 
 
 def test_build_extrude(fix_FCDoc, fix_hexagon_sketch):
-    from qmt.geometry.parts import Part3D
+    from qmt.data.part_data import Part3DData
     sketch = fix_hexagon_sketch()
-    input_part = Part3D('label', sketch.Name, 'extrude', 'metal_gate',
-                        material='Au', thickness=10)
+    input_part = Part3DData('label', sketch.Name, 'extrude', 'metal_gate',
+                            material='Au', thickness=10)
     built_part = build_extrude(input_part)
     #TODO
 
