@@ -131,13 +131,14 @@ class FenicsPotentialData3D(InterpolatableScalarData3D):
 class FenicsThomasFermiData3D(FenicsPotentialData3D):
     def __init__(self, fenics_potential, charge_density_function, solver_input, coords_units=qc.units.nm,
                  data_units=qc.units.meV):
-        super(FenicsThomasFermiData3D, self).__init__(fenics_potential, solver_input, coords_units, data_units)
         self.charge_density_function = charge_density_function
+        super(FenicsThomasFermiData3D, self).__init__(fenics_potential, solver_input, coords_units, data_units)
 
     def _initialize_non_surface_charge_density(self, solver_input):
         names_to_ids = solver_input.geo_3d_data.get_names_to_region_ids()
         measure = fn.Measure("dx", domain=solver_input.mesh,
                                  subdomain_data=solver_input.region_mapping.region_mapping_function)
+        # Straightforward
         # TODO
 
     def _initialize_surface_densities(self, solver_input):
@@ -147,12 +148,15 @@ class FenicsThomasFermiData3D(FenicsPotentialData3D):
 class FenicsPoissonData3D(FenicsPotentialData3D):
     def __init__(self, fenics_potential, source_charge_options, solver_input, coords_units=qc.units.nm,
                  data_units=qc.units.meV):
-        super(FenicsPoissonData3D, self).__init__(fenics_potential, solver_input, coords_units, data_units)
         self.source_charge_options = source_charge_options
+        super(FenicsPoissonData3D, self).__init__(fenics_potential, solver_input, coords_units, data_units)
+
 
     def _initialize_surface_densities(self, solver_input):
-        return
+        pass
+        # Could be encoded as double-valued FacetFunctions?
         # Can use code from utilities to get source terms?
 
     def _initialize_non_surface_charge_density(self, solver_input):
+        # get terms from utilities, w/o measures
         pass
