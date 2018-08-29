@@ -701,15 +701,14 @@ class Model:
             the current state of modelDict will be wiped out and replaced by the
             loaded file.
         """
-        fileExists = os.path.isfile(self.modelPath)
-        if fileExists:
-            myFile = open(self.modelPath, 'r')
-            modelDict = json.load(myFile)
-            myFile.close()
-        else:
+        try:
+            with open(self.modelPath, 'r') as f:
+                modelDict = json.load(f)
+        except FileNotFoundError:
             warnings.warn('Could not load: Model file {} does not exist.'.format(
                 self.modelPath))
             modelDict = self.genEmptyModelDict()
+
         if updateModel:
             for subDictKey in self.modelDict:
                 modelDict[subDictKey].update(self.modelDict[subDictKey])
