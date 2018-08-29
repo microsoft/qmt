@@ -703,7 +703,7 @@ class Model:
         try:
             with open(self.modelPath, 'r') as f:
                 modelDict = json.load(f)
-        except FileNotFoundError:
+        except IOError:  # change to FileNotFoundError when >Py3 only
             warnings.warn('Could not load: Model file {} does not exist.'.format(
                 self.modelPath))
             modelDict = self.genEmptyModelDict()
