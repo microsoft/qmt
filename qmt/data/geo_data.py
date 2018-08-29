@@ -5,7 +5,6 @@ import shutil
 from qmt.materials import Materials
 from qmt.data.template import Data
 
-
 # TODO factor out geo superclass
 class GeoData(Data):
     pass
@@ -126,6 +125,8 @@ class Geo2DData(Data):
                 pass
 
 class Geo3DData(Data):
+    EXTERIOR_BC_NAME = "exterior"
+
     def __init__(self):
         """
         Class for a 3D geometry specification. It holds:
@@ -134,6 +135,7 @@ class Geo3DData(Data):
         """
         super(Geo3DData, self).__init__()
 
+        self.exterior_neumann_boundary_condition_value = None
         self.build_order = []
         self.parts = {}   # dict of parts in this geometry
         self.serial_fcdoc = None  # serialized FreeCAD document for this geometry
@@ -142,6 +144,7 @@ class Geo3DData(Data):
         # marker function
         self.fenics_ids = None # dictionary with part name keys mapping to fenics ids.
         self.materials_database = Materials()
+        self.exterior_boundary_condition_value = None
 
 
     def get_material(self, part_name):
@@ -277,16 +280,45 @@ class Geo3DData(Data):
 
 
     def get_names_to_region_ids(self):
-        return {name: i + 1 for i, name in enumerate(self.build_order)}
+        mapping = {name: i + 2 for i, name in enumerate(self.build_order)}
+        if self.exterior_boundary_condition_value is not None or self.exterior_neumann_boundary_condition_value is not None:
+            mapping[Geo3DData.EXTERIOR_BC_NAME] = 1
+        return mapping
 
     def get_region_ids_to_names(self):
         return {id: name for name, id in self.get_names_to_region_ids().items()}
+
+    def add_exterior_boundary_condition(self, value):
+        self.exterior_boundary_condition_value = value
+
+    def add_exterior_neumann_boundary_condition(self, value):
+        self.exterior_neumann_boundary_condition_value = value
+
+
+    def get_names_to_neumann_bc_values(self):
+        results = {}
+        for part, data in self.parts.items():
+            if data.boundary_condition and "neumann" in data.boundary_condition:
+                results[part] = data.boundary_condition["neumann"]
+
+        if self.exterior_neumann_boundary_condition_value is not None:
+            results[Geo3DData.EXTERIOR_BC_NAME] = self.exterior_neumann_boundary_condition_value
+
+            # try:
+            #     results[part] = data.boundary_condition["voltage"]
+            # except (KeyError, TypeError) as e:
+            #     pass
+        return results
+
 
     def get_names_to_dirichlet_bc_values(self):
         results = {}
         for part, data in self.parts.items():
             if data.boundary_condition and "voltage" in data.boundary_condition:
                 results[part] = data.boundary_condition["voltage"]
+
+        if self.exterior_boundary_condition_value is not None:
+            results[Geo3DData.EXTERIOR_BC_NAME] = self.exterior_boundary_condition_value
 
             # try:
             #     results[part] = data.boundary_condition["voltage"]

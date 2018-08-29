@@ -4,7 +4,7 @@
 import time
 
 import qmt.task_framework as qtf
-from qmt.task_framework import Task
+from qmt.tasks import Task
 
 
 class GeometryTaskExample(Task):

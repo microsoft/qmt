@@ -9,7 +9,7 @@ import shutil
 import tempfile
 import zipfile
 from xml.etree import ElementTree
-from qmt.geometry.freecad import FreeCAD
+import FreeCAD
 
 
 def delete(obj):

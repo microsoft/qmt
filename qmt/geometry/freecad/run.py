@@ -7,8 +7,8 @@
 import pickle
 import sys
 
-import qmt.geometry.freecad as cad
-
+import FreeCAD
+from qmt.geometry.freecad.objectConstruction import build
 
 def main():
     """Fetch input data and dispatch instructions.
@@ -21,7 +21,7 @@ def main():
 
     if instruction == 'build3d':
         activate_doc_from(data['current_options'])
-        new_opts = cad.objectConstruction.build(data['current_options'])
+        new_opts = build(data['current_options'])
         send_back(new_opts)
 
     elif instruction == 'writeFCfile':
@@ -42,8 +42,8 @@ def activate_doc_from(opts):
     :param dict opts:   QMT Geometry3D opts dict.
     :return:            A FCStd doc loaded from the file_path or serialised document.
     """
-    doc = cad.FreeCAD.newDocument('instance')
-    cad.FreeCAD.setActiveDocument('instance')
+    doc = FreeCAD.newDocument('instance')
+    FreeCAD.setActiveDocument('instance')
 
     if 'file_path' in opts:
         doc.load(opts['file_path'])
