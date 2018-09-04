@@ -17,7 +17,7 @@ class Geometry1D(Task):
         """
         super(Geometry1D, self).__init__([], options, name)
 
-    def _solve_instance(self, input_result_list, current_options):
+    def _solve_instance(input_result_list, current_options):
         """
         :param list input_result_list: This is an empty list.
         :param dict current_options: The dictionary specifying parts from above.
@@ -41,7 +41,7 @@ class Geometry2D(Task):
         """
         super(Geometry2D, self).__init__([], options, name)
 
-    def _solve_instance(self, input_result_list, current_options):
+    def _solve_instance(input_result_list, current_options):
         """
         :param list input_result_list: This is an empty list.
         :param dict current_options: The dictionary specification from above.
@@ -71,7 +71,7 @@ class Geometry3D(Task):
         # for partDirective in options["part_dict"]:
         #     assert type(options["part_dict"][partDirective]) is Part3D
 
-    def _solve_instance(self, input_result_list, current_options):
+    def _solve_instance(input_result_list, current_options):
         """
         :param list input_result_list: This is an empty list.
         :param dict current_options: The dictionary specifying parts from above.
