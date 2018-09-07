@@ -151,6 +151,10 @@ class Geo3DData(Data):
         return self.materials_database[self.parts[part_name].material]
 
     def get_material_mapping(self):
+        """
+        Get mapping of part names to materials.
+        :return:
+        """
         return {name: self.get_material(name) for name in self.parts.keys()}
 
     def get_parts(self):

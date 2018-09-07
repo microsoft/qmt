@@ -4,7 +4,7 @@ import numpy as np
 
 from qmt.data import Part3DData
 from qmt.tasks import Geometry3D
-from qms.tasks import Mesh3D, Poisson3D, RegionMapFunction, ThomasFermi3D, ThomasFermi3DFake
+from qms.tasks import Mesh3D, Poisson3D, RegionMapFunction, ThomasFermi3D
 import math
 
 from qms.fem.fenics_expressions import make_permittivity_expression
