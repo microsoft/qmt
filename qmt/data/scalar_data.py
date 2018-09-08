@@ -47,14 +47,14 @@ class InterpolatableScalarData3D(ScalarData3D):
 
 
 class FenicsPotentialData3D(InterpolatableScalarData3D):
-    def __init__(self, fenics_potential, solver_input, coords_units,
-                 data_units):
+    def __init__(self, fenics_potential, solver_input, coords_units, data_units, inf_norm_inconsistency=None):
         mesh = solver_input.mesh
         # region_mapping = solver_input.region_mapping
         coords = mesh.coordinates()
         data = fenics_potential.compute_vertex_values()
         super(FenicsPotentialData3D, self).__init__(coords, data, coords_units, data_units, fenics_potential)
         self.phi = self.evaluate_point_function
+        self.inf_norm_inconsistency = inf_norm_inconsistency
         # TODO initialize surface and volume integrals
         # self.charge_density, self.parts_to_volume_charge_integrals = self._initialize_non_surface_charge_density(solver_input)
         # self.parts_to_boundary_densities, self.parts_to_boundary_charge_integrals = self._initialize_surface_densities(solver_input)
@@ -129,8 +129,7 @@ class FenicsPotentialData3D(InterpolatableScalarData3D):
 # TODO override integral initializers
 
 class FenicsThomasFermiData3D(FenicsPotentialData3D):
-    def __init__(self, fenics_potential, charge_density_function, solver_input, coords_units=qc.units.nm,
-                 data_units=qc.units.meV):
+    def __init__(self, fenics_potential, solver_input, coords_units, data_units, inf_norm_inconsistency=None):
         self.charge_density_function = charge_density_function
         super(FenicsThomasFermiData3D, self).__init__(fenics_potential, solver_input, coords_units, data_units)
 
@@ -146,8 +145,7 @@ class FenicsThomasFermiData3D(FenicsPotentialData3D):
 
 
 class FenicsPoissonData3D(FenicsPotentialData3D):
-    def __init__(self, fenics_potential, source_charge_options, solver_input, coords_units=qc.units.nm,
-                 data_units=qc.units.meV):
+    def __init__(self, fenics_potential, solver_input, coords_units, data_units, inf_norm_inconsistency=None):
         self.source_charge_options = source_charge_options
         super(FenicsPoissonData3D, self).__init__(fenics_potential, solver_input, coords_units, data_units)
 

@@ -80,6 +80,8 @@ class Part3DData(Data):
         # ~ if (etch_zone is not None) and (depo_zone is not None):
             # ~ raise NameError(
                 # ~ 'Error - etch_zone and depo_zone cannot both be set!')
+        if domain_type not in ["semiconductor", "dielectric"] and ns is not None:
+            raise ValueError("Cannot set a volume charge density on a gate or virtual part.")
 
         # Input storage
         self.label = label
