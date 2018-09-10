@@ -91,7 +91,7 @@ class Task(object):
     __metaclass__ = TaskMetaclass
     current_instance_id = 0
 
-    def __init__(self, task_list, options, name, gather=False):
+    def __init__(self, task_list=None, options=None, name="Task", gather=False):
         """
         Constructs a new Task.
         :param task_list: the tasks that this depends on.
@@ -103,6 +103,12 @@ class Task(object):
         if "#" not in self.name:
             self.name += "#" + str(Task.current_instance_id)
             Task.current_instance_id += 1
+
+        if task_list is None:
+            task_list = []
+
+        if options is None:
+            options = {}
 
         self.options = options
         self.resources = None

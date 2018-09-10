@@ -138,7 +138,6 @@ class Geo3DData(Data):
         """
         super(Geo3DData, self).__init__()
 
-        self.exterior_neumann_boundary_condition_value = None
         self.build_order = []
         self.parts = {}  # dict of parts in this geometry
         self.serial_fcdoc = None  # serialized FreeCAD document for this geometry
@@ -147,7 +146,7 @@ class Geo3DData(Data):
         # marker function
         self.fenics_ids = None  # dictionary with part name keys mapping to fenics ids.
         self.materials_database = Materials()
-        self.exterior_boundary_condition_value = None
+
 
     def get_material(self, part_name):
         return self.materials_database[self.parts[part_name].material]
@@ -266,7 +265,7 @@ class Geo3DData(Data):
         else:
             import fenics as fn
             assert mesh, 'Need to specify a mesh on which to generate the region marker function'
-            data = fn.CellFunction('size_t', mesh)
+            data = fn.MeshFunction('size_t', mesh, mesh.topology().dim())
             fn.File(tmp_path) >> data
         shutil.rmtree(scratch_dir)
         return data
@@ -286,8 +285,7 @@ class Geo3DData(Data):
 
     def get_names_to_region_ids(self):
         mapping = {name: i + 2 for i, name in enumerate(self.build_order)}
-        if self.exterior_boundary_condition_value is not None or self.exterior_neumann_boundary_condition_value is not None:
-            mapping[Geo3DData.EXTERIOR_BC_NAME] = 1
+        mapping[Geo3DData.EXTERIOR_BC_NAME] = 1
         return mapping
 
     def get_region_ids_to_names(self):
