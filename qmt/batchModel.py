@@ -2,10 +2,12 @@
 # Licensed under the MIT License.
 
 from __future__ import absolute_import, division, print_function
-import numpy as np
-import os
 import json
+import warnings
+
+import numpy as np
 from six import itervalues
+
 import qmt
 
 
@@ -14,8 +16,8 @@ class Model:
         """Class for creating, loading, and manipulating a json file that
         contains information about the model.
 
-        Keyword arguments
-        -----------------
+        Parameters
+        ----------
         modelPath : str, default None
             Path to the model json file. If initialized with None, should be set
             manually before loading/saving.
@@ -693,21 +695,19 @@ class Model:
         Parameters
         ----------
         updateModel : bool, default True
-        If true, whatever is currently in the modelDict will be added to the
-        loaded model on import. Repeated settings are overwritten. If false,
-        the current state of modelDict will be wiped out and replaced by the
-        loaded file.
+            If true, whatever is currently in the modelDict will be added to the
+            loaded model on import. Repeated settings are overwritten. If false,
+            the current state of modelDict will be wiped out and replaced by the
+            loaded file.
         """
-        fileExists = os.path.isfile(self.modelPath)
-        if fileExists:
-            print('Loading model file {}.'.format(self.modelPath))
-            myFile = open(self.modelPath, 'r')
-            modelDict = json.load(myFile)
-            myFile.close()
-        else:
-            print('Could not load: Model file {} does not exist.'.format(
+        try:
+            with open(self.modelPath, 'r') as f:
+                modelDict = json.load(f)
+        except IOError:  # change to FileNotFoundError when >Py3 only
+            warnings.warn('Could not load: Model file {} does not exist.'.format(
                 self.modelPath))
             modelDict = self.genEmptyModelDict()
+
         if updateModel:
             for subDictKey in self.modelDict:
                 modelDict[subDictKey].update(self.modelDict[subDictKey])
