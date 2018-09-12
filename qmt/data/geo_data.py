@@ -161,6 +161,9 @@ class Geo3DData(Data):
     def get_parts(self):
         return self.parts
 
+    def get_names(self):
+        return self.parts.keys()
+
     def add_part(self, part_name, part, overwrite=False):
         """
         Add a part to this geometry.
@@ -288,11 +291,11 @@ class Geo3DData(Data):
         mapping[Geo3DData.EXTERIOR_BC_NAME] = 1
         return mapping
 
+    def get_region_ids(self):
+        return self.get_region_ids_to_names().keys()
+
     def get_region_ids_to_names(self):
         return {id: name for name, id in self.get_names_to_region_ids().items()}
-
-    def get_names(self):
-        return self.parts.keys()
 
     def get_names_to_default_ns(self):
         return {name: part.ns for name, part in self.parts.items() if part.ns is not None}

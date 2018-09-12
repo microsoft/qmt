@@ -152,7 +152,8 @@ class Task(object):
             current_options = replace_tag_with_value(current_options, tag, tag_values[tag])
         return current_options
 
-    def _solve_instance(self, input_result_list, current_options):
+    @staticmethod
+    def _solve_instance(input_result_list, current_options):
         """
         Does the actual computation of this.
 
