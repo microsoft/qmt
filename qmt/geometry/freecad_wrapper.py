@@ -3,7 +3,7 @@
 
 """Wrapping FreeCAD calls within a Python 3 environment."""
 
-
+from __future__ import print_function
 import os
 import pickle
 import subprocess
@@ -11,7 +11,7 @@ import subprocess
 import qmt
 
 
-def fcwrapper(pyenv='python2', instruction=None, data=None):
+def fcwrapper(pyenv='python2', instruction=None, data=None, debug=False):
     """Wrapper to isolate FreeCAD Python 2.7 calls from the Python 3 code base.
 
     :param str pyenv:       Python interpreter, defaults to 'python2'.
@@ -31,11 +31,18 @@ def fcwrapper(pyenv='python2', instruction=None, data=None):
     # output[1] not checked because stderr is used for mere warnings too often.
     if proc.returncode != 0:
         print(output[1].decode())
-        print(os.linesep + ' --- END OF WRAPPED STDERR ---' + os.linesep)
+        print(os.linesep + ' --- END OF FC WRAPPED STDERR ---' + os.linesep)
         raise ValueError('pywrapper returned ' + str(proc.returncode))
 
     # The returned serialised byte stream is demarcated by the separator string
     # "MAGICQMTRANSFERBYTES". Most data preceding the separator corresponds to
     # FreeCAD notifications and gets discarded.
-    serial_data = output[0].decode().split('MAGICQMTRANSFERBYTES')[-1].encode()
+    pipe_data = output[0].decode().split('MAGICQMTRANSFERBYTES')
+    if debug is True:
+        print(os.linesep + ' --- FC WRAPPED STDOUT ---' + os.linesep)
+        print(str(*pipe_data[0:-1]).decode())
+        print(os.linesep + ' --- FC WRAPPED STDERR ---' + os.linesep)
+        print(output[1].decode())
+        print(os.linesep + ' --- END OF FC WRAPPED STDERR ---' + os.linesep)
+    serial_data = pipe_data[-1].encode()
     return pickle.loads(serial_data)

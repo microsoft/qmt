@@ -5,6 +5,8 @@
 """General FreeCAD helper functions."""
 
 import os
+import sys
+import contextlib
 import shutil
 import tempfile
 import zipfile
@@ -39,6 +41,21 @@ def deepRemove(obj=None, name=None, label=None):
         raise RuntimeError('No object selected!')
     _deepRemove_impl(obj)
     doc.recompute()
+
+
+@contextlib.contextmanager
+def silent_stdout():
+    sys.stdout.flush()
+    stored_py = sys.stdout
+    stored_fileno = os.dup(sys.stdout.fileno())
+    with open(os.devnull, 'w') as devnull:
+        sys.stdout = devnull              # for python stdout.write
+        os.dup2(devnull.fileno(), 1)      # for library write to fileno 1
+        try:
+            yield
+        finally:
+            sys.stdout = stored_py
+            os.dup2(stored_fileno, 1)
 
 
 def _remove_from_zip(zipfname, *filenames):
