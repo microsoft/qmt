@@ -81,12 +81,16 @@ class Geometry3D(Task):
         pyenv = current_options['pyenv'] if 'pyenv' in current_options else 'python2'
 
         # Convert NumPy3 floats to something that Python2 can unpickle
-        current_options['params'] = {k: float(v) for k, v in current_options['params'].items()}
+        if 'params' in current_options:
+            current_options['params'] = {
+                k: float(v) for k, v in current_options['params'].items()
+            }
 
         # Send off the instructions
         ret = fcwrapper(pyenv, 'build3d',
                         {'input_result_list': input_result_list,
-                         'current_options': current_options})
+                         'current_options': current_options},
+                         debug=False)
 
         # TODO: use Geo3DData.get_data() and set_data() from within wrapper
         # Build a geometry object with from the returned results

@@ -73,6 +73,7 @@ def build(opts):
                              ' is not a recognized directive type.')
 
         assert part is not None
+        part.Label = input_part.label
         doc.recompute()
         opts['built_part_names'][input_part.label] = part.Name
         store_serial(opts['serial_stp_parts'], input_part.label,
@@ -403,6 +404,7 @@ def initialize_lithography(info, opts, fillShells=True):
         except:
             raise KeyError("No substrate built for '" + str(baseSubstrate.label) + "'")
         info.lithoDict['substrate'][()] += [doc.getObject(built_part_name)]
+    # ~ import sys
     # ~ sys.stderr.write(">>> litdic " + str(info.lithoDict) + "\n")
 
     # Now that we have ordered the primitives, we need to compute a few
@@ -637,6 +639,23 @@ def gen_G(info, opts, layerNum, objID):
         if () not in layer['objIDs'][objID]['HDict']:
             layer['objIDs'][objID][
                 'HDict'][()] = H_offset(info, opts, layerNum, objID)
+
+        # This block fixes multifuses for wireshells with too big offsets,
+        # by forcing all participating object shells into a new solid.
+        solid_hlist = []
+        import Part
+        for obj in layer['objIDs'][objID]['HDict'][()]:
+            __s__ = obj.Shape.Faces
+            __s__ = Part.Solid(Part.Shell(__s__))
+            __o__ = FreeCAD.ActiveDocument.addObject("Part::Feature",obj.Label+"_solid")
+            __o__.Label = obj.Label+"_solid"
+            __o__.Shape = __s__
+            solid_hlist.append(__o__)
+            info.trash.append(obj)
+            info.trash.append(__o__)
+            info.trash.append(__s__)
+        layer['objIDs'][objID]['HDict'][()] = solid_hlist
+
         H = genUnion(layer['objIDs'][objID]['HDict'][()],
                      consumeInputs=False)
         info.trash.append(H)

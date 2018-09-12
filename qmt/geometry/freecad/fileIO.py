@@ -10,6 +10,8 @@ import os
 import Mesh
 import Part
 
+from .auxiliary import silent_stdout
+
 
 def exportMeshed(obj, fileName):
     ''' Export a mesh of an object to the given file name.
@@ -35,7 +37,8 @@ def exportCAD(obj_list, file_name):
     # The export format is determined by the extension, so we should check it:
     supported_ext = ('.step', '.stp')
     if file_name.endswith(supported_ext):
-        Part.export(obj_list, file_name)
+        with silent_stdout():
+            Part.export(obj_list, file_name)
     else:
         raise ValueError(file_name + ' is not a supported extension ('
                          + ', '.join(supported_ext) + ')')
@@ -60,9 +63,8 @@ def updateParams(doc, paramDict):
     # a geometry sweep in the model script.
     if paramDict:
         # Internal: unconditional removeObject on spreadSheet breaks param dependencies.
-        # ~ spreadSheet = doc.addObject('Spreadsheet::Sheet', 'modelParams')
         try:
-            spreadSheet = doc.modelParams
+            spreadSheet = doc.addObject('Spreadsheet::Sheet', 'modelParams')
             spreadSheet.clearAll()  # clear existing spreadsheet
         except:
             doc.removeObject('modelParams')  # otherwise it was not a good spreadsheet
