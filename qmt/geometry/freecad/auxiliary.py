@@ -45,6 +45,7 @@ def deepRemove(obj=None, name=None, label=None):
 
 @contextlib.contextmanager
 def silent_stdout():
+    '''Suppress standard output.'''
     sys.stdout.flush()
     stored_py = sys.stdout
     stored_fileno = os.dup(sys.stdout.fileno())
@@ -58,7 +59,7 @@ def silent_stdout():
             os.dup2(stored_fileno, 1)
 
 
-def _remove_from_zip(zipfname, *filenames):
+def _remove_from_zip(zipfname, *filenames):  # pragma: no cover
     '''Remove file names from zip archive.'''
     tempdir = tempfile.mkdtemp()
     try:
@@ -74,14 +75,14 @@ def _remove_from_zip(zipfname, *filenames):
         shutil.rmtree(tempdir)
 
 
-def _replace_in_zip_fstr(zipfname, filename, content):
+def _replace_in_zip_fstr(zipfname, filename, content):  # pragma: no cover
     '''Replace a file in a zip archive with some content string.'''
     _remove_from_zip(zipfname, filename)
     zfile = zipfile.ZipFile(zipfname, mode='a')
     zfile.writestr(filename, content)
 
 
-def make_objects_visible(zipfname):
+def make_objects_visible(zipfname):  # pragma: no cover
     '''Make objects visible in a fcstd file with GuiDocument.xml.'''
     zfile = zipfile.ZipFile(zipfname)
     gui_xml = zfile.read('GuiDocument.xml')

@@ -4,9 +4,9 @@
 """Sketch manipulation."""
 
 
-import FreeCAD
 from copy import deepcopy
 
+import FreeCAD
 import Draft
 import Part
 import Sketcher
@@ -90,29 +90,7 @@ def findCycle(lineSegments, startingIndex, availSegIDs):
         # ~ if idx in wire
 
 
-def addCycleSketch(name, doc, cycleSegIndList, lineSegments):
-    ''' Add a sketch of a cycle to a FC document.
-    '''
-    if (doc.getObject(name) is not None):  # this name already exists
-        raise ValueError("Error: sketch " + name + " already exists.")
-    obj = doc.addObject('Sketcher::SketchObject', name)
-    # obj.MapMode = 'FlatFace'
-    obj = doc.getObject(name)
-    cnt = 0
-    for segIndex in cycleSegIndList:
-        startPoint = lineSegments[segIndex, 0, :]
-        endPoint = lineSegments[segIndex, 1, :]
-        obj.addGeometry(Part.LineSegment(vec(tuple(startPoint)), vec(tuple(endPoint))))
-        cnt += 1
-        if cnt <= 1:
-            continue
-        obj.addConstraint(Sketcher.Constraint('Coincident', cnt - 2, 2, cnt - 1, 1))
-    obj.addConstraint(Sketcher.Constraint('Coincident', cnt - 1, 2, 0, 1))
-    doc.recompute()
-    return obj
-
-
-def addCycleSketch2(name, wire):
+def addCycleSketch(name, wire):
     ''' Add a sketch of a cycle (closed wire) to a FC document.
     '''
     assert wire.isClosed()
@@ -148,7 +126,7 @@ def addPolyLineSketch(name, doc, segmentOrder, lineSegments):
     return obj
 
 
-def findEdgeCycles(sketch):
+def findEdgeCycles(sketch):  # TODO: port objectConstruction crossection stuff
     """Find the list of edges in a sketch and separate them into cycles."""
     lineSegments = findSegments(sketch)
     # Next, detect cycles:
@@ -166,30 +144,15 @@ def findEdgeCycles2(sketch):
     """Find the list of edges in a sketch and separate them into cycles."""
     return sketch.Shape.Wires
 
-def splitSketch_old(sketch):
-    '''Splits a sketch into several, returning a list of names of the new sketches.
-    '''
-    doc = FreeCAD.ActiveDocument
-    lineSegments, cycles = findEdgeCycles(sketch)
-    # Finally, add new sketches based on the cycles:
-    currentSketchName = sketch.Name
-    cycleSketchList = []
-    for i, cycle in enumerate(cycles):
-        cycleSketch = addCycleSketch(currentSketchName + '_' + str(i),
-                                  doc, cycle, lineSegments)
-        cycleSketchList += [cycleSketch]
-    return cycleSketchList
 
 def splitSketch(sketch):
     '''Splits a sketch into several, returning a list of names of the new sketches.
     '''
     if not sketch.Shape.Wires:
         raise ValueError("No wires in sketch.")
-    # ~ if len(sketch.Shape.Wires) < 2:  # some code relies on copied sketch
-    # ~     return [sketch]
     sketchList = []
     for i,wire in enumerate(sketch.Shape.Wires):
-        sketchList.append(addCycleSketch2(sketch.Name + '_' + str(i), wire))
+        sketchList.append(addCycleSketch(sketch.Name + '_' + str(i), wire))
     return sketchList
 
 

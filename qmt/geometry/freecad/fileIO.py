@@ -7,8 +7,9 @@
 
 import os
 
-import Mesh
+import FreeCAD
 import Part
+import Mesh
 
 from .auxiliary import silent_stdout
 
