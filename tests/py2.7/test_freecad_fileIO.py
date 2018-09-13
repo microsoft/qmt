@@ -56,33 +56,22 @@ def test_exportCAD(fix_testDir, fix_FCDoc):
         exportCAD([testShape], 'not_a_step_file')
     assert 'not a supported extension' in str(err.value)
 
+def test_store_serial(fix_testDir, fix_FCDoc):
+    '''Test serialisation to memory.'''
+    # Serialise document
+    obj = fix_FCDoc.addObject('App::FeaturePython', 'some_content')
+    serial_data = store_serial(fix_FCDoc, lambda d, p: d.saveAs(p), 'fcstd')
 
-# ~ def test_updateParams(fix_modelPath, fix_FCDoc):
-    # ~ '''Test updating of parameters in the FC gui.
-       # ~ TODO: this should probably work with only 1 param (right now it doesn't).
-    # ~ '''
-    # ~ setupModelFile(fix_modelPath)
-    # ~ model = qmt.Model(modelPath=fix_modelPath)
+    # Write to a file
+    file_path = 'test.fcstd'
+    import codecs
+    data = codecs.decode(serial_data.encode(), 'base64')
+    with open(file_path, 'wb') as of:
+        of.write(data)
 
-    # ~ dummy = fix_FCDoc.addObject("Part::Box", "modelParams")
-    # ~ model.modelDict['geometricParams']['length1'] = (2, 'freeCAD')
-    # ~ updateParams()
-    # ~ model.modelDict['geometricParams']['length2'] = (3, 'freeCAD')
-    # ~ model.modelDict['geometricParams']['param3'] = (3, 'python')
-    # ~ updateParams(model)
-    # ~ model.modelDict['geometricParams']['param4'] = (3, 'unknown')
-    # ~ model.saveModel()
-    # ~ with pytest.raises(ValueError) as err:
-        # ~ updateParams()
-    # ~ assert 'Unknown geometric parameter' in str(err.value)
+    # Load back and check
+    doc = FreeCAD.newDocument('instance')
+    FreeCAD.setActiveDocument('instance')
+    doc.load(file_path)
 
-    # ~ fcFilePath = os.path.splitext(fix_modelPath)[0] + '.FCStd'
-    # ~ fix_FCDoc.saveAs(fcFilePath)
-    # ~ myDoc2 = FreeCAD.newDocument('testDoc2')
-    # ~ myDoc2.load(fcFilePath)
-    # ~ assert myDoc2.modelParams.length1 == 2
-    # ~ assert myDoc2.modelParams.length2 == 3
-
-    # ~ FreeCAD.closeDocument('testDoc2')
-    # ~ os.remove(fcFilePath)
-    # ~ os.remove(fix_modelPath)
+    assert doc.getObject('some_content') is not None

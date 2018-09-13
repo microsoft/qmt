@@ -7,8 +7,11 @@
 
 import os
 
-import Mesh
+import FreeCAD
 import Part
+import Mesh
+
+from .auxiliary import silent_stdout
 
 
 def exportMeshed(obj, fileName):
@@ -35,66 +38,20 @@ def exportCAD(obj_list, file_name):
     # The export format is determined by the extension, so we should check it:
     supported_ext = ('.step', '.stp')
     if file_name.endswith(supported_ext):
-        Part.export(obj_list, file_name)
+        with silent_stdout():
+            Part.export(obj_list, file_name)
     else:
         raise ValueError(file_name + ' is not a supported extension ('
                          + ', '.join(supported_ext) + ')')
 
-
-# TODO: this is sketchUtils or geomUtils, not fileIO
-def updateParams(doc, paramDict):
-    ''' Update the parameters in the modelParams spreadsheet to reflect the
-        current value in the dict.
-    '''
-    # ~ doc = FreeCAD.ActiveDocument
-
-    # ~ if passModel is None:
-        # ~ myModel = getModel()
-    # ~ else:
-        # ~ myModel = passModel
-    # ~ paramDict = myModel.modelDict['geometricParams']
-
-    # We only want to do something if geometric parameters are defined
-    # in the model. This means that if we have old parameters sitting
-    # in the FreeCAD file, they won't get wiped out if we comment out
-    # a geometry sweep in the model script.
-    if paramDict:
-        # Internal: unconditional removeObject on spreadSheet breaks param dependencies.
-        # ~ spreadSheet = doc.addObject('Spreadsheet::Sheet', 'modelParams')
-        try:
-            spreadSheet = doc.modelParams
-            spreadSheet.clearAll()  # clear existing spreadsheet
-        except:
-            doc.removeObject('modelParams')  # otherwise it was not a good spreadsheet
-            spreadSheet = doc.addObject('Spreadsheet::Sheet', 'modelParams')
-        spreadSheet.set('A1', 'paramName')
-        spreadSheet.set('B1', 'paramValue')
-        spreadSheet.setColumnWidth('A', 200)
-        spreadSheet.setStyle('A1:B1', 'bold', 'add')
-        for i, key in enumerate(paramDict):
-            paramType = paramDict[key][1]
-            if paramType == 'freeCAD':
-                idx = str(i + 2)
-                spreadSheet.set('A' + idx, key)
-                spreadSheet.set('B' + idx, str(paramDict[key][0]))
-                spreadSheet.setAlias('B' + idx, str(key))
-            elif paramType == 'python':
-                pass
-            else:
-                raise ValueError('Unknown geometric parameter type.')
-
-        doc.recompute()
-
-
-def store_serial(target_dict, target_label, save_fct, ext, obj):
-    '''Store a serialised representation of save_fct(obj, temporary_file.ext)
-    inside target_dict[target_label].
+def store_serial(obj, save_fct, ext):
+    '''Return a serialised representation of save_fct(obj, temporary_file.ext).
     '''
     import codecs
     import uuid
     tmp_path = 'tmp_' + uuid.uuid4().hex + '.' + ext
     save_fct(obj, tmp_path)
     with open(tmp_path, 'rb') as f:
-        # ~ target_dict[target_label] = codecs.encode(f.read(), 'base64')
-        target_dict[target_label] = codecs.encode(f.read(), 'base64').decode()  # TODO test
+        serial_data = codecs.encode(f.read(), 'base64').decode()
     os.remove(tmp_path)
+    return serial_data

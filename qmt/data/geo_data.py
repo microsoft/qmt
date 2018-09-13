@@ -185,7 +185,7 @@ class Geo3DData(Data):
             else:
                 pass
 
-    def set_data(self,data_name,data,scratch_dir=None):
+    def set_data(self, data_name, data, scratch_dir=None):
         """
         Set data to a serial format that is easily portable.
         :param scratch_dir:
@@ -200,6 +200,7 @@ class Geo3DData(Data):
             scratch_dir = 'tmp_'+str(uuid.uuid4())
         os.mkdir(scratch_dir)
         if data_name == 'fcdoc':
+            # TODO: refactor into "write to file" and "read file into memory" (reuse store_serial)
             tmp_path = os.path.join(scratch_dir,'tmp_doc_'+str(hash(data))+'.fcstd')
             data.saveAs(tmp_path)
         elif data_name == 'mesh' or data_name == 'rmf':
@@ -220,7 +221,7 @@ class Geo3DData(Data):
             self.serial_region_marker = serial_data
         shutil.rmtree(scratch_dir)
 
-    def get_data(self,data_name, mesh=None, scratch_dir=None):
+    def get_data(self, data_name, mesh=None, scratch_dir=None):
         """
         Get data from stored serial format.
         :param scratch_dir:
@@ -236,6 +237,7 @@ class Geo3DData(Data):
             scratch_dir = 'tmp_'+str(uuid.uuid4())
         os.mkdir(scratch_dir)
         if data_name == 'fcdoc':
+            # TODO: templates sent by path string, other "unpacking" fcdocs is not needed
             serial_data = self.serial_fcdoc
             tmp_path = os.path.join(scratch_dir,'tmp_doc_'+str(hash(serial_data))+'.fcstd')
         elif data_name == 'mesh' or data_name == 'rmf':
@@ -325,4 +327,3 @@ class Geo3DData(Data):
             # except (KeyError, TypeError) as e:
             #     pass
         return results
-

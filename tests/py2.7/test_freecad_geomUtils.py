@@ -4,9 +4,8 @@
 """Testing QMT geometry util functions."""
 
 
-from __future__ import absolute_import, division, print_function
+from __future__ import division
 
-from qmt.geometry.freecad import Part
 from qmt.geometry.freecad.geomUtils import *
 
 vec = FreeCAD.Vector
