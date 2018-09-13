@@ -1,7 +1,7 @@
 import dask
 import dask.distributed
 from six import iteritems
-
+import cloudpickle
 
 class SweepManager(object):
     """
@@ -530,6 +530,17 @@ class SweepTag(object):
         out = SweepTag(self.tag_name)
         out.tag_function = lambda x: abs(self.tag_function(x))
         return out
+
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        # Remove the unpicklable entries.
+        state['tag_function'] = cloudpickle.dumps(self.tag_function)
+        return state
+
+    def __setstate__(self, state):
+        # Restore instance attributes.
+        self.__dict__.update(state)
+        self.tag_function = cloudpickle.loads(state['tag_function'])
 
     def replace(self, value):
         return self.tag_function(value)

@@ -101,13 +101,13 @@ class Part3DData(Data):
         self.t_out = t_out
         self.layer_num = layer_num
         self.litho_base = [] if litho_base is None else litho_base
-        self.fill_litho = fill_litho
+        self.fill_litho = fill_litho  # TODO: scheduled for removal
         self.mesh_max_size = mesh_max_size
         self.mesh_min_size = mesh_min_size
         self.mesh_growth_rate = mesh_growth_rate
         self.mesh_scale_vector = mesh_scale_vector
         self.boundary_condition = boundary_condition
-        self.subtract_list = [] if subtract_list is None else subtract_list
+        self.subtract_list = [] if subtract_list is None else subtract_list  # TODO: scheduled for removal
         self.ns = ns
         self.phi_nl = phi_nl
         self.ds = ds

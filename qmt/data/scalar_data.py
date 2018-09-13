@@ -2,7 +2,6 @@
 # Licensed under the MIT License.
 
 import fenics as fn
-# ~ from qms.fem import fenics_expressions
 
 import qmt.physics_constants as qc
 from qms.fem.fenics_expressions import make_u0_expression, make_3d_prefactor_expression

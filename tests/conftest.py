@@ -27,7 +27,7 @@ def fix_exampleDir():
 @pytest.fixture(scope='function')
 def fix_FCDoc():
     '''Set up and tear down a FreeCAD document.'''
-    from qmt.geometry.freecad import FreeCAD
+    import FreeCAD
     doc = FreeCAD.newDocument('testDoc')
     yield doc
     FreeCAD.closeDocument('testDoc')
@@ -49,7 +49,7 @@ def fix_two_cycle_sketch():
         # Note: the z-component is zero, as sketches are plane objects.
         #       Adjust orientation with Sketch.Placement(Normal, Rotation)
         import Part
-        from qmt.geometry.freecad import FreeCAD
+        import FreeCAD
         vec = FreeCAD.Vector
         lseg = Part.LineSegment
 
@@ -77,7 +77,7 @@ def fix_unit_square_sketch():
         '''Helper function to drop a simple unit square sketch.
            The segments are carefully ordered.
         '''
-        from qmt.geometry.freecad import FreeCAD
+        import FreeCAD
         import Part
         vec = FreeCAD.Vector
         lseg = Part.LineSegment
@@ -105,7 +105,7 @@ def fix_hexagon_sketch():
 
     def aux_hexagon_sketch(r=1):
         '''Helper function to drop a hexagonal sketch.'''
-        from qmt.geometry.freecad import FreeCAD
+        import FreeCAD
         import ProfileLib.RegularPolygon
         vec = FreeCAD.Vector
         doc = FreeCAD.ActiveDocument

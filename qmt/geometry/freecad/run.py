@@ -8,7 +8,6 @@ import pickle
 import sys
 
 import FreeCAD
-from qmt.geometry.freecad.objectConstruction import build
 
 def main():
     """Fetch input data and dispatch instructions.
@@ -20,6 +19,7 @@ def main():
     data = pickle.loads(''.join(sys.stdin.readlines()))
 
     if instruction == 'build3d':
+        from qmt.geometry.freecad.objectConstruction import build
         activate_doc_from(data['current_options'])
         new_opts = build(data['current_options'])
         send_back(new_opts)

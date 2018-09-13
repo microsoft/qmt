@@ -3,8 +3,8 @@
 
 import time
 
-import qmt.task_framework as qtf
-from qmt.task_framework import Task
+import qmt.tasks as qtf
+from qmt.tasks import Task
 
 
 class GeometryTaskExample(Task):
@@ -14,7 +14,7 @@ class GeometryTaskExample(Task):
         self.input_task_list = [] # no input tasks here
 
     def _solve_instance(self,input_result_list,current_options):
-        print('running geom')
+        time.sleep(1.)
         return current_options
 
 
@@ -51,8 +51,10 @@ sweeps = [{tag1: 1., tag2: 10.}, {tag1: 2., tag2: 10.}, {tag1: 1., tag2: 5.}, {t
 sweep_man = qtf.SweepManager(sweeps)
 
 result = sweep_man.run(poisson_task)
-print(poisson_task.reduce())
+#print(poisson_task.reduce())
 
-print(geo_task.reduce())
+#print(geo_task.reduce())
+
+print(result.result())
 
 #print(map(dask.result,result.futures))

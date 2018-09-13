@@ -17,7 +17,7 @@ class Geometry1D(Task):
         """
         super(Geometry1D, self).__init__([], options, name)
 
-    def _solve_instance(self, input_result_list, current_options):
+    def _solve_instance(input_result_list, current_options):
         """
         :param list input_result_list: This is an empty list.
         :param dict current_options: The dictionary specifying parts from above.
@@ -41,7 +41,7 @@ class Geometry2D(Task):
         """
         super(Geometry2D, self).__init__([], options, name)
 
-    def _solve_instance(self, input_result_list, current_options):
+    def _solve_instance(input_result_list, current_options):
         """
         :param list input_result_list: This is an empty list.
         :param dict current_options: The dictionary specification from above.
@@ -71,7 +71,7 @@ class Geometry3D(Task):
         # for partDirective in options["part_dict"]:
         #     assert type(options["part_dict"][partDirective]) is Part3D
 
-    def _solve_instance(self, input_result_list, current_options):
+    def _solve_instance(input_result_list, current_options):
         """
         :param list input_result_list: This is an empty list.
         :param dict current_options: The dictionary specifying parts from above.
@@ -87,18 +87,9 @@ class Geometry3D(Task):
             }
 
         # Send off the instructions
-        ret = fcwrapper(pyenv, 'build3d',
+        geo = fcwrapper(pyenv, 'build3d',
                         {'input_result_list': input_result_list,
                          'current_options': current_options},
                          debug=False)
-
-        # TODO: use Geo3DData.get_data() and set_data() from within wrapper
-        # Build a geometry object with from the returned results
-        geo = Geo3DData()
-        geo.serial_fcdoc = ret['serial_fcdoc']
-        for part in current_options['input_parts']:
-            part.serial_stp = ret['serial_stp_parts'][part.label]
-            part.built_fc_name = ret['built_part_names'][part.label]
-            geo.add_part(part.label, part)
 
         return geo

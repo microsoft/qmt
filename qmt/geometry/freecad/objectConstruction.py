@@ -11,14 +11,46 @@ from six import iteritems, text_type
 
 # TODO: use namespace in code
 from qmt.geometry.freecad.auxiliary import *
-from qmt.geometry.freecad.fileIO import (updateParams, exportCAD, store_serial)
-from qmt.geometry.freecad.geomUtils import (extrude, copy_move, genUnion,
+from qmt.geometry.freecad.fileIO import (exportCAD, store_serial)
+from qmt.geometry.freecad.geomUtils import (extrude, copy_move, genUnion,# make_solid,
                                             getBB, makeBB, makeHexFace,
                                             extrudeBetween, intersect,
                                             checkOverlap, subtract,
                                             crossSection)
 from qmt.geometry.freecad.sketchUtils import (findSegments, splitSketch, extendSketch,
                                               findEdgeCycles, draftOffset)
+
+from qmt.data.geo_data import Geo3DData
+
+def updateParams(doc, paramDict):
+    ''' Update the parameters in the modelParams spreadsheet to reflect the
+        current value in the dict.
+    '''
+    if not paramDict:
+        return
+    # Cave: unconditional removeObject on spreadSheet breaks param dependencies.
+    try:
+        spreadSheet.clearAll()  # clear existing spreadsheet
+    except:
+        doc.removeObject('modelParams')  # otherwise it was not a good spreadsheet
+        spreadSheet = doc.addObject('Spreadsheet::Sheet', 'modelParams')
+    spreadSheet.set('A1', 'paramName')
+    spreadSheet.set('B1', 'paramValue')
+    spreadSheet.setColumnWidth('A', 200)
+    spreadSheet.setStyle('A1:B1', 'bold', 'add')
+    for i, key in enumerate(paramDict):
+        paramType = paramDict[key][1]
+        if paramType == 'freeCAD':
+            idx = str(i + 2)
+            spreadSheet.set('A' + idx, key)
+            spreadSheet.set('B' + idx, str(paramDict[key][0]))
+            spreadSheet.setAlias('B' + idx, str(key))
+        elif paramType == 'python':
+            pass
+        else:
+            raise ValueError('Unknown geometric parameter type.')
+
+    doc.recompute()
 
 
 class DummyInfo:
@@ -33,6 +65,7 @@ def build(opts):
     :return dict:       Modified options dict.
     '''
     doc = FreeCAD.ActiveDocument
+    geo = Geo3DData()
 
     # Schedule for deletion all objects not explicitly selected by the user
     input_parts_names = [part.fc_name for part in opts['input_parts']]
@@ -52,8 +85,9 @@ def build(opts):
     if 'serial_stp_parts' not in opts:
         opts['serial_stp_parts'] = {}
 
-    info_holder = DummyInfo()  # temporary workaround to support old litho code
     # Build the parts
+    info_holder = DummyInfo()  # temporary workaround to support old litho code
+    built_parts = []
     for input_part in opts['input_parts']:
 
         if input_part.directive == 'extrude':
@@ -73,23 +107,38 @@ def build(opts):
                              ' is not a recognized directive type.')
 
         assert part is not None
-        part.Label = input_part.label
         doc.recompute()
-        opts['built_part_names'][input_part.label] = part.Name
-        store_serial(opts['serial_stp_parts'], input_part.label,
-                     exportCAD, 'stp',  [ part ] )
+        built_parts.append(part)
+        opts['built_part_names'][input_part.label] = part.Name  # needed for litho steps
 
-    collect_garbarge(info_holder)
-
+    # Cleanup
+    collect_garbage(info_holder)
     for obj in blacklist:
         delete(obj)
     doc.recompute()
-    def _save_helper(doc, path):
-        doc.saveAs(path)
-        #make_objects_visible(path)  # freecadcmd doesn't create GuiDocument.xml
-    store_serial(opts, 'serial_fcdoc', _save_helper, 'fcstd', doc)
 
-    return opts
+    # Subtraction (removes the need for subtractlists)
+    for i, part in enumerate(built_parts):
+        for other_part in built_parts[0:i]:
+            if checkOverlap([part, other_part]):
+                cut = subtract(part, copy_move(other_part), consumeInputs=True)
+                simple_copy = doc.addObject('Part::Feature', "simple_copy")
+                simple_copy.Shape = cut.Shape  # no solid, just its shape (can be disjoint)
+                delete(cut)
+                part = simple_copy
+                built_parts[i] = simple_copy
+
+    # Update names and store the built parts
+    for input_part, built_part in zip(opts['input_parts'], built_parts):
+        built_part.Label = input_part.label  # here it's collision free
+        input_part.serial_stp = store_serial([ built_part ], exportCAD, 'stp')
+        input_part.built_fc_name = built_part.Name
+        geo.add_part(input_part.label, input_part)
+
+    # Store the FreeCAD document
+    geo.set_data('fcdoc', doc)
+
+    return geo
 
 
 def build_pass(part):
@@ -640,6 +689,7 @@ def gen_G(info, opts, layerNum, objID):
             layer['objIDs'][objID][
                 'HDict'][()] = H_offset(info, opts, layerNum, objID)
 
+        # TODO: reuse new function
         # This block fixes multifuses for wireshells with too big offsets,
         # by forcing all participating object shells into a new solid.
         solid_hlist = []
@@ -671,496 +721,13 @@ def gen_G(info, opts, layerNum, objID):
     G.Label = partName
     return G
 
-def collect_garbarge(info):
+def collect_garbage(info):
     """Delete all the objects in trash."""
     for obj in info.trash:
         try:
             delete(obj)
         except BaseException:
             pass
-
-
-
-
-
-
-################################################################################
-
-
-class modelBuilder:
-    def __init__(self, passModel=None, debugMode=False):
-        """Builds a model defined by the JSON input file."""
-        if passModel is None:
-            self.model = getModel()
-        else:
-            self.model = passModel
-        self.debugMode = debugMode
-        self.doc = FreeCAD.ActiveDocument
-        self._buildPartsDict = {}
-        self.lithoSetup = False  # Has the litho setup routine been run?
-        self.trash = []  # trash for garbage collection at the end
-        # Update the FreeCAD model to reflect the current value of any model
-        # parameters:
-        updateParams(passModel=self.model)
-
-    def buildPart(self, partName):
-        partDict = self.model.modelDict['3DParts'][partName]
-        directive = partDict['directive']
-        if directive == 'extrude':
-            objs = self._build_extrude(partName)
-        elif directive == 'wire':
-            objs = self._build_wire(partName)
-        elif directive == 'wireShell':
-            objs = self._build_wire_shell(partName)
-        elif directive == 'SAG':
-            objs = self._build_SAG(partName)
-        elif directive == 'lithography':
-            objs = self._build_litho(partName)
-        else:
-            raise ValueError('Directive ' + directive +
-                             ' is not a recognized directive type.')
-        self._buildPartsDict[partName] = objs
-        for obj in objs:
-            self.model.registerCadPart(partName, obj.Name, None)
-
-    # ~ def exportBuiltParts(self, stepFileDir=None, stlFileDir=None):
-        # ~ # Now that we are ready to export, we first want to merge all of the
-        # ~ # 3D renders corresponding to a single shape into one entity:
-        # ~ totalObjsDict = {}
-        # ~ for partName in self._buildPartsDict.keys():
-            # ~ objsList = self._buildPartsDict[partName]
-            # ~ mergedObj = genUnion(objsList, consumeInputs=True)
-            # ~ mergedObj.Label = partName
-            # ~ totalObjsDict[partName] = mergedObj
-        # ~ # Now that we have merged the objects, we want to center them  in the x-y
-        # ~ # plane so the distances aren't ridiculous:
-        # ~ centerObjects(totalObjsDict.values())
-        # ~ # Finally, we go through the dictionary and export:
-        # ~ for partName in totalObjsDict.keys():
-            # ~ obj = totalObjsDict[partName]
-            # ~ objFCName = obj.Name
-            # ~ if stepFileDir is not None:
-                # ~ filePath = stepFileDir + '/' + partName + '.step'
-                # ~ exportCAD(obj, filePath)
-                # ~ self.model.registerCadPart(
-                    # ~ partName, objFCName, filePath, reset=True)
-            # ~ if stlFileDir is not None:
-                # ~ filePath = stlFileDir + '/' + partName + '.stl'
-                # ~ exportMeshed(obj, filePath)
-
-    def saveFreeCADState(self, fileName):
-        """Save a copy of the freeCAD model and do garbage collection."""
-        self._collect_garbarge()
-        FreeCAD.ActiveDocument.saveAs(fileName)
-
-    def _build_extrude(self, partName):
-        """Build an extrude part."""
-        partDict = self.model.modelDict['3DParts'][partName]
-        assert partDict['directive'] == 'extrude'
-        z0 = self._fetch_geo_param(partDict['z0'])
-        deltaz = self._fetch_geo_param(partDict['thickness'])
-        sketch = self.doc.getObject(partDict['fcName'])
-        splitSketches = splitSketch(sketch)
-        extParts = []
-        for mySplitSketch in splitSketches:
-            extPart = extrudeBetween(mySplitSketch, z0, z0 + deltaz)
-            extPart.Label = partName
-            extParts.append(extPart)
-            delete(mySplitSketch)
-        return extParts
-
-    def _build_wire(self, partName, offset=0.):
-        """Build a wire part."""
-        partDict = self.model.modelDict['3DParts'][partName]
-        assert partDict['directive'] == 'wire'
-        zBottom = self._fetch_geo_param(partDict['z0'])
-        width = self._fetch_geo_param(partDict['thickness'])
-        sketch = self.doc.getObject(partDict['fcName'])
-        wire = buildWire(sketch, zBottom, width, offset=offset)
-        wire.Label = partName
-        return [wire]
-
-    def _build_wire_shell(self, partName, offset=0.):
-        """Build a wire shell part."""
-        partDict = self.model.modelDict['3DParts'][partName]
-        wirePartDict = self.model.modelDict['3DParts'][partDict['targetWire']]
-        assert partDict['directive'] == 'wireShell'
-        zBottom = self._fetch_geo_param(wirePartDict['z0'])
-        width = self._fetch_geo_param(wirePartDict['thickness'])
-        wireSketch = self.doc.getObject(wirePartDict['fcName'])
-        shellVerts = partDict['shellVerts']
-        thickness = self._fetch_geo_param(partDict['thickness'])
-        depoZoneName = partDict['depoZone']
-        etchZoneName = partDict['etchZone']
-        if depoZoneName is not None:
-            depoZone = self.doc.getObject(depoZoneName)
-        else:
-            depoZone = None
-        if etchZoneName is not None:
-            etchZone = self.doc.getObject(etchZoneName)
-        else:
-            etchZone = None
-        shell = buildAlShell(
-            wireSketch,
-            zBottom,
-            width,
-            shellVerts,
-            thickness,
-            depoZone=depoZone,
-            etchZone=etchZone,
-            offset=offset)
-        shell.Label = partName
-        return [shell]
-
-    def _build_SAG(self, partName, offset=0.):
-        partDict = self.model.modelDict['3DParts'][partName]
-        assert partDict['directive'] == 'SAG'
-        zBot = self._fetch_geo_param(partDict['z0'])
-        zMid = self._fetch_geo_param(partDict['zMiddle'])
-        zTop = self._fetch_geo_param(partDict['thickness']) + zBot
-        tIn = self._fetch_geo_param(partDict['tIn'])
-        tOut = self._fetch_geo_param(partDict['tOut'])
-        sketch = self.doc.getObject(partDict['fcName'])
-        SAG = makeSAG(sketch, zBot, zMid, zTop, tIn, tOut, offset=offset)
-        SAG.Label = partName
-        return [SAG]
-
-    def _build_litho(self, partName):
-        """Build a lithography part."""
-        partDict = self.model.modelDict['3DParts'][partName]
-        if not self.lithoSetup:
-            self._initialize_lithography(fillShells=partDict['fillLitho'])
-            self.lithoSetup = True
-        assert partDict['directive'] == 'lithography'
-        layerNum = partDict['layerNum']
-        returnObjs = []
-        for objID in self.lithoDict['layers'][layerNum]['objIDs']:
-            if partName == self.lithoDict['layers'][layerNum]['objIDs'][
-                    objID]['partName']:
-                returnObjs.append(self._gen_G(layerNum, objID))
-        return returnObjs
-
-    def _fetch_geo_param(self, param):
-        """Fetch the numerical value of a geometric parameter, which might be
-        either a string or a float.
-        """
-        if isinstance(param, text_type):
-            returnParam = float(
-                self.model.modelDict['geometricParams'][param][0])
-        else:
-            returnParam = param
-        return returnParam
-
-    def _gen_offset(self, obj, offsetVal):
-        """Generates an offset non-destructively."""
-        # First, we need to check if the object needs special treatment:
-        treatment = 'standard'
-        for partName in self.model.modelDict['3DParts'].keys():
-            partDict = self.model.modelDict['3DParts'][partName]
-            if obj.Name in partDict['fileNames']:
-                treatment = partDict['directive']
-                break
-        if treatment == 'extrude' or treatment == 'lithography':
-            treatment = 'standard'
-        if treatment == 'standard':
-            # Apparently the offset function is buggy for very small offsets...
-            if offsetVal < 1e-5:
-                offsetDupe = copy_move(obj)
-            else:
-                offset = self.doc.addObject("Part::Offset")
-                offset.Source = obj
-                offset.Value = offsetVal
-                offset.Mode = 0
-                offset.Join = 2
-                self.doc.recompute()
-                offsetDupe = copy_move(offset)
-                self.doc.recompute()
-                delete(offset)
-        elif treatment == 'wire':
-            offsetDupe = self._build_wire(partName, offset=offsetVal)[0]
-        elif treatment == 'wireShell':
-            offsetDupe = self._build_wire_shell(partName, offset=offsetVal)[0]
-        elif treatment == 'SAG':
-            offsetDupe = self._build_SAG(partName, offset=offsetVal)[0]
-        self.doc.recompute()
-        return offsetDupe
-
-    def _initialize_lithography(self, fillShells=True):
-        self.fillShells = fillShells
-        # The lithography step requires some infrastructure to track things
-        # throughout.
-        self.lithoDict = {}  # dictionary containing objects for the lithography step
-        self.lithoDict['layers'] = {}
-        # Dictionary for containing the substrate. () indicates un-offset objects,
-        # and subsequent tuples are offset by t_i for each index in the tuple.
-        self.lithoDict['substrate'] = {(): []}
-        # To start, we need to collect up all the lithography directives, and
-        # organize them by layerNum and objectIDs within layers.
-        baseSubstratePartNames = []
-        for partName in self.model.modelDict['3DParts'].keys():
-            partDict = self.model.modelDict['3DParts'][partName]
-            # If this part is a litho step
-            if 'lithography' == partDict['directive']:
-                layerNum = partDict['layerNum']  # layerNum of this part
-                # Add the layerNum to the layer dictionary:
-                if layerNum not in self.lithoDict['layers']:
-                    self.lithoDict['layers'][layerNum] = {'objIDs': {}}
-                layerDict = self.lithoDict['layers'][layerNum]
-                # Gennerate the base and thickness of the layer:
-                layerBase = self._fetch_geo_param(partDict['z0'])
-                layerThickness = self._fetch_geo_param(partDict['thickness'])
-                # All parts within a given layer number are required to have
-                # identical thickness and base, so check that:
-                if 'base' in layerDict:
-                    assert layerBase == layerDict['base']
-                else:
-                    layerDict['base'] = layerBase
-                if 'thickness' in layerDict:
-                    assert layerThickness == layerDict['thickness']
-                else:
-                    layerDict['thickness'] = layerThickness
-                # A given part references a base sketch. However, we need to split
-                # the sketch here into possibly disjoint sub-sketches to work
-                # with them:
-                sketch = self.doc.getObject(partDict['fcName'])
-                splitSketches = splitSketch(sketch)
-                for mySplitSketch in splitSketches:
-                    objID = len(layerDict['objIDs'])
-                    objDict = {}
-                    objDict['partName'] = partName
-                    objDict['sketch'] = mySplitSketch
-                    self.trash.append(mySplitSketch)
-                    self.lithoDict['layers'][layerNum]['objIDs'][objID] = objDict
-                # Add the base substrate to the appropriate dictionary
-                baseSubstratePartNames += partDict['lithoBase']
-        # Get rid of any duplicates:
-        baseSubstratePartNames = list(set(baseSubstratePartNames))
-        # Now convert the part names for the substrate into 3D freeCAD objects, which
-        # should have already been rendered.
-        for baseSubstratePartName in baseSubstratePartNames:
-            for baseSubstrateObjName in self.model.modelDict['3DParts'][
-                    baseSubstratePartName]['fileNames'].keys():
-                self.lithoDict['substrate'][(
-                )] += [self.doc.getObject(baseSubstrateObjName)]
-        # Now that we have ordered the primitives, we need to compute a few
-        # aux quantities that we will need. First, we compute the total bounding
-        # box of the lithography procedure:
-        thicknesses = []
-        bases = []
-        for layerNum in self.lithoDict['layers'].keys():
-            thicknesses.append(self.lithoDict['layers'][layerNum]['thickness'])
-            bases.append(self.lithoDict['layers'][layerNum]['base'])
-        bottom = min(bases)
-        totalThickness = sum(thicknesses)
-        assert len(self.lithoDict['substrate'][
-            ()]) > 0  # Otherwise, we don't have a reference for the lateral BB
-        substrateUnion = genUnion(self.lithoDict['substrate'][()],
-                                  consumeInputs=False)  # total substrate
-        BB = list(getBB(substrateUnion))  # bounding box
-        BB[4] = min([bottom, BB[4]])
-        BB[5] = max([BB[5] + totalThickness, bottom + totalThickness])
-        BB = tuple(BB)
-        constructionZone = makeBB(BB)  # box that encompases the whole domain.
-        self.lithoDict['boundingBox'] = [BB, constructionZone]
-        delete(substrateUnion)  # not needed for next steps
-        delete(constructionZone)  # not needed for next steps
-        # Next, we add two prisms for each sketch. The first, which we denote "B",
-        # is bounded by the base from the bottom and the layer thickness on the top.
-        # These serve as "stencils" that would be the deposited shape if no other.
-        # objects got in the way. The second set of prisms, denoted "C", covers the
-        # base of the layer to the top of the entire domain box. This is used for
-        # forming the volumes occupied when substrate objects are offset and
-        # checking for overlaps.
-        for layerNum in self.lithoDict['layers'].keys():
-            base = self.lithoDict['layers'][layerNum]['base']
-            thickness = self.lithoDict['layers'][layerNum]['thickness']
-            for objID in self.lithoDict['layers'][layerNum]['objIDs']:
-                sketch = self.lithoDict['layers'][layerNum]['objIDs'][objID]['sketch']
-                B = extrudeBetween(sketch, base, base + thickness)
-                C = extrudeBetween(sketch, base, BB[5])
-                self.lithoDict['layers'][layerNum]['objIDs'][objID]['B'] = B
-                self.lithoDict['layers'][layerNum]['objIDs'][objID]['C'] = C
-                self.trash.append(B)
-                self.trash.append(C)
-                # In addition, add a hook for the HDict, which will contain the "H"
-                # constructions for this object, but offset to thicknesses of various
-                # layers, according to the keys.
-                self.lithoDict['layers'][layerNum]['objIDs'][objID][
-                    'HDict'] = {}
-
-    def _screened_H_union_list(self, obj, m, j, offsetTuple, checkOffsetTuple):
-        """Foremd the "screened union list" of obj with the layer m, objID j H object that has
-        been offset according to offsetTuple. The screened union list is defined by checking
-        first whether the object intersects with the components of the checkOffset version
-        of the H object. Then, for each component that would intersect, we return the a list
-        of the offsetTuple version of the object.
-        """
-        # First, we need to check to see if we need to compute either of the
-        # underlying H obj lists:
-        HDict = self.lithoDict['layers'][m]['objIDs'][j]['HDict']
-        # HDict stores a collection of H object component lists for each (layerNum,objID)
-        # pair. The index of this dictionary is a tuple: () indicates no
-        # offset, while other indices indicate an offset by summing the thicknesses
-        # from corresponding layers.
-        if checkOffsetTuple not in HDict:  # If we haven't computed this yet
-            HDict[checkOffsetTuple] = self._H_offset(m, j, tList=list(
-                checkOffsetTuple))  # list of H parts
-            self.trash += HDict[checkOffsetTuple]
-        if offsetTuple not in HDict:  # If we haven't computed this yet
-            HDict[offsetTuple] = self._H_offset(
-                m, j, tList=list(offsetTuple))  # list of H parts
-            self.trash += HDict[offsetTuple]
-        HObjCheckList = HDict[checkOffsetTuple]
-        HObjList = HDict[offsetTuple]
-        returnList = []
-        for i, HObjPart in enumerate(HObjCheckList):
-            if checkOverlap(
-                    [obj, HObjPart]):  # if we need to include an overlap
-                returnList.append(HObjList[i])
-        return returnList
-
-    def _screened_A_UnionList(self, obj, t, ti, offsetTuple, checkOffsetTuple):
-        """Foremd the "screened union list" of obj with the substrate A that has
-        been offset according to offsetTuple.
-        """
-        # First, we need to see if we have built the objects before:
-        if checkOffsetTuple not in self.lithoDict['substrate']:
-            self.lithoDict['substrate'][checkOffsetTuple] = []
-            for A in self.lithoDict['substrate'][()]:
-                AObj = self._gen_offset(A, t)
-                self.trash.append(AObj)
-                self.lithoDict['substrate'][checkOffsetTuple].append(AObj)
-        if offsetTuple not in self.lithoDict['substrate']:
-            self.lithoDict['substrate'][offsetTuple] = []
-            for A in self.lithoDict['substrate'][()]:
-                AObj = self._gen_offset(A, t + ti)
-                self.trash.append(AObj)
-                self.lithoDict['substrate'][offsetTuple].append(AObj)
-
-        returnList = []
-        for i, ACheck in enumerate(
-                self.lithoDict['substrate'][checkOffsetTuple]):
-            if checkOverlap([obj, ACheck]):
-                returnList.append(self.lithoDict['substrate'][offsetTuple][i])
-        return returnList
-
-    def _H_offset(self, layerNum, objID, tList=[]):
-        """For a given layerNum=n and ObjID=i, compute the deposited object.
-
-        ```latex
-        H_{n,i}(t) = C_{n,i}(t) \cap [ B_{n,i}(t) \cup (\cup_{m<n;j} H_{m,j}(t_i+t)) \cup (\cup_k A_k(t_i + t))],
-        ```
-        where A_k is from the base substrate list. This is computed recursively. The list of integers
-        tList determines the offset t; t = the sum of all layer thicknesses ti that appear
-        in tList. For example, tList = [1,2,3] -> t = t1+t2+t3.
-
-        Note: this object is returned as a list of objects that need to be unioned together
-        in order to form the full H.
-        """
-        # This is a tuple that encodes the check offset t:
-        checkOffsetTuple = tuple(sorted(tList))
-        # This is a tuple that encodes the total offset t_i+t:
-        offsetTuple = tuple(sorted(tList + [layerNum]))
-        # First, check if we have to do anything:
-        layers = self.lithoDict['layers']
-        if checkOffsetTuple in layers[layerNum]['objIDs'][
-                objID]['HDict']:
-            return layers[layerNum]['objIDs'][objID][
-                'HDict'][checkOffsetTuple]
-        # First, compute t:
-        t = 0.0
-        for tIndex in tList:
-            t += layers[tIndex]['thickness']
-        # thickness of this layer
-        ti = layers[layerNum]['thickness']
-        # Set the aux. thickness t:
-        B = layers[layerNum]['objIDs'][objID][
-            'B']  # B prism for this layer & objID
-        C = layers[layerNum]['objIDs'][objID][
-            'C']  # C prism for this layer & ObjID
-        B_t = self._gen_offset(B, t)  # offset the B prism
-        C_t = self._gen_offset(C, t)  # offset the C prism
-        self.trash.append(B_t)
-        self.trash.append(C_t)
-        # Build up the substrate due to previously deposited gates
-        HOffsetList = []
-        for m in layers.keys():
-            if m < layerNum:  # then this is a lower layer
-                for j in layers[m]['objIDs'].keys():
-                    HOffsetList += self._screened_H_union_list(
-                        C_t, m, j, offsetTuple, checkOffsetTuple)
-                    # Next, build up the original substrate list:
-        AOffsetList = []
-        AOffsetList += self._screened_A_UnionList(
-            C_t, t, ti, offsetTuple, checkOffsetTuple)
-        unionList = HOffsetList + AOffsetList
-        returnList = [B_t]
-        for obj in unionList:
-            intObj = intersect([C_t, obj])
-            self.trash.append(intObj)
-            returnList.append(intObj)
-        layers[layerNum]['objIDs'][objID]['HDict'][
-            checkOffsetTuple] = returnList
-        return returnList
-
-    def _gen_U(self, layerNum, objID):
-        """For a given layerNum and objID, compute the quantity:
-        ```latex
-        U_{n,i}(t) = (\cup_{m<n;j} G_{m,j}) \cup (\cup_{k} A_k),
-        ```
-        where the inner union terms are not included if their intersection
-        with B_i is empty.
-        """
-        layers = self.lithoDict['layers']
-        B = layers[layerNum]['objIDs'][objID][
-            'B']  # B prism for this layer & objID
-        GList = []
-        for m in layers.keys():
-            if m < layerNum:  # then this is a lower layer
-                for j in layers[m].keys():
-                    if 'G' not in layers[layerNum][
-                            'objIDs'][objID]:
-                        self._gen_G(m, j)
-                    G = layers[layerNum]['objIDs'][objID]['G']
-                    if checkOverlap([B, G]):
-                        GList.append(G)
-        AList = []
-        for A in self.lithoDict['substrate'][()]:
-            if checkOverlap([B, A]):
-                AList.append(A)
-        unionList = GList + AList
-        unionObj = genUnion(unionList, consumeInputs=False)
-        return unionObj
-
-    def _gen_G(self, layerNum, objID):
-        """Generate the gate deposition for a given layerNum and objID."""
-        layer = self.lithoDict['layers'][layerNum]
-        if 'G' not in layer['objIDs'][objID]:
-            if () not in layer['objIDs'][objID]['HDict']:
-                layer['objIDs'][objID][
-                    'HDict'][()] = self._H_offset(layerNum, objID)
-            H = genUnion(layer['objIDs'][objID]['HDict'][()],
-                         consumeInputs=False)
-            self.trash.append(H)
-            if self.fillShells:
-                G = copy_move(H)
-            else:
-                U = self._gen_U(layerNum, objID)
-                G = subtract(H, U)
-                delete(U)
-            layer['objIDs'][objID]['G'] = G
-        G = layer['objIDs'][objID]['G']
-        partName = layer['objIDs'][objID]['partName']
-        G.Label = partName
-        return G
-
-    def _collect_garbarge(self):
-        """Delete all the objects in self.trash."""
-        for obj in self.trash:
-            try:
-                delete(obj)
-            except BaseException:
-                pass
 
 
 def buildCrossSection(sliceInfo, passModel=None):

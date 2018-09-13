@@ -28,53 +28,6 @@ def test_build_extrude(fix_FCDoc, fix_hexagon_sketch):
     built_part = build_extrude(input_part)
     #TODO
 
-# ~ def setup_function():
-    # ~ global myDoc
-    # ~ myDoc = FreeCAD.newDocument('testDoc')
-    # ~ repo_path = os.path.join(os.path.dirname(qmt.__file__), os.pardir)
-    # ~ global testDir
-    # ~ testDir = os.path.join(repo_path, 'tests')
-    # ~ global modelFilePath
-    # ~ modelFilePath = os.path.join(testDir, 'testModel.json')
-    # ~ setupModelFile(modelFilePath)
-
-
-# ~ def teardown_function():
-    # ~ os.remove(modelFilePath)
-    # ~ FreeCAD.closeDocument('testDoc')
-
-
-# ~ def manual_testing(function):
-    # ~ setup_function()
-    # ~ function()
-    # ~ teardown_function()
-
-
-# ~ def repo_path():
-    # ~ """Retrieve path to the directory containing the qmt repository."""
-    # ~ return 
-
-
-# ~ def aux_unit_square_sketch():
-    # ~ '''Helper function to drop a simple unit square sketch.
-       # ~ The segments are carefully ordered.
-    # ~ '''
-    # ~ a = (0,0,0)
-    # ~ b = (1,0,0)
-    # ~ c = (1,1,0)
-    # ~ d = (0,1,0)
-
-    # ~ sketch = FreeCAD.activeDocument().addObject('Sketcher::SketchObject','Sketch')
-    # ~ geoList = []
-    # ~ geoList.append(Part.LineSegment(FreeCAD.Vector(*a),FreeCAD.Vector(*b)))
-    # ~ geoList.append(Part.LineSegment(FreeCAD.Vector(*b),FreeCAD.Vector(*c)))
-    # ~ geoList.append(Part.LineSegment(FreeCAD.Vector(*c),FreeCAD.Vector(*d)))
-    # ~ geoList.append(Part.LineSegment(FreeCAD.Vector(*d),FreeCAD.Vector(*a)))
-    # ~ FreeCAD.ActiveDocument.Sketch.addGeometry(geoList,False)
-    # ~ FreeCAD.ActiveDocument.recompute()
-    # ~ return sketch
-
-
 # ~ def test_buildWire():
     # ~ '''Test wire via bounding box for default offsets/zBottom.
        # ~ TODO: all cases

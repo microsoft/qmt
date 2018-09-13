@@ -4,11 +4,10 @@
 """Testing QMT sketch util functions."""
 
 
-from __future__ import absolute_import, division, print_function
+from __future__ import division
 
 import pytest
 
-from qmt.geometry.freecad import Part
 from qmt.geometry.freecad.sketchUtils import *
 
 vec = FreeCAD.Vector
@@ -20,7 +19,6 @@ def test_findSegments(fix_FCDoc, fix_two_cycle_sketch):
     d = (22, -11, 0)
     sketch = fix_two_cycle_sketch(b=b, d=d)
     segArr = findSegments(sketch)
-    # ~ fix_FCDoc.saveAs("test.fcstd")
     assert (segArr[0][1] == [b]).all()
     assert (segArr[2][1] == [d]).all()
 
@@ -74,7 +72,6 @@ def test_findCycle(fix_FCDoc, fix_two_cycle_sketch):
     ref2 = [4, 5, 6]     # triangular cycle indices
     for i in range(4):
         c = findCycle(segArr, i, range(segArr.shape[0]))  # update starting point
-        # ~ print(c)
         assert c == ref1[i:] + ref1[:i]  # advancing rotation
     for i in range(3):
         c = findCycle(segArr, i + 4, range(segArr.shape[0]))
@@ -85,32 +82,16 @@ def test_addCycleSketch(fix_FCDoc, fix_two_cycle_sketch):
     '''Test if cycles are correctly added.'''
     b = (-30, 20, 0)
     d = (20, -10, 0)
-    sketch = fix_two_cycle_sketch(b=b, d=d)
-    segArr, cycles = findEdgeCycles(sketch)
-    addCycleSketch('cyclesketch', fix_FCDoc, cycles[0], segArr[0:4])
-    segArr = findSegments(fix_FCDoc.cyclesketch)
-    assert (segArr[0][1] == [b]).all()
-    assert (segArr[2][1] == [d]).all()
-
-    with pytest.raises(ValueError) as err:
-        addCycleSketch('cyclesketch', fix_FCDoc, cycles[0], segArr[0:4])
-    assert 'already exists' in str(err.value)
-
-
-def test_addCycleSketch2(fix_FCDoc, fix_two_cycle_sketch):
-    '''Test if cycles are correctly added.'''
-    b = (-30, 20, 0)
-    d = (20, -10, 0)
     sketch = fix_two_cycle_sketch()
     wire = sketch.Shape.Wires[0]
-    sketch_new = addCycleSketch2('cyclesketch', wire)
+    sketch_new = addCycleSketch('cyclesketch', wire)
 
     segArr = findSegments(sketch_new)
     assert (segArr[0][1] == [b]).all()
     assert (segArr[2][1] == [d]).all()
 
     with pytest.raises(ValueError) as err:
-        addCycleSketch2('cyclesketch', wire)
+        addCycleSketch('cyclesketch', wire)
     assert 'already exists' in str(err.value)
 
 
@@ -140,21 +121,6 @@ def test_findEdgeCycles2(fix_FCDoc, fix_two_cycle_sketch):
     assert np.allclose(com, com_ref)
 
 
-def test_splitSketch_old(fix_FCDoc, fix_two_cycle_sketch):
-    '''Test if multi-cycle sketches are split correctly.'''
-    sketch = fix_two_cycle_sketch()
-
-    newsketchL = splitSketch_old(sketch)
-    centers_orig = [e.CenterOfMass for e in sketch.Shape.Edges]
-    centers_sq = [e.CenterOfMass for e in newsketchL[0].Shape.Edges]
-    centers_tri = [e.CenterOfMass for e in newsketchL[1].Shape.Edges]
-
-    for p in centers_sq:
-        assert p in centers_orig and p not in centers_tri
-    for p in centers_tri:
-        assert p in centers_orig and p not in centers_sq
-
-
 def test_splitSketch(fix_FCDoc, fix_two_cycle_sketch, fix_unit_square_sketch):
     '''Test if multi-cycle sketches are split correctly.'''
     sketch = fix_two_cycle_sketch()
@@ -168,7 +134,6 @@ def test_splitSketch(fix_FCDoc, fix_two_cycle_sketch, fix_unit_square_sketch):
         assert p in centers_orig and p not in centers_tri
     for p in centers_tri:
         assert p in centers_orig and p not in centers_sq
-    # ~ fix_FCDoc.saveAs("test.fcstd")
 
     sketch = fix_unit_square_sketch()
     # TODO: not true if splitSketch duplicates
