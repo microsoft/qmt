@@ -200,6 +200,7 @@ class Geo3DData(Data):
             scratch_dir = 'tmp_'+str(uuid.uuid4())
         os.mkdir(scratch_dir)
         if data_name == 'fcdoc':
+            # TODO: refactor into "write to file" and "read file into memory" (reuse store_serial)
             tmp_path = os.path.join(scratch_dir,'tmp_doc_'+str(hash(data))+'.fcstd')
             data.saveAs(tmp_path)
         elif data_name == 'mesh' or data_name == 'rmf':
@@ -236,6 +237,7 @@ class Geo3DData(Data):
             scratch_dir = 'tmp_'+str(uuid.uuid4())
         os.mkdir(scratch_dir)
         if data_name == 'fcdoc':
+            # TODO: templates sent by path string, other "unpacking" fcdocs is not needed
             serial_data = self.serial_fcdoc
             tmp_path = os.path.join(scratch_dir,'tmp_doc_'+str(hash(serial_data))+'.fcstd')
         elif data_name == 'mesh' or data_name == 'rmf':

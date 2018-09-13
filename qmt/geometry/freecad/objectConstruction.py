@@ -20,6 +20,7 @@ from qmt.geometry.freecad.geomUtils import (extrude, copy_move, genUnion,# make_
 from qmt.geometry.freecad.sketchUtils import (findSegments, splitSketch, extendSketch,
                                               findEdgeCycles, draftOffset)
 
+from qmt.data.geo_data import Geo3DData
 
 def updateParams(doc, paramDict):
     ''' Update the parameters in the modelParams spreadsheet to reflect the
@@ -64,6 +65,7 @@ def build(opts):
     :return dict:       Modified options dict.
     '''
     doc = FreeCAD.ActiveDocument
+    geo = Geo3DData()
 
     # Schedule for deletion all objects not explicitly selected by the user
     input_parts_names = [part.fc_name for part in opts['input_parts']]
@@ -105,10 +107,15 @@ def build(opts):
                              ' is not a recognized directive type.')
 
         assert part is not None
-        part.Label = input_part.label
         doc.recompute()
         built_parts.append(part)
-        opts['built_part_names'][input_part.label] = part.Name  # for litho steps
+        opts['built_part_names'][input_part.label] = part.Name  # needed for litho steps
+
+    # Cleanup
+    collect_garbage(info_holder)
+    for obj in blacklist:
+        delete(obj)
+    doc.recompute()
 
     # Subtraction (removes the need for subtractlists)
     for i, part in enumerate(built_parts):
@@ -121,25 +128,17 @@ def build(opts):
                 part = simple_copy
                 built_parts[i] = simple_copy
 
-    # Update names and export the built parts
+    # Update names and store the built parts
     for input_part, built_part in zip(opts['input_parts'], built_parts):
-        built_part.Label = input_part.label
-        store_serial(opts['serial_stp_parts'], input_part.label,
-                     exportCAD, 'stp',  [ built_part ] )
-
-    # Cleanup
-    collect_garbage(info_holder)
-    for obj in blacklist:
-        delete(obj)
-    doc.recompute()
+        built_part.Label = input_part.label  # here it's collision free
+        input_part.serial_stp = store_serial([ built_part ], exportCAD, 'stp')
+        input_part.built_fc_name = built_part.Name
+        geo.add_part(input_part.label, input_part)
 
     # Store the FreeCAD document
-    def _save_helper(doc, path):
-        doc.saveAs(path)
-        #make_objects_visible(path)  # freecadcmd doesn't create GuiDocument.xml
-    store_serial(opts, 'serial_fcdoc', _save_helper, 'fcstd', doc)
+    geo.set_data('fcdoc', doc)
 
-    return opts
+    return geo
 
 
 def build_pass(part):

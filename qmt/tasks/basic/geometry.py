@@ -87,19 +87,9 @@ class Geometry3D(Task):
             }
 
         # Send off the instructions
-        ret = fcwrapper(pyenv, 'build3d',
+        geo = fcwrapper(pyenv, 'build3d',
                         {'input_result_list': input_result_list,
                          'current_options': current_options},
                          debug=False)
-
-        # TODO: use Geo3DData.get_data() and set_data() from within wrapper
-
-        # Build a geometry object with from the returned results
-        geo = Geo3DData()
-        geo.serial_fcdoc = ret['serial_fcdoc']
-        for part in current_options['input_parts']:
-            part.serial_stp = ret['serial_stp_parts'][part.label]
-            part.built_fc_name = ret['built_part_names'][part.label]
-            geo.add_part(part.label, part)
 
         return geo
