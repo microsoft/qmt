@@ -123,6 +123,8 @@ class FenicsPotentialData3D(ScalarData3D):
         V = fn.FunctionSpace(mesh, element_type, element_degree)
         potential = fn.Function(V, potential_path)
 
+        shutil.rmtree(scratch_dir)
+
         return potential
 
     # TODO implement from serialization above
@@ -211,10 +213,13 @@ class FenicsThomasFermiData3D(FenicsPotentialData3D):
             surface_charge_integrals[part] = fn.assemble(part_surface_density * measure[part])
 
             # Make boundary function space
-            sm = fn.SubMesh
-
-
-            surface_densities[part] = part_surface_density
+            # region_id = names_to_ids[part]
+            # sm = fn.SubMesh(solver_input.mesh, solver_input.region_mapping.region_mapping_function, region_id)
+            # bm = fn.BoundaryMesh(sm, "exterior")
+            # boundary_V = fn.FunctionSpace(bm, self._element_type, self._element_degree)
+            # surface_density_function = fn.project(part_surface_density, boundary_V)
+            #
+            # surface_densities[part] = surface_density_function
 
         return {}, surface_charge_integrals
 
