@@ -23,7 +23,7 @@ class ReduceDim3D(Task):
         # if "parts" in options:
         #     for part in options["parts"]: assert type(part) is str
 
-    def _solve_instance(self, input_result_list, current_options):
+    def _solve_instance(input_result_list, current_options):
         """
         :param list input_result_list: This is a singleton list of a geo_3d object.
         :param dict current_options: The dictionary specifying parts from above.
@@ -52,7 +52,7 @@ class ReduceDim2D(Task):
         # if "parts" in options:
         #     for part in options["parts"]: assert type(part) is str
 
-    def _solve_instance(self, input_result_list, current_options):
+    def _solve_instance(input_result_list, current_options):
         """
         :param list input_result_list: This is a one-element list of a Geometry2D result.
         :param dict current_options: The dictionary specifying parts from above.
