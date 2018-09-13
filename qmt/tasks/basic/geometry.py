@@ -93,6 +93,7 @@ class Geometry3D(Task):
                          debug=False)
 
         # TODO: use Geo3DData.get_data() and set_data() from within wrapper
+
         # Build a geometry object with from the returned results
         geo = Geo3DData()
         geo.serial_fcdoc = ret['serial_fcdoc']

@@ -185,7 +185,7 @@ class Geo3DData(Data):
             else:
                 pass
 
-    def set_data(self,data_name,data,scratch_dir=None):
+    def set_data(self, data_name, data, scratch_dir=None):
         """
         Set data to a serial format that is easily portable.
         :param scratch_dir:
@@ -220,7 +220,7 @@ class Geo3DData(Data):
             self.serial_region_marker = serial_data
         shutil.rmtree(scratch_dir)
 
-    def get_data(self,data_name, mesh=None, scratch_dir=None):
+    def get_data(self, data_name, mesh=None, scratch_dir=None):
         """
         Get data from stored serial format.
         :param scratch_dir:
@@ -325,4 +325,3 @@ class Geo3DData(Data):
             # except (KeyError, TypeError) as e:
             #     pass
         return results
-

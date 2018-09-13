@@ -11,7 +11,7 @@ from six import iteritems, text_type
 
 # TODO: use namespace in code
 from qmt.geometry.freecad.auxiliary import *
-from qmt.geometry.freecad.fileIO import (updateParams, exportCAD, store_serial)
+from qmt.geometry.freecad.fileIO import (exportCAD, store_serial)
 from qmt.geometry.freecad.geomUtils import (extrude, copy_move, genUnion,# make_solid,
                                             getBB, makeBB, makeHexFace,
                                             extrudeBetween, intersect,
@@ -19,6 +19,37 @@ from qmt.geometry.freecad.geomUtils import (extrude, copy_move, genUnion,# make_
                                             crossSection)
 from qmt.geometry.freecad.sketchUtils import (findSegments, splitSketch, extendSketch,
                                               findEdgeCycles, draftOffset)
+
+
+def updateParams(doc, paramDict):
+    ''' Update the parameters in the modelParams spreadsheet to reflect the
+        current value in the dict.
+    '''
+    if not paramDict:
+        return
+    # Cave: unconditional removeObject on spreadSheet breaks param dependencies.
+    try:
+        spreadSheet.clearAll()  # clear existing spreadsheet
+    except:
+        doc.removeObject('modelParams')  # otherwise it was not a good spreadsheet
+        spreadSheet = doc.addObject('Spreadsheet::Sheet', 'modelParams')
+    spreadSheet.set('A1', 'paramName')
+    spreadSheet.set('B1', 'paramValue')
+    spreadSheet.setColumnWidth('A', 200)
+    spreadSheet.setStyle('A1:B1', 'bold', 'add')
+    for i, key in enumerate(paramDict):
+        paramType = paramDict[key][1]
+        if paramType == 'freeCAD':
+            idx = str(i + 2)
+            spreadSheet.set('A' + idx, key)
+            spreadSheet.set('B' + idx, str(paramDict[key][0]))
+            spreadSheet.setAlias('B' + idx, str(key))
+        elif paramType == 'python':
+            pass
+        else:
+            raise ValueError('Unknown geometric parameter type.')
+
+    doc.recompute()
 
 
 class DummyInfo:
@@ -83,18 +114,10 @@ def build(opts):
     for i, part in enumerate(built_parts):
         for other_part in built_parts[0:i]:
             if checkOverlap([part, other_part]):
-                cut_tool = copy_move(other_part)
-                cut = doc.addObject("Part::Cut",part.Label)
-                cut.Base = part
-                cut.Tool = cut_tool
-                doc.recompute()
-
-                simple_copy = doc.addObject('Part::Feature',part.Label)
+                cut = subtract(part, copy_move(other_part), consumeInputs=True)
+                simple_copy = doc.addObject('Part::Feature', "simple_copy")
                 simple_copy.Shape = cut.Shape  # no solid, just its shape (can be disjoint)
-
                 delete(cut)
-                delete(cut_tool)
-                delete(part)
                 part = simple_copy
                 built_parts[i] = simple_copy
 

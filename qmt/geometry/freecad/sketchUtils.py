@@ -25,7 +25,6 @@ def findSegments(sketch):
     for wire in sketch.Shape.Wires:
         for edge in wire.Edges:
             lineSegments.append([tuple(edge.Vertexes[0].Point), tuple(edge.Vertexes[1].Point)])
-    # TODO: reuse list of wires for cycles
     return np.array(lineSegments)
 
 
@@ -257,7 +256,6 @@ def makeIntoSketch(inputObj, sketchName=None):
     if sketchName is None:
         sketchName = inputObj.Name + '_sketch'
     returnSketch = Draft.makeSketch(inputObj, autoconstraints=True, name=sketchName)
-    # TODO: check that fc017 Draft.makeSketch always produces wires
     deepRemove(obj=inputObj)
     FreeCAD.ActiveDocument.recompute()
     return returnSketch

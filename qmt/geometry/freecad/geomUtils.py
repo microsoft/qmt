@@ -77,14 +77,10 @@ def makeHexFace(sketch, zBottom, width):
     doc = FreeCAD.ActiveDocument
     lineSegments = findSegments(sketch)
     lineSegment = lineSegments[0]
-    # ~ x0, y0, z0 = lineSegment[0]
-    # ~ x1, y1, z1 = lineSegment[1]
     x0, y0, _ = lineSegment[0]
     x1, y1, _ = lineSegment[1]
     dx = x1 - x0
     dy = y1 - y0
-    # ~ xBar = 0.5 * (x0 + x1)
-    # ~ yBar = 0.5 * (y0 + y1)
     # First, make the initial face:
     face = Draft.makePolygon(6, radius=width * 0.5, inscribed=False, face=True)
     doc.recompute()
