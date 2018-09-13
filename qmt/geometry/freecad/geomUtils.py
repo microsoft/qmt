@@ -56,6 +56,19 @@ def copy_move(obj, moveVec=(0., 0., 0.), copy=True):
     return f
 
 
+# TODO: consuming is questionable because inputs might be needed in a delayed fashion
+# ~ def make_solid(obj, consumeInputs=False):
+    # ~ doc = FreeCAD.ActiveDocument
+    # ~ shell = obj.Shape.Faces
+    # ~ shell = Part.Solid(Part.Shell(shell))
+    # ~ solid = doc.addObject("Part::Feature",obj.Label+"_solid")
+    # ~ solid.Label = obj.Label+"_solid"
+    # ~ solid.Shape = shell
+    # ~ doc.recompute()
+    # ~ del shell, solid
+    # ~ return solid
+
+
 def makeHexFace(sketch, zBottom, width):
     '''Given a sketch for a wire, make the first face. Also need to make sure it
     is placed normal to the initial line segment in the sketch. This will ensure
@@ -105,6 +118,7 @@ def genUnion(objList, consumeInputs=False):
         return None
     elif len(objList) == 1:
         returnObj = copy_move(objList[0])
+        returnObj.Label = objList[0].Label
         if consumeInputs:
             delete(objList[0])
         return returnObj
@@ -117,6 +131,7 @@ def genUnion(objList, consumeInputs=False):
         union.Shapes = nonZeroList
         doc.recompute()  # crucial recompute
         unionDupe = copy_move(union)
+        unionDupe.Label = objList[0].Label
         doc.removeObject(union.Name)
         doc.recompute()
         if consumeInputs:

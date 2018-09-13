@@ -8,7 +8,8 @@ from __future__ import absolute_import, division, print_function
 
 import pytest
 
-from qmt.geometry.freecad import Part
+import Part
+# ~ from qmt.geometry.freecad import Part
 from qmt.geometry.freecad.sketchUtils import *
 
 vec = FreeCAD.Vector
