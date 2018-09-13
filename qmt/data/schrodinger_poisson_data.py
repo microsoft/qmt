@@ -4,7 +4,7 @@
 from qmt.data import Data
 
 class SchrodingerPoissonData(Data):
-    def __init__(self, poisson_obj, density, density_per_subband, density_units, rho, rho_units, psis, energies, potential, potential_units, mesh, mesh_units, bands, temperature, band_charges):
+    def __init__(self, poisson_obj, density, density_per_subband, density_units, rho, rho_units, psis, energies, potential, potential_units, mesh, mesh_units, bands, temperature, band_charges, Dit, neutral_level, fixed_charge_sites, fixed_charge_site_perimeters):
         """
         Constructs Data object stores outputs of Thomas-Fermi Task.
          
@@ -31,6 +31,10 @@ class SchrodingerPoissonData(Data):
         self.bands = bands
         self.temperature = temperature
         self.band_charges = band_charges
+        self.Dit = Dit
+        self.neutral_level = neutral_level
+        self.fixed_charge_sites = fixed_charge_sites
+        self.fixed_charge_site_perimeters = fixed_charge_site_perimeters
 
     def _serialize(self):
         self.content['poisson'] = self.poisson
@@ -48,6 +52,10 @@ class SchrodingerPoissonData(Data):
         self.content['bands'] = self.bands
         self.content['temperature'] = self.temperature
         self.content['band_charges'] = self.band_charges
+        self.content['Dit'] = self.Dit
+        self.content['neutral_level'] = self.neutral_level
+        self.content['fixed_charge_sites'] = self.fixed_charge_sites
+        self.content['fixed_charge_site_perimeters'] = self.fixed_charge_site_perimeters
 
     def _deserialize(self):
         self.poisson = self.content['poisson']
@@ -65,3 +73,7 @@ class SchrodingerPoissonData(Data):
         self.bands = self.content['bands']
         self.temperature = self.content['temperature']
         self.band_charges = self.content['band_charges']
+        self.Dit = self.content['Dit']
+        self.neutral_level = self.content['neutral_level']
+        self.fixed_charge_sites = self.content['fixed_charge_sites']
+        self.fixed_charge_site_perimeters = self.content['fixed_charge_site_perimeters']

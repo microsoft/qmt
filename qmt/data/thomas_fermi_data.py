@@ -4,7 +4,7 @@
 from qmt.data import Data
 
 class ThomasFermiData(Data):
-    def __init__(self, poisson_obj, density, density_units, rho, rho_units, mesh, mesh_units, masses, bands, temperature, band_charges, eunit):
+    def __init__(self, poisson_obj, density, density_units, rho, rho_units, mesh, mesh_units, masses, bands, temperature, band_charges, eunit, fixed_charge_sites, fixed_charge_site_perimeters):
         """
         Constructs Data object stores outputs of Thomas-Fermi Task.
          
@@ -28,6 +28,8 @@ class ThomasFermiData(Data):
         self.temperature = temperature
         self.band_charges = band_charges
         self.eunit = eunit
+        self.fixed_charge_sites = fixed_charge_sites
+        self.fixed_charge_site_perimeters = fixed_charge_site_perimeters
 
     def _serialize(self):
         self.content['poisson'] = self.poisson
@@ -42,6 +44,8 @@ class ThomasFermiData(Data):
         self.content['temperature'] = self.temperature
         self.content['band_charges'] = self.band_charges
         self.content['eunit'] = self._serialize_unit(self.eunit)
+        self.content['fixed_charge_sites'] = self.fixed_charge_sites
+        self.content['fixed_charge_site_perimeters'] = self.fixed_charge_site_perimeters
 
     def _deserialize(self):
         self.poisson = self.content['poisson']
@@ -56,3 +60,5 @@ class ThomasFermiData(Data):
         self.temperature = self.content['temperature']
         self.band_charges = self.content['band_charges']
         self.eunit = self._deserialize_unit(self.content['eunit'])
+        self.fixed_charge_sites = self.content['fixed_charge_sites']
+        self.fixed_charge_site_perimeters = self.content['fixed_charge_site_perimeters']

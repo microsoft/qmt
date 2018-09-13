@@ -1,8 +1,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-import fenics as fn
-from qms.fem import fenics_expressions
+#import fenics as fn
+#from qms.fem import fenics_expressions
 
 import qmt.physics_constants as qc
 from qmt.data.template import Data
