@@ -150,6 +150,9 @@ class ReducedSweepWithData(object):
         """
         return iter(self._data)
 
+    def sweep_points_to_data(self):
+        return [(self.sweep.tagged_value_list[i], self._data[i]) for i in range(len(self.sweep))]
+
     def __str__(self):
         return str(self._data)
 
