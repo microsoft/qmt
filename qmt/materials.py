@@ -440,6 +440,11 @@ class Materials(collections.Mapping):
             print(msg)
             return -(mat['electronAffinity'] + mat['directBandGap'])
 
+    # Spencer
+    # TODO sanity check
+    def reference_level(self):
+        return self.matDict['InSb']['electronAffinity']
+
 
 def conduction_band_offset(mat, ref_mat):
     """
@@ -469,6 +474,7 @@ def conduction_band_offset(mat, ref_mat):
         print(msg)
         chi = mat['electronAffinity']
         return ref_mat['electronAffinity'] - chi
+
 
 
 def valence_band_offset(mat, ref_mat):

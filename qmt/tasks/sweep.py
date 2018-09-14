@@ -48,7 +48,7 @@ class SweepManager(object):
         return SweepManager([{}], dask_client)
 
     @staticmethod
-    def construct_cartesian_product(params_to_product):
+    def construct_cartesian_product(params_to_product, dask_client=None):
         """
         Constructs a new SweepManager from data values for each input.
         :param params_to_product: a dictionary mapping tags to lists of input values
@@ -74,7 +74,7 @@ class SweepManager(object):
         for key in params_to_product:
             pool = params_to_product[key]
             result = [merge_two_dicts(x, {key: y}) for x in result for y in pool]
-        return SweepManager(result)
+        return SweepManager(result, dask_client)
 
     def run(self, task):
         """

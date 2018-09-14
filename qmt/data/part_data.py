@@ -62,6 +62,8 @@ class Part3DData(Data):
         :param dict boundary_condition: One or more boundary conditions, if applicable, of
                                         the form of a type -> value mapping. For example, this could be {'voltage':1.0} or,
                                         more explicitly, {'voltage': {'type': 'dirichlet', 'value': 1.0,'unit': 'V'}}.
+                                        Assumed by FEniCS solvers to be in the form {"voltage":1.0},
+                                        and the value given is taken to be in meV.
         :param list subtract_list: A list of partNames that should be subtracted from the current
                                    part when forming the final 3D objects. This subtraction is carried out when boundary
                                    conditions are set.
@@ -77,6 +79,11 @@ class Part3DData(Data):
             raise NameError('Error - directive ' + directive + ' is not a valid directive!')
         if domain_type not in ['semiconductor', 'metal_gate', 'virtual', 'dielectric']:
             raise NameError('Error - domainType ' + domain_type + ' not valid!')
+        # ~ if (etch_zone is not None) and (depo_zone is not None):
+            # ~ raise NameError(
+                # ~ 'Error - etch_zone and depo_zone cannot both be set!')
+        if domain_type not in ["semiconductor", "dielectric"] and ns is not None:
+            raise ValueError("Cannot set a volume charge density on a gate or virtual part.")
 
         # Input storage
         self.label = label
