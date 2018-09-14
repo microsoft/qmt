@@ -71,8 +71,9 @@ class FenicsPotentialData3D(ScalarData3D):
 
         self._serial_volume_density_data = self.serialize_fenics_function(mesh, charge_density)
 
-        self._serial_parts_to_boundary_densities = {part: self.serialize_fenics_function(mesh, density) for part, density in
-                                                   parts_to_boundary_densities.items()}
+        self._serial_parts_to_boundary_densities = {part: self.serialize_fenics_function(mesh, density) for
+                                                    part, density in
+                                                    parts_to_boundary_densities.items()}
 
     def _initialize_non_surface_charge_density(self, solver_input, potential):
         raise NotImplementedError("Class is abstract. This method is delegated to subclasses.")
@@ -146,17 +147,20 @@ class FenicsPotentialData3D(ScalarData3D):
 
         return SerialFenicsFunctionData(serial_mesh, serial_function)
 
+
 class SerialFenicsFunctionData(object):
 
     def __init__(self, serial_mesh, serial_function):
         self.serial_mesh = serial_mesh
         self.serial_function = serial_function
 
+
 class FenicsThomasFermiData3D(FenicsPotentialData3D):
     def __init__(self, fenics_potential, solver_input, coords_units, data_units, solver_options,
                  inf_norm_inconsistency=None):
         self.solver_options = solver_options
-        super(FenicsThomasFermiData3D, self).__init__(fenics_potential, solver_input, coords_units, data_units)
+        super(FenicsThomasFermiData3D, self).__init__(fenics_potential, solver_input, coords_units, data_units,
+                                                      inf_norm_inconsistency=inf_norm_inconsistency)
 
     def _initialize_non_surface_charge_density(self, solver_input, potential):
         names_to_ids = solver_input.geo_3d_data.get_names_to_region_ids()
@@ -185,7 +189,6 @@ class FenicsThomasFermiData3D(FenicsPotentialData3D):
             # Need to interpolate all_parts_density onto a suitable function space
             # Maybe DG
             density_V = fn.FunctionSpace(solver_input.mesh, "DG", self._element_degree)
-            print(type(all_parts_density))
             density_function = fn.project(all_parts_density, density_V)
 
         return density_function, volume_charge_integrals
@@ -207,7 +210,7 @@ class FenicsThomasFermiData3D(FenicsPotentialData3D):
             if part in solver_input.parts_to_phi_nl_and_ds:
                 known_potential = potential
                 part_surface_density += get_raw_dit_term(part, solver_input.parts_to_phi_nl_and_ds[part], solver_input,
-                                              self.solver_options, known_potential)
+                                                         self.solver_options, known_potential)
 
             surface_charge_integrals[part] = fn.assemble(part_surface_density * measure[part])
 
