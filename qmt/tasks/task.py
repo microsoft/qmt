@@ -208,6 +208,7 @@ class Task(object):
                 self.delayed_result = delayed(self.__class__._solve_gathered)(list_of_input_result_lists, list_of_current_options,
                                                                     result_sweep, dask_key_name=self.name)
 
+    #TODO: this is currently broken with the 3D Mesh task
     def visualize_entire_sweep(self, filename=None):
         """
         Return a visualization of the entire task graph of the sweep rooted at this as an IPython image object.

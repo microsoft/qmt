@@ -440,8 +440,7 @@ class Materials(collections.Mapping):
             print(msg)
             return -(mat['electronAffinity'] + mat['directBandGap'])
 
-    # Spencer
-    # TODO sanity check
+    #TODO: make this user-configurable and shift all energy properties reported by materials
     def reference_level(self):
         return self.matDict['InSb']['electronAffinity']
 
