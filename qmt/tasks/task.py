@@ -20,11 +20,13 @@ How to use, in a nutshell:
     The input_result_list stores the outputs of the dependent tasks in the same order these tasks
     were given in the constructor, and current_options stores the options to the current task.
 
+    There is also a _solve_gather callback for use in specialized situations.
+
     IMPORTANT: object references in both of these callback parameters must be treated as read-only
     or copied before modification,
     since they are shared across parameter sweeps.
 
-    The reason this latter has to be provided is that both the input results and options
+    Both the input results and options
     may be dependent on an automatically-handled sweep. Your _solve_instance does not have to know about this--
     it just has to compute its result dependent on the outputs of dependent tasks and its options,
     and return this result.
@@ -41,33 +43,14 @@ How to use, in a nutshell:
 
 Classes:
     Task
-    TaskMetaclass
 """
 
 import copy
 
+import dask
 from dask import delayed
 
-from qmt.tasks.sweep import SweepManager, ReducedSweep, ReducedSweepDelayed, gen_tag_extract, replace_tag_with_value
-
-class TaskMetaclass(type):
-    """
-    Registers the class of each Task subclass for serialization.
-    Might be deprecated soon.
-    """
-    class_registry = {}
-
-    def __new__(mcs, name, bases, class_dict):
-        cls = type.__new__(mcs, name, bases, class_dict)
-
-        TaskMetaclass.register_class(cls)
-
-        return cls
-
-    @staticmethod
-    def register_class(class_to_register):
-        TaskMetaclass.class_registry[class_to_register.__name__] = class_to_register
-
+from qmt.tasks.sweep import SweepManager, ReducedSweep, ReducedSweepDelayed, ReducedSweepResults, gen_tag_extract, replace_tag_with_value
 
 class Task(object):
     """
@@ -78,17 +61,20 @@ class Task(object):
 
     Class attributes:
         current_instance_id: unique id for each task for serialization.
-        Might be deprecated soon.
 
     Attributes:
         previous_tasks: The tasks that this depends on.
         options: Additional options that control the operation of this.
+        resources: resources for the Dask client.
+        gather: default False. If false, the task is assumed to have a _solve_instance method, and takes in
+            one sweep point's worth of inputs. If true, the task is assumed to have a _solve_gathered method,
+            and takes in inputs from every sweep point in its restricted sweep.
         name: The name of the task.
         list_of_tags: the list of sweep input tags that the sweep over this depends on
         delayed_result: the task graph rooted at this
-        # TODO put in description of accessors for sweepholders !!!
+        computed_result: SweepHolderFutures pointing at (possibly pending) results.
+        daskless_result: result, if the task was run with run_daskless
     """
-    __metaclass__ = TaskMetaclass
     current_instance_id = 0
 
     def __init__(self, task_list=None, options=None, name="Task", gather=False):
@@ -196,9 +182,6 @@ class Task(object):
         if self.previous_tasks is None:
             raise ValueError("A list of dependent tasks must be passed to the constructor by subclasses!")
         else:
-            # Make a SweepHolder to store results
-            # TODO
-            # rearrange sweeps
             reduced_sweep = ReducedSweep.create_from_manager_and_tags(self.sweep_manager, self.list_of_tags)
 
             self.delayed_result = ReducedSweepDelayed.create_from_reduced_sweep_and_manager(reduced_sweep,
