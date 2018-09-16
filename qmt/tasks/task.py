@@ -271,16 +271,30 @@ class Task(object):
     #         return reduce_function(self.computed_result)
 
     # Precondition: there is no sweep (i.e. no tags in the options)
-    def run_daskless(self):
+    def run_daskless(self,clear_cache=False):
+        """
+        Runs the task chain without using Dask. This is useful for local debugging with the
+        number of moving parts kept to a minimum. The results are stored in self.daskless_result.
+
+        TODO: This debugging mode does not currently support sweeping.
+
+        :param clear_cache: If True, then force a recompute even if run_daskless has previously run.
+        """
         for task in self.previous_tasks:
             task.run_daskless()
 
         input_result_list = [task.daskless_result for task in self.previous_tasks]
 
         if self.gather:
-            self.sweep_manager = SweepManager.create_empty_sweep(dask_client=None)
-            self.daskless_result = self.__class__._solve_gathered([input_result_list], [self.options]).only()
+            if self.daskless_result is None or clear_cache:
+                self.sweep_manager = SweepManager.create_empty_sweep(dask_client=None)
+                result_sweep = ReducedSweepResults.create_empty_from_manager_and_tags(
+                    self.sweep_manager, self.list_of_tags)
+                self.daskless_result = self.__class__._solve_gathered([input_result_list],
+                                                                      [self.options],
+                                                                      result_sweep).only()
         else:
-            self.daskless_result = self.__class__._solve_instance(input_result_list, self.options)
+            if self.daskless_result is None or clear_cache:
+                self.daskless_result = self.__class__._solve_instance(input_result_list, self.options)
 
         return self.daskless_result
