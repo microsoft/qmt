@@ -35,11 +35,10 @@ class SweepManager(object):
                     set(x.keys()) for x in sweep_list]), \
             'All dicts in sweep_list must have same keys.'
 
-        if dask_client is None:
-            dask_client = dask.distributed.Client(processes=False)  # client on the local machine
+        # if dask_client is None:
+            # dask_client = dask.distributed.Client(processes=False)  # client on the local machine
 
         self.dask_client = dask_client
-
         self.results = None
 
     # TODO test
