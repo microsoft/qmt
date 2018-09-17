@@ -42,13 +42,12 @@ def activate_doc_from(opts):
     :param dict opts:   QMT Geometry3D opts dict.
     :return:            A FCStd doc loaded from the file_path or serialised document.
     """
-    doc = FreeCAD.newDocument('instance')
-    FreeCAD.setActiveDocument('instance')
 
     if 'serial_fcdoc' in opts:
-        stored_doc = pickle.loads(opts['serial_fcdoc'])
-        for obj in stored_doc.Objects:
-            doc.copyObject(obj, False)  # don't deep copy dependencies
+        from qmt.data.geo_data import Geo3DData
+        Geo3DData.serial_fcdoc = opts['serial_fcdoc']
+        doc = Geo3DData.get_data('fcdoc')
+
     else:
         raise ValueError("No FreeCAD document available")
 
