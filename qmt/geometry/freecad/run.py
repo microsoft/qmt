@@ -45,9 +45,9 @@ def activate_doc_from(opts):
 
     if 'serial_fcdoc' in opts:
         from qmt.data.geo_data import Geo3DData
-        Geo3DData.serial_fcdoc = opts['serial_fcdoc']
-        doc = Geo3DData.get_data('fcdoc')
-
+        data = Geo3DData()
+        data.serial_fcdoc = opts['serial_fcdoc']
+        doc = data.get_data('fcdoc')
     else:
         raise ValueError("No FreeCAD document available")
 
