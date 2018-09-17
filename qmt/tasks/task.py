@@ -11,7 +11,7 @@ How to use, in a nutshell:
     These should also, in most cases, be the arguments to the subclass constructor--
     any arguments that the subclass constructor needs that are not dependent tasks should
     be placed into the options argument.
-        See ms_tasks/poisson_task.py for an example.
+        See basic/geometry.py for an example.
 
     The actual work done by your Task subclass will be done in the _solve_instance callback,
     which you must implement.

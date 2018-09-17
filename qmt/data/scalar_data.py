@@ -40,17 +40,6 @@ class ScalarData3D(ScalarData):
         self.data_units = data_units
 
 
-# class InterpolatableScalarData3D(ScalarData3D):
-#     def __init__(self, coords, data, coords_units, data_units, evaluate_point_function):
-#         super(InterpolatableScalarData3D, self).__init__(coords, data, coords_units, data_units)
-#         self.evaluate_point_function = evaluate_point_function
-#
-#     def evaluate(self, point):
-#         return self.evaluate_point_function(point)
-
-# def as_fenics_expression(self):
-
-
 class FenicsPotentialData3D(ScalarData3D):
     def __init__(self, fenics_potential, solver_input, coords_units, data_units, inf_norm_inconsistency=None):
         mesh = solver_input.mesh
@@ -224,17 +213,6 @@ class FenicsThomasFermiData3D(FenicsPotentialData3D):
             # surface_densities[part] = surface_density_function
 
         return {}, surface_charge_integrals
-
-
-# TODO clean up
-def make_accumulation_term(solver_input, known_potential):
-    u0_expression = make_u0_expression(solver_input)
-    prefactor_expression = make_3d_prefactor_expression(solver_input)
-
-    return -prefactor_expression * abs(known_potential - solver_input.reference_level - u0_expression) ** (
-            3 / 2) * fn.conditional(
-        (known_potential - solver_input.reference_level - u0_expression) > 0, 1, 0)
-
 
 class FenicsPoissonData3D(FenicsPotentialData3D):
     def __init__(self, fenics_potential, solver_input, coords_units, data_units, inf_norm_inconsistency=None):
