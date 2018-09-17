@@ -74,7 +74,7 @@ class Geometry3D(Task):
         super(Geometry3D, self).__init__([], options, name)
 
     @staticmethod
-    def serialize_fc_file(self,file_path):
+    def serialize_fc_file(file_path):
         """
         Serialize a freecad file from disk in preparation for passing in through the task
         dictionary.
@@ -102,7 +102,7 @@ class Geometry3D(Task):
 
         pyenv = current_options['pyenv'] # the python 2 environment
 
-        assert 'serial_fc_doc' in current_options # make sure the fc doc is in options
+        assert 'serial_fcdoc' in current_options # make sure the fc doc is in options
 
         # Send off the instructions
         geo = fcwrapper(pyenv, 'build3d',
