@@ -21,8 +21,8 @@ def main():
     if instruction == 'build3d':
         from qmt.geometry.freecad.objectConstruction import build
         activate_doc_from(data['current_options'])
-        new_opts = build(data['current_options'])
-        send_back(new_opts)
+        geo_output = build(data['current_options'])
+        send_back(geo_output)
 
     elif instruction == 'writeFCfile':
         pass
@@ -45,9 +45,7 @@ def activate_doc_from(opts):
     doc = FreeCAD.newDocument('instance')
     FreeCAD.setActiveDocument('instance')
 
-    if 'file_path' in opts:
-        doc.load(opts['file_path'])
-    elif 'serial_fcdoc' in opts:
+    if 'serial_fcdoc' in opts:
         stored_doc = pickle.loads(opts['serial_fcdoc'])
         for obj in stored_doc.Objects:
             doc.copyObject(obj, False)  # don't deep copy dependencies

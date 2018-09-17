@@ -60,16 +60,31 @@ class Geometry3D(Task):
         """
         Builds a geometry in 3D.
         :param dict options: The dictionary specifying parts and and FreeCAD infromation. It should
-        be of the form {"fcname":path_to_freeCAD_file,"parts_dict":parts_dict}, where parts_dict
-        is a dictionary of the form
-        {part_name:Part3D}.
+        be of the form {"fcfile":binary_stream_of_fc_file,
+                        "parts_dict":parts_dict,
+                        "pyenv":path_to_py_2},
+        where
+
+        serial_fcdoc is the binary string of the FreeCAD input file (accessed via serialize_fc_file),
+        parts_dict is a dictionary of the form {part_name:Part3D},
+        pyenv is the path to the python 2 executable (on whatever system will execute the work).
+
         :param str name: The name of this task.
         """
         super(Geometry3D, self).__init__([], options, name)
-        # assert type(options["fcname"]) is str
-        # assert type(options["parts_dict"]) is dict
-        # for partDirective in options["part_dict"]:
-        #     assert type(options["part_dict"][partDirective]) is Part3D
+
+    @staticmethod
+    def serialize_fc_file(self,file_path):
+        """
+        Serialize a freecad file from disk in preparation for passing in through the task
+        dictionary.
+        :param file_path: path to the FreeCAD file
+        :return file_content: binary stream of the FreeCAD file.
+        """
+        import codecs
+        with open(file_path,'rb') as file:
+            serial_data = codecs.encode(file.read(), 'base64').decode()
+        return serial_data
 
     def _solve_instance(input_result_list, current_options):
         """
@@ -78,13 +93,16 @@ class Geometry3D(Task):
         :return geo_3d: A Geo3DData object.
         """
         from qmt.geometry.freecad_wrapper import fcwrapper
-        pyenv = current_options['pyenv'] if 'pyenv' in current_options else 'python2'
 
         # Convert NumPy3 floats to something that Python2 can unpickle
         if 'params' in current_options:
             current_options['params'] = {
                 k: float(v) for k, v in current_options['params'].items()
             }
+
+        pyenv = current_options['pyenv'] # the python 2 environment
+
+        assert 'serial_fc_doc' in current_options # make sure the fc doc is in options
 
         # Send off the instructions
         geo = fcwrapper(pyenv, 'build3d',
