@@ -19,13 +19,15 @@ class SweepManager(object):
     # Each entry has the form {tag1: value1, ... tagN: valueN}
     # mapping SweepTag objects to values in each of the input domains.
 
-    def __init__(self, sweep_list, dask_client=None):
+    def __init__(self, sweep_list, dask_client=None,no_dask=False):
         """
         Constructs a new SweepManager directly from sweep entries.
         :param sweep_list: a list representing values in the cartesian
         product of input domains. Each entry has the form {tag1: value1, ... tagN: valueN}
         :param dask_client: the dask client to run the sweep on. Defaults to
         a client on the local machine.
+        :param no_dask: set this to True to avoid starting a dask client. Note that self.dask_client
+        will need to be set manually before running a sweep.
         """
         self.sweep_list = sweep_list
         assert isinstance(self.sweep_list, list) and \
@@ -35,16 +37,16 @@ class SweepManager(object):
                     set(x.keys()) for x in sweep_list]), \
             'All dicts in sweep_list must have same keys.'
 
-        # if dask_client is None:
-            # dask_client = dask.distributed.Client(processes=False)  # client on the local machine
+        if dask_client is None and not no_dask:
+            dask_client = dask.distributed.Client(processes=False)  # client on the local machine
 
         self.dask_client = dask_client
         self.results = None
 
     # TODO test
     @staticmethod
-    def create_empty_sweep(dask_client=None):
-        return SweepManager([{}], dask_client)
+    def create_empty_sweep(dask_client=None,no_dask=False):
+        return SweepManager([{}], dask_client=dask_client,no_dask=no_dask)
 
     @staticmethod
     def construct_cartesian_product(params_to_product, dask_client=None):

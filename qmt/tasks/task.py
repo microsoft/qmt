@@ -287,7 +287,7 @@ class Task(object):
 
         if self.gather:
             if self.daskless_result is None or clear_cache:
-                self.sweep_manager = SweepManager.create_empty_sweep(dask_client=None)
+                self.sweep_manager = SweepManager.create_empty_sweep(no_dask=True)
                 result_sweep = ReducedSweepResults.create_empty_from_manager_and_tags(
                     self.sweep_manager, self.list_of_tags)
                 self.daskless_result = self.__class__._solve_gathered([input_result_list],
