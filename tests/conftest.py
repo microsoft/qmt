@@ -164,7 +164,6 @@ def fix_task_env():
                 result_sweep.add(mesh, sweep_holder_index)
             return result_sweep
 
-
     class PostProcessingTaskExample(Task):
         """Takes input from the gathered task and does some more work in parallel.
 
@@ -185,7 +184,6 @@ def fix_task_env():
             return result
 
     return InputTaskExample,GatheredTaskExample,PostProcessingTaskExample
-
 
 
 
