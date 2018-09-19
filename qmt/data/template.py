@@ -8,20 +8,6 @@ class Data(object):
         """
         self.content = {}  # storage for contents to serialize
 
-    def _serialize(self):
-        """
-        Method for stuffing the contents of a Data class into the self.content dictionary, which
-        is then saved to Azure or disk.
-        """
-        raise NotImplementedError("_serialize should define how to get data into self.content.")
-
-    def _deserialize(self):
-        """
-        Method for retrieving data from self.content, called after it is loaded from Azure or disk.
-        """
-        raise NotImplementedError("_serialize should define how to get data into self.content.")
-
-
     def save(self, azure_info=None, file_path=None):
         """
         Save the data to Azure or disk. Azure takes precedence over local disk if specified.

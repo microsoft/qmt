@@ -30,35 +30,3 @@ class ThomasFermiData(Data):
         self.eunit = eunit
         self.fixed_charge_sites = fixed_charge_sites
         self.fixed_charge_site_perimeters = fixed_charge_site_perimeters
-
-    def _serialize(self):
-        self.content['poisson'] = self.poisson
-        self.content['density'] = self.density
-        self.content['density_units'] = self._serialize_unit(self.density_units)
-        self.content['rho'] = self.rho
-        self.content['rho_units'] = self._serialize_unit(self.rho_units)
-        self.content['mesh'] = self.mesh
-        self.content['mesh_units'] = self._serialize_unit(self.mesh_units)
-        self.content['masses'] = self.masses
-        self.content['bands'] = self.bands
-        self.content['temperature'] = self.temperature
-        self.content['band_charges'] = self.band_charges
-        self.content['eunit'] = self._serialize_unit(self.eunit)
-        self.content['fixed_charge_sites'] = self.fixed_charge_sites
-        self.content['fixed_charge_site_perimeters'] = self.fixed_charge_site_perimeters
-
-    def _deserialize(self):
-        self.poisson = self.content['poisson']
-        self.density = self.content['density']
-        self.denisty_units = self._deserialize_unit(self.content['density_units'])
-        self.rho = self.content['rho']
-        self.rho_units = self._deserialize_unit(self.content['rho_units'])
-        self.mesh = self.content['mesh']
-        self.mesh_units = self._deserialize_unit(self.content['mesh_units'])
-        self.masses = self.content['masses']
-        self.bands = self.content['bands']
-        self.temperature = self.content['temperature']
-        self.band_charges = self.content['band_charges']
-        self.eunit = self._deserialize_unit(self.content['eunit'])
-        self.fixed_charge_sites = self.content['fixed_charge_sites']
-        self.fixed_charge_site_perimeters = self.content['fixed_charge_site_perimeters']
