@@ -32,7 +32,9 @@ class Part3DData(Data):
                          SAG, and lithography directives.
         :param float thickness: The total thickness. Required for all directives.
                                 On wireShell, this is interpreted as the layer thickness.
-        :param str target_wire: Target wire directive for a coating directive.
+        :param Part3DData target_wire: Target wire directive for a coating directive. TODO: This
+        is currently set to use a Part3DData object rather than a str. Should it really behave
+        this way?
         :param list shell_verts: Vertices to use when rendering the coating. Required
                                  for the shell directive.
         # ~ :param str depo_zone: FreeCAD sketch defining the (positive) mask for the deposition

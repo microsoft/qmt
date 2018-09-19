@@ -10,6 +10,12 @@ import pytest
 import qmt
 
 @pytest.fixture(scope='session')
+def fix_py2env():
+    ''' change this to your python2.7 environment'''
+    py2env = "Change this to your python 2 path"
+    return py2env
+
+@pytest.fixture(scope='session')
 def fix_testDir():
     '''Return the test directory path.'''
     rootPath = os.path.join(os.path.dirname(qmt.__file__), os.pardir)
@@ -30,7 +36,6 @@ def fix_FCDoc():
     doc = FreeCAD.newDocument('testDoc')
     yield doc
     FreeCAD.closeDocument('testDoc')
-
 
 ################################################################################
 # Sketches
