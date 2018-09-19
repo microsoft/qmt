@@ -20,3 +20,6 @@ dependencies:
   - dask-jobqueue  
   - sphinx
   - jupyter
+  - kwant
+  - mkl
+  - mkl-service
