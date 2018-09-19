@@ -17,6 +17,7 @@ install:
   - conda update -q conda
   - conda info -a
   - conda env create -q -n test-environment -f environment.yml
+  - conda install dask
   - source activate test-environment
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
       sudo add-apt-repository -y ppa:freecad-maintainers/freecad-stable;
