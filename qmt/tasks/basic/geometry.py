@@ -17,6 +17,7 @@ class Geometry1D(Task):
         """
         super(Geometry1D, self).__init__([], options, name)
 
+    @staticmethod
     def _solve_instance(input_result_list, current_options):
         """
         :param list input_result_list: This is an empty list.
@@ -41,6 +42,7 @@ class Geometry2D(Task):
         """
         super(Geometry2D, self).__init__([], options, name)
 
+    @staticmethod
     def _solve_instance(input_result_list, current_options):
         """
         :param list input_result_list: This is an empty list.
@@ -86,6 +88,7 @@ class Geometry3D(Task):
             serial_data = codecs.encode(file.read(), 'base64').decode()
         return serial_data
 
+    @staticmethod
     def _solve_instance(input_result_list, current_options):
         """
         :param list input_result_list: This is an empty list.
