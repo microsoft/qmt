@@ -5,10 +5,11 @@ dependencies:
   - scipy
   - sympy
   - matplotlib
-  - dask
   - pytest
   - pyside
   - future
+  - dask
+  - shapely
   - h5py
   - pip:
     - pytablewriter
