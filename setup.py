@@ -4,10 +4,6 @@
 
 from setuptools import setup
 
-with open('requirements.txt') as f:
-    requirements = [x.strip() for x in f.readlines()]
-
-
 setup(
     name='qmt', version='1.0',
     description='Qubit Modeling Tools (QMT) for computational modeling of quantum devices',
