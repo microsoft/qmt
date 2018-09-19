@@ -22,17 +22,19 @@ from qmt.geometry.freecad.sketchUtils import (findSegments, splitSketch, extendS
 
 from qmt.data.geo_data import Geo3DData
 
-def updateParams(doc, paramDict):
+def set_params(doc, paramDict):
+    # TODO: support passthrough params
     ''' Update the parameters in the modelParams spreadsheet to reflect the
         current value in the dict.
     '''
     if not paramDict:
         return
-    # Cave: unconditional removeObject on spreadSheet breaks param dependencies.
     try:
+        spreadSheet = doc.modelParams
         spreadSheet.clearAll()  # clear existing spreadsheet
     except:
-        doc.removeObject('modelParams')  # otherwise it was not a good spreadsheet
+        # Cave: unconditional removeObject on spreadSheet breaks param dependencies.
+        doc.removeObject('modelParams')  # it was not a good spreadsheet
         spreadSheet = doc.addObject('Spreadsheet::Sheet', 'modelParams')
     spreadSheet.set('A1', 'paramName')
     spreadSheet.set('B1', 'paramValue')
@@ -62,7 +64,7 @@ def build(opts):
     '''Build the 3D geometry.
 
     :param dict opts:   Options dict in the QMT 3D geometry input format.
-    :return dict:       Modified options dict.
+    :return geo:        Geo3DData object with the built objects.
     '''
     doc = FreeCAD.ActiveDocument
     geo = Geo3DData()
@@ -78,7 +80,7 @@ def build(opts):
     if 'params' in opts:
         # Extend params dictionary to original parts schema
         fcdict = {key: (value, 'freeCAD') for (key, value) in opts['params'].items()}
-        updateParams(doc, fcdict)
+        set_params(doc, fcdict)
 
     if 'built_part_names' not in opts:
         opts['built_part_names'] = {}
