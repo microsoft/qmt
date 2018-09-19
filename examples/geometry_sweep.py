@@ -35,7 +35,8 @@ wrap2 = Part3DData('Second Layer', 'Sketch007', 'lithography', 'dielectric',
 
 freecad_dict = {
     'pyenv': 'python2',
-    'file_path': 'geometry_sweep_showcase.fcstd',
+    # ~ 'file_path': 'geometry_sweep_showcase.fcstd',
+    'serial_fcdoc': Geometry3D.serialize_fc_file('geometry_sweep_showcase.fcstd'),
     'params': {'d1': tag1},
     'input_parts': [block1, block2, sag, wire, shell, block3, substrate, wrap, wrap2]
 }
