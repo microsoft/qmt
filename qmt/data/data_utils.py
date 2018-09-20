@@ -49,7 +49,7 @@ def load_serial(serial_obj, load_fct, ext_format=None, scratch_dir=None):
     The load_fct must be a correct complement of the previously used store_fct.
     '''
     import uuid
-    if ext_format is not None:
+    if ext_format is None:
         ext_format = 'tmpdata'
     tmp_path = 'tmp_' + uuid.uuid4().hex + '.' + ext_format
     if scratch_dir is not None:
