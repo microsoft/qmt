@@ -33,11 +33,11 @@ def test_geo_task(fix_py2env,fix_testDir):
     wrap2 = Part3DData('Second Layer', 'Sketch007', 'lithography', 'dielectric',
                        layer_num=2, thickness=1)
     print(os.path.join(fix_testDir,'py3','data','geometry_test.fcstd'))
-    serial_fc_doc = Geometry3D.serialize_fc_file(
-        os.path.join(fix_testDir, 'py3', 'data', 'geometry_test.fcstd'))
+    # serial_fc_doc = Geometry3D.serialize_fc_file(
+    input_file_path = os.path.join(fix_testDir, 'py3', 'data', 'geometry_test.fcstd')
     freecad_dict = {
         'pyenv': fix_py2env,
-        'serial_fcdoc': serial_fc_doc,
+        'input_file': input_file_path,
         'params': {'d1': tag1},
         'input_parts': [block1, block2, sag, wire, shell, block3, substrate, wrap, wrap2]
     }

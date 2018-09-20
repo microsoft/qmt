@@ -4,7 +4,7 @@
 from qmt.data import Data
 
 class ThomasFermiData(Data):
-    def __init__(self,*,poisson_obj=None, phi=None, density=None, density_units=None, rho=None,
+    def __init__(self,poisson_obj=None, phi=None, density=None, density_units=None, rho=None,
                  rho_units=None, mesh=None, mesh_units=None, masses=None, bands=None,
                  temperature=None, band_charges=None, eunit=None, fixed_charge_sites=None,
                  fixed_charge_site_perimeters=None,materials=None):
