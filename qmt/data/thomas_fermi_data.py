@@ -4,7 +4,10 @@
 from qmt.data import Data
 
 class ThomasFermiData(Data):
-    def __init__(self, poisson_obj, density, density_units, rho, rho_units, mesh, mesh_units, masses, bands, temperature, band_charges, eunit, fixed_charge_sites, fixed_charge_site_perimeters):
+    def __init__(self,*,poisson_obj=None, density=None, density_units=None, rho=None,
+                 rho_units=None, mesh=None, mesh_units=None, masses=None, bands=None,
+                 temperature=None, band_charges=None, eunit=None, fixed_charge_sites=None,
+                 fixed_charge_site_perimeters=None):
         """
         Constructs Data object stores outputs of Thomas-Fermi Task.
          
