@@ -43,13 +43,15 @@ def store_serial(obj, save_fct, ext_format, scratch_dir=None):
     return serial_data
 
 
-def load_serial(serial_obj, load_fct, scratch_dir=None):
+def load_serial(serial_obj, load_fct, ext_format=None, scratch_dir=None):
     '''
     Return the original object stored with store_serial.
     The load_fct must be a correct complement of the previously used store_fct.
     '''
     import uuid
-    tmp_path = 'tmp_' + uuid.uuid4().hex + '.' + 'tmpdata'
+    if ext_format is not None:
+        ext_format = 'tmpdata'
+    tmp_path = 'tmp_' + uuid.uuid4().hex + '.' + ext_format
     if scratch_dir is not None:
         if not os.path.exists(scratch_dir):  # carefully create
             os.mkdir(scratch_dir)

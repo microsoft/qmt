@@ -243,7 +243,8 @@ class Geo3DData(Data):
             import fenics as fn
             def _load_fct(path):
                 return fn.Mesh(path)
-            return load_serial(self.serial_mesh, _load_fct, scratch_dir=scratch_dir)
+            return load_serial(self.serial_mesh, _load_fct, ext_format='xml',
+                               scratch_dir=scratch_dir)
 
         elif data_name == 'rmf':
             import fenics as fn
@@ -252,7 +253,8 @@ class Geo3DData(Data):
                 data = fn.MeshFunction('size_t', mesh, mesh.topology().dim())
                 fn.File(path) >> data
                 return data
-            return load_serial(self.serial_region_marker, _load_fct, scratch_dir=scratch_dir)
+            return load_serial(self.serial_region_marker, _load_fct, ext_format='xml',
+                               scratch_dir=scratch_dir)
 
         else:
             raise ValueError(str(data_name) + ' was not a valid data_name.')
