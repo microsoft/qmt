@@ -61,9 +61,9 @@ class DummyInfo:
         self.litho_setup_done = False
 
 def build(opts):
-    '''Build the 3D geometry.
+    '''Build the 3D geometry in FreeCAD.
 
-    :param dict opts:   Options dict in the QMT 3D geometry input format.
+    :param dict opts:   Options dict in the QMT Geometry3D.__init__ input format.
     :return geo:        Geo3DData object with the built objects.
     '''
     doc = FreeCAD.ActiveDocument

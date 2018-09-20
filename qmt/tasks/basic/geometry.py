@@ -61,16 +61,15 @@ class Geometry3D(Task):
     def __init__(self, options=None, name='geometry_3d_task'):
         """
         Builds a geometry in 3D.
-        :param dict options: The dictionary specifying parts and and FreeCAD infromation. It should
-        be of the form {"fcfile":binary_stream_of_fc_file,
-                        "parts_dict":parts_dict,
-                        "pyenv":path_to_py_2},
-        where
 
-        serial_fcdoc is the binary string of the FreeCAD input file (accessed via serialize_fc_file),
-        parts_dict is a dictionary of the form {part_name:Part3D},
-        pyenv is the path to the python 2 executable (on whatever system will execute the work).
-
+        :param dict options: The dictionary specifying FreeCAD infromation.
+        It should be of the form
+        {
+          'pyenv':       path or callable name of the Python 2 executable,
+          'input_file':  path to FreeCAD template file,
+          'input_parts': list of input parts, leftmost items built first
+          'params':      dictionary { 'param_name': SweepTag('d1 thickness') }
+        }
         :param str name: The name of this task.
         """
         super(Geometry3D, self).__init__([], options, name)
@@ -108,9 +107,6 @@ class Geometry3D(Task):
         assert 'serial_fcdoc' in current_options # make sure the fc doc is in options
 
         # Send off the instructions
-        geo = fcwrapper(pyenv, 'build3d',
-                        {'input_result_list': input_result_list,
-                         'current_options': current_options},
-                         debug=False)
+        geo = fcwrapper(pyenv, 'build3d', {'current_options': current_options}, debug=False)
 
         return geo
