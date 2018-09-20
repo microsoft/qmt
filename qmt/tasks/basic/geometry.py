@@ -5,8 +5,8 @@
 
 from shapely.geometry import Polygon, LineString
 
-from qmt.data.geo_data import Geo1DData, Geo2DData, Geo3DData, serialised_file
-from qmt.tasks.task import Task
+from qmt.data import Geo1DData, Geo2DData, Geo3DData, serialised_file
+from qmt.tasks import Task
 
 
 class Geometry1D(Task):
