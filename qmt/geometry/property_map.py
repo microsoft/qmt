@@ -71,9 +71,9 @@ class MaterialPropertyMap(PropertyMap):
                 elif prop_name == 'valenceBandMaximum':
                     self.partProps[p] = mat_lib.valence_band_maximum(mat)
                 elif prop_name == 'lightHoleMass':
-                    self.partProps[p] = mat.hole_mass('light','dos')
+                    self.partProps[p] = mat.hole_mass('light', 'dos')
                 elif prop_name == 'heavyHoleMass':
-                    self.partProps[p] = mat.hole_mass('heavy','dos')
+                    self.partProps[p] = mat.hole_mass('heavy', 'dos')
                 else:
                     self.partProps[p] = mat[prop_name]
             except KeyError:

@@ -163,12 +163,6 @@ class Geo3DData(Data):
         """
         return {name: self.get_material(name) for name in self.parts.keys()}
 
-    def get_parts(self):
-        return self.parts
-
-    def get_names(self):
-        return self.parts.keys()
-
     def add_part(self, part_name, part, overwrite=False):
         """
         Add a part to this geometry.
@@ -271,6 +265,7 @@ class Geo3DData(Data):
         write_deserialised_file(self.serial_fcdoc, file_path)
         return file_path
 
+    #TODO: Redundant? self.fenics_ids appears to be identical to the mapping returned here
     def get_names_to_region_ids(self):
         mapping = {name: i + 2 for i, name in enumerate(self.build_order)}
         mapping[Geo3DData.EXTERIOR_BC_NAME] = 1
@@ -290,8 +285,7 @@ class Geo3DData(Data):
 
     def get_names_to_default_phi_nl_and_ds(self):
         result = {}
-        for name in self.get_names():
-
+        for name in self.parts:
             if self.parts[name].phi_nl is not None:
                 result[name] = {}
                 result[name]["phi_nl"] = self.parts[name].phi_nl
