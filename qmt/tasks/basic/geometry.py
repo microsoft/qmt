@@ -67,8 +67,8 @@ class Geometry3D(Task):
         {
           'pyenv':       path or callable name of the Python 2 executable,
           'input_file':  path to FreeCAD template file,
-          'input_parts': list of input parts, leftmost items built first
-          'params':      dictionary { 'param_name': SweepTag('d1 thickness') }
+          'input_parts': ordered list of input parts, leftmost items get built first
+          'params':      dict{ 'param_name': SweepTag }
         }
         :param str name: The name of this task.
         """
