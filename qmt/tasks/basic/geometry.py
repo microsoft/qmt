@@ -72,6 +72,7 @@ class Geometry3D(Task):
         }
         :param str name: The name of this task.
         """
+        options['serial_fcdoc'] = Geometry3D.serialize_fc_file(options['input_file'])
         super(Geometry3D, self).__init__([], options, name)
 
     @staticmethod
