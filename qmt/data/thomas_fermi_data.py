@@ -4,10 +4,10 @@
 from qmt.data import Data
 
 class ThomasFermiData(Data):
-    def __init__(self,*,poisson_obj=None, density=None, density_units=None, rho=None,
+    def __init__(self,*,poisson_obj=None, phi=None, density=None, density_units=None, rho=None,
                  rho_units=None, mesh=None, mesh_units=None, masses=None, bands=None,
                  temperature=None, band_charges=None, eunit=None, fixed_charge_sites=None,
-                 fixed_charge_site_perimeters=None):
+                 fixed_charge_site_perimeters=None,materials=None):
         """
         Constructs Data object stores outputs of Thomas-Fermi Task.
          
@@ -20,6 +20,7 @@ class ThomasFermiData(Data):
         super(ThomasFermiData, self).__init__()
 
         self.poisson = poisson_obj
+        self.phi = phi
         self.density = density
         self.density_units = density_units
         self.rho = rho
@@ -33,3 +34,4 @@ class ThomasFermiData(Data):
         self.eunit = eunit
         self.fixed_charge_sites = fixed_charge_sites
         self.fixed_charge_site_perimeters = fixed_charge_site_perimeters
+        self.materials=None
