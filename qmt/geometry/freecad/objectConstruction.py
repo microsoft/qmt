@@ -11,7 +11,7 @@ from six import iteritems, text_type
 
 # TODO: use namespace in code
 from qmt.geometry.freecad.auxiliary import *
-from qmt.geometry.freecad.fileIO import (exportCAD, store_serial)
+from qmt.geometry.freecad.fileIO import exportCAD
 from qmt.geometry.freecad.geomUtils import (extrude, copy_move, genUnion,# make_solid,
                                             getBB, makeBB, makeHexFace,
                                             extrudeBetween, intersect,
@@ -20,7 +20,8 @@ from qmt.geometry.freecad.geomUtils import (extrude, copy_move, genUnion,# make_
 from qmt.geometry.freecad.sketchUtils import (findSegments, splitSketch, extendSketch,
                                               findEdgeCycles, draftOffset)
 
-from qmt.data.geo_data import Geo3DData
+from qmt.data.geo_data import Geo3DData, store_serial
+
 
 def set_params(doc, paramDict):
     # TODO: support passthrough params
@@ -59,6 +60,7 @@ class DummyInfo:
     def __init__(self):
         self.trash = []
         self.litho_setup_done = False
+
 
 def build(opts):
     '''Build the 3D geometry in FreeCAD.
@@ -133,7 +135,7 @@ def build(opts):
     # Update names and store the built parts
     for input_part, built_part in zip(opts['input_parts'], built_parts):
         built_part.Label = input_part.label  # here it's collision free
-        input_part.serial_stp = store_serial([ built_part ], exportCAD, 'stp')
+        input_part.serial_stp = store_serial([built_part], exportCAD, 'stp')
         input_part.built_fc_name = built_part.Name
         geo.add_part(input_part.label, input_part)
 
@@ -193,6 +195,7 @@ def build_wire(part, offset=0.):
     wire = buildWire(sketch, zBottom, width, offset=offset)
     wire.Label = part.label
     return wire
+
 
 def build_wire_shell(part, offset=0.):
     '''Build a wire shell part.'''
@@ -393,6 +396,7 @@ def makeSAG(sketch, zBot, zMid, zTop, tIn, tOut, offset=0.):
     returnPart = genUnion(returnParts, consumeInputs=True)
     return returnPart
 
+
 def initialize_lithography(info, opts, fillShells=True):
     doc = FreeCAD.ActiveDocument
     info.fillShells = fillShells
@@ -442,7 +446,6 @@ def initialize_lithography(info, opts, fillShells=True):
                 info.lithoDict['layers'][layerNum]['objIDs'][objID] = objDict
             # Add the base substrate to the appropriate dictionary
             baseSubstrateParts += part.litho_base
-
 
     # Get rid of any duplicates:
     baseSubstrateParts = list(set(baseSubstrateParts))
@@ -570,6 +573,7 @@ def screened_H_union_list(info, opts, obj, m, j, offsetTuple, checkOffsetTuple):
             returnList.append(HObjList[i])
     return returnList
 
+
 def screened_A_UnionList(info, opts, obj, t, ti, offsetTuple, checkOffsetTuple):
     """Foremd the "screened union list" of obj with the substrate A that has
     been offset according to offsetTuple.
@@ -594,6 +598,7 @@ def screened_A_UnionList(info, opts, obj, t, ti, offsetTuple, checkOffsetTuple):
         if checkOverlap([obj, ACheck]):
             returnList.append(info.lithoDict['substrate'][offsetTuple][i])
     return returnList
+
 
 def H_offset(info, opts, layerNum, objID, tList=[]):
     """For a given layerNum=n and ObjID=i, compute the deposited object.
@@ -654,6 +659,7 @@ def H_offset(info, opts, layerNum, objID, tList=[]):
         checkOffsetTuple] = returnList
     return returnList
 
+
 def gen_U(info, layerNum, objID):
     """For a given layerNum and objID, compute the quantity:
     ```latex
@@ -683,6 +689,7 @@ def gen_U(info, layerNum, objID):
     unionObj = genUnion(unionList, consumeInputs=False)
     return unionObj
 
+
 def gen_G(info, opts, layerNum, objID):
     """Generate the gate deposition for a given layerNum and objID."""
     layer = info.lithoDict['layers'][layerNum]
@@ -699,8 +706,8 @@ def gen_G(info, opts, layerNum, objID):
         for obj in layer['objIDs'][objID]['HDict'][()]:
             __s__ = obj.Shape.Faces
             __s__ = Part.Solid(Part.Shell(__s__))
-            __o__ = FreeCAD.ActiveDocument.addObject("Part::Feature",obj.Label+"_solid")
-            __o__.Label = obj.Label+"_solid"
+            __o__ = FreeCAD.ActiveDocument.addObject("Part::Feature", obj.Label + "_solid")
+            __o__.Label = obj.Label + "_solid"
             __o__.Shape = __s__
             solid_hlist.append(__o__)
             info.trash.append(obj)
@@ -722,6 +729,7 @@ def gen_G(info, opts, layerNum, objID):
     partName = layer['objIDs'][objID]['partName']
     G.Label = partName
     return G
+
 
 def collect_garbage(info):
     """Delete all the objects in trash."""

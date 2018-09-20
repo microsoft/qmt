@@ -43,15 +43,3 @@ def exportCAD(obj_list, file_name):
     else:
         raise ValueError(file_name + ' is not a supported extension ('
                          + ', '.join(supported_ext) + ')')
-
-def store_serial(obj, save_fct, ext):
-    '''Return a serialised representation of save_fct(obj, temporary_file.ext).
-    '''
-    import codecs
-    import uuid
-    tmp_path = 'tmp_' + uuid.uuid4().hex + '.' + ext
-    save_fct(obj, tmp_path)
-    with open(tmp_path, 'rb') as f:
-        serial_data = codecs.encode(f.read(), 'base64').decode()
-    os.remove(tmp_path)
-    return serial_data

@@ -1,13 +1,16 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
+"""Geometry task classes for 1D, 2D and 3D."""
+
 from shapely.geometry import Polygon, LineString
 
-from qmt.data.geo_data import Geo1DData, Geo2DData, Geo3DData
+from qmt.data.geo_data import Geo1DData, Geo2DData, Geo3DData, serialised_file
 from qmt.tasks.task import Task
 
 
 class Geometry1D(Task):
+    """Task for handling of 1D geometries."""
     def __init__(self, options=None, name='geometry_1d_task'):
         """
         Builds a geometry in 1D.
@@ -31,6 +34,7 @@ class Geometry1D(Task):
 
 
 class Geometry2D(Task):
+    """Task for handling of 2D geometries with Shapely."""
     def __init__(self, options=None, name='geometry_2d_task'):
         """
         Builds a geometry in 2D.
@@ -58,6 +62,7 @@ class Geometry2D(Task):
 
 
 class Geometry3D(Task):
+    """Task for handling of 3D geometries with FreeCAD."""
     def __init__(self, options=None, name='geometry_3d_task'):
         """
         Builds a geometry in 3D.
@@ -72,21 +77,8 @@ class Geometry3D(Task):
         }
         :param str name: The name of this task.
         """
-        options['serial_fcdoc'] = Geometry3D.serialize_fc_file(options['input_file'])
+        options['serial_fcdoc'] = serialised_file(options['input_file'])
         super(Geometry3D, self).__init__([], options, name)
-
-    @staticmethod
-    def serialize_fc_file(file_path):
-        """
-        Serialize a freecad file from disk in preparation for passing in through the task
-        dictionary.
-        :param file_path: path to the FreeCAD file
-        :return file_content: binary stream of the FreeCAD file.
-        """
-        import codecs
-        with open(file_path,'rb') as file:
-            serial_data = codecs.encode(file.read(), 'base64').decode()
-        return serial_data
 
     @staticmethod
     def _solve_instance(input_result_list, current_options):
@@ -103,9 +95,9 @@ class Geometry3D(Task):
                 k: float(v) for k, v in current_options['params'].items()
             }
 
-        pyenv = current_options['pyenv'] # the python 2 environment
+        pyenv = current_options['pyenv']  # the python 2 environment
 
-        assert 'serial_fcdoc' in current_options # make sure the fc doc is in options
+        assert 'serial_fcdoc' in current_options  # make sure the fc doc is in options
 
         # Send off the instructions
         geo = fcwrapper(pyenv, 'build3d', {'current_options': current_options}, debug=False)

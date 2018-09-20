@@ -1,3 +1,8 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+"""Geometry data classes."""
+
 import codecs
 import os
 import shutil
@@ -6,12 +11,73 @@ from qmt.materials import Materials
 from qmt.data.template import Data
 
 
+def serialised_file(path):
+    '''Return a serialised blob of the contents of a given file path.'''
+    with open(path, 'rb') as f:
+        serial_data = codecs.encode(f.read(), 'base64').decode()
+    return serial_data
+
+
+def write_deserialised_file(serial_obj, path):
+    '''Write a deserialised file from a serialised blob to a given file path.'''
+    data = codecs.decode(serial_obj.encode(), 'base64')
+    with open(path, 'wb') as f:
+        f.write(data)
+
+
+def store_serial(obj, save_fct, ext_format, scratch_dir=None):
+    '''
+    Return a serialised representation of
+    save_fct(obj, scratch_dir/temporary_file.ext_format).
+    The temporary file has a unique name.
+    The parameter ext_format can be used for format distinction in some save_fct.
+    '''
+    import uuid
+    tmp_path = 'tmp_' + uuid.uuid4().hex + '.' + ext_format
+    if scratch_dir is not None:
+        if not os.path.exists(scratch_dir):  # carefully create
+            os.mkdir(scratch_dir)
+            tmp_path = os.path.join(scratch_dir, tmp_path)
+
+    save_fct(obj, tmp_path)
+    serial_data = serialised_file(tmp_path)
+
+    os.remove(tmp_path)
+    if scratch_dir is not None:
+        if os.path.exists(scratch_dir) and os.path.isdir(scratch_dir):  # carefully delete
+            shutil.rmtree(scratch_dir)
+    return serial_data
+
+
+def load_serial(serial_obj, load_fct, scratch_dir=None):
+    '''
+    Return the original object stored with store_serial.
+    The load_fct must be a correct complement of the previously used store_fct.
+    '''
+    import uuid
+    tmp_path = 'tmp_' + uuid.uuid4().hex + '.' + 'tmpdata'
+    if scratch_dir is not None:
+        if not os.path.exists(scratch_dir):  # carefully create
+            os.mkdir(scratch_dir)
+            tmp_path = os.path.join(scratch_dir, tmp_path)
+
+    write_deserialised_file(serial_obj, tmp_path)
+    obj = load_fct(tmp_path)
+
+    os.remove(tmp_path)
+    if scratch_dir is not None:
+        if os.path.exists(scratch_dir) and os.path.isdir(scratch_dir):  # carefully delete
+            shutil.rmtree(scratch_dir)
+    return obj
+
+
 # TODO factor out geo superclass
 class GeoData(Data):
     pass
 
 
 class Geo1DData(Data):
+    """Class holding 1D geometry data."""
     def __init__(self):
         """
         Class for holding a 1D geometry specification.
@@ -51,6 +117,7 @@ class Geo1DData(Data):
 
 
 class Geo2DData(Data):
+    """Class holding 2D geometry data."""
     def __init__(self):
         """
         Class for holding a 2D geometry specification. This class holds two main dicts:
@@ -128,6 +195,7 @@ class Geo2DData(Data):
 
 
 class Geo3DData(Data):
+    """Class holding 3D geometry data."""
     EXTERIOR_BC_NAME = "exterior"
 
     def __init__(self):
@@ -146,7 +214,6 @@ class Geo3DData(Data):
         # marker function
         self.fenics_ids = None  # dictionary with part name keys mapping to fenics ids.
         self.materials_database = Materials()
-
 
     def get_material(self, part_name):
         return self.materials_database[self.parts[part_name].material]
@@ -196,84 +263,65 @@ class Geo3DData(Data):
     def set_data(self, data_name, data, scratch_dir=None):
         """
         Set data to a serial format that is easily portable.
-        :param scratch_dir:
-        :param str data_name: Options are:
-                            "fcdoc", freeCAD document
-                            "mesh", for a fenics mesh
-                            "rmf", for a fenics region marker function
-        :param data: The corresponding data that we would like to set.
+        :param str data_name:  "fcdoc" freeCAD document
+                               "mesh"  fenics mesh
+                               "rmf"   fenics region marker function
+        :param data:           The corresponding data that we would like to set.
+        :param scratch_dir:    Optional temporary (fast) storage location.
         """
-        if scratch_dir is None:
-            import uuid
-            scratch_dir = 'tmp_' + str(uuid.uuid4())
-        os.mkdir(scratch_dir)
         if data_name == 'fcdoc':
-            # TODO: refactor into "write to file" and "read file into memory" (reuse store_serial)
-            tmp_path = os.path.join(scratch_dir,'tmp_doc_'+str(hash(data))+'.fcstd')
-            data.saveAs(tmp_path)
+            def _save_fct(doc, path):
+                doc.saveAs(path)
+            self.serial_fcdoc = store_serial(data, _save_fct, 'fcstd', scratch_dir=scratch_dir)
+
         elif data_name == 'mesh' or data_name == 'rmf':
             import fenics as fn
-            tmp_path = os.path.join(scratch_dir, 'tmp_fenics_' + str(hash(data)) + '.xml')
-            fn.File(tmp_path) << data
+            def _save_fct(data, path):
+                fn.File(path) << data
+            if data_name == 'mesh':
+                self.serial_mesh = store_serial(data, _save_fct, 'mesh', scratch_dir=scratch_dir)
+            if data_name == 'rmf':
+                self.serial_region_marker = store_serial(data, _save_fct, 'rmf', scratch_dir=scratch_dir)
+
         else:
             raise ValueError(str(data_name) + ' was not a valid data_name.')
-        with open(tmp_path, 'rb') as f:
-            # The data is encoded in base64 then decoded as a string so that it can be passed
-            # safely over subprocess pipes.
-            serial_data = codecs.encode(f.read(), 'base64').decode()
-        if data_name == 'fcdoc':
-            self.serial_fcdoc = serial_data
-        elif data_name == 'mesh':
-            self.serial_mesh = serial_data
-        elif data_name == 'rmf':
-            self.serial_region_marker = serial_data
-        shutil.rmtree(scratch_dir)
 
     def get_data(self, data_name, mesh=None, scratch_dir=None):
         """
         Get data from stored serial format.
-        :param scratch_dir:
+        :param str data_name:  "fcdoc" freeCAD document
+                               "mesh"  fenics mesh
+                               "rmf"   fenics region marker function
         :param mesh:
-        :param str data_name: Options are:
-                            "fcdoc", freeCAD document
-                            "mesh", for a fenics mesh
-                            "rmf", for a fenics region marker function
-        :return data: The freeCAD document or fenics object that was stored.
+        :param scratch_dir:    Optional temporary (fast) storage location.
+        :return data:          The freeCAD document or fenics object that was stored.
         """
-        if scratch_dir is None:
-            import uuid
-            scratch_dir = 'tmp_' + str(uuid.uuid4())
-        os.mkdir(scratch_dir)
-        if data_name == 'fcdoc':
-            # TODO: templates sent by path string, other "unpacking" fcdocs is not needed
-            serial_data = self.serial_fcdoc
-            tmp_path = os.path.join(scratch_dir, 'tmp_doc_' + str(hash(serial_data)) + '.fcstd')
-        elif data_name == 'mesh' or data_name == 'rmf':
-            if data_name == 'mesh':
-                serial_data = self.serial_mesh
-            else:
-                serial_data = self.serial_region_marker
-            tmp_path = os.path.join(scratch_dir, 'tmp_fenics_' + str(hash(serial_data)) + '.xml')
-        else:
-            raise ValueError(str(data_name) + ' was not a valid data_name.')
-        decoded_data = codecs.decode(serial_data.encode(), 'base64')
-        with open(tmp_path, 'wb') as of:
-            of.write(decoded_data)
         if data_name == 'fcdoc':
             import FreeCAD
-            data = FreeCAD.newDocument('instance')
-            FreeCAD.setActiveDocument('instance')
-            data.load(tmp_path)
+            def _load_fct(path):
+                doc = FreeCAD.newDocument('instance')
+                FreeCAD.setActiveDocument('instance')
+                doc.load(path)
+                return doc
+            return load_serial(self.serial_fcdoc, _load_fct, scratch_dir=scratch_dir)
+
         elif data_name == 'mesh':
             import fenics as fn
-            data = fn.Mesh(tmp_path)
-        else:
+            def _load_fct(path):
+                return fn.Mesh(path)
+            return load_serial(self.serial_mesh, _load_fct, scratch_dir=scratch_dir)
+
+        elif data_name == 'rmf':
             import fenics as fn
-            assert mesh, 'Need to specify a mesh on which to generate the region marker function'
-            data = fn.MeshFunction('size_t', mesh, mesh.topology().dim())
-            fn.File(tmp_path) >> data
-        shutil.rmtree(scratch_dir)
-        return data
+            def _load_fct(path):
+                assert mesh, 'Need to specify a mesh on which to generate the region marker function'
+                data = fn.MeshFunction('size_t', mesh, mesh.topology().dim())
+                fn.File(path) >> data
+                return data
+            return load_serial(self.serial_region_marker, _load_fct, scratch_dir=scratch_dir)
+
+        else:
+            raise ValueError(str(data_name) + ' was not a valid data_name.')
 
     def write_fcstd(self, file_path=None):
         """Write geometry to a fcstd file.
@@ -281,11 +329,8 @@ class Geo3DData(Data):
         Returns the fcstd file path.
         """
         if file_path is None:
-            file_path = str(self.build_order) + '.fcstd'
-        import codecs
-        data = codecs.decode(self.serial_fcdoc.encode(), 'base64')
-        with open(file_path, 'wb') as of:
-            of.write(data)
+            file_path = str(self.build_order) + '.fcstd'  # TODO: something smarter
+        write_deserialised_file(self.serial_fcdoc, file_path)
         return file_path
 
     def get_names_to_region_ids(self):
