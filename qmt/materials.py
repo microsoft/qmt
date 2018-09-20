@@ -441,8 +441,12 @@ class Materials(collections.Mapping):
             return -(mat['electronAffinity'] + mat['directBandGap'])
 
     #TODO: make this user-configurable and shift all energy properties reported by materials
-    def reference_level(self):
-        return self.matDict['InSb']['electronAffinity']
+    def reference_level(self, eunit=None):
+        if eunit is None:
+            eunit = units.meV
+        else:
+            eunit = toFloat(units.meV / parseUnit(eunit))
+        return -self.matDict['InSb']['electronAffinity'] * eunit
 
 
 def conduction_band_offset(mat, ref_mat):
