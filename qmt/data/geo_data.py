@@ -208,12 +208,14 @@ class Geo3DData(Data):
 
         elif data_name == 'mesh' or data_name == 'rmf':
             import fenics as fn
+
             def _save_fct(data, path):
                 fn.File(path) << data
             if data_name == 'mesh':
-                self.serial_mesh = store_serial(data, _save_fct, 'mesh', scratch_dir=scratch_dir)
+                self.serial_mesh = store_serial(data, _save_fct, 'xml', scratch_dir=scratch_dir)
             if data_name == 'rmf':
-                self.serial_region_marker = store_serial(data, _save_fct, 'rmf', scratch_dir=scratch_dir)
+                self.serial_region_marker = store_serial(data, _save_fct, 'xml',
+                                                         scratch_dir=scratch_dir)
 
         else:
             raise ValueError(str(data_name) + ' was not a valid data_name.')
