@@ -54,7 +54,11 @@ class Geometry2D(Task):
         :return: geo_2d: A Geo2DData object.
         """
         geo_2d = Geo2DData()
-        for part_name in current_options['parts']:
+        build_order = list(current_options.get('build_order', current_options['parts']))
+        for part in current_options['parts']:
+            if part not in build_order:
+                build_order.append(part)
+        for part_name in build_order:
             geo_2d.add_part(part_name, Polygon(current_options['parts'][part_name]))
         for edge_name in current_options['edges']:
             geo_2d.add_edge(edge_name, LineString(current_options['edges'][edge_name]))
