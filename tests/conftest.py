@@ -35,14 +35,19 @@ def fix_FCDoc():
 
 
 @pytest.fixture(scope='session')
-def fix_py2env(fix_testDir):
-    '''Host setting for python2.7 environment.'''
-
+def fix_host_settings_dir(fix_testDir):
+    '''Host setting directory.'''
     settings_dir = os.path.join(fix_testDir, 'host_settings')
     if not os.path.exists(settings_dir):
         os.mkdir(settings_dir)
+    return settings_dir
 
-    py2env_file = os.path.join(settings_dir, 'py2env_path')
+
+@pytest.fixture(scope='session')
+def fix_py2env(fix_host_settings_dir):
+    '''Host setting for python2.7 environment.'''
+
+    py2env_file = os.path.join(fix_host_settings_dir, 'py2env_path')
 
     # Check for file existence and help the user fill it.
     not_found_error = FileNotFoundError if sys.version_info[0] >= 3 else IOError
