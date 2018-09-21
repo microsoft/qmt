@@ -12,23 +12,6 @@ import qmt
 
 
 @pytest.fixture(scope='session')
-def fix_py2env():
-    '''Change this to your python2.7 environment.'''
-
-    py2env = 'python2'
-
-    not_found_error = FileNotFoundError if sys.version_info[0] >= 3 else OSError
-    try:
-        import subprocess
-        p = subprocess.Popen([py2env, '--version'])
-        p.terminate()
-    except not_found_error:
-        raise ValueError('Invalid Python 2.7 environment in py2env fixture. ' +
-                         'Please edit this in ' + __file__)
-    return py2env
-
-
-@pytest.fixture(scope='session')
 def fix_testDir():
     '''Return the test directory path.'''
     rootPath = os.path.join(os.path.dirname(qmt.__file__), os.pardir)
@@ -49,6 +32,40 @@ def fix_FCDoc():
     doc = FreeCAD.newDocument('testDoc')
     yield doc
     FreeCAD.closeDocument('testDoc')
+
+
+@pytest.fixture(scope='session')
+def fix_py2env(fix_testDir):
+    '''Host setting for python2.7 environment.'''
+
+    settings_dir = os.path.join(fix_testDir, 'host_settings')
+    if not os.path.exists(settings_dir):
+        os.mkdir(settings_dir)
+
+    py2env_file = os.path.join(settings_dir, 'py2env_path')
+
+    # Check for file existence and help the user fill it.
+    not_found_error = FileNotFoundError if sys.version_info[0] >= 3 else IOError
+    try:
+        with open(py2env_file) as f:
+            py2env = f.read().strip()
+    except not_found_error:
+        with open(py2env_file, 'a'):
+            os.utime(py2env_file, None)  # touch the file
+        raise ValueError("Please specify a valid Python2.7 executable path in " +
+                         py2env_file)
+
+    # Check for file correctness and scold the user.
+    not_found_error = FileNotFoundError if sys.version_info[0] >= 3 else OSError
+    try:
+        import subprocess
+        p = subprocess.Popen([py2env, '--version'])
+        p.terminate()
+    except not_found_error:
+        raise ValueError('Invalid Python 2.7 environment ' + py2env +
+                         ' in ' + py2env_file)
+
+    return py2env
 
 
 @pytest.fixture(scope='function')
