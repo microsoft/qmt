@@ -3,10 +3,10 @@
 
 """Geometry data classes."""
 
-from .data_utils import load_serial, store_serial, write_deserialised_file
-
 from qmt.materials import Materials
 from qmt.data.template import Data
+
+from .data_utils import load_serial, store_serial, write_deserialised_file
 
 
 # TODO factor out geo superclass
@@ -199,7 +199,7 @@ class Geo3DData(Data):
                                "mesh"  fenics mesh
                                "rmf"   fenics region marker function
         :param data:           The corresponding data that we would like to set.
-        :param scratch_dir:    Optional temporary (fast) storage location.
+        :param scratch_dir:    Optional existing temporary (fast) storage location.
         """
         if data_name == 'fcdoc':
             def _save_fct(doc, path):
@@ -232,6 +232,7 @@ class Geo3DData(Data):
         """
         if data_name == 'fcdoc':
             import FreeCAD
+
             def _load_fct(path):
                 doc = FreeCAD.newDocument('instance')
                 FreeCAD.setActiveDocument('instance')
@@ -241,6 +242,7 @@ class Geo3DData(Data):
 
         elif data_name == 'mesh':
             import fenics as fn
+
             def _load_fct(path):
                 return fn.Mesh(path)
             return load_serial(self.serial_mesh, _load_fct, ext_format='xml',
@@ -248,6 +250,7 @@ class Geo3DData(Data):
 
         elif data_name == 'rmf':
             import fenics as fn
+
             def _load_fct(path):
                 assert mesh, 'Need to specify a mesh on which to generate the region marker function'
                 data = fn.MeshFunction('size_t', mesh, mesh.topology().dim())
@@ -265,11 +268,11 @@ class Geo3DData(Data):
         Returns the fcstd file path.
         """
         if file_path is None:
-            file_path = str(self.build_order) + '.fcstd'  # TODO: something smarter
+            file_path = '_'.join([item[0:4].replace(' ', '_') for item in self.build_order]) + '.fcstd'
         write_deserialised_file(self.serial_fcdoc, file_path)
         return file_path
 
-    #TODO: Redundant? self.fenics_ids appears to be identical to the mapping returned here
+    # TODO: Redundant? self.fenics_ids appears to be identical to the mapping returned here
     def get_names_to_region_ids(self):
         mapping = {name: i + 2 for i, name in enumerate(self.build_order)}
         mapping[Geo3DData.EXTERIOR_BC_NAME] = 1
