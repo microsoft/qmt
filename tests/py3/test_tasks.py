@@ -89,7 +89,7 @@ def test_sweep(fix_task_env):
     results = post_proc_task.computed_result.calculate_completed_results()
     assert len(results) == 630 and results.get_result(3)==0.0
 
-def test_docker_sweep(fix_task_env,fix_setup_docker):
+def test_docker_sweep(fix_task_env, fix_setup_docker):
     import subprocess
     import time
     from dask.distributed import Client

@@ -15,7 +15,7 @@ def serialised_file(path):
     return serial_data
 
 
-def write_deserialised_file(serial_obj, path):
+def write_deserialised(serial_obj, path):
     '''Write a deserialised file from a serialised blob to a given file path.'''
     data = codecs.decode(serial_obj.encode(), 'base64')
     with open(path, 'wb') as f:
@@ -48,7 +48,7 @@ def load_serial(serial_obj, load_fct, ext_format=None, scratch_dir=None):
     if not scratch_dir:
         scratch_dir = os.curdir
     tmp_path = os.path.join(scratch_dir, uuid.uuid4().hex + '.' + ext_format)
-    write_deserialised_file(serial_obj, tmp_path)
+    write_deserialised(serial_obj, tmp_path)
     obj = load_fct(tmp_path)
     os.remove(tmp_path)
     return obj

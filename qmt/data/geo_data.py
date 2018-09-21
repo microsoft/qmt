@@ -6,7 +6,7 @@
 from qmt.materials import Materials
 from qmt.data.template import Data
 
-from .data_utils import load_serial, store_serial, write_deserialised_file
+from .data_utils import load_serial, store_serial, write_deserialised
 
 
 # TODO factor out geo superclass
@@ -269,7 +269,7 @@ class Geo3DData(Data):
         """
         if file_path is None:
             file_path = '_'.join([item[0:4].replace(' ', '_') for item in self.build_order]) + '.fcstd'
-        write_deserialised_file(self.serial_fcdoc, file_path)
+        write_deserialised(self.serial_fcdoc, file_path)
         return file_path
 
     # TODO: Redundant? self.fenics_ids appears to be identical to the mapping returned here
