@@ -3,17 +3,13 @@
 
 """Fixtures for QMT unit tests."""
 
-import os
 
+import os
+import sys
 import pytest
 
 import qmt
 
-@pytest.fixture(scope='session')
-def fix_py2env():
-    ''' change this to your python2.7 environment'''
-    py2env = "Change this to your python 2 path"
-    return py2env
 
 @pytest.fixture(scope='session')
 def fix_testDir():
@@ -37,18 +33,57 @@ def fix_FCDoc():
     yield doc
     FreeCAD.closeDocument('testDoc')
 
+
+@pytest.fixture(scope='session')
+def fix_host_settings_dir(fix_testDir):
+    '''Host setting directory.'''
+    settings_dir = os.path.join(fix_testDir, 'host_settings')
+    if not os.path.exists(settings_dir):
+        os.mkdir(settings_dir)
+    return settings_dir
+
+
+@pytest.fixture(scope='session')
+def fix_py2env(fix_host_settings_dir):
+    '''Host setting for python2.7 environment.'''
+
+    py2env_file = os.path.join(fix_host_settings_dir, 'py2env_path')
+
+    # Check for file existence and help the user fill it.
+    not_found_error = FileNotFoundError if sys.version_info[0] >= 3 else IOError
+    try:
+        with open(py2env_file) as f:
+            py2env = f.read().strip()
+    except not_found_error:
+        with open(py2env_file, 'a'):
+            os.utime(py2env_file, None)  # touch the file
+        raise ValueError("Please specify a valid Python2.7 executable path in " +
+                         py2env_file)
+
+    # Check for file correctness and scold the user.
+    not_found_error = FileNotFoundError if sys.version_info[0] >= 3 else OSError
+    try:
+        import subprocess
+        p = subprocess.Popen([py2env, '--version'])
+        p.terminate()
+    except not_found_error:
+        raise ValueError('Invalid Python 2.7 environment ' + py2env +
+                         ' in ' + py2env_file)
+
+    return py2env
+
+
 @pytest.fixture(scope='function')
 def fix_setup_docker():
     '''Build the docker image to run tests'''
     import subprocess
-    import os
     subprocess.check_call(['docker', 'pull', 'johnkgamble/qmt_base'])
-    build_path = os.path.join(os.path.dirname(qmt.__file__),'..')
-    subprocess.check_call(['docker', 'build', '-t','qmt:master','.'],cwd=build_path)
+    build_path = os.path.join(os.path.dirname(qmt.__file__), '..')
+    subprocess.check_call(['docker', 'build', '-t', 'qmt:master', '.'], cwd=build_path)
+
 
 ################################################################################
 # Sketches
-
 
 @pytest.fixture(scope='function')
 def fix_two_cycle_sketch():
@@ -123,16 +158,15 @@ def fix_hexagon_sketch():
         vec = FreeCAD.Vector
         doc = FreeCAD.ActiveDocument
         sketch = doc.addObject('Sketcher::SketchObject', 'HexSketch')
-        ProfileLib.RegularPolygon.makeRegularPolygon('HexSketch', 6, vec(10,10,0), vec(20,20,0), False)
+        ProfileLib.RegularPolygon.makeRegularPolygon('HexSketch', 6, vec(1, 1, 0), vec(1+r, 1, 0), False)
         doc.recompute()
         return sketch
 
     return aux_hexagon_sketch
 
+
 ################################################################################
 # Tasks environment
-
-
 
 @pytest.fixture(scope='function')
 def fix_task_env():
@@ -151,10 +185,11 @@ def fix_task_env():
         """
         def __init__(self, options=None, name='input_task'):
             super(InputTaskExample, self).__init__([], options, name)
+
         @staticmethod
         def _solve_instance(input_result_list, current_options):
             for key_val in input_result_list:
-                print(key_val)+' '+str(input_result_list[key_val])
+                print(key_val) + ' ' + str(input_result_list[key_val])
             return current_options
 
     class GatheredTaskExample(Task):
@@ -167,13 +202,14 @@ def fix_task_env():
         """
         def __init__(self, input_task, options=None, name='gathered_task', gather=True):
             super(GatheredTaskExample, self).__init__([input_task], options, name, gather=gather)
+
         @staticmethod
-        def _solve_gathered(list_of_input_result_lists, list_of_options,result_sweep):
+        def _solve_gathered(list_of_input_result_lists, list_of_options, result_sweep):
             for sweep_holder_index, tag_values in enumerate(result_sweep.tagged_value_list):
                 geometry_obj = list_of_input_result_lists[sweep_holder_index][0]
                 mesh = {}
                 for part in geometry_obj:
-                    mesh[part] = np.linspace(0.0,1.0,
+                    mesh[part] = np.linspace(0.0, 1.0,
                                              list_of_options[sweep_holder_index]['numpoints'])
                 result_sweep.add(mesh, sweep_holder_index)
             return result_sweep
@@ -185,39 +221,17 @@ def fix_task_env():
         be of the form {"prefactor":float}.
         :param str name: Name of the task.
         """
-        def __init__(self, input_task,gathered_task, options=None, name='post_proc_task'):
-            super(PostProcessingTaskExample, self).__init__([input_task,gathered_task], options, name)
+        def __init__(self, input_task, gathered_task, options=None, name='post_proc_task'):
+            super(PostProcessingTaskExample, self).__init__([input_task, gathered_task], options, name)
+
         @staticmethod
         def _solve_instance(input_result_list, current_options):
             input_task_result = input_result_list[0]
             gathered_task_result = input_result_list[1]
             result = 0.0
             for part in input_task_result:
-                result += current_options['prefactor']*np.sum(input_task_result[part])*\
-                          np.sum(gathered_task_result[part])
+                result += (current_options['prefactor'] * np.sum(input_task_result[part]) *
+                           np.sum(gathered_task_result[part]))
             return result
 
-    return InputTaskExample,GatheredTaskExample,PostProcessingTaskExample
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    return InputTaskExample, GatheredTaskExample, PostProcessingTaskExample
