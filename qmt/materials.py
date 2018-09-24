@@ -156,16 +156,20 @@ class Materials(collections.Mapping):
         manually before loading/saving.
     matDict : dict, default None
         Dictionary of materials to fill the database.
+    load : Bool
+        Load the json file. Needs to be False when creating a new materials.json file.
     """
 
-    def __init__(self, matPath=None, matDict=None):
+    def __init__(self, matPath=None, matDict=None, load=True):
         self.matDict = {}
         self.bowingParameters = {}
         if matPath is None and matDict is None:
             matPath = os.path.join(os.path.dirname(__file__), 'materials.json')
         self.matPath = matPath
-        if matPath is not None:
+
+        if matPath is not None and load:
             self.load()
+
         if matDict is not None:
             self.bowingParameters.update(
                 matDict.pop('__bowing_parameters', {}))
@@ -338,11 +342,13 @@ class Materials(collections.Mapping):
         try:
             with open(self.matPath, 'r') as myFile:
                 db = json.load(myFile)
+            self.deserializeDict(db)
         except IOError:
             print("Could not load materials file %s." % self.matPath)
             print("Generating a new file at that location...")
-            db = {}
-        self.deserialize_dict(db)
+            generate_file(self.matPath)
+            self.load()
+
 
     def conduction_band_minimum(self, mat):
         """Calculate the energy of the conduction band minimum $E_c$ of a semiconductor material.
@@ -648,13 +654,8 @@ def write_database_to_markdown(out_file, mat_lib):
         """), file=out_file)
 
 
-# New physical materials go here:
-if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        fname = sys.argv[1]
-    else:
-        fname = None
-    materials = Materials(fname)
+def generate_file(fname=None):
+    materials = Materials(fname, load=False)
 
     # === Metals ===
     materials.add_material('Al', 'metal', relativePermittivity=1000,
@@ -851,3 +852,12 @@ if __name__ == '__main__':
 
     with open('materials.md', 'w') as f:
         write_database_to_markdown(f, materials)
+
+
+# New physical materials go here:
+if __name__ == '__main__':
+    if len(sys.argv) > 1:
+        fname = sys.argv[1]
+    else:
+        fname = None
+    generate_file(fname)
