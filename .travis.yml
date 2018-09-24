@@ -37,6 +37,13 @@ script:
       export PYTHONPATH=$PYTHONPATH:$HOME/miniconda/envs/test-environment/lib ;
     fi
   - echo python2 > /home/travis/build/Microsoft/qmt/tests/host_settings/py2env_path
+  - ls /home/
+  - ls /home/travis/
+  - ls /home/travis/build/
+  - ls /home/travis/build/Microsoft/
+  - ls /home/travis/build/Microsoft/qmt/
+  - ls /home/travis/build/Microsoft/qmt/tests/
+  - ls /home/travis/build/Microsoft/qmt/tests/host_settings/
   - pytest tests
 
    
