@@ -296,7 +296,7 @@
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;invalid direction: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">direction</span><span class="p">))</span></div></div>
 
 
-<div class="viewcode-block" id="Materials"><a class="viewcode-back" href="../../rst/dev_overview.html#qmt.Materials">[docs]</a><span class="k">class</span> <span class="nc">Materials</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
+<div class="viewcode-block" id="Materials"><a class="viewcode-back" href="../../source/qmt.html#qmt.Materials">[docs]</a><span class="k">class</span> <span class="nc">Materials</span><span class="p">(</span><span class="n">collections</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Class for creating, loading, and manipulating a json file that</span>
 <span class="sd">    contains information about materials.</span>
 
@@ -332,14 +332,14 @@
     <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matDict</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Materials.add_material"><a class="viewcode-back" href="../../rst/dev_overview.html#qmt.Materials.add_material">[docs]</a>    <span class="k">def</span> <span class="nf">add_material</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">mat_type</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="Materials.add_material"><a class="viewcode-back" href="../../source/qmt.html#qmt.Materials.add_material">[docs]</a>    <span class="k">def</span> <span class="nf">add_material</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">mat_type</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Generate a material and add it to the matDict.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">mat_type</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;metal&#39;</span><span class="p">,</span> <span class="s1">&#39;dielectric&#39;</span><span class="p">):</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;electronMass&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;electronMass&#39;</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">matDict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_material</span><span class="p">(</span><span class="n">mat_type</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Materials.set_bowing_parameters"><a class="viewcode-back" href="../../rst/dev_overview.html#qmt.Materials.set_bowing_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">set_bowing_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name_a</span><span class="p">,</span> <span class="n">name_b</span><span class="p">,</span> <span class="n">mat_type</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="Materials.set_bowing_parameters"><a class="viewcode-back" href="../../source/qmt.html#qmt.Materials.set_bowing_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">set_bowing_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name_a</span><span class="p">,</span> <span class="n">name_b</span><span class="p">,</span> <span class="n">mat_type</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Generate a bowing parameter set and add it to the bowingParameters dict.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">bowingParameters</span><span class="p">[(</span><span class="n">name_a</span><span class="p">,</span> <span class="n">name_b</span><span class="p">)]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_material</span><span class="p">(</span>
             <span class="n">mat_type</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
@@ -387,7 +387,7 @@
     <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Materials.find"><a class="viewcode-back" href="../../rst/dev_overview.html#qmt.Materials.find">[docs]</a>    <span class="k">def</span> <span class="nf">find</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">eunit</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Materials.find"><a class="viewcode-back" href="../../source/qmt.html#qmt.Materials.find">[docs]</a>    <span class="k">def</span> <span class="nf">find</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">eunit</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Retrieve a named material from the database.</span>
 
 <span class="sd">        If the material is not found directly, an attempt is made to construct</span>
@@ -480,14 +480,14 @@
         <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">iteritems</span><span class="p">(</span><span class="n">bowingParms</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">bowingParameters</span><span class="p">[</span><span class="n">literal_eval</span><span class="p">(</span><span class="n">k</span><span class="p">)]</span> <span class="o">=</span> <span class="n">v</span></div>
 
-<div class="viewcode-block" id="Materials.save"><a class="viewcode-back" href="../../rst/dev_overview.html#qmt.Materials.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Materials.save"><a class="viewcode-back" href="../../source/qmt.html#qmt.Materials.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Save the current materials database to disk.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">db</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">serialize_dict</span><span class="p">()</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matPath</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">myFile</span><span class="p">:</span>
             <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">myFile</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Materials.load"><a class="viewcode-back" href="../../rst/dev_overview.html#qmt.Materials.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Materials.load"><a class="viewcode-back" href="../../source/qmt.html#qmt.Materials.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Load the materials database from disk.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
@@ -499,7 +499,7 @@
             <span class="n">db</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">deserialize_dict</span><span class="p">(</span><span class="n">db</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Materials.conduction_band_minimum"><a class="viewcode-back" href="../../rst/dev_overview.html#qmt.Materials.conduction_band_minimum">[docs]</a>    <span class="k">def</span> <span class="nf">conduction_band_minimum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mat</span><span class="p">):</span>
+<div class="viewcode-block" id="Materials.conduction_band_minimum"><a class="viewcode-back" href="../../source/qmt.html#qmt.Materials.conduction_band_minimum">[docs]</a>    <span class="k">def</span> <span class="nf">conduction_band_minimum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mat</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Calculate the energy of the conduction band minimum $E_c$ of a semiconductor material.</span>
 
 <span class="sd">        The reference energy E=0 is fixed to the vacuum level, as defined by the electron affinity</span>
@@ -551,7 +551,7 @@
             <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="k">return</span> <span class="o">-</span><span class="n">mat</span><span class="p">[</span><span class="s1">&#39;electronAffinity&#39;</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="Materials.valence_band_maximum"><a class="viewcode-back" href="../../rst/dev_overview.html#qmt.Materials.valence_band_maximum">[docs]</a>    <span class="k">def</span> <span class="nf">valence_band_maximum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mat</span><span class="p">):</span>
+<div class="viewcode-block" id="Materials.valence_band_maximum"><a class="viewcode-back" href="../../source/qmt.html#qmt.Materials.valence_band_maximum">[docs]</a>    <span class="k">def</span> <span class="nf">valence_band_maximum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mat</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Calculate the energy of the valence band maximum $E_v$ of a semiconductor material.</span>
 
 <span class="sd">        The reference energy E=0 is fixed to the vacuum level, as defined by the electron affinity</span>

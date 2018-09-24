@@ -207,7 +207,7 @@
 <span class="p">)</span>
 
 
-<div class="viewcode-block" id="parse_unit"><a class="viewcode-back" href="../../rst/dev_overview.html#qmt.parse_unit">[docs]</a><span class="k">def</span> <span class="nf">parse_unit</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+<div class="viewcode-block" id="parse_unit"><a class="viewcode-back" href="../../source/qmt.html#qmt.parse_unit">[docs]</a><span class="k">def</span> <span class="nf">parse_unit</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;convert name of a unit into the corresponding sympy value&quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">units</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">u</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;__&#39;</span><span class="p">:</span>
@@ -251,7 +251,7 @@
     <span class="k">return</span> <span class="n">canonicalize</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="to_float"><a class="viewcode-back" href="../../rst/dev_overview.html#qmt.to_float">[docs]</a><span class="k">def</span> <span class="nf">to_float</span><span class="p">(</span><span class="n">expr</span><span class="p">):</span>
+<div class="viewcode-block" id="to_float"><a class="viewcode-back" href="../../source/qmt.html#qmt.to_float">[docs]</a><span class="k">def</span> <span class="nf">to_float</span><span class="p">(</span><span class="n">expr</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Convert sympy expression involving units to a float. Fails if expr is not dimensionless.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">cancel</span><span class="p">(</span><span class="n">expr</span><span class="p">))</span></div>
 
