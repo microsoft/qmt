@@ -116,3 +116,4 @@ ENV/
 /qmt/freecadMacros/dxfImportObjects.py
 /qmt/freecadMacros/dxfLibrary.py
 /qmt/freecadMacros/dxfReader.py
+dask-worker-space
