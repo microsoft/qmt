@@ -14,11 +14,11 @@ from qmt.geometry.freecad.auxiliary import *
 from qmt.geometry.freecad.fileIO import exportCAD
 from qmt.geometry.freecad.geomUtils import (extrude, copy_move, genUnion,# make_solid,
                                             getBB, makeBB, makeHexFace,
-                                            extrudeBetween, intersect,
+                                            extrudeBetween, draftOffset, intersect,
                                             checkOverlap, subtract,
                                             crossSection)
 from qmt.geometry.freecad.sketchUtils import (findSegments, splitSketch, extendSketch,
-                                              findEdgeCycles, draftOffset)
+                                              findEdgeCycles)
 
 from qmt.data.geo_data import Geo3DData, store_serial
 

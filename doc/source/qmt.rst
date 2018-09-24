@@ -6,10 +6,9 @@ Subpackages
 
 .. toctree::
 
-    qmt.basic_tasks
+    qmt.data
     qmt.geometry
-    qmt.ms_tasks
-    qmt.task_framework
+    qmt.tasks
     qmt.visualization
 
 Submodules

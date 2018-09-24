@@ -88,6 +88,7 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../rst/tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/modules.html">Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../rst/dev_overview.html">Structure of QMT</a></li>
 </ul>
 
@@ -157,15 +158,15 @@
 
 <span class="sd">&quot;&quot;&quot;Wrapping FreeCAD calls within a Python 3 environment.&quot;&quot;&quot;</span>
 
-
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">print_function</span>
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">subprocess</span>
 <span class="kn">import</span> <span class="nn">pickle</span>
+<span class="kn">import</span> <span class="nn">subprocess</span>
 
 <span class="kn">import</span> <span class="nn">qmt</span>
 
 
-<div class="viewcode-block" id="fcwrapper"><a class="viewcode-back" href="../../../source/qmt.geometry.html#qmt.geometry.freecad_wrapper.fcwrapper">[docs]</a><span class="k">def</span> <span class="nf">fcwrapper</span><span class="p">(</span><span class="n">pyenv</span><span class="o">=</span><span class="s1">&#39;python2&#39;</span><span class="p">,</span> <span class="n">instruction</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="fcwrapper"><a class="viewcode-back" href="../../../source/qmt.geometry.html#qmt.geometry.freecad_wrapper.fcwrapper">[docs]</a><span class="k">def</span> <span class="nf">fcwrapper</span><span class="p">(</span><span class="n">pyenv</span><span class="o">=</span><span class="s1">&#39;python2&#39;</span><span class="p">,</span> <span class="n">instruction</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Wrapper to isolate FreeCAD Python 2.7 calls from the Python 3 code base.</span>
 
 <span class="sd">    :param str pyenv:       Python interpreter, defaults to &#39;python2&#39;.</span>
@@ -185,13 +186,20 @@
     <span class="c1"># output[1] not checked because stderr is used for mere warnings too often.</span>
     <span class="k">if</span> <span class="n">proc</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">output</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">linesep</span> <span class="o">+</span> <span class="s1">&#39; --- END OF WRAPPED STDERR ---&#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">linesep</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">linesep</span> <span class="o">+</span> <span class="s1">&#39; --- END OF FC WRAPPED STDERR ---&#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">linesep</span><span class="p">)</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;pywrapper returned &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">proc</span><span class="o">.</span><span class="n">returncode</span><span class="p">))</span>
 
     <span class="c1"># The returned serialised byte stream is demarcated by the separator string</span>
     <span class="c1"># &quot;MAGICQMTRANSFERBYTES&quot;. Most data preceding the separator corresponds to</span>
     <span class="c1"># FreeCAD notifications and gets discarded.</span>
-    <span class="n">serial_data</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;MAGICQMTRANSFERBYTES&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
+    <span class="n">pipe_data</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;MAGICQMTRANSFERBYTES&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">debug</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">linesep</span> <span class="o">+</span> <span class="s1">&#39; --- FC WRAPPED STDOUT ---&#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">linesep</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="o">*</span><span class="n">pipe_data</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">linesep</span> <span class="o">+</span> <span class="s1">&#39; --- FC WRAPPED STDERR ---&#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">linesep</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">output</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">linesep</span> <span class="o">+</span> <span class="s1">&#39; --- END OF FC WRAPPED STDERR ---&#39;</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">linesep</span><span class="p">)</span>
+    <span class="n">serial_data</span> <span class="o">=</span> <span class="n">pipe_data</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">pickle</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">serial_data</span><span class="p">)</span></div>
 </pre></div>
 

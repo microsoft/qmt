@@ -19,22 +19,6 @@ qmt\.geometry\.freecad\_wrapper module
     :undoc-members:
     :show-inheritance:
 
-qmt\.geometry\.geo\_data module
--------------------------------
-
-.. automodule:: qmt.geometry.geo_data
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-qmt\.geometry\.parts module
----------------------------
-
-.. automodule:: qmt.geometry.parts
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 qmt\.geometry\.property\_map module
 -----------------------------------
 

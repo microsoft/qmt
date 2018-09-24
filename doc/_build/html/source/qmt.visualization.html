@@ -29,7 +29,9 @@
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Structure of QMT" href="../rst/dev_overview.html" />
+    <link rel="prev" title="qmt.tasks.ms package" href="qmt.tasks.ms.html" /> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -86,8 +88,25 @@
             
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../rst/tutorial.html">Tutorial</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="qmt.html">qmt package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="qmt.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="qmt.data.html">qmt.data package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qmt.geometry.html">qmt.geometry package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qmt.tasks.html">qmt.tasks package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">qmt.visualization package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qmt.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qmt.html#module-qmt.materials">qmt.materials module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qmt.html#module-qmt.physics_constants">qmt.physics_constants module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qmt.html#module-qmt">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../rst/dev_overview.html">Structure of QMT</a></li>
 </ul>
 
@@ -134,6 +153,10 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
+          <li><a href="modules.html">qmt</a> &raquo;</li>
+        
+          <li><a href="qmt.html">qmt package</a> &raquo;</li>
+        
       <li>qmt.visualization package</li>
     
     
@@ -166,6 +189,26 @@
 <dd></dd></dl>
 
 </div>
+<div class="section" id="module-qmt.visualization.density_2d_plot">
+<span id="qmt-visualization-density-2d-plot-module"></span><h2>qmt.visualization.density_2d_plot module<a class="headerlink" href="#module-qmt.visualization.density_2d_plot" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="qmt.visualization.density_2d_plot.generate_2d_density_plot">
+<code class="descclassname">qmt.visualization.density_2d_plot.</code><code class="descname">generate_2d_density_plot</code><span class="sig-paren">(</span><em>generic_task</em>, <em>filename</em>, <em>dask_client=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/visualization/density_2d_plot.html#generate_2d_density_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.visualization.density_2d_plot.generate_2d_density_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function takes as input a 2D ThomasFermi or SchrodingerPoisson task, and a filename. 
+It then saves all of the data relevant to this plot.</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-qmt.visualization.mobility_plots">
+<span id="qmt-visualization-mobility-plots-module"></span><h2>qmt.visualization.mobility_plots module<a class="headerlink" href="#module-qmt.visualization.mobility_plots" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="qmt.visualization.mobility_plots.generate_mobility_plots">
+<code class="descclassname">qmt.visualization.mobility_plots.</code><code class="descname">generate_mobility_plots</code><span class="sig-paren">(</span><em>generic_task</em>, <em>filename</em>, <em>x_axis_tag</em>, <em>x_axis_units</em>, <em>dask_client=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/visualization/mobility_plots.html#generate_mobility_plots"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.visualization.mobility_plots.generate_mobility_plots" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function takes as input a mobility task, a filename, the tag which is the x axis of the eventual plot,
+and the units of the x-axis as a string. It then saves all of the data relevant to this plot.</p>
+</dd></dl>
+
+</div>
 <div class="section" id="module-qmt.visualization.plot">
 <span id="qmt-visualization-plot-module"></span><h2>qmt.visualization.plot module<a class="headerlink" href="#module-qmt.visualization.plot" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
@@ -192,6 +235,15 @@
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../rst/dev_overview.html" class="btn btn-neutral float-right" title="Structure of QMT" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="qmt.tasks.ms.html" class="btn btn-neutral" title="qmt.tasks.ms package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>

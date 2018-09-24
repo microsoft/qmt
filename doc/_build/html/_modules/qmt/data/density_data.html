@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>qmt.ms_tasks.density_data &mdash; QMT 1.0 documentation</title>
+  <title>qmt.data.density_data &mdash; QMT 1.0 documentation</title>
   
 
   
@@ -88,6 +88,7 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../rst/tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/modules.html">Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../rst/dev_overview.html">Structure of QMT</a></li>
 </ul>
 
@@ -136,7 +137,7 @@
         
           <li><a href="../../index.html">Module code</a> &raquo;</li>
         
-      <li>qmt.ms_tasks.density_data</li>
+      <li>qmt.data.density_data</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -151,13 +152,13 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <h1>Source code for qmt.ms_tasks.density_data</h1><div class="highlight"><pre>
+  <h1>Source code for qmt.data.density_data</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Copyright (c) Microsoft Corporation. All rights reserved.</span>
 <span class="c1"># Licensed under the MIT License.</span>
 
-<span class="kn">from</span> <span class="nn">qmt.task_framework</span> <span class="k">import</span> <span class="n">Data</span>
+<span class="kn">from</span> <span class="nn">qmt.data.template</span> <span class="k">import</span> <span class="n">Data</span>
 
-<div class="viewcode-block" id="Density1D"><a class="viewcode-back" href="../../../source/qmt.ms_tasks.html#qmt.ms_tasks.density_data.Density1D">[docs]</a><span class="k">class</span> <span class="nc">Density1D</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+<div class="viewcode-block" id="Density1DData"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.density_data.Density1DData">[docs]</a><span class="k">class</span> <span class="nc">Density1DData</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">densities</span><span class="p">,</span> <span class="n">density_units</span><span class="p">,</span> <span class="n">bands</span><span class="p">,</span> <span class="n">band_units</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">mesh_units</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructs Data object stores density information for 1d.</span>
@@ -169,7 +170,7 @@
 <span class="sd">        :param mesh: numpy array with the 1d mesh</span>
 <span class="sd">        :param mesh_units: units of mesh points</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="nb">super</span><span class="p">(</span><span class="n">Density1D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Density1DData</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         
         <span class="bp">self</span><span class="o">.</span><span class="n">densities</span> <span class="o">=</span> <span class="n">densities</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">density_units</span> <span class="o">=</span> <span class="n">density_units</span>

@@ -4,14 +4,14 @@ from which all special purpose tasks are subclassed.
 
 How to use, in a nutshell:
     To create a new task, subclass Task.
-    The constructor for the subclass must call the superclass constructor with
-        task_list=list of all dependent tasks,
-        options=dictionary containing all other inputs to the subclass task,
+    The constructor for the subclass must call the superclass constructor with \
+        task_list=list of all dependent tasks, \
+        options=dictionary containing all other inputs to the subclass task, \
         and optionally name=arbitrary name.
     These should also, in most cases, be the arguments to the subclass constructor--
     any arguments that the subclass constructor needs that are not dependent tasks should
     be placed into the options argument.
-        See basic/geometry.py for an example.
+    See basic/geometry.py for an example.
 
     The actual work done by your Task subclass will be done in the _solve_instance callback,
     which you must implement.
@@ -66,8 +66,8 @@ class Task(object):
         previous_tasks: The tasks that this depends on.
         options: Additional options that control the operation of this.
         resources: resources for the Dask client.
-        gather: default False. If false, the task is assumed to have a _solve_instance method, and takes in
-            one sweep point's worth of inputs. If true, the task is assumed to have a _solve_gathered method,
+        gather: default False. If false, the task is assumed to have a _solve_instance method, and takes in \
+            one sweep point's worth of inputs. If true, the task is assumed to have a _solve_gathered method, \
             and takes in inputs from every sweep point in its restricted sweep.
         name: The name of the task.
         list_of_tags: the list of sweep input tags that the sweep over this depends on

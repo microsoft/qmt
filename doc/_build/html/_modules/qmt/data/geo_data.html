@@ -1,0 +1,574 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>qmt.data.geo_data &mdash; QMT 1.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> QMT
+          
+
+          
+            
+            <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../rst/tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/modules.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rst/dev_overview.html">Structure of QMT</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">QMT</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>qmt.data.geo_data</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for qmt.data.geo_data</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) Microsoft Corporation. All rights reserved.</span>
+<span class="c1"># Licensed under the MIT License.</span>
+
+<span class="sd">&quot;&quot;&quot;Geometry data classes.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">qmt.materials</span> <span class="k">import</span> <span class="n">Materials</span>
+<span class="kn">from</span> <span class="nn">qmt.data.template</span> <span class="k">import</span> <span class="n">Data</span>
+
+<span class="kn">from</span> <span class="nn">.data_utils</span> <span class="k">import</span> <span class="n">load_serial</span><span class="p">,</span> <span class="n">store_serial</span><span class="p">,</span> <span class="n">write_deserialised</span>
+
+
+<span class="c1"># TODO factor out geo superclass</span>
+<div class="viewcode-block" id="GeoData"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geo_data.GeoData">[docs]</a><span class="k">class</span> <span class="nc">GeoData</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+    <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="Geo1DData"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geo_data.Geo1DData">[docs]</a><span class="k">class</span> <span class="nc">Geo1DData</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class holding 1D geometry data.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Class for holding a 1D geometry specification.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Geo1DData</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parts</span> <span class="o">=</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="Geo1DData.add_part"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geo_data.Geo1DData.add_part">[docs]</a>    <span class="k">def</span> <span class="nf">add_part</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part_name</span><span class="p">,</span> <span class="n">start_point</span><span class="p">,</span> <span class="n">end_point</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a part to this geometry.</span>
+<span class="sd">        :param str part_name: Name of the part to create</span>
+<span class="sd">        :param float start_point: Position of the start of the part</span>
+<span class="sd">        :param float end_point: Position of the end of the part</span>
+<span class="sd">        :param bool overwrite: Should we allow this to overwrite?</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">start</span><span class="p">,</span> <span class="n">end</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">start_point</span><span class="p">,</span> <span class="n">end_point</span><span class="p">])</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">part_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">overwrite</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Attempted to overwrite the part &quot;</span> <span class="o">+</span> <span class="n">part_name</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="n">part_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">start</span><span class="p">,</span> <span class="n">end</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Geo1DData.remove_part"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geo_data.Geo1DData.remove_part">[docs]</a>    <span class="k">def</span> <span class="nf">remove_part</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part_name</span><span class="p">,</span> <span class="n">ignore_if_absent</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove a part from this geometry.</span>
+<span class="sd">        :param str part_name: Name of part to remove</span>
+<span class="sd">        :param bool ignore_if_absent: Should we ignore an attempted removal if the part name</span>
+<span class="sd">        is not found?</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">part_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="n">part_name</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">ignore_if_absent</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Attempted to remove the part &quot;</span> <span class="o">+</span> <span class="n">part_name</span> <span class="o">+</span> <span class="s2">&quot;, which doesn&#39;t exist.&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">pass</span></div></div>
+
+
+<div class="viewcode-block" id="Geo2DData"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geo_data.Geo2DData">[docs]</a><span class="k">class</span> <span class="nc">Geo2DData</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class holding 2D geometry data.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Class for holding a 2D geometry specification. This class holds two main dicts:</span>
+<span class="sd">            - parts is a dictionary of shapely Polygon objects</span>
+<span class="sd">            - edges is a dictionary of shapely LineString objects</span>
+<span class="sd">        Parts are intended to be 2D domains, while edges are used for setting boundary conditions</span>
+<span class="sd">        and surface conditions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Geo2DData</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parts</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">edges</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">build_order</span> <span class="o">=</span> <span class="p">[]</span>
+
+<div class="viewcode-block" id="Geo2DData.add_part"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geo_data.Geo2DData.add_part">[docs]</a>    <span class="k">def</span> <span class="nf">add_part</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part_name</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a part to this geometry.</span>
+<span class="sd">        :param str part_name: Name of the part to create</span>
+<span class="sd">        :param Polygon part: Polygon object from shapely.geometry. This must be a valid Polygon.</span>
+<span class="sd">        :param bool overwrite: Should we allow this to overwrite?</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">part</span><span class="o">.</span><span class="n">is_valid</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Part &quot;</span> <span class="o">+</span> <span class="n">part_name</span> <span class="o">+</span> <span class="s2">&quot; is not a valid polygon.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">part_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">overwrite</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Attempted to overwrite the part &quot;</span> <span class="o">+</span> <span class="n">part_name</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="n">part_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">part</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">build_order</span> <span class="o">+=</span> <span class="p">[</span><span class="n">part_name</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Geo2DData.remove_part"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geo_data.Geo2DData.remove_part">[docs]</a>    <span class="k">def</span> <span class="nf">remove_part</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part_name</span><span class="p">,</span> <span class="n">ignore_if_absent</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove a part from this geometry.</span>
+<span class="sd">        :param str part_name: Name of part to remove</span>
+<span class="sd">        :param bool ignore_if_absent: Should we ignore an attempted removal if the part name</span>
+<span class="sd">        is not found?</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">part_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="n">part_name</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">build_order</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">part_name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">ignore_if_absent</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Attempted to remove the part &quot;</span> <span class="o">+</span> <span class="n">part_name</span> <span class="o">+</span> <span class="s2">&quot;, which doesn&#39;t exist.&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Geo2DData.add_edge"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geo_data.Geo2DData.add_edge">[docs]</a>    <span class="k">def</span> <span class="nf">add_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge_name</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add an edge to this geometry.</span>
+<span class="sd">        :param str edge_name: Name of the edge to create</span>
+<span class="sd">        :param LineString edge: LineString object from shapely.geometry.</span>
+<span class="sd">        :param bool overwrite: Should we allow this to overwrite?</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">edge_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">overwrite</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Attempted to overwrite the edge &quot;</span> <span class="o">+</span> <span class="n">edge_name</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="n">edge_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">edge</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">build_order</span> <span class="o">+=</span> <span class="p">[</span><span class="n">edge_name</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Geo2DData.remove_edge"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geo_data.Geo2DData.remove_edge">[docs]</a>    <span class="k">def</span> <span class="nf">remove_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge_name</span><span class="p">,</span> <span class="n">ignore_if_absent</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove an edge from this geometry.</span>
+<span class="sd">        :param str edge_name: Name of part to remove</span>
+<span class="sd">        :param bool ignore_if_absent: Should we ignore an attempted removal if the part name</span>
+<span class="sd">        is not found?</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">edge_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="n">edge_name</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">build_order</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">edge_name</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">ignore_if_absent</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Attempted to remove the edge &quot;</span> <span class="o">+</span> <span class="n">edge_name</span> <span class="o">+</span> <span class="s2">&quot;, which doesn&#39;t exist.&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">pass</span></div></div>
+
+
+<div class="viewcode-block" id="Geo3DData"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geo_data.Geo3DData">[docs]</a><span class="k">class</span> <span class="nc">Geo3DData</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class holding 3D geometry data.&quot;&quot;&quot;</span>
+    <span class="n">EXTERIOR_BC_NAME</span> <span class="o">=</span> <span class="s2">&quot;exterior&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Class for a 3D geometry specification. It holds:</span>
+<span class="sd">            - parts is a dict of Part3D objects, keyed by the label of each Part3D object.</span>
+<span class="sd">            - build_order is a list of strings indicating the construction order.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Geo3DData</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">build_order</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parts</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># dict of parts in this geometry</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">serial_fcdoc</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># serialized FreeCAD document for this geometry</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">serial_mesh</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Holding container for the serialized xml of the meshed geometry</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">serial_region_marker</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># Holding container for the serialized xml of the region</span>
+        <span class="c1"># marker function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fenics_ids</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># dictionary with part name keys mapping to fenics ids.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">materials_database</span> <span class="o">=</span> <span class="n">Materials</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Geo3DData.get_material"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geo_data.Geo3DData.get_material">[docs]</a>    <span class="k">def</span> <span class="nf">get_material</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part_name</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">materials_database</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="n">part_name</span><span class="p">]</span><span class="o">.</span><span class="n">material</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Geo3DData.get_material_mapping"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geo_data.Geo3DData.get_material_mapping">[docs]</a>    <span class="k">def</span> <span class="nf">get_material_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get mapping of part names to materials.</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_material</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span></div>
+
+<div class="viewcode-block" id="Geo3DData.add_part"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geo_data.Geo3DData.add_part">[docs]</a>    <span class="k">def</span> <span class="nf">add_part</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part_name</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Add a part to this geometry.</span>
+<span class="sd">        :param str part_name: Name of the part to create</span>
+<span class="sd">        :param Part3D part: Part3D object.</span>
+<span class="sd">        :param bool overwrite: Should we allow this to overwrite?</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">part_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">overwrite</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Attempted to overwrite the part &quot;</span> <span class="o">+</span> <span class="n">part_name</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">build_order</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="n">part_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">part</span></div>
+
+<div class="viewcode-block" id="Geo3DData.remove_part"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geo_data.Geo3DData.remove_part">[docs]</a>    <span class="k">def</span> <span class="nf">remove_part</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part_name</span><span class="p">,</span> <span class="n">ignore_if_absent</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Remove a part from this geometry.</span>
+<span class="sd">        :param str part_name: Name of part to remove</span>
+<span class="sd">        :param bool ignore_if_absent: Should we ignore an attempted removal if the part name</span>
+<span class="sd">        is not found?</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">part_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">:</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="n">part_name</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">ignore_if_absent</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Attempted to remove the part &quot;</span> <span class="o">+</span> <span class="n">part_name</span> <span class="o">+</span> <span class="s2">&quot;, which doesn&#39;t exist.&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Geo3DData.set_data"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geo_data.Geo3DData.set_data">[docs]</a>    <span class="k">def</span> <span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_name</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">scratch_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set data to a serial format that is easily portable.</span>
+<span class="sd">        :param str data_name:  &quot;fcdoc&quot; freeCAD document \</span>
+<span class="sd">                               &quot;mesh&quot;  fenics mesh \</span>
+<span class="sd">                               &quot;rmf&quot;   fenics region marker function</span>
+<span class="sd">        :param data:           The corresponding data that we would like to set.</span>
+<span class="sd">        :param scratch_dir:    Optional existing temporary (fast) storage location.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">data_name</span> <span class="o">==</span> <span class="s1">&#39;fcdoc&#39;</span><span class="p">:</span>
+            <span class="k">def</span> <span class="nf">_save_fct</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+                <span class="n">doc</span><span class="o">.</span><span class="n">saveAs</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">serial_fcdoc</span> <span class="o">=</span> <span class="n">store_serial</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">_save_fct</span><span class="p">,</span> <span class="s1">&#39;fcstd&#39;</span><span class="p">,</span> <span class="n">scratch_dir</span><span class="o">=</span><span class="n">scratch_dir</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">data_name</span> <span class="o">==</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">or</span> <span class="n">data_name</span> <span class="o">==</span> <span class="s1">&#39;rmf&#39;</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">fenics</span> <span class="k">as</span> <span class="nn">fn</span>
+
+            <span class="k">def</span> <span class="nf">_save_fct</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+                <span class="n">fn</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">data</span>
+            <span class="k">if</span> <span class="n">data_name</span> <span class="o">==</span> <span class="s1">&#39;mesh&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">serial_mesh</span> <span class="o">=</span> <span class="n">store_serial</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">_save_fct</span><span class="p">,</span> <span class="s1">&#39;xml&#39;</span><span class="p">,</span> <span class="n">scratch_dir</span><span class="o">=</span><span class="n">scratch_dir</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">data_name</span> <span class="o">==</span> <span class="s1">&#39;rmf&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">serial_region_marker</span> <span class="o">=</span> <span class="n">store_serial</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">_save_fct</span><span class="p">,</span> <span class="s1">&#39;xml&#39;</span><span class="p">,</span>
+                                                         <span class="n">scratch_dir</span><span class="o">=</span><span class="n">scratch_dir</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">data_name</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; was not a valid data_name.&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Geo3DData.get_data"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geo_data.Geo3DData.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_name</span><span class="p">,</span> <span class="n">mesh</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scratch_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get data from stored serial format.</span>
+<span class="sd">        :param str data_name:  &quot;fcdoc&quot; freeCAD document \</span>
+<span class="sd">                               &quot;mesh&quot;  fenics mesh \</span>
+<span class="sd">                               &quot;rmf&quot;   fenics region marker function</span>
+<span class="sd">        :param mesh:</span>
+<span class="sd">        :param scratch_dir:    Optional existing temporary (fast) storage location.</span>
+<span class="sd">        :return data:          The freeCAD document or fenics object that was stored.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">data_name</span> <span class="o">==</span> <span class="s1">&#39;fcdoc&#39;</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">FreeCAD</span>
+
+            <span class="k">def</span> <span class="nf">_load_fct</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+                <span class="n">doc</span> <span class="o">=</span> <span class="n">FreeCAD</span><span class="o">.</span><span class="n">newDocument</span><span class="p">(</span><span class="s1">&#39;instance&#39;</span><span class="p">)</span>
+                <span class="n">FreeCAD</span><span class="o">.</span><span class="n">setActiveDocument</span><span class="p">(</span><span class="s1">&#39;instance&#39;</span><span class="p">)</span>
+                <span class="n">doc</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">doc</span>
+            <span class="k">return</span> <span class="n">load_serial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serial_fcdoc</span><span class="p">,</span> <span class="n">_load_fct</span><span class="p">,</span> <span class="n">scratch_dir</span><span class="o">=</span><span class="n">scratch_dir</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">data_name</span> <span class="o">==</span> <span class="s1">&#39;mesh&#39;</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">fenics</span> <span class="k">as</span> <span class="nn">fn</span>
+
+            <span class="k">def</span> <span class="nf">_load_fct</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">fn</span><span class="o">.</span><span class="n">Mesh</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">load_serial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serial_mesh</span><span class="p">,</span> <span class="n">_load_fct</span><span class="p">,</span> <span class="n">ext_format</span><span class="o">=</span><span class="s1">&#39;xml&#39;</span><span class="p">,</span>
+                               <span class="n">scratch_dir</span><span class="o">=</span><span class="n">scratch_dir</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="n">data_name</span> <span class="o">==</span> <span class="s1">&#39;rmf&#39;</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">fenics</span> <span class="k">as</span> <span class="nn">fn</span>
+
+            <span class="k">def</span> <span class="nf">_load_fct</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+                <span class="k">assert</span> <span class="n">mesh</span><span class="p">,</span> <span class="s1">&#39;Need to specify a mesh on which to generate the region marker function&#39;</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">MeshFunction</span><span class="p">(</span><span class="s1">&#39;size_t&#39;</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">mesh</span><span class="o">.</span><span class="n">topology</span><span class="p">()</span><span class="o">.</span><span class="n">dim</span><span class="p">())</span>
+                <span class="n">fn</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">&gt;&gt;</span> <span class="n">data</span>
+                <span class="k">return</span> <span class="n">data</span>
+            <span class="k">return</span> <span class="n">load_serial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serial_region_marker</span><span class="p">,</span> <span class="n">_load_fct</span><span class="p">,</span> <span class="n">ext_format</span><span class="o">=</span><span class="s1">&#39;xml&#39;</span><span class="p">,</span>
+                               <span class="n">scratch_dir</span><span class="o">=</span><span class="n">scratch_dir</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">data_name</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; was not a valid data_name.&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Geo3DData.write_fcstd"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geo_data.Geo3DData.write_fcstd">[docs]</a>    <span class="k">def</span> <span class="nf">write_fcstd</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">file_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Write geometry to a fcstd file.</span>
+
+<span class="sd">        Returns the fcstd file path.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">file_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">file_path</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_order</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;.fcstd&#39;</span>
+        <span class="n">write_deserialised</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serial_fcdoc</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">file_path</span></div>
+
+    <span class="c1"># TODO: Redundant? self.fenics_ids appears to be identical to the mapping returned here</span>
+<div class="viewcode-block" id="Geo3DData.get_names_to_region_ids"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geo_data.Geo3DData.get_names_to_region_ids">[docs]</a>    <span class="k">def</span> <span class="nf">get_names_to_region_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">build_order</span><span class="p">)}</span>
+        <span class="n">mapping</span><span class="p">[</span><span class="n">Geo3DData</span><span class="o">.</span><span class="n">EXTERIOR_BC_NAME</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">mapping</span></div>
+
+<div class="viewcode-block" id="Geo3DData.get_region_ids"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geo_data.Geo3DData.get_region_ids">[docs]</a>    <span class="k">def</span> <span class="nf">get_region_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_region_ids_to_names</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Geo3DData.get_region_ids_to_names"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geo_data.Geo3DData.get_region_ids_to_names">[docs]</a>    <span class="k">def</span> <span class="nf">get_region_ids_to_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="n">name</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="nb">id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_names_to_region_ids</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span></div>
+
+<div class="viewcode-block" id="Geo3DData.get_names_to_default_ns"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geo_data.Geo3DData.get_names_to_default_ns">[docs]</a>    <span class="k">def</span> <span class="nf">get_names_to_default_ns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">part</span><span class="o">.</span><span class="n">ns</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">part</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">part</span><span class="o">.</span><span class="n">ns</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span></div>
+
+<div class="viewcode-block" id="Geo3DData.get_names_to_default_phi_nl"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geo_data.Geo3DData.get_names_to_default_phi_nl">[docs]</a>    <span class="k">def</span> <span class="nf">get_names_to_default_phi_nl</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">part</span><span class="o">.</span><span class="n">ds</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">part</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">part</span><span class="o">.</span><span class="n">ds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span></div>
+
+<div class="viewcode-block" id="Geo3DData.get_names_to_default_phi_nl_and_ds"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geo_data.Geo3DData.get_names_to_default_phi_nl_and_ds">[docs]</a>    <span class="k">def</span> <span class="nf">get_names_to_default_phi_nl_and_ds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">phi_nl</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">result</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">result</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;phi_nl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">phi_nl</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">ds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;both phi_nl and ds must be specified together&quot;</span><span class="p">)</span>
+                <span class="n">result</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;ds&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">ds</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;both phi_nl and ds must be specified together&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">result</span></div>
+
+<div class="viewcode-block" id="Geo3DData.get_names_to_default_ds"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geo_data.Geo3DData.get_names_to_default_ds">[docs]</a>    <span class="k">def</span> <span class="nf">get_names_to_default_ds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">part</span><span class="o">.</span><span class="n">phi_nl</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">part</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">part</span><span class="o">.</span><span class="n">phi_nl</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span></div>
+
+<div class="viewcode-block" id="Geo3DData.get_names_to_default_bcs"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geo_data.Geo3DData.get_names_to_default_bcs">[docs]</a>    <span class="k">def</span> <span class="nf">get_names_to_default_bcs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">part</span><span class="o">.</span><span class="n">boundary_condition</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">part</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span>
+                <span class="n">part</span><span class="o">.</span><span class="n">boundary_condition</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span></div>
+
+<div class="viewcode-block" id="Geo3DData.get_names_to_default_dirichlet_bcs"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geo_data.Geo3DData.get_names_to_default_dirichlet_bcs">[docs]</a>    <span class="k">def</span> <span class="nf">get_names_to_default_dirichlet_bcs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">part</span><span class="o">.</span><span class="n">boundary_condition</span><span class="p">[</span><span class="s2">&quot;voltage&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">part</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span>
+                <span class="n">part</span><span class="o">.</span><span class="n">boundary_condition</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s2">&quot;dirichlet&quot;</span> <span class="ow">in</span> <span class="n">part</span><span class="o">.</span><span class="n">boundary_condition</span><span class="p">}</span></div>
+
+<div class="viewcode-block" id="Geo3DData.get_names_to_default_neumann_bcs"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geo_data.Geo3DData.get_names_to_default_neumann_bcs">[docs]</a>    <span class="k">def</span> <span class="nf">get_names_to_default_neumann_bcs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">part</span><span class="o">.</span><span class="n">boundary_condition</span><span class="p">[</span><span class="s2">&quot;neumann&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">part</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span>
+                <span class="n">part</span><span class="o">.</span><span class="n">boundary_condition</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s2">&quot;neumann&quot;</span> <span class="ow">in</span> <span class="n">part</span><span class="o">.</span><span class="n">boundary_condition</span><span class="p">}</span></div></div>
+
+    <span class="c1"># def add_exterior_boundary_condition(self, value):</span>
+    <span class="c1">#     self.exterior_boundary_condition_value = value</span>
+    <span class="c1">#</span>
+    <span class="c1"># def add_exterior_neumann_boundary_condition(self, value):</span>
+    <span class="c1">#     self.exterior_neumann_boundary_condition_value = value</span>
+
+    <span class="c1"># def get_names_to_neumann_bc_values(self):</span>
+    <span class="c1">#     results = {}</span>
+    <span class="c1">#     for part, data in self.parts.items():</span>
+    <span class="c1">#         if data.boundary_condition and &quot;neumann&quot; in data.boundary_condition:</span>
+    <span class="c1">#             results[part] = data.boundary_condition[&quot;neumann&quot;]</span>
+    <span class="c1">#</span>
+    <span class="c1">#     if self.exterior_neumann_boundary_condition_value is not None:</span>
+    <span class="c1">#         results[Geo3DData.EXTERIOR_BC_NAME] = self.exterior_neumann_boundary_condition_value</span>
+    <span class="c1">#</span>
+    <span class="c1">#         # try:</span>
+    <span class="c1">#         #     results[part] = data.boundary_condition[&quot;voltage&quot;]</span>
+    <span class="c1">#         # except (KeyError, TypeError) as e:</span>
+    <span class="c1">#         #     pass</span>
+    <span class="c1">#     return results</span>
+    <span class="c1">#</span>
+    <span class="c1">#</span>
+    <span class="c1"># def get_names_to_dirichlet_bc_values(self):</span>
+    <span class="c1">#     results = {}</span>
+    <span class="c1">#     for part, data in self.parts.items():</span>
+    <span class="c1">#         if data.boundary_condition and &quot;voltage&quot; in data.boundary_condition:</span>
+    <span class="c1">#             results[part] = data.boundary_condition[&quot;voltage&quot;]</span>
+    <span class="c1">#</span>
+    <span class="c1">#     if self.exterior_boundary_condition_value is not None:</span>
+    <span class="c1">#         results[Geo3DData.EXTERIOR_BC_NAME] = self.exterior_boundary_condition_value</span>
+    <span class="c1">#</span>
+    <span class="c1">#         # try:</span>
+    <span class="c1">#         #     results[part] = data.boundary_condition[&quot;voltage&quot;]</span>
+    <span class="c1">#         # except (KeyError, TypeError) as e:</span>
+    <span class="c1">#         #     pass</span>
+    <span class="c1">#     return results</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Microsoft Corporation.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'1.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

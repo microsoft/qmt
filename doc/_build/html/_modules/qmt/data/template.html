@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>qmt.task_framework.data_template &mdash; QMT 1.0 documentation</title>
+  <title>qmt.data.template &mdash; QMT 1.0 documentation</title>
   
 
   
@@ -88,6 +88,7 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../rst/tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/modules.html">Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../rst/dev_overview.html">Structure of QMT</a></li>
 </ul>
 
@@ -136,7 +137,7 @@
         
           <li><a href="../../index.html">Module code</a> &raquo;</li>
         
-      <li>qmt.task_framework.data_template</li>
+      <li>qmt.data.template</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -151,32 +152,18 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <h1>Source code for qmt.task_framework.data_template</h1><div class="highlight"><pre>
+  <h1>Source code for qmt.data.template</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">from</span> <span class="nn">six</span> <span class="k">import</span> <span class="n">iteritems</span>
 
-
-<div class="viewcode-block" id="Data"><a class="viewcode-back" href="../../../source/qmt.task_framework.html#qmt.task_framework.data_template.Data">[docs]</a><span class="k">class</span> <span class="nc">Data</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="Data"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.template.Data">[docs]</a><span class="k">class</span> <span class="nc">Data</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Class for passing data between tasks.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">content</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># storage for contents to serialize</span>
 
-    <span class="k">def</span> <span class="nf">_serialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Method for stuffing the contents of a Data class into the self.content dictionary, which</span>
-<span class="sd">        is then saved to Azure or disk.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;_serialize should define how to get data into self.content.&quot;</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">_deserialize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Method for retrieving data from self.content, called after it is loaded from Azure or disk.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;_serialize should define how to get data into self.content.&quot;</span><span class="p">)</span>
-
-
-<div class="viewcode-block" id="Data.save"><a class="viewcode-back" href="../../../source/qmt.task_framework.html#qmt.task_framework.data_template.Data.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">azure_info</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Data.save"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.template.Data.save">[docs]</a>    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">azure_info</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Save the data to Azure or disk. Azure takes precedence over local disk if specified.</span>
 <span class="sd">        :param azure_info: Key information for Azure store</span>
@@ -192,7 +179,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No file given for save.&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Data.load"><a class="viewcode-back" href="../../../source/qmt.task_framework.html#qmt.task_framework.data_template.Data.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">azure_info</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="Data.load"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.template.Data.load">[docs]</a>    <span class="k">def</span> <span class="nf">load</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">azure_info</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">file_path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Load the data from Azure or disk. Azure takes precedence over local disk if specified.</span>
 <span class="sd">        :param azure_info: Key information for Azure store</span>
@@ -213,8 +200,8 @@
 <span class="sd">        Serializes a unit instance (e.g. units.meV -&gt; &#39;meV&#39;)</span>
 <span class="sd">        :param unit_instance: An instance of a unit (e.g. units.meV)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">qmt</span> <span class="k">import</span> <span class="n">units</span>
-        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">units</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+        <span class="kn">from</span> <span class="nn">qmt.physics_constants</span> <span class="k">import</span> <span class="n">units</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">iteritems</span><span class="p">(</span><span class="n">units</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">v</span><span class="o">==</span><span class="n">unit_instance</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">k</span>
 
@@ -223,7 +210,7 @@
 <span class="sd">        De-serializes a unit instance (e.g. &#39;meV&#39; -&gt; units.meV)</span>
 <span class="sd">        :param unit_string: String corresponding with unit (e.g. &#39;meV&#39;)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">qmt</span> <span class="k">import</span> <span class="n">units</span>
+        <span class="kn">from</span> <span class="nn">qmt.physics_constants</span> <span class="k">import</span> <span class="n">units</span>
         <span class="k">return</span> <span class="n">units</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">unit_string</span><span class="p">]</span></div>
 </pre></div>
 

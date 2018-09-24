@@ -50,7 +50,7 @@ class MaterialPropertyMap(PropertyMap):
 
     :param PartMap part_map: Mapper from spatial location to part identifier.
     :param dict part_materials: Dict mapping from part identifier to a material name.
-    :param Materials mat_lib: Materials library used to look up the material properties.
+    :param qmt.Materials mat_lib: Materials library used to look up the material properties.
     :param str prop_name: Name of the material property to be retrieved for each part.
     :param eunit: Energy unit, passed to `mat_lib.find()`.
     :param fill_value: Value to be filled in places where there is no part or the part does not have

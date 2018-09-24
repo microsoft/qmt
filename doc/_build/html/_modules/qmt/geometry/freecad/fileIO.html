@@ -88,6 +88,7 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../rst/tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../source/modules.html">Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../rst/dev_overview.html">Structure of QMT</a></li>
 </ul>
 
@@ -165,6 +166,8 @@
 <span class="kn">import</span> <span class="nn">Part</span>
 <span class="kn">import</span> <span class="nn">Mesh</span>
 
+<span class="kn">from</span> <span class="nn">.auxiliary</span> <span class="k">import</span> <span class="n">silent_stdout</span>
+
 
 <div class="viewcode-block" id="exportMeshed"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.fileIO.exportMeshed">[docs]</a><span class="k">def</span> <span class="nf">exportMeshed</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">fileName</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39; Export a mesh of an object to the given file name.</span>
@@ -185,69 +188,16 @@
 <span class="sd">    :param list obj_list:       List of objects to export.</span>
 <span class="sd">    :param string file_name:    Name of file to create and export into.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj_list</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;obj_list must be a list of objects.&quot;</span><span class="p">)</span>
     <span class="c1"># The export format is determined by the extension, so we should check it:</span>
-    <span class="k">if</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.step&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.stp&#39;</span><span class="p">):</span>
-        <span class="n">Part</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">obj_list</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>
+    <span class="n">supported_ext</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;.step&#39;</span><span class="p">,</span> <span class="s1">&#39;.stp&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">file_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">supported_ext</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">silent_stdout</span><span class="p">():</span>
+            <span class="n">Part</span><span class="o">.</span><span class="n">export</span><span class="p">(</span><span class="n">obj_list</span><span class="p">,</span> <span class="n">file_name</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">file_name</span> <span class="o">+</span> <span class="s1">&#39; is not a supported extension (.stp, .step)&#39;</span><span class="p">)</span></div>
-
-
-<span class="c1"># TODO: this is sketchUtils or geomUtils, not fileIO</span>
-<div class="viewcode-block" id="updateParams"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.fileIO.updateParams">[docs]</a><span class="k">def</span> <span class="nf">updateParams</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">paramDict</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39; Update the parameters in the modelParams spreadsheet to reflect the</span>
-<span class="sd">        current value in the dict.</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="c1"># ~ doc = FreeCAD.ActiveDocument</span>
-
-    <span class="c1"># ~ if passModel is None:</span>
-        <span class="c1"># ~ myModel = getModel()</span>
-    <span class="c1"># ~ else:</span>
-        <span class="c1"># ~ myModel = passModel</span>
-    <span class="c1"># ~ paramDict = myModel.modelDict[&#39;geometricParams&#39;]</span>
-
-    <span class="c1"># We only want to do something if geometric parameters are defined</span>
-    <span class="c1"># in the model. This means that if we have old parameters sitting</span>
-    <span class="c1"># in the FreeCAD file, they won&#39;t get wiped out if we comment out</span>
-    <span class="c1"># a geometry sweep in the model script.</span>
-    <span class="k">if</span> <span class="n">paramDict</span><span class="p">:</span>
-        <span class="c1"># Internal: unconditional removeObject on spreadSheet breaks param dependencies.</span>
-        <span class="c1"># ~ spreadSheet = doc.addObject(&#39;Spreadsheet::Sheet&#39;, &#39;modelParams&#39;)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">spreadSheet</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">modelParams</span>
-            <span class="n">spreadSheet</span><span class="o">.</span><span class="n">clearAll</span><span class="p">()</span>  <span class="c1"># clear existing spreadsheet</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">doc</span><span class="o">.</span><span class="n">removeObject</span><span class="p">(</span><span class="s1">&#39;modelParams&#39;</span><span class="p">)</span>  <span class="c1"># otherwise it was not a good spreadsheet</span>
-            <span class="n">spreadSheet</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">addObject</span><span class="p">(</span><span class="s1">&#39;Spreadsheet::Sheet&#39;</span><span class="p">,</span> <span class="s1">&#39;modelParams&#39;</span><span class="p">)</span>
-        <span class="n">spreadSheet</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;A1&#39;</span><span class="p">,</span> <span class="s1">&#39;paramName&#39;</span><span class="p">)</span>
-        <span class="n">spreadSheet</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;B1&#39;</span><span class="p">,</span> <span class="s1">&#39;paramValue&#39;</span><span class="p">)</span>
-        <span class="n">spreadSheet</span><span class="o">.</span><span class="n">setColumnWidth</span><span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
-        <span class="n">spreadSheet</span><span class="o">.</span><span class="n">setStyle</span><span class="p">(</span><span class="s1">&#39;A1:B1&#39;</span><span class="p">,</span> <span class="s1">&#39;bold&#39;</span><span class="p">,</span> <span class="s1">&#39;add&#39;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">paramDict</span><span class="p">):</span>
-            <span class="n">paramType</span> <span class="o">=</span> <span class="n">paramDict</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">paramType</span> <span class="o">==</span> <span class="s1">&#39;freeCAD&#39;</span><span class="p">:</span>
-                <span class="n">idx</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
-                <span class="n">spreadSheet</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;A&#39;</span> <span class="o">+</span> <span class="n">idx</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
-                <span class="n">spreadSheet</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;B&#39;</span> <span class="o">+</span> <span class="n">idx</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">paramDict</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
-                <span class="n">spreadSheet</span><span class="o">.</span><span class="n">setAlias</span><span class="p">(</span><span class="s1">&#39;B&#39;</span> <span class="o">+</span> <span class="n">idx</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
-            <span class="k">elif</span> <span class="n">paramType</span> <span class="o">==</span> <span class="s1">&#39;python&#39;</span><span class="p">:</span>
-                <span class="k">pass</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown geometric parameter type.&#39;</span><span class="p">)</span>
-
-        <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span></div>
-
-
-<div class="viewcode-block" id="store_serial"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.fileIO.store_serial">[docs]</a><span class="k">def</span> <span class="nf">store_serial</span><span class="p">(</span><span class="n">target_dict</span><span class="p">,</span> <span class="n">target_label</span><span class="p">,</span> <span class="n">save_fct</span><span class="p">,</span> <span class="n">ext</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Store a serialised representation of save_fct(obj, temporary_file.ext)</span>
-<span class="sd">    inside target_dict[target_label].</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    <span class="kn">import</span> <span class="nn">codecs</span>
-    <span class="kn">import</span> <span class="nn">uuid</span>
-    <span class="n">tmp_path</span> <span class="o">=</span> <span class="s1">&#39;tmp_&#39;</span> <span class="o">+</span> <span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="o">.</span><span class="n">hex</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="n">ext</span>
-    <span class="n">save_fct</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">tmp_path</span><span class="p">)</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-        <span class="n">target_dict</span><span class="p">[</span><span class="n">target_label</span><span class="p">]</span> <span class="o">=</span> <span class="n">codecs</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">(),</span> <span class="s1">&#39;base64&#39;</span><span class="p">)</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">tmp_path</span><span class="p">)</span></div>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">file_name</span> <span class="o">+</span> <span class="s1">&#39; is not a supported extension (&#39;</span>
+                         <span class="o">+</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">supported_ext</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span><span class="p">)</span></div>
 </pre></div>
 
            </div>

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>qmt.task_framework.task &mdash; QMT 1.0 documentation</title>
+  <title>qmt.tasks.task &mdash; QMT 1.0 documentation</title>
   
 
   
@@ -88,6 +88,7 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../rst/tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/modules.html">Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../rst/dev_overview.html">Structure of QMT</a></li>
 </ul>
 
@@ -136,7 +137,7 @@
         
           <li><a href="../../index.html">Module code</a> &raquo;</li>
         
-      <li>qmt.task_framework.task</li>
+      <li>qmt.tasks.task</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -151,21 +152,21 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <h1>Source code for qmt.task_framework.task</h1><div class="highlight"><pre>
+  <h1>Source code for qmt.tasks.task</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Core module of the Task framework. Contains the base Task class,</span>
 <span class="sd">from which all special purpose tasks are subclassed.</span>
 
 <span class="sd">How to use, in a nutshell:</span>
 <span class="sd">    To create a new task, subclass Task.</span>
-<span class="sd">    The constructor for the subclass must call the superclass constructor with</span>
-<span class="sd">        task_list=list of all dependent tasks,</span>
-<span class="sd">        options=dictionary containing all other inputs to the subclass task,</span>
+<span class="sd">    The constructor for the subclass must call the superclass constructor with \</span>
+<span class="sd">        task_list=list of all dependent tasks, \</span>
+<span class="sd">        options=dictionary containing all other inputs to the subclass task, \</span>
 <span class="sd">        and optionally name=arbitrary name.</span>
 <span class="sd">    These should also, in most cases, be the arguments to the subclass constructor--</span>
 <span class="sd">    any arguments that the subclass constructor needs that are not dependent tasks should</span>
 <span class="sd">    be placed into the options argument.</span>
-<span class="sd">        See ms_tasks/poisson_task.py for an example.</span>
+<span class="sd">    See basic/geometry.py for an example.</span>
 
 <span class="sd">    The actual work done by your Task subclass will be done in the _solve_instance callback,</span>
 <span class="sd">    which you must implement.</span>
@@ -174,53 +175,39 @@
 <span class="sd">    The input_result_list stores the outputs of the dependent tasks in the same order these tasks</span>
 <span class="sd">    were given in the constructor, and current_options stores the options to the current task.</span>
 
+<span class="sd">    There is also a _solve_gather callback for use in specialized situations.</span>
+
 <span class="sd">    IMPORTANT: object references in both of these callback parameters must be treated as read-only</span>
 <span class="sd">    or copied before modification,</span>
 <span class="sd">    since they are shared across parameter sweeps.</span>
 
-<span class="sd">    The reason this latter has to be provided is that both the input results and options</span>
+<span class="sd">    Both the input results and options</span>
 <span class="sd">    may be dependent on an automatically-handled sweep. Your _solve_instance does not have to know about this--</span>
 <span class="sd">    it just has to compute its result dependent on the outputs of dependent tasks and its options,</span>
 <span class="sd">    and return this result.</span>
 
 <span class="sd">    Finally, to run a task, use the run() method,</span>
-<span class="sd">    and extract the results (over a sweep) from the .computed_result field as an iterable SweepHolder.</span>
-<span class="sd">    These results will be Dask futures. You can call reduce() on the Task to wait for the results</span>
-<span class="sd">    and bring them into local memory (a blocking operation). If you only want to compute</span>
-<span class="sd">    on some of the data, and/or do postprocessing, you will need to hand reduce() a reduceFunction to use.</span>
+<span class="sd">    which begins the actual calculation. run() returns immediately and stores pointers to the results undergoing</span>
+<span class="sd">    computation in a SweepHolderFutures object in the .computed_result field of the task. This object</span>
+<span class="sd">    associates sweep parameters with the results being computed. You can iterate over results being computed,</span>
+<span class="sd">    wait for the results to be computed with calculate_completed_results(), or wait for any particular result</span>
+<span class="sd">    with get_completed_result().</span>
 
 <span class="sd">    For an example of how to set up a sweep, see ./tests/test_tasks_sweep.py and refer</span>
 <span class="sd">    to the documentation of the sweeping classes in sweep.py.</span>
 
 <span class="sd">Classes:</span>
 <span class="sd">    Task</span>
-<span class="sd">    TaskMetaclass</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">dask</span> <span class="k">import</span> <span class="n">delayed</span>
-<span class="kn">from</span> <span class="nn">.sweep</span> <span class="k">import</span> <span class="n">ReducedSweep</span><span class="p">,</span> <span class="n">ReducedSweepDelayed</span><span class="p">,</span> <span class="n">gen_tag_extract</span><span class="p">,</span> <span class="n">replace_tag_with_value</span>
 <span class="kn">import</span> <span class="nn">copy</span>
 
-<div class="viewcode-block" id="TaskMetaclass"><a class="viewcode-back" href="../../../source/qmt.task_framework.html#qmt.task_framework.task.TaskMetaclass">[docs]</a><span class="k">class</span> <span class="nc">TaskMetaclass</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Registers the class of each Task subclass for serialization.</span>
-<span class="sd">    Might be deprecated soon.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">class_registry</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="kn">import</span> <span class="nn">dask</span>
+<span class="kn">from</span> <span class="nn">dask</span> <span class="k">import</span> <span class="n">delayed</span>
 
-    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="n">mcs</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">class_dict</span><span class="p">):</span>
-        <span class="bp">cls</span> <span class="o">=</span> <span class="nb">type</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">mcs</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">class_dict</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">qmt.tasks.sweep</span> <span class="k">import</span> <span class="n">SweepManager</span><span class="p">,</span> <span class="n">ReducedSweep</span><span class="p">,</span> <span class="n">ReducedSweepDelayed</span><span class="p">,</span> <span class="n">ReducedSweepResults</span><span class="p">,</span> <span class="n">gen_tag_extract</span><span class="p">,</span> <span class="n">replace_tag_with_value</span>
 
-        <span class="n">TaskMetaclass</span><span class="o">.</span><span class="n">register_class</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="bp">cls</span>
-
-<div class="viewcode-block" id="TaskMetaclass.register_class"><a class="viewcode-back" href="../../../source/qmt.task_framework.html#qmt.task_framework.task.TaskMetaclass.register_class">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">register_class</span><span class="p">(</span><span class="n">class_to_register</span><span class="p">):</span>
-        <span class="n">TaskMetaclass</span><span class="o">.</span><span class="n">class_registry</span><span class="p">[</span><span class="n">class_to_register</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="n">class_to_register</span></div></div>
-
-
-<div class="viewcode-block" id="Task"><a class="viewcode-back" href="../../../source/qmt.task_framework.html#qmt.task_framework.task.Task">[docs]</a><span class="k">class</span> <span class="nc">Task</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="Task"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.task.Task">[docs]</a><span class="k">class</span> <span class="nc">Task</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Abstract class for general simulation tasks run within the Dask framework.</span>
 
@@ -229,20 +216,23 @@
 
 <span class="sd">    Class attributes:</span>
 <span class="sd">        current_instance_id: unique id for each task for serialization.</span>
-<span class="sd">        Might be deprecated soon.</span>
 
 <span class="sd">    Attributes:</span>
 <span class="sd">        previous_tasks: The tasks that this depends on.</span>
 <span class="sd">        options: Additional options that control the operation of this.</span>
+<span class="sd">        resources: resources for the Dask client.</span>
+<span class="sd">        gather: default False. If false, the task is assumed to have a _solve_instance method, and takes in \</span>
+<span class="sd">            one sweep point&#39;s worth of inputs. If true, the task is assumed to have a _solve_gathered method, \</span>
+<span class="sd">            and takes in inputs from every sweep point in its restricted sweep.</span>
 <span class="sd">        name: The name of the task.</span>
 <span class="sd">        list_of_tags: the list of sweep input tags that the sweep over this depends on</span>
 <span class="sd">        delayed_result: the task graph rooted at this</span>
-<span class="sd">        # TODO put in description of accessors for sweepholders !!!</span>
+<span class="sd">        computed_result: SweepHolderFutures pointing at (possibly pending) results.</span>
+<span class="sd">        daskless_result: result, if the task was run with run_daskless</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">TaskMetaclass</span>
     <span class="n">current_instance_id</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_list</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">gather</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_list</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Task&quot;</span><span class="p">,</span> <span class="n">gather</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructs a new Task.</span>
 <span class="sd">        :param task_list: the tasks that this depends on.</span>
@@ -254,6 +244,12 @@
         <span class="k">if</span> <span class="s2">&quot;#&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+=</span> <span class="s2">&quot;#&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">Task</span><span class="o">.</span><span class="n">current_instance_id</span><span class="p">)</span>
             <span class="n">Task</span><span class="o">.</span><span class="n">current_instance_id</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">if</span> <span class="n">task_list</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">task_list</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="n">options</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">resources</span> <span class="o">=</span> <span class="kc">None</span>
@@ -272,6 +268,8 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">delayed_result</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">computed_result</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">daskless_result</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">_compile</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -295,7 +293,8 @@
             <span class="n">current_options</span> <span class="o">=</span> <span class="n">replace_tag_with_value</span><span class="p">(</span><span class="n">current_options</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">tag_values</span><span class="p">[</span><span class="n">tag</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">current_options</span>
 
-    <span class="k">def</span> <span class="nf">_solve_instance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_result_list</span><span class="p">,</span> <span class="n">current_options</span><span class="p">):</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_solve_instance</span><span class="p">(</span><span class="n">input_result_list</span><span class="p">,</span> <span class="n">current_options</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Does the actual computation of this.</span>
 
@@ -312,7 +311,8 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Task is missing the _solve_instance method!&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_solve_gathered</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_of_input_result_lists</span><span class="p">,</span> <span class="n">list_of_current_options</span><span class="p">):</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_solve_gathered</span><span class="p">(</span><span class="n">list_of_input_result_lists</span><span class="p">,</span> <span class="n">list_of_current_options</span><span class="p">,</span> <span class="n">result_sweep</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Does the actual computation of a &#39;gathered&#39; task (e.g. COMSOL meshing).</span>
 
@@ -323,9 +323,10 @@
 <span class="sd">        IMPORTANT: object references in both list_of_current_options and list_of_input_result_list</span>
 <span class="sd">        must be treated as read-only or copied before modification, since they are shared across parameter sweeps.</span>
 
-<span class="sd">        :param list_of_input_result_list: The list of results produced by dependent tasks, in the order</span>
+<span class="sd">        :param list_of_input_result_lists: The list of results produced by dependent tasks, in the order</span>
 <span class="sd">        that the dependent tasks were given in the call to the Task base class constructor.</span>
 <span class="sd">        :param list_of_current_options: The list of options of this corresponding to the current sweep iteration.</span>
+<span class="sd">        :param result_sweep: Empty ReducedSweepResults object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Task is missing the _solve_gathered method!&quot;</span><span class="p">)</span>
 
@@ -336,12 +337,10 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">previous_tasks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;A list of dependent tasks must be passed to the constructor by subclasses!&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># Make a SweepHolder to store results</span>
-            <span class="c1"># TODO</span>
-            <span class="c1"># rearrange sweeps</span>
             <span class="n">reduced_sweep</span> <span class="o">=</span> <span class="n">ReducedSweep</span><span class="o">.</span><span class="n">create_from_manager_and_tags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sweep_manager</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_of_tags</span><span class="p">)</span>
+
             <span class="bp">self</span><span class="o">.</span><span class="n">delayed_result</span> <span class="o">=</span> <span class="n">ReducedSweepDelayed</span><span class="o">.</span><span class="n">create_from_reduced_sweep_and_manager</span><span class="p">(</span><span class="n">reduced_sweep</span><span class="p">,</span>
-                                                                                       <span class="bp">self</span><span class="o">.</span><span class="n">sweep_manager</span><span class="p">)</span>
+                                                                                            <span class="bp">self</span><span class="o">.</span><span class="n">sweep_manager</span><span class="p">)</span>
             <span class="n">list_of_current_options</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">list_of_input_result_lists</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">sweep_holder_index</span><span class="p">,</span> <span class="n">tag_values</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">delayed_result</span><span class="o">.</span><span class="n">tagged_value_list</span><span class="p">):</span>
@@ -351,17 +350,21 @@
                 <span class="n">total_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">delayed_result</span><span class="o">.</span><span class="n">sweep</span><span class="o">.</span><span class="n">convert_to_total_indices</span><span class="p">(</span><span class="n">sweep_holder_index</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
 
                 <span class="c1"># Use this index to get the appropriate results in dependent tasks</span>
-                <span class="n">input_result_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">task</span><span class="o">.</span><span class="n">delayed_result</span><span class="o">.</span><span class="n">get_object</span><span class="p">(</span><span class="n">total_index</span><span class="p">)</span> <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">previous_tasks</span><span class="p">]</span>
+                <span class="n">input_result_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">task</span><span class="o">.</span><span class="n">delayed_result</span><span class="o">.</span><span class="n">get_datum</span><span class="p">(</span><span class="n">total_index</span><span class="p">)</span> <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">previous_tasks</span><span class="p">]</span>
                 <span class="n">list_of_input_result_lists</span> <span class="o">+=</span> <span class="p">[</span><span class="n">input_result_list</span><span class="p">]</span>
-                
+
                 <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">gather</span><span class="p">:</span>
                     <span class="c1"># Create a delayed object for this task&#39;s computation.</span>
-                    <span class="n">output</span> <span class="o">=</span> <span class="n">delayed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_solve_instance</span><span class="p">)(</span><span class="n">input_result_list</span><span class="p">,</span> <span class="n">current_options</span><span class="p">,</span> <span class="n">dask_key_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="o">+</span><span class="s1">&#39;_&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">sweep_holder_index</span><span class="p">))</span>
+                    <span class="n">output</span> <span class="o">=</span> <span class="n">delayed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">_solve_instance</span><span class="p">)(</span><span class="n">input_result_list</span><span class="p">,</span> <span class="n">current_options</span><span class="p">,</span>
+                                                           <span class="n">dask_key_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">sweep_holder_index</span><span class="p">))</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">delayed_result</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">sweep_holder_index</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gather</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">delayed_result</span> <span class="o">=</span> <span class="n">delayed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_solve_gathered</span><span class="p">)(</span><span class="n">list_of_input_result_lists</span><span class="p">,</span> <span class="n">list_of_current_options</span><span class="p">,</span> <span class="n">dask_key_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">result_sweep</span> <span class="o">=</span> <span class="n">ReducedSweepResults</span><span class="o">.</span><span class="n">create_empty_from_manager_and_tags</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sweep_manager</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_of_tags</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">delayed_result</span> <span class="o">=</span> <span class="n">delayed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">_solve_gathered</span><span class="p">)(</span><span class="n">list_of_input_result_lists</span><span class="p">,</span> <span class="n">list_of_current_options</span><span class="p">,</span>
+                                                                    <span class="n">result_sweep</span><span class="p">,</span> <span class="n">dask_key_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Task.visualize_entire_sweep"><a class="viewcode-back" href="../../../source/qmt.task_framework.html#qmt.task_framework.task.Task.visualize_entire_sweep">[docs]</a>    <span class="k">def</span> <span class="nf">visualize_entire_sweep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="c1">#TODO: this is currently broken with the 3D Mesh task</span>
+<div class="viewcode-block" id="Task.visualize_entire_sweep"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.task.Task.visualize_entire_sweep">[docs]</a>    <span class="k">def</span> <span class="nf">visualize_entire_sweep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a visualization of the entire task graph of the sweep rooted at this as an IPython image object.</span>
 
@@ -376,7 +379,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">delayed_result</span><span class="o">.</span><span class="n">visualize_entire_sweep</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Task.visualize_single_sweep_element"><a class="viewcode-back" href="../../../source/qmt.task_framework.html#qmt.task_framework.task.Task.visualize_single_sweep_element">[docs]</a>    <span class="k">def</span> <span class="nf">visualize_single_sweep_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+<div class="viewcode-block" id="Task.visualize_single_sweep_element"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.task.Task.visualize_single_sweep_element">[docs]</a>    <span class="k">def</span> <span class="nf">visualize_single_sweep_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return a visualization of task graph of one element of the sweep rooted at this as an IPython image object.</span>
 
@@ -390,7 +393,8 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">delayed_result</span><span class="o">.</span><span class="n">visualize_single_sweep_element</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Task.run"><a class="viewcode-back" href="../../../source/qmt.task_framework.html#qmt.task_framework.task.Task.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="c1"># TODO split off the gathered tasks and normal tasks into subclasses</span>
+    <span class="k">def</span> <span class="nf">_run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Runs the task DAG graph whose root is this and returns the results.</span>
 
@@ -402,83 +406,53 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">computed_result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">previous_tasks</span><span class="p">:</span>
-                <span class="n">task</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+                <span class="n">task</span><span class="o">.</span><span class="n">_run</span><span class="p">()</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gather</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">computed_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sweep_manager</span><span class="o">.</span><span class="n">dask_client</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">delayed_result</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">computed_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">delayed_result</span><span class="o">.</span><span class="n">calculate_futures</span><span class="p">(</span><span class="n">resources</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">resources</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">computed_result</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">computed_result</span>
 
-<div class="viewcode-block" id="Task.reduce"><a class="viewcode-back" href="../../../source/qmt.task_framework.html#qmt.task_framework.task.Task.reduce">[docs]</a>    <span class="k">def</span> <span class="nf">reduce</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reduce_function</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">computed_result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="c1"># Deprecated. See visualization/plot_helpers</span>
+    <span class="c1"># def reduce(self, reduce_function=None):</span>
+    <span class="c1">#     assert self.computed_result is not None</span>
+    <span class="c1">#</span>
+    <span class="c1">#     if reduce_function is None:</span>
+    <span class="c1">#         reduce_function = Task.gather_futures</span>
+    <span class="c1">#     if self.gather:</span>
+    <span class="c1">#         return reduce_function([self.computed_result])</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         return reduce_function(self.computed_result)</span>
 
-        <span class="k">if</span> <span class="n">reduce_function</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">reduce_function</span> <span class="o">=</span> <span class="n">Task</span><span class="o">.</span><span class="n">gather_futures</span>
+    <span class="c1"># Precondition: there is no sweep (i.e. no tags in the options)</span>
+<div class="viewcode-block" id="Task.run_daskless"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.task.Task.run_daskless">[docs]</a>    <span class="k">def</span> <span class="nf">run_daskless</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">clear_cache</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Runs the task chain without using Dask. This is useful for local debugging with the</span>
+<span class="sd">        number of moving parts kept to a minimum. The results are stored in self.daskless_result.</span>
+
+<span class="sd">        TODO: This debugging mode does not currently support sweeping.</span>
+
+<span class="sd">        :param clear_cache: If True, then force a recompute even if run_daskless has previously run.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">previous_tasks</span><span class="p">:</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">run_daskless</span><span class="p">()</span>
+
+        <span class="n">input_result_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">task</span><span class="o">.</span><span class="n">daskless_result</span> <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">previous_tasks</span><span class="p">]</span>
+
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">gather</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">reduce_function</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">computed_result</span><span class="p">])</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">daskless_result</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">clear_cache</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sweep_manager</span> <span class="o">=</span> <span class="n">SweepManager</span><span class="o">.</span><span class="n">create_empty_sweep</span><span class="p">(</span><span class="n">no_dask</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">result_sweep</span> <span class="o">=</span> <span class="n">ReducedSweepResults</span><span class="o">.</span><span class="n">create_empty_from_manager_and_tags</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">sweep_manager</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">list_of_tags</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">daskless_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">_solve_gathered</span><span class="p">([</span><span class="n">input_result_list</span><span class="p">],</span>
+                                                                      <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">],</span>
+                                                                      <span class="n">result_sweep</span><span class="p">)</span><span class="o">.</span><span class="n">only</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">reduce_function</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">computed_result</span><span class="p">)</span></div>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">daskless_result</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">clear_cache</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">daskless_result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="n">_solve_instance</span><span class="p">(</span><span class="n">input_result_list</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="p">)</span>
 
-<div class="viewcode-block" id="Task.gather_futures"><a class="viewcode-back" href="../../../source/qmt.task_framework.html#qmt.task_framework.task.Task.gather_futures">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">gather_futures</span><span class="p">(</span><span class="n">sweep_results</span><span class="p">):</span>
-        <span class="n">presents</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="c1">#sweep_results.wait()</span>
-        <span class="k">for</span> <span class="n">future</span> <span class="ow">in</span> <span class="n">sweep_results</span><span class="p">:</span>
-            <span class="n">presents</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">())</span>
-        <span class="k">return</span> <span class="n">presents</span></div></div>
-
-<span class="c1"># DEPRECATED serialization</span>
-<span class="c1"># @staticmethod</span>
-<span class="c1"># def from_dict(dict_representation):</span>
-<span class="c1">#     taskName, data = dict_representation.items()[0]</span>
-<span class="c1">#     className = data[&#39;class&#39;]</span>
-<span class="c1">#     target_class = TaskMetaclass.class_registry[className]</span>
-<span class="c1">#     kwargs = {}</span>
-<span class="c1">#     for argName, argValue in data[&#39;argumentDictionary&#39;].items():</span>
-<span class="c1">#         if Task.isTaskRepresentation(argValue):</span>
-<span class="c1">#             kwargs[argName] = Task.from_dict(argValue)</span>
-<span class="c1">#         else:</span>
-<span class="c1">#             kwargs[argName] = argValue</span>
-<span class="c1">#     print(target_class)</span>
-<span class="c1">#     return target_class(name=taskName, **kwargs)</span>
-<span class="c1">#</span>
-<span class="c1"># def save(self, file_name):</span>
-<span class="c1">#     raise NotImplementedError(&quot;json serialization not yet implemented&quot;)</span>
-<span class="c1">#     # TODO add serialization</span>
-
-<span class="c1"># def to_dict(self):</span>
-<span class="c1">#     result = OrderedDict()</span>
-<span class="c1">#     result_data = OrderedDict()</span>
-<span class="c1">#     result_data[&#39;class&#39;] = self.__class__.__name__</span>
-<span class="c1">#     result_data[&#39;argumentDictionary&#39;] = self.dependencies_dict()</span>
-<span class="c1">#     result[self.name] = result_data</span>
-<span class="c1">#     return result</span>
-
-<span class="c1"># with open(file_name, &#39;w&#39;) as jsonFile:</span>
-<span class="c1">#     json.dump(self.to_dict(), jsonFile)</span>
-<span class="c1">#</span>
-<span class="c1"># def dependencies_dict(self):</span>
-<span class="c1">#     result = {}</span>
-<span class="c1">#     for argName, argValue in self.argumentDictionary.items():</span>
-<span class="c1">#         if isinstance(argValue, Task):</span>
-<span class="c1">#             result[argName] = argValue.to_dict()</span>
-<span class="c1">#         else:</span>
-<span class="c1">#             result[argName] = argValue</span>
-<span class="c1">#</span>
-<span class="c1">#     return result</span>
-
-<span class="c1"># @staticmethod</span>
-<span class="c1"># def remove_self_argument(init_arguments):</span>
-<span class="c1">#     init_arguments.pop(&#39;self&#39;, None)</span>
-<span class="c1">#     return init_arguments</span>
-<span class="c1">#</span>
-<span class="c1"># @staticmethod</span>
-<span class="c1"># def isTaskRepresentation(argValue):</span>
-<span class="c1">#     # check if it has form {name:otherDict}</span>
-<span class="c1">#     hasSingleItem = isinstance(argValue, dict) and len(argValue.items()) == 1</span>
-<span class="c1">#     # check if it has the class to reconstitute the task from</span>
-<span class="c1">#     return hasSingleItem and &quot;class&quot; in argValue.values()[0]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">daskless_result</span></div></div>
 </pre></div>
 
            </div>

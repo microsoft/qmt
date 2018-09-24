@@ -11,6 +11,7 @@
    :caption: Contents:
 
    rst/tutorial.rst
+   Modules <source/modules.rst>
    rst/dev_overview.rst
 
 Indices and tables
@@ -18,4 +19,5 @@ Indices and tables
 
 * :ref:`genindex`
 * :ref:`modindex`
-* :ref:`search`
+
+.. * :ref:`search`

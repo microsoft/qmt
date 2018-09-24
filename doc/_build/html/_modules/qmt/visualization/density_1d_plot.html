@@ -88,6 +88,7 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../rst/tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/modules.html">Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../rst/dev_overview.html">Structure of QMT</a></li>
 </ul>
 
@@ -152,8 +153,10 @@
            <div itemprop="articleBody">
             
   <h1>Source code for qmt.visualization.density_1d_plot</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">qmt.visualization.plot_helpers</span> <span class="k">import</span> <span class="n">save_relevant_data</span>
-<span class="kn">import</span> <span class="nn">h5py</span>
+<span></span><span class="kn">import</span> <span class="nn">h5py</span>
+
+<span class="kn">from</span> <span class="nn">qmt.visualization.plot_helpers</span> <span class="k">import</span> <span class="n">save_relevant_data</span>
+
 
 <div class="viewcode-block" id="generate_1d_density_plot"><a class="viewcode-back" href="../../../source/qmt.visualization.html#qmt.visualization.density_1d_plot.generate_1d_density_plot">[docs]</a><span class="k">def</span> <span class="nf">generate_1d_density_plot</span><span class="p">(</span><span class="n">generic_task</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">dask_client</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">dask_client</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -185,7 +188,7 @@
         <span class="n">density_data</span> <span class="o">=</span> <span class="n">densities</span><span class="p">[</span><span class="n">index</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">hv</span><span class="o">.</span><span class="n">Curve</span><span class="p">((</span><span class="n">mesh_data</span><span class="p">,</span> <span class="n">density_data</span><span class="p">),</span><span class="n">kdims</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;x (&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">mesh_units</span><span class="p">[</span><span class="n">index</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39;)&#39;</span><span class="p">),(</span><span class="s1">&#39;density&#39;</span><span class="p">,</span><span class="s1">&#39;density (&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">density_units</span><span class="p">[</span><span class="n">index</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39;)&#39;</span><span class="p">)])</span>
     <span class="n">curve_dict_2D</span> <span class="o">=</span> <span class="p">{</span><span class="nb">tuple</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="n">index</span><span class="p">]):</span><span class="n">density_plot</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">))}</span>
-    <span class="k">return</span> <span class="n">hv</span><span class="o">.</span><span class="n">HoloMap</span><span class="p">(</span><span class="n">curve_dict_2D</span><span class="p">,</span> <span class="n">kdims</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">kdims</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">hv</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">Dynamic</span><span class="p">(</span><span class="n">hv</span><span class="o">.</span><span class="n">HoloMap</span><span class="p">(</span><span class="n">curve_dict_2D</span><span class="p">,</span> <span class="n">kdims</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">kdims</span><span class="p">)))</span>
 </pre></div>
 
            </div>

@@ -88,6 +88,7 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../rst/tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/modules.html">Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../rst/dev_overview.html">Structure of QMT</a></li>
 </ul>
 
@@ -152,8 +153,8 @@
            <div itemprop="articleBody">
             
   <h1>Source code for qmt.geometry.property_map</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">six</span> <span class="k">import</span> <span class="n">iteritems</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">six</span> <span class="k">import</span> <span class="n">iteritems</span>
 
 
 <div class="viewcode-block" id="PropertyMap"><a class="viewcode-back" href="../../../source/qmt.geometry.html#qmt.geometry.property_map.PropertyMap">[docs]</a><span class="k">class</span> <span class="nc">PropertyMap</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -190,7 +191,10 @@
 
         <span class="n">unique_parts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span>
         <span class="n">unique_props</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">propMap</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">unique_parts</span><span class="p">]</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">parts</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">type</span><span class="p">(</span><span class="n">unique_props</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">obj_type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">unique_props</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">obj_type</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="n">obj_type</span> <span class="o">=</span> <span class="nb">object</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">parts</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">obj_type</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">part</span><span class="p">,</span> <span class="n">prop</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">unique_parts</span><span class="p">,</span> <span class="n">unique_props</span><span class="p">):</span>
             <span class="n">result</span><span class="p">[</span><span class="n">parts</span> <span class="o">==</span> <span class="n">part</span><span class="p">]</span> <span class="o">=</span> <span class="n">prop</span>
         <span class="k">return</span> <span class="n">result</span></div>
@@ -201,7 +205,7 @@
 
 <span class="sd">    :param PartMap part_map: Mapper from spatial location to part identifier.</span>
 <span class="sd">    :param dict part_materials: Dict mapping from part identifier to a material name.</span>
-<span class="sd">    :param Materials mat_lib: Materials library used to look up the material properties.</span>
+<span class="sd">    :param qmt.Materials mat_lib: Materials library used to look up the material properties.</span>
 <span class="sd">    :param str prop_name: Name of the material property to be retrieved for each part.</span>
 <span class="sd">    :param eunit: Energy unit, passed to `mat_lib.find()`.</span>
 <span class="sd">    :param fill_value: Value to be filled in places where there is no part or the part does not have</span>
@@ -218,9 +222,13 @@
         <span class="k">for</span> <span class="n">p</span><span class="p">,</span> <span class="n">mat</span> <span class="ow">in</span> <span class="n">iteritems</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">materialsDict</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">prop_name</span> <span class="o">==</span> <span class="s1">&#39;conductionBandMinimum&#39;</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">partProps</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">mat_lib</span><span class="o">.</span><span class="n">conductionBandMinimum</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">partProps</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">mat_lib</span><span class="o">.</span><span class="n">conduction_band_minimum</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
                 <span class="k">elif</span> <span class="n">prop_name</span> <span class="o">==</span> <span class="s1">&#39;valenceBandMaximum&#39;</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">partProps</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">mat_lib</span><span class="o">.</span><span class="n">valenceBandMaximum</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">partProps</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">mat_lib</span><span class="o">.</span><span class="n">valence_band_maximum</span><span class="p">(</span><span class="n">mat</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">prop_name</span> <span class="o">==</span> <span class="s1">&#39;lightHoleMass&#39;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">partProps</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">mat</span><span class="o">.</span><span class="n">hole_mass</span><span class="p">(</span><span class="s1">&#39;light&#39;</span><span class="p">,</span> <span class="s1">&#39;dos&#39;</span><span class="p">)</span>
+                <span class="k">elif</span> <span class="n">prop_name</span> <span class="o">==</span> <span class="s1">&#39;heavyHoleMass&#39;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">partProps</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">mat</span><span class="o">.</span><span class="n">hole_mass</span><span class="p">(</span><span class="s1">&#39;heavy&#39;</span><span class="p">,</span> <span class="s1">&#39;dos&#39;</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">partProps</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">mat</span><span class="p">[</span><span class="n">prop_name</span><span class="p">]</span>
             <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>

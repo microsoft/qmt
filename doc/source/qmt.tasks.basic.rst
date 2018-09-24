@@ -1,21 +1,21 @@
-qmt\.basic\_tasks package
+qmt\.tasks\.basic package
 =========================
 
 Submodules
 ----------
 
-qmt\.basic\_tasks\.geometry module
+qmt\.tasks\.basic\.geometry module
 ----------------------------------
 
-.. automodule:: qmt.basic_tasks.geometry
+.. automodule:: qmt.tasks.basic.geometry
     :members:
     :undoc-members:
     :show-inheritance:
 
-qmt\.basic\_tasks\.reduce\_dim module
+qmt\.tasks\.basic\.reduce\_dim module
 -------------------------------------
 
-.. automodule:: qmt.basic_tasks.reduce_dim
+.. automodule:: qmt.tasks.basic.reduce_dim
     :members:
     :undoc-members:
     :show-inheritance:
@@ -24,7 +24,7 @@ qmt\.basic\_tasks\.reduce\_dim module
 Module contents
 ---------------
 
-.. automodule:: qmt.basic_tasks
+.. automodule:: qmt.tasks.basic
     :members:
     :undoc-members:
     :show-inheritance:

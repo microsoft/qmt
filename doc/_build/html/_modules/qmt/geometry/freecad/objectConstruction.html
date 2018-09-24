@@ -88,6 +88,7 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../rst/tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../source/modules.html">Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../rst/dev_overview.html">Structure of QMT</a></li>
 </ul>
 
@@ -157,37 +158,73 @@
 
 <span class="sd">&quot;&quot;&quot;Functions that perform composite executions.&quot;&quot;&quot;</span>
 
+<span class="kn">import</span> <span class="nn">FreeCAD</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">Draft</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">six</span> <span class="k">import</span> <span class="n">iteritems</span><span class="p">,</span> <span class="n">text_type</span>
 
-<span class="kn">import</span> <span class="nn">FreeCAD</span>
-<span class="kn">import</span> <span class="nn">Draft</span>
-
-
 <span class="c1"># TODO: use namespace in code</span>
 <span class="kn">from</span> <span class="nn">qmt.geometry.freecad.auxiliary</span> <span class="k">import</span> <span class="o">*</span>
-<span class="kn">import</span> <span class="nn">qmt.geometry.freecad.geomUtils</span>
-<span class="kn">import</span> <span class="nn">qmt.geometry.freecad.sketchUtils</span>
-<span class="kn">import</span> <span class="nn">qmt.geometry.freecad.fileIO</span>
-<span class="kn">from</span> <span class="nn">qmt.geometry.freecad.geomUtils</span> <span class="k">import</span> <span class="p">(</span><span class="n">extrude</span><span class="p">,</span> <span class="n">copy_move</span><span class="p">,</span> <span class="n">genUnion</span><span class="p">,</span>
+<span class="kn">from</span> <span class="nn">qmt.geometry.freecad.fileIO</span> <span class="k">import</span> <span class="n">exportCAD</span>
+<span class="kn">from</span> <span class="nn">qmt.geometry.freecad.geomUtils</span> <span class="k">import</span> <span class="p">(</span><span class="n">extrude</span><span class="p">,</span> <span class="n">copy_move</span><span class="p">,</span> <span class="n">genUnion</span><span class="p">,</span><span class="c1"># make_solid,</span>
                                             <span class="n">getBB</span><span class="p">,</span> <span class="n">makeBB</span><span class="p">,</span> <span class="n">makeHexFace</span><span class="p">,</span>
-                                            <span class="n">extrudeBetween</span><span class="p">,</span> <span class="n">centerObjects</span><span class="p">,</span> <span class="n">intersect</span><span class="p">,</span>
+                                            <span class="n">extrudeBetween</span><span class="p">,</span> <span class="n">draftOffset</span><span class="p">,</span> <span class="n">intersect</span><span class="p">,</span>
                                             <span class="n">checkOverlap</span><span class="p">,</span> <span class="n">subtract</span><span class="p">,</span>
                                             <span class="n">crossSection</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">qmt.geometry.freecad.sketchUtils</span> <span class="k">import</span> <span class="p">(</span><span class="n">findSegments</span><span class="p">,</span> <span class="n">splitSketch</span><span class="p">,</span> <span class="n">extendSketch</span><span class="p">,</span>
-                                              <span class="n">findEdgeCycles</span><span class="p">,</span> <span class="n">draftOffset</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">qmt.geometry.freecad.fileIO</span> <span class="k">import</span> <span class="p">(</span><span class="n">updateParams</span><span class="p">,</span> <span class="n">exportCAD</span><span class="p">,</span> <span class="n">exportMeshed</span><span class="p">,</span> <span class="n">store_serial</span><span class="p">)</span>
+                                              <span class="n">findEdgeCycles</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">qmt.data.geo_data</span> <span class="k">import</span> <span class="n">Geo3DData</span><span class="p">,</span> <span class="n">store_serial</span>
+
+
+<div class="viewcode-block" id="set_params"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.set_params">[docs]</a><span class="k">def</span> <span class="nf">set_params</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">paramDict</span><span class="p">):</span>
+    <span class="c1"># TODO: support passthrough params</span>
+    <span class="sd">&#39;&#39;&#39; Update the parameters in the modelParams spreadsheet to reflect the</span>
+<span class="sd">        current value in the dict.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">paramDict</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">spreadSheet</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">modelParams</span>
+        <span class="n">spreadSheet</span><span class="o">.</span><span class="n">clearAll</span><span class="p">()</span>  <span class="c1"># clear existing spreadsheet</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="c1"># Cave: unconditional removeObject on spreadSheet breaks param dependencies.</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">removeObject</span><span class="p">(</span><span class="s1">&#39;modelParams&#39;</span><span class="p">)</span>  <span class="c1"># it was not a good spreadsheet</span>
+        <span class="n">spreadSheet</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">addObject</span><span class="p">(</span><span class="s1">&#39;Spreadsheet::Sheet&#39;</span><span class="p">,</span> <span class="s1">&#39;modelParams&#39;</span><span class="p">)</span>
+    <span class="n">spreadSheet</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;A1&#39;</span><span class="p">,</span> <span class="s1">&#39;paramName&#39;</span><span class="p">)</span>
+    <span class="n">spreadSheet</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;B1&#39;</span><span class="p">,</span> <span class="s1">&#39;paramValue&#39;</span><span class="p">)</span>
+    <span class="n">spreadSheet</span><span class="o">.</span><span class="n">setColumnWidth</span><span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+    <span class="n">spreadSheet</span><span class="o">.</span><span class="n">setStyle</span><span class="p">(</span><span class="s1">&#39;A1:B1&#39;</span><span class="p">,</span> <span class="s1">&#39;bold&#39;</span><span class="p">,</span> <span class="s1">&#39;add&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">paramDict</span><span class="p">):</span>
+        <span class="n">paramType</span> <span class="o">=</span> <span class="n">paramDict</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">paramType</span> <span class="o">==</span> <span class="s1">&#39;freeCAD&#39;</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">spreadSheet</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;A&#39;</span> <span class="o">+</span> <span class="n">idx</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+            <span class="n">spreadSheet</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;B&#39;</span> <span class="o">+</span> <span class="n">idx</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">paramDict</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="n">spreadSheet</span><span class="o">.</span><span class="n">setAlias</span><span class="p">(</span><span class="s1">&#39;B&#39;</span> <span class="o">+</span> <span class="n">idx</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">paramType</span> <span class="o">==</span> <span class="s1">&#39;python&#39;</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown geometric parameter type.&#39;</span><span class="p">)</span>
+
+    <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="DummyInfo"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.DummyInfo">[docs]</a><span class="k">class</span> <span class="nc">DummyInfo</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trash</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">litho_setup_done</span> <span class="o">=</span> <span class="kc">False</span></div>
 
 
 <div class="viewcode-block" id="build"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.build">[docs]</a><span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="n">opts</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Build the 3D geometry.</span>
+    <span class="sd">&#39;&#39;&#39;Build the 3D geometry in FreeCAD.</span>
 
-<span class="sd">    :param dict opts:   Options dict in the QMT 3D geometry input format.</span>
-<span class="sd">    :return dict:       Modified options dict.</span>
+<span class="sd">    :param dict opts:   Options dict in the QMT Geometry3D.__init__ input format.</span>
+<span class="sd">    :return geo:        Geo3DData object with the built objects.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="n">doc</span> <span class="o">=</span> <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span>
+    <span class="n">geo</span> <span class="o">=</span> <span class="n">Geo3DData</span><span class="p">()</span>
 
     <span class="c1"># Schedule for deletion all objects not explicitly selected by the user</span>
     <span class="n">input_parts_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">part</span><span class="o">.</span><span class="n">fc_name</span> <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">[</span><span class="s1">&#39;input_parts&#39;</span><span class="p">]]</span>
@@ -200,7 +237,7 @@
     <span class="k">if</span> <span class="s1">&#39;params&#39;</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">:</span>
         <span class="c1"># Extend params dictionary to original parts schema</span>
         <span class="n">fcdict</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">&#39;freeCAD&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-        <span class="n">updateParams</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">fcdict</span><span class="p">)</span>
+        <span class="n">set_params</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">fcdict</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="s1">&#39;built_part_names&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">:</span>
         <span class="n">opts</span><span class="p">[</span><span class="s1">&#39;built_part_names&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
@@ -208,6 +245,8 @@
         <span class="n">opts</span><span class="p">[</span><span class="s1">&#39;serial_stp_parts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="c1"># Build the parts</span>
+    <span class="n">info_holder</span> <span class="o">=</span> <span class="n">DummyInfo</span><span class="p">()</span>  <span class="c1"># temporary workaround to support old litho code</span>
+    <span class="n">built_parts</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">input_part</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">[</span><span class="s1">&#39;input_parts&#39;</span><span class="p">]:</span>
 
         <span class="k">if</span> <span class="n">input_part</span><span class="o">.</span><span class="n">directive</span> <span class="o">==</span> <span class="s1">&#39;extrude&#39;</span><span class="p">:</span>
@@ -219,33 +258,54 @@
         <span class="k">elif</span> <span class="n">input_part</span><span class="o">.</span><span class="n">directive</span> <span class="o">==</span> <span class="s1">&#39;wire_shell&#39;</span><span class="p">:</span>
             <span class="n">part</span> <span class="o">=</span> <span class="n">build_wire_shell</span><span class="p">(</span><span class="n">input_part</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">input_part</span><span class="o">.</span><span class="n">directive</span> <span class="o">==</span> <span class="s1">&#39;lithography&#39;</span><span class="p">:</span>
-            <span class="n">part</span> <span class="o">=</span> <span class="n">build_lithography</span><span class="p">(</span><span class="n">input_part</span><span class="p">)</span>
+            <span class="n">part</span> <span class="o">=</span> <span class="n">build_lithography</span><span class="p">(</span><span class="n">input_part</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">info_holder</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">input_part</span><span class="o">.</span><span class="n">directive</span> <span class="o">==</span> <span class="s1">&#39;3d_shape&#39;</span><span class="p">:</span>
             <span class="n">part</span> <span class="o">=</span> <span class="n">build_pass</span><span class="p">(</span><span class="n">input_part</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Directive &#39;</span> <span class="o">+</span> <span class="n">input_part</span><span class="o">.</span><span class="n">directive</span> <span class="o">+</span>
                              <span class="s1">&#39; is not a recognized directive type.&#39;</span><span class="p">)</span>
 
+        <span class="k">assert</span> <span class="n">part</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
-        <span class="n">opts</span><span class="p">[</span><span class="s1">&#39;built_part_names&#39;</span><span class="p">][</span><span class="n">input_part</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">Name</span>
-        <span class="n">store_serial</span><span class="p">(</span><span class="n">opts</span><span class="p">[</span><span class="s1">&#39;serial_stp_parts&#39;</span><span class="p">],</span> <span class="n">input_part</span><span class="o">.</span><span class="n">label</span><span class="p">,</span>
-                     <span class="n">exportCAD</span><span class="p">,</span> <span class="s1">&#39;stp&#39;</span><span class="p">,</span>  <span class="p">[</span> <span class="n">part</span> <span class="p">]</span> <span class="p">)</span>
+        <span class="n">built_parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
+        <span class="n">opts</span><span class="p">[</span><span class="s1">&#39;built_part_names&#39;</span><span class="p">][</span><span class="n">input_part</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">Name</span>  <span class="c1"># needed for litho steps</span>
 
+    <span class="c1"># Cleanup</span>
+    <span class="n">collect_garbage</span><span class="p">(</span><span class="n">info_holder</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">blacklist</span><span class="p">:</span>
         <span class="n">delete</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
     <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
-    <span class="k">def</span> <span class="nf">_save_helper</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-        <span class="n">doc</span><span class="o">.</span><span class="n">saveAs</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-        <span class="c1">#make_objects_visible(path)  # freecadcmd doesn&#39;t create GuiDocument.xml</span>
-    <span class="n">store_serial</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="s1">&#39;serial_fcdoc&#39;</span><span class="p">,</span> <span class="n">_save_helper</span><span class="p">,</span> <span class="s1">&#39;fcstd&#39;</span><span class="p">,</span> <span class="n">doc</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">opts</span></div>
+    <span class="c1"># Subtraction (removes the need for subtractlists)</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">part</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">built_parts</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">other_part</span> <span class="ow">in</span> <span class="n">built_parts</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">i</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">checkOverlap</span><span class="p">([</span><span class="n">part</span><span class="p">,</span> <span class="n">other_part</span><span class="p">]):</span>
+                <span class="n">cut</span> <span class="o">=</span> <span class="n">subtract</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">other_part</span><span class="p">),</span> <span class="n">consumeInputs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">simple_copy</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">addObject</span><span class="p">(</span><span class="s1">&#39;Part::Feature&#39;</span><span class="p">,</span> <span class="s2">&quot;simple_copy&quot;</span><span class="p">)</span>
+                <span class="n">simple_copy</span><span class="o">.</span><span class="n">Shape</span> <span class="o">=</span> <span class="n">cut</span><span class="o">.</span><span class="n">Shape</span>  <span class="c1"># no solid, just its shape (can be disjoint)</span>
+                <span class="n">delete</span><span class="p">(</span><span class="n">cut</span><span class="p">)</span>
+                <span class="n">part</span> <span class="o">=</span> <span class="n">simple_copy</span>
+                <span class="n">built_parts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">simple_copy</span>
+
+    <span class="c1"># Update names and store the built parts</span>
+    <span class="k">for</span> <span class="n">input_part</span><span class="p">,</span> <span class="n">built_part</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">opts</span><span class="p">[</span><span class="s1">&#39;input_parts&#39;</span><span class="p">],</span> <span class="n">built_parts</span><span class="p">):</span>
+        <span class="n">built_part</span><span class="o">.</span><span class="n">Label</span> <span class="o">=</span> <span class="n">input_part</span><span class="o">.</span><span class="n">label</span>  <span class="c1"># here it&#39;s collision free</span>
+        <span class="n">input_part</span><span class="o">.</span><span class="n">serial_stp</span> <span class="o">=</span> <span class="n">store_serial</span><span class="p">([</span><span class="n">built_part</span><span class="p">],</span> <span class="n">exportCAD</span><span class="p">,</span> <span class="s1">&#39;stp&#39;</span><span class="p">)</span>
+        <span class="n">input_part</span><span class="o">.</span><span class="n">built_fc_name</span> <span class="o">=</span> <span class="n">built_part</span><span class="o">.</span><span class="n">Name</span>
+        <span class="n">geo</span><span class="o">.</span><span class="n">add_part</span><span class="p">(</span><span class="n">input_part</span><span class="o">.</span><span class="n">label</span><span class="p">,</span> <span class="n">input_part</span><span class="p">)</span>
+
+    <span class="c1"># Store the FreeCAD document</span>
+    <span class="n">geo</span><span class="o">.</span><span class="n">set_data</span><span class="p">(</span><span class="s1">&#39;fcdoc&#39;</span><span class="p">,</span> <span class="n">doc</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">geo</span></div>
 
 
 <div class="viewcode-block" id="build_pass"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.build_pass">[docs]</a><span class="k">def</span> <span class="nf">build_pass</span><span class="p">(</span><span class="n">part</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Pas a part unchanged.&#39;&#39;&#39;</span>
     <span class="k">assert</span> <span class="n">part</span><span class="o">.</span><span class="n">directive</span> <span class="o">==</span> <span class="s1">&#39;3d_shape&#39;</span>
-    <span class="k">return</span> <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span><span class="o">.</span><span class="n">getObject</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">fc_name</span><span class="p">)</span></div>
+    <span class="n">existing_part</span> <span class="o">=</span> <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span><span class="o">.</span><span class="n">getObject</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">fc_name</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">existing_part</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">existing_part</span></div>
 
 
 <div class="viewcode-block" id="build_extrude"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.build_extrude">[docs]</a><span class="k">def</span> <span class="nf">build_extrude</span><span class="p">(</span><span class="n">part</span><span class="p">):</span>
@@ -291,25 +351,26 @@
     <span class="n">wire</span><span class="o">.</span><span class="n">Label</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">label</span>
     <span class="k">return</span> <span class="n">wire</span></div>
 
+
 <div class="viewcode-block" id="build_wire_shell"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.build_wire_shell">[docs]</a><span class="k">def</span> <span class="nf">build_wire_shell</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;Build a wire shell part.&#39;&#39;&#39;</span>
     <span class="k">assert</span> <span class="n">part</span><span class="o">.</span><span class="n">directive</span> <span class="o">==</span> <span class="s1">&#39;wire_shell&#39;</span>
     <span class="n">doc</span> <span class="o">=</span> <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span>
-    <span class="n">zBottom</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">z0</span>
-    <span class="n">radius</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">thickness_of_wire</span>
-    <span class="n">wireSketch</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">getObject</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">fc_name</span><span class="p">)</span>
+    <span class="n">zBottom</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">target_wire</span><span class="o">.</span><span class="n">z0</span>
+    <span class="n">radius</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">target_wire</span><span class="o">.</span><span class="n">thickness</span>
+    <span class="n">wireSketch</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">getObject</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">target_wire</span><span class="o">.</span><span class="n">fc_name</span><span class="p">)</span>
     <span class="n">shell_verts</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">shell_verts</span>
     <span class="n">thickness</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">thickness</span>
-    <span class="n">depoZoneName</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">depo_zone</span>
-    <span class="n">etchZoneName</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">etch_zone</span>
-    <span class="k">if</span> <span class="n">depoZoneName</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">depoZone</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">getObject</span><span class="p">(</span><span class="n">depoZoneName</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">depoZone</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">if</span> <span class="n">etchZoneName</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">etchZone</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">getObject</span><span class="p">(</span><span class="n">etchZoneName</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
+
+    <span class="k">if</span> <span class="n">part</span><span class="o">.</span><span class="n">depo_mode</span> <span class="o">==</span> <span class="s1">&#39;depo&#39;</span><span class="p">:</span>
+        <span class="n">depoZone</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">getObject</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">fc_name</span><span class="p">)</span>
         <span class="n">etchZone</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">elif</span> <span class="n">part</span><span class="o">.</span><span class="n">depo_mode</span> <span class="o">==</span> <span class="s1">&#39;etch&#39;</span><span class="p">:</span>
+        <span class="n">depoZone</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">etchZone</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">getObject</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">fc_name</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown depo_mode &#39;</span> <span class="o">+</span> <span class="n">depo_mode</span><span class="p">)</span>
+
     <span class="n">shell</span> <span class="o">=</span> <span class="n">buildAlShell</span><span class="p">(</span>
         <span class="n">wireSketch</span><span class="p">,</span>
         <span class="n">zBottom</span><span class="p">,</span>
@@ -323,21 +384,19 @@
     <span class="k">return</span> <span class="n">shell</span></div>
 
 
-<div class="viewcode-block" id="build_lithography"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.build_lithography">[docs]</a><span class="k">def</span> <span class="nf">build_lithography</span><span class="p">(</span><span class="n">part</span><span class="p">):</span>
+<div class="viewcode-block" id="build_lithography"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.build_lithography">[docs]</a><span class="k">def</span> <span class="nf">build_lithography</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">info_holder</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Build a lithography part.&quot;&quot;&quot;</span>
-    <span class="k">assert</span> <span class="n">part</span><span class="o">.</span><span class="n">directive</span> <span class="o">==</span> <span class="s1">&#39;litoghraphy&#39;</span>
-    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
-    <span class="n">doc</span> <span class="o">=</span> <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">lithoSetup</span><span class="p">:</span>
-        <span class="n">lithoDict</span> <span class="o">=</span> <span class="n">_initialize_lithography</span><span class="p">(</span><span class="n">fillShells</span><span class="o">=</span><span class="n">part</span><span class="o">.</span><span class="n">fillLitho</span><span class="p">)</span>
-        <span class="n">lithoSetup</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="n">layerNum</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">layerNum</span>
+    <span class="k">assert</span> <span class="n">part</span><span class="o">.</span><span class="n">directive</span> <span class="o">==</span> <span class="s1">&#39;lithography&#39;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">info_holder</span><span class="o">.</span><span class="n">litho_setup_done</span><span class="p">:</span>
+        <span class="n">initialize_lithography</span><span class="p">(</span><span class="n">info_holder</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">fillShells</span><span class="o">=</span><span class="n">part</span><span class="o">.</span><span class="n">fill_litho</span><span class="p">)</span>
+        <span class="n">info_holder</span><span class="o">.</span><span class="n">litho_setup_done</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="n">layerNum</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">layer_num</span>
     <span class="n">returnObjs</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">objID</span> <span class="ow">in</span> <span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">]:</span>
-        <span class="k">if</span> <span class="n">partName</span> <span class="o">==</span> <span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span>
-                <span class="n">objID</span><span class="p">][</span><span class="s1">&#39;partName&#39;</span><span class="p">]:</span>
-            <span class="n">returnObjs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_gen_G</span><span class="p">(</span><span class="n">layerNum</span><span class="p">,</span> <span class="n">objID</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">returnObjs</span></div>
+    <span class="k">for</span> <span class="n">objID</span> <span class="ow">in</span> <span class="n">info_holder</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">part</span><span class="o">.</span><span class="n">fc_name</span> <span class="o">==</span> <span class="n">info_holder</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;partName&#39;</span><span class="p">]:</span>
+            <span class="n">returnObjs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gen_G</span><span class="p">(</span><span class="n">info_holder</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">layerNum</span><span class="p">,</span> <span class="n">objID</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">genUnion</span><span class="p">(</span><span class="n">returnObjs</span><span class="p">,</span> <span class="n">consumeInputs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
 
 <span class="c1">################################################################################</span>
@@ -493,480 +552,347 @@
     <span class="k">return</span> <span class="n">returnPart</span></div>
 
 
-<div class="viewcode-block" id="modelBuilder"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.modelBuilder">[docs]</a><span class="k">class</span> <span class="nc">modelBuilder</span><span class="p">:</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">passModel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">debugMode</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Builds a model defined by the JSON input file.&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">passModel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">getModel</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">passModel</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">debugMode</span> <span class="o">=</span> <span class="n">debugMode</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">doc</span> <span class="o">=</span> <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_buildPartsDict</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lithoSetup</span> <span class="o">=</span> <span class="kc">False</span>  <span class="c1"># Has the litho setup routine been run?</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">trash</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># trash for garbage collection at the end</span>
-        <span class="c1"># Update the FreeCAD model to reflect the current value of any model</span>
-        <span class="c1"># parameters:</span>
-        <span class="n">updateParams</span><span class="p">(</span><span class="n">passModel</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+<div class="viewcode-block" id="initialize_lithography"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.initialize_lithography">[docs]</a><span class="k">def</span> <span class="nf">initialize_lithography</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">fillShells</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span>
+    <span class="n">info</span><span class="o">.</span><span class="n">fillShells</span> <span class="o">=</span> <span class="n">fillShells</span>
+    <span class="c1"># The lithography step requires some infrastructure to track things</span>
+    <span class="c1"># throughout.</span>
+    <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># dictionary containing objects for the lithography step</span>
+    <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1"># Dictionary for containing the substrate. () indicates un-offset objects,</span>
+    <span class="c1"># and subsequent tuples are offset by t_i for each index in the tuple.</span>
+    <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{():</span> <span class="p">[]}</span>
 
-<div class="viewcode-block" id="modelBuilder.buildPart"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.modelBuilder.buildPart">[docs]</a>    <span class="k">def</span> <span class="nf">buildPart</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">partName</span><span class="p">):</span>
-        <span class="n">partDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;3DParts&#39;</span><span class="p">][</span><span class="n">partName</span><span class="p">]</span>
-        <span class="n">directive</span> <span class="o">=</span> <span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;directive&#39;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">directive</span> <span class="o">==</span> <span class="s1">&#39;extrude&#39;</span><span class="p">:</span>
-            <span class="n">objs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_extrude</span><span class="p">(</span><span class="n">partName</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">directive</span> <span class="o">==</span> <span class="s1">&#39;wire&#39;</span><span class="p">:</span>
-            <span class="n">objs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_wire</span><span class="p">(</span><span class="n">partName</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">directive</span> <span class="o">==</span> <span class="s1">&#39;wireShell&#39;</span><span class="p">:</span>
-            <span class="n">objs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_wire_shell</span><span class="p">(</span><span class="n">partName</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">directive</span> <span class="o">==</span> <span class="s1">&#39;SAG&#39;</span><span class="p">:</span>
-            <span class="n">objs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_SAG</span><span class="p">(</span><span class="n">partName</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">directive</span> <span class="o">==</span> <span class="s1">&#39;lithography&#39;</span><span class="p">:</span>
-            <span class="n">objs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_litho</span><span class="p">(</span><span class="n">partName</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Directive &#39;</span> <span class="o">+</span> <span class="n">directive</span> <span class="o">+</span>
-                             <span class="s1">&#39; is not a recognized directive type.&#39;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_buildPartsDict</span><span class="p">[</span><span class="n">partName</span><span class="p">]</span> <span class="o">=</span> <span class="n">objs</span>
-        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objs</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">registerCadPart</span><span class="p">(</span><span class="n">partName</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">Name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+    <span class="c1"># To start, we need to collect up all the lithography directives, and</span>
+    <span class="c1"># organize them by layerNum and objectIDs within layers.</span>
+    <span class="n">baseSubstrateParts</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">[</span><span class="s1">&#39;input_parts&#39;</span><span class="p">]:</span>
+        <span class="c1"># If this part is a litho step</span>
+        <span class="k">if</span> <span class="n">part</span><span class="o">.</span><span class="n">directive</span> <span class="o">==</span> <span class="s1">&#39;lithography&#39;</span><span class="p">:</span>
+            <span class="n">layerNum</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">layer_num</span>  <span class="c1"># layerNum of this part</span>
+            <span class="c1"># Add the layerNum to the layer dictionary:</span>
+            <span class="k">if</span> <span class="n">layerNum</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">]:</span>
+                <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;objIDs&#39;</span><span class="p">:</span> <span class="p">{}}</span>
+            <span class="n">layerDict</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">]</span>
+            <span class="c1"># Generate the base and thickness of the layer:</span>
+            <span class="n">layerBase</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">z0</span><span class="p">)</span>
+            <span class="n">layerThickness</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">thickness</span><span class="p">)</span>
+            <span class="c1"># All parts within a given layer number are required to have</span>
+            <span class="c1"># identical thickness and base, so check that:</span>
+            <span class="k">if</span> <span class="s1">&#39;base&#39;</span> <span class="ow">in</span> <span class="n">layerDict</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">layerBase</span> <span class="o">==</span> <span class="n">layerDict</span><span class="p">[</span><span class="s1">&#39;base&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">layerDict</span><span class="p">[</span><span class="s1">&#39;base&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">layerBase</span>
+            <span class="k">if</span> <span class="s1">&#39;thickness&#39;</span> <span class="ow">in</span> <span class="n">layerDict</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">layerThickness</span> <span class="o">==</span> <span class="n">layerDict</span><span class="p">[</span><span class="s1">&#39;thickness&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">layerDict</span><span class="p">[</span><span class="s1">&#39;thickness&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">layerThickness</span>
+            <span class="c1"># A given part references a base sketch. However, we need to split</span>
+            <span class="c1"># the sketch here into possibly disjoint sub-sketches to work</span>
+            <span class="c1"># with them:</span>
+            <span class="n">sketch</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">getObject</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">fc_name</span><span class="p">)</span>
+            <span class="n">splitSketches</span> <span class="o">=</span> <span class="n">splitSketch</span><span class="p">(</span><span class="n">sketch</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">mySplitSketch</span> <span class="ow">in</span> <span class="n">splitSketches</span><span class="p">:</span>
+                <span class="n">objID</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">layerDict</span><span class="p">[</span><span class="s1">&#39;objIDs&#39;</span><span class="p">])</span>
+                <span class="n">objDict</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">objDict</span><span class="p">[</span><span class="s1">&#39;partName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">fc_name</span>
+                <span class="n">objDict</span><span class="p">[</span><span class="s1">&#39;sketch&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mySplitSketch</span>
+                <span class="n">info</span><span class="o">.</span><span class="n">trash</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mySplitSketch</span><span class="p">)</span>
+                <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">]</span> <span class="o">=</span> <span class="n">objDict</span>
+            <span class="c1"># Add the base substrate to the appropriate dictionary</span>
+            <span class="n">baseSubstrateParts</span> <span class="o">+=</span> <span class="n">part</span><span class="o">.</span><span class="n">litho_base</span>
 
-    <span class="c1"># ~ def exportBuiltParts(self, stepFileDir=None, stlFileDir=None):</span>
-        <span class="c1"># ~ # Now that we are ready to export, we first want to merge all of the</span>
-        <span class="c1"># ~ # 3D renders corresponding to a single shape into one entity:</span>
-        <span class="c1"># ~ totalObjsDict = {}</span>
-        <span class="c1"># ~ for partName in self._buildPartsDict.keys():</span>
-            <span class="c1"># ~ objsList = self._buildPartsDict[partName]</span>
-            <span class="c1"># ~ mergedObj = genUnion(objsList, consumeInputs=True)</span>
-            <span class="c1"># ~ mergedObj.Label = partName</span>
-            <span class="c1"># ~ totalObjsDict[partName] = mergedObj</span>
-        <span class="c1"># ~ # Now that we have merged the objects, we want to center them  in the x-y</span>
-        <span class="c1"># ~ # plane so the distances aren&#39;t ridiculous:</span>
-        <span class="c1"># ~ centerObjects(totalObjsDict.values())</span>
-        <span class="c1"># ~ # Finally, we go through the dictionary and export:</span>
-        <span class="c1"># ~ for partName in totalObjsDict.keys():</span>
-            <span class="c1"># ~ obj = totalObjsDict[partName]</span>
-            <span class="c1"># ~ objFCName = obj.Name</span>
-            <span class="c1"># ~ if stepFileDir is not None:</span>
-                <span class="c1"># ~ filePath = stepFileDir + &#39;/&#39; + partName + &#39;.step&#39;</span>
-                <span class="c1"># ~ exportCAD(obj, filePath)</span>
-                <span class="c1"># ~ self.model.registerCadPart(</span>
-                    <span class="c1"># ~ partName, objFCName, filePath, reset=True)</span>
-            <span class="c1"># ~ if stlFileDir is not None:</span>
-                <span class="c1"># ~ filePath = stlFileDir + &#39;/&#39; + partName + &#39;.stl&#39;</span>
-                <span class="c1"># ~ exportMeshed(obj, filePath)</span>
+    <span class="c1"># Get rid of any duplicates:</span>
+    <span class="n">baseSubstrateParts</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">baseSubstrateParts</span><span class="p">))</span>
 
-<div class="viewcode-block" id="modelBuilder.saveFreeCADState"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.modelBuilder.saveFreeCADState">[docs]</a>    <span class="k">def</span> <span class="nf">saveFreeCADState</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileName</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Save a copy of the freeCAD model and do garbage collection.&quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_collect_garbarge</span><span class="p">()</span>
-        <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span><span class="o">.</span><span class="n">saveAs</span><span class="p">(</span><span class="n">fileName</span><span class="p">)</span></div>
+    <span class="c1"># Now convert the part names for the substrate into 3D freeCAD objects, which</span>
+    <span class="c1"># should have already been rendered.</span>
+    <span class="k">for</span> <span class="n">baseSubstrate</span> <span class="ow">in</span> <span class="n">baseSubstrateParts</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">built_part_name</span> <span class="o">=</span> <span class="n">opts</span><span class="p">[</span><span class="s1">&#39;built_part_names&#39;</span><span class="p">][</span><span class="n">baseSubstrate</span><span class="o">.</span><span class="n">label</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;No substrate built for &#39;&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">baseSubstrate</span><span class="o">.</span><span class="n">label</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;&#39;&quot;</span><span class="p">)</span>
+        <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">][()]</span> <span class="o">+=</span> <span class="p">[</span><span class="n">doc</span><span class="o">.</span><span class="n">getObject</span><span class="p">(</span><span class="n">built_part_name</span><span class="p">)]</span>
+    <span class="c1"># ~ import sys</span>
+    <span class="c1"># ~ sys.stderr.write(&quot;&gt;&gt;&gt; litdic &quot; + str(info.lithoDict) + &quot;\n&quot;)</span>
 
-    <span class="k">def</span> <span class="nf">_build_extrude</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">partName</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Build an extrude part.&quot;&quot;&quot;</span>
-        <span class="n">partDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;3DParts&#39;</span><span class="p">][</span><span class="n">partName</span><span class="p">]</span>
-        <span class="k">assert</span> <span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;directive&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;extrude&#39;</span>
-        <span class="n">z0</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_geo_param</span><span class="p">(</span><span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;z0&#39;</span><span class="p">])</span>
-        <span class="n">deltaz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_geo_param</span><span class="p">(</span><span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;thickness&#39;</span><span class="p">])</span>
-        <span class="n">sketch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">getObject</span><span class="p">(</span><span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;fcName&#39;</span><span class="p">])</span>
-        <span class="n">splitSketches</span> <span class="o">=</span> <span class="n">splitSketch</span><span class="p">(</span><span class="n">sketch</span><span class="p">)</span>
-        <span class="n">extParts</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">mySplitSketch</span> <span class="ow">in</span> <span class="n">splitSketches</span><span class="p">:</span>
-            <span class="n">extPart</span> <span class="o">=</span> <span class="n">extrudeBetween</span><span class="p">(</span><span class="n">mySplitSketch</span><span class="p">,</span> <span class="n">z0</span><span class="p">,</span> <span class="n">z0</span> <span class="o">+</span> <span class="n">deltaz</span><span class="p">)</span>
-            <span class="n">extPart</span><span class="o">.</span><span class="n">Label</span> <span class="o">=</span> <span class="n">partName</span>
-            <span class="n">extParts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">extPart</span><span class="p">)</span>
-            <span class="n">delete</span><span class="p">(</span><span class="n">mySplitSketch</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">extParts</span>
+    <span class="c1"># Now that we have ordered the primitives, we need to compute a few</span>
+    <span class="c1"># aux quantities that we will need. First, we compute the total bounding</span>
+    <span class="c1"># box of the lithography procedure:</span>
+    <span class="n">thicknesses</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">bases</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">layerNum</span> <span class="ow">in</span> <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">thicknesses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;thickness&#39;</span><span class="p">])</span>
+        <span class="n">bases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;base&#39;</span><span class="p">])</span>
+    <span class="n">bottom</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">bases</span><span class="p">)</span>
+    <span class="n">totalThickness</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">thicknesses</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">][</span>
+        <span class="p">()])</span> <span class="o">&gt;</span> <span class="mi">0</span>  <span class="c1"># Otherwise, we don&#39;t have a reference for the lateral BB</span>
+    <span class="n">substrateUnion</span> <span class="o">=</span> <span class="n">genUnion</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">][()],</span>
+                              <span class="n">consumeInputs</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># total substrate</span>
+    <span class="n">BB</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">getBB</span><span class="p">(</span><span class="n">substrateUnion</span><span class="p">))</span>  <span class="c1"># bounding box</span>
+    <span class="n">BB</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">([</span><span class="n">bottom</span><span class="p">,</span> <span class="n">BB</span><span class="p">[</span><span class="mi">4</span><span class="p">]])</span>
+    <span class="n">BB</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">BB</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">+</span> <span class="n">totalThickness</span><span class="p">,</span> <span class="n">bottom</span> <span class="o">+</span> <span class="n">totalThickness</span><span class="p">])</span>
+    <span class="n">BB</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">BB</span><span class="p">)</span>
+    <span class="n">constructionZone</span> <span class="o">=</span> <span class="n">makeBB</span><span class="p">(</span><span class="n">BB</span><span class="p">)</span>  <span class="c1"># box that encompases the whole domain.</span>
+    <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;boundingBox&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">BB</span><span class="p">,</span> <span class="n">constructionZone</span><span class="p">]</span>
+    <span class="n">delete</span><span class="p">(</span><span class="n">substrateUnion</span><span class="p">)</span>  <span class="c1"># not needed for next steps</span>
+    <span class="n">delete</span><span class="p">(</span><span class="n">constructionZone</span><span class="p">)</span>  <span class="c1"># not needed for next steps  ... WHY?</span>
 
-    <span class="k">def</span> <span class="nf">_build_wire</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">partName</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Build a wire part.&quot;&quot;&quot;</span>
-        <span class="n">partDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;3DParts&#39;</span><span class="p">][</span><span class="n">partName</span><span class="p">]</span>
-        <span class="k">assert</span> <span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;directive&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;wire&#39;</span>
-        <span class="n">zBottom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_geo_param</span><span class="p">(</span><span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;z0&#39;</span><span class="p">])</span>
-        <span class="n">width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_geo_param</span><span class="p">(</span><span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;thickness&#39;</span><span class="p">])</span>
-        <span class="n">sketch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">getObject</span><span class="p">(</span><span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;fcName&#39;</span><span class="p">])</span>
-        <span class="n">wire</span> <span class="o">=</span> <span class="n">buildWire</span><span class="p">(</span><span class="n">sketch</span><span class="p">,</span> <span class="n">zBottom</span><span class="p">,</span> <span class="n">width</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">)</span>
-        <span class="n">wire</span><span class="o">.</span><span class="n">Label</span> <span class="o">=</span> <span class="n">partName</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">wire</span><span class="p">]</span>
+    <span class="c1"># Next, we add two prisms for each sketch. The first, which we denote &quot;B&quot;,</span>
+    <span class="c1"># is bounded by the base from the bottom and the layer thickness on the top.</span>
+    <span class="c1"># These serve as &quot;stencils&quot; that would be the deposited shape if no other.</span>
+    <span class="c1"># objects got in the way. The second set of prisms, denoted &quot;C&quot;, covers the</span>
+    <span class="c1"># base of the layer to the top of the entire domain box. This is used for</span>
+    <span class="c1"># forming the volumes occupied when substrate objects are offset and</span>
+    <span class="c1"># checking for overlaps.</span>
+    <span class="k">for</span> <span class="n">layerNum</span> <span class="ow">in</span> <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;base&#39;</span><span class="p">]</span>
+        <span class="n">thickness</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;thickness&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">objID</span> <span class="ow">in</span> <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">]:</span>
+            <span class="n">sketch</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;sketch&#39;</span><span class="p">]</span>
+            <span class="n">B</span> <span class="o">=</span> <span class="n">extrudeBetween</span><span class="p">(</span><span class="n">sketch</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">base</span> <span class="o">+</span> <span class="n">thickness</span><span class="p">)</span>
+            <span class="n">C</span> <span class="o">=</span> <span class="n">extrudeBetween</span><span class="p">(</span><span class="n">sketch</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">BB</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+            <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;B&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">B</span>
+            <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;C&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">C</span>
+            <span class="n">info</span><span class="o">.</span><span class="n">trash</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">B</span><span class="p">)</span>
+            <span class="n">info</span><span class="o">.</span><span class="n">trash</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">C</span><span class="p">)</span>
+            <span class="c1"># In addition, add a hook for the HDict, which will contain the &quot;H&quot;</span>
+            <span class="c1"># constructions for this object, but offset to thicknesses of various</span>
+            <span class="c1"># layers, according to the keys.</span>
+            <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;HDict&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span></div>
 
-    <span class="k">def</span> <span class="nf">_build_wire_shell</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">partName</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Build a wire shell part.&quot;&quot;&quot;</span>
-        <span class="n">partDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;3DParts&#39;</span><span class="p">][</span><span class="n">partName</span><span class="p">]</span>
-        <span class="n">wirePartDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;3DParts&#39;</span><span class="p">][</span><span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;targetWire&#39;</span><span class="p">]]</span>
-        <span class="k">assert</span> <span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;directive&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;wireShell&#39;</span>
-        <span class="n">zBottom</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_geo_param</span><span class="p">(</span><span class="n">wirePartDict</span><span class="p">[</span><span class="s1">&#39;z0&#39;</span><span class="p">])</span>
-        <span class="n">width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_geo_param</span><span class="p">(</span><span class="n">wirePartDict</span><span class="p">[</span><span class="s1">&#39;thickness&#39;</span><span class="p">])</span>
-        <span class="n">wireSketch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">getObject</span><span class="p">(</span><span class="n">wirePartDict</span><span class="p">[</span><span class="s1">&#39;fcName&#39;</span><span class="p">])</span>
-        <span class="n">shellVerts</span> <span class="o">=</span> <span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;shellVerts&#39;</span><span class="p">]</span>
-        <span class="n">thickness</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_geo_param</span><span class="p">(</span><span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;thickness&#39;</span><span class="p">])</span>
-        <span class="n">depoZoneName</span> <span class="o">=</span> <span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;depoZone&#39;</span><span class="p">]</span>
-        <span class="n">etchZoneName</span> <span class="o">=</span> <span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;etchZone&#39;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">depoZoneName</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">depoZone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">getObject</span><span class="p">(</span><span class="n">depoZoneName</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">depoZone</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="n">etchZoneName</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">etchZone</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">getObject</span><span class="p">(</span><span class="n">etchZoneName</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">etchZone</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">shell</span> <span class="o">=</span> <span class="n">buildAlShell</span><span class="p">(</span>
-            <span class="n">wireSketch</span><span class="p">,</span>
-            <span class="n">zBottom</span><span class="p">,</span>
-            <span class="n">width</span><span class="p">,</span>
-            <span class="n">shellVerts</span><span class="p">,</span>
-            <span class="n">thickness</span><span class="p">,</span>
-            <span class="n">depoZone</span><span class="o">=</span><span class="n">depoZone</span><span class="p">,</span>
-            <span class="n">etchZone</span><span class="o">=</span><span class="n">etchZone</span><span class="p">,</span>
-            <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">)</span>
-        <span class="n">shell</span><span class="o">.</span><span class="n">Label</span> <span class="o">=</span> <span class="n">partName</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">shell</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">_build_SAG</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">partName</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.</span><span class="p">):</span>
-        <span class="n">partDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;3DParts&#39;</span><span class="p">][</span><span class="n">partName</span><span class="p">]</span>
-        <span class="k">assert</span> <span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;directive&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;SAG&#39;</span>
-        <span class="n">zBot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_geo_param</span><span class="p">(</span><span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;z0&#39;</span><span class="p">])</span>
-        <span class="n">zMid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_geo_param</span><span class="p">(</span><span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;zMiddle&#39;</span><span class="p">])</span>
-        <span class="n">zTop</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_geo_param</span><span class="p">(</span><span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;thickness&#39;</span><span class="p">])</span> <span class="o">+</span> <span class="n">zBot</span>
-        <span class="n">tIn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_geo_param</span><span class="p">(</span><span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;tIn&#39;</span><span class="p">])</span>
-        <span class="n">tOut</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_geo_param</span><span class="p">(</span><span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;tOut&#39;</span><span class="p">])</span>
-        <span class="n">sketch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">getObject</span><span class="p">(</span><span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;fcName&#39;</span><span class="p">])</span>
-        <span class="n">SAG</span> <span class="o">=</span> <span class="n">makeSAG</span><span class="p">(</span><span class="n">sketch</span><span class="p">,</span> <span class="n">zBot</span><span class="p">,</span> <span class="n">zMid</span><span class="p">,</span> <span class="n">zTop</span><span class="p">,</span> <span class="n">tIn</span><span class="p">,</span> <span class="n">tOut</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offset</span><span class="p">)</span>
-        <span class="n">SAG</span><span class="o">.</span><span class="n">Label</span> <span class="o">=</span> <span class="n">partName</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">SAG</span><span class="p">]</span>
+<div class="viewcode-block" id="gen_offset"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.gen_offset">[docs]</a><span class="k">def</span> <span class="nf">gen_offset</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">offsetVal</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generates an offset non-destructively.&quot;&quot;&quot;</span>
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span>
+    <span class="c1"># First, we need to check if the object needs special treatment:</span>
+    <span class="n">treatment</span> <span class="o">=</span> <span class="s1">&#39;standard&#39;</span>
+    <span class="k">for</span> <span class="n">input_part</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">[</span><span class="s1">&#39;input_parts&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">Name</span> <span class="o">==</span> <span class="n">input_part</span><span class="o">.</span><span class="n">fc_name</span><span class="p">:</span>
+            <span class="n">treatment</span> <span class="o">=</span> <span class="n">input_part</span><span class="o">.</span><span class="n">directive</span>
+            <span class="k">break</span>
 
-    <span class="k">def</span> <span class="nf">_build_litho</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">partName</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Build a lithography part.&quot;&quot;&quot;</span>
-        <span class="n">partDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;3DParts&#39;</span><span class="p">][</span><span class="n">partName</span><span class="p">]</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">lithoSetup</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_initialize_lithography</span><span class="p">(</span><span class="n">fillShells</span><span class="o">=</span><span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;fillLitho&#39;</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">lithoSetup</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">assert</span> <span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;directive&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;lithography&#39;</span>
-        <span class="n">layerNum</span> <span class="o">=</span> <span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;layerNum&#39;</span><span class="p">]</span>
-        <span class="n">returnObjs</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">objID</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">]:</span>
-            <span class="k">if</span> <span class="n">partName</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span>
-                    <span class="n">objID</span><span class="p">][</span><span class="s1">&#39;partName&#39;</span><span class="p">]:</span>
-                <span class="n">returnObjs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_gen_G</span><span class="p">(</span><span class="n">layerNum</span><span class="p">,</span> <span class="n">objID</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">returnObjs</span>
-
-    <span class="k">def</span> <span class="nf">_fetch_geo_param</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Fetch the numerical value of a geometric parameter, which might be</span>
-<span class="sd">        either a string or a float.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">text_type</span><span class="p">):</span>
-            <span class="n">returnParam</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;geometricParams&#39;</span><span class="p">][</span><span class="n">param</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">returnParam</span> <span class="o">=</span> <span class="n">param</span>
-        <span class="k">return</span> <span class="n">returnParam</span>
-
-    <span class="k">def</span> <span class="nf">_gen_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">offsetVal</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Generates an offset non-destructively.&quot;&quot;&quot;</span>
-        <span class="c1"># First, we need to check if the object needs special treatment:</span>
+    <span class="k">if</span> <span class="n">treatment</span> <span class="o">==</span> <span class="s1">&#39;extrude&#39;</span> <span class="ow">or</span> <span class="n">treatment</span> <span class="o">==</span> <span class="s1">&#39;lithography&#39;</span><span class="p">:</span>
         <span class="n">treatment</span> <span class="o">=</span> <span class="s1">&#39;standard&#39;</span>
-        <span class="k">for</span> <span class="n">partName</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;3DParts&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">partDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;3DParts&#39;</span><span class="p">][</span><span class="n">partName</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">Name</span> <span class="ow">in</span> <span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;fileNames&#39;</span><span class="p">]:</span>
-                <span class="n">treatment</span> <span class="o">=</span> <span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;directive&#39;</span><span class="p">]</span>
-                <span class="k">break</span>
-        <span class="k">if</span> <span class="n">treatment</span> <span class="o">==</span> <span class="s1">&#39;extrude&#39;</span> <span class="ow">or</span> <span class="n">treatment</span> <span class="o">==</span> <span class="s1">&#39;lithography&#39;</span><span class="p">:</span>
-            <span class="n">treatment</span> <span class="o">=</span> <span class="s1">&#39;standard&#39;</span>
-        <span class="k">if</span> <span class="n">treatment</span> <span class="o">==</span> <span class="s1">&#39;standard&#39;</span><span class="p">:</span>
-            <span class="c1"># Apparently the offset function is buggy for very small offsets...</span>
-            <span class="k">if</span> <span class="n">offsetVal</span> <span class="o">&lt;</span> <span class="mf">1e-5</span><span class="p">:</span>
-                <span class="n">offsetDupe</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">offset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">addObject</span><span class="p">(</span><span class="s2">&quot;Part::Offset&quot;</span><span class="p">)</span>
-                <span class="n">offset</span><span class="o">.</span><span class="n">Source</span> <span class="o">=</span> <span class="n">obj</span>
-                <span class="n">offset</span><span class="o">.</span><span class="n">Value</span> <span class="o">=</span> <span class="n">offsetVal</span>
-                <span class="n">offset</span><span class="o">.</span><span class="n">Mode</span> <span class="o">=</span> <span class="mi">0</span>
-                <span class="n">offset</span><span class="o">.</span><span class="n">Join</span> <span class="o">=</span> <span class="mi">2</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
-                <span class="n">offsetDupe</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
-                <span class="n">delete</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">treatment</span> <span class="o">==</span> <span class="s1">&#39;wire&#39;</span><span class="p">:</span>
-            <span class="n">offsetDupe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_wire</span><span class="p">(</span><span class="n">partName</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offsetVal</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">elif</span> <span class="n">treatment</span> <span class="o">==</span> <span class="s1">&#39;wireShell&#39;</span><span class="p">:</span>
-            <span class="n">offsetDupe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_wire_shell</span><span class="p">(</span><span class="n">partName</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offsetVal</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">elif</span> <span class="n">treatment</span> <span class="o">==</span> <span class="s1">&#39;SAG&#39;</span><span class="p">:</span>
-            <span class="n">offsetDupe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_SAG</span><span class="p">(</span><span class="n">partName</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offsetVal</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">offsetDupe</span>
+    <span class="k">if</span> <span class="n">treatment</span> <span class="o">==</span> <span class="s1">&#39;standard&#39;</span><span class="p">:</span>
+        <span class="c1"># Apparently the offset function is buggy for very small offsets...</span>
+        <span class="k">if</span> <span class="n">offsetVal</span> <span class="o">&lt;</span> <span class="mf">1e-5</span><span class="p">:</span>
+            <span class="n">offsetDupe</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">offset</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">addObject</span><span class="p">(</span><span class="s2">&quot;Part::Offset&quot;</span><span class="p">)</span>
+            <span class="n">offset</span><span class="o">.</span><span class="n">Source</span> <span class="o">=</span> <span class="n">obj</span>
+            <span class="n">offset</span><span class="o">.</span><span class="n">Value</span> <span class="o">=</span> <span class="n">offsetVal</span>
+            <span class="n">offset</span><span class="o">.</span><span class="n">Mode</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">offset</span><span class="o">.</span><span class="n">Join</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
+            <span class="n">offsetDupe</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
+            <span class="n">delete</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">treatment</span> <span class="o">==</span> <span class="s1">&#39;wire&#39;</span><span class="p">:</span>
+        <span class="n">offsetDupe</span> <span class="o">=</span> <span class="n">build_wire</span><span class="p">(</span><span class="n">partName</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offsetVal</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">treatment</span> <span class="o">==</span> <span class="s1">&#39;wireShell&#39;</span><span class="p">:</span>
+        <span class="n">offsetDupe</span> <span class="o">=</span> <span class="n">build_wire_shell</span><span class="p">(</span><span class="n">partName</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offsetVal</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">treatment</span> <span class="o">==</span> <span class="s1">&#39;SAG&#39;</span><span class="p">:</span>
+        <span class="n">offsetDupe</span> <span class="o">=</span> <span class="n">build_sag</span><span class="p">(</span><span class="n">partName</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offsetVal</span><span class="p">)</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">offsetDupe</span></div>
 
-    <span class="k">def</span> <span class="nf">_initialize_lithography</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fillShells</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">fillShells</span> <span class="o">=</span> <span class="n">fillShells</span>
-        <span class="c1"># The lithography step requires some infrastructure to track things</span>
-        <span class="c1"># throughout.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># dictionary containing objects for the lithography step</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="c1"># Dictionary for containing the substrate. () indicates un-offset objects,</span>
-        <span class="c1"># and subsequent tuples are offset by t_i for each index in the tuple.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{():</span> <span class="p">[]}</span>
-        <span class="c1"># To start, we need to collect up all the lithography directives, and</span>
-        <span class="c1"># organize them by layerNum and objectIDs within layers.</span>
-        <span class="n">baseSubstratePartNames</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">partName</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;3DParts&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">partDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;3DParts&#39;</span><span class="p">][</span><span class="n">partName</span><span class="p">]</span>
-            <span class="c1"># If this part is a litho step</span>
-            <span class="k">if</span> <span class="s1">&#39;lithography&#39;</span> <span class="o">==</span> <span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;directive&#39;</span><span class="p">]:</span>
-                <span class="n">layerNum</span> <span class="o">=</span> <span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;layerNum&#39;</span><span class="p">]</span>  <span class="c1"># layerNum of this part</span>
-                <span class="c1"># Add the layerNum to the layer dictionary:</span>
-                <span class="k">if</span> <span class="n">layerNum</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">]:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;objIDs&#39;</span><span class="p">:</span> <span class="p">{}}</span>
-                <span class="n">layerDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">]</span>
-                <span class="c1"># Gennerate the base and thickness of the layer:</span>
-                <span class="n">layerBase</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_geo_param</span><span class="p">(</span><span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;z0&#39;</span><span class="p">])</span>
-                <span class="n">layerThickness</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fetch_geo_param</span><span class="p">(</span><span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;thickness&#39;</span><span class="p">])</span>
-                <span class="c1"># All parts within a given layer number are required to have</span>
-                <span class="c1"># identical thickness and base, so check that:</span>
-                <span class="k">if</span> <span class="s1">&#39;base&#39;</span> <span class="ow">in</span> <span class="n">layerDict</span><span class="p">:</span>
-                    <span class="k">assert</span> <span class="n">layerBase</span> <span class="o">==</span> <span class="n">layerDict</span><span class="p">[</span><span class="s1">&#39;base&#39;</span><span class="p">]</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">layerDict</span><span class="p">[</span><span class="s1">&#39;base&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">layerBase</span>
-                <span class="k">if</span> <span class="s1">&#39;thickness&#39;</span> <span class="ow">in</span> <span class="n">layerDict</span><span class="p">:</span>
-                    <span class="k">assert</span> <span class="n">layerThickness</span> <span class="o">==</span> <span class="n">layerDict</span><span class="p">[</span><span class="s1">&#39;thickness&#39;</span><span class="p">]</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">layerDict</span><span class="p">[</span><span class="s1">&#39;thickness&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">layerThickness</span>
-                <span class="c1"># A given part references a base sketch. However, we need to split</span>
-                <span class="c1"># the sketch here into possibly disjoint sub-sketches to work</span>
-                <span class="c1"># with them:</span>
-                <span class="n">sketch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">getObject</span><span class="p">(</span><span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;fcName&#39;</span><span class="p">])</span>
-                <span class="n">splitSketches</span> <span class="o">=</span> <span class="n">splitSketch</span><span class="p">(</span><span class="n">sketch</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">mySplitSketch</span> <span class="ow">in</span> <span class="n">splitSketches</span><span class="p">:</span>
-                    <span class="n">objID</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">layerDict</span><span class="p">[</span><span class="s1">&#39;objIDs&#39;</span><span class="p">])</span>
-                    <span class="n">objDict</span> <span class="o">=</span> <span class="p">{}</span>
-                    <span class="n">objDict</span><span class="p">[</span><span class="s1">&#39;partName&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">partName</span>
-                    <span class="n">objDict</span><span class="p">[</span><span class="s1">&#39;sketch&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mySplitSketch</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">trash</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mySplitSketch</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">]</span> <span class="o">=</span> <span class="n">objDict</span>
-                <span class="c1"># Add the base substrate to the appropriate dictionary</span>
-                <span class="n">baseSubstratePartNames</span> <span class="o">+=</span> <span class="n">partDict</span><span class="p">[</span><span class="s1">&#39;lithoBase&#39;</span><span class="p">]</span>
-        <span class="c1"># Get rid of any duplicates:</span>
-        <span class="n">baseSubstratePartNames</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">baseSubstratePartNames</span><span class="p">))</span>
-        <span class="c1"># Now convert the part names for the substrate into 3D freeCAD objects, which</span>
-        <span class="c1"># should have already been rendered.</span>
-        <span class="k">for</span> <span class="n">baseSubstratePartName</span> <span class="ow">in</span> <span class="n">baseSubstratePartNames</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">baseSubstrateObjName</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">modelDict</span><span class="p">[</span><span class="s1">&#39;3DParts&#39;</span><span class="p">][</span>
-                    <span class="n">baseSubstratePartName</span><span class="p">][</span><span class="s1">&#39;fileNames&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">][(</span>
-                <span class="p">)]</span> <span class="o">+=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">doc</span><span class="o">.</span><span class="n">getObject</span><span class="p">(</span><span class="n">baseSubstrateObjName</span><span class="p">)]</span>
-        <span class="c1"># Now that we have ordered the primitives, we need to compute a few</span>
-        <span class="c1"># aux quantities that we will need. First, we compute the total bounding</span>
-        <span class="c1"># box of the lithography procedure:</span>
-        <span class="n">thicknesses</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">bases</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">layerNum</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">thicknesses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;thickness&#39;</span><span class="p">])</span>
-            <span class="n">bases</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;base&#39;</span><span class="p">])</span>
-        <span class="n">bottom</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">bases</span><span class="p">)</span>
-        <span class="n">totalThickness</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">thicknesses</span><span class="p">)</span>
-        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">][</span>
-            <span class="p">()])</span> <span class="o">&gt;</span> <span class="mi">0</span>  <span class="c1"># Otherwise, we don&#39;t have a reference for the lateral BB</span>
-        <span class="n">substrateUnion</span> <span class="o">=</span> <span class="n">genUnion</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">][()],</span>
-                                  <span class="n">consumeInputs</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># total substrate</span>
-        <span class="n">BB</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">getBB</span><span class="p">(</span><span class="n">substrateUnion</span><span class="p">))</span>  <span class="c1"># bounding box</span>
-        <span class="n">BB</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">([</span><span class="n">bottom</span><span class="p">,</span> <span class="n">BB</span><span class="p">[</span><span class="mi">4</span><span class="p">]])</span>
-        <span class="n">BB</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="n">BB</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">+</span> <span class="n">totalThickness</span><span class="p">,</span> <span class="n">bottom</span> <span class="o">+</span> <span class="n">totalThickness</span><span class="p">])</span>
-        <span class="n">BB</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">BB</span><span class="p">)</span>
-        <span class="n">constructionZone</span> <span class="o">=</span> <span class="n">makeBB</span><span class="p">(</span><span class="n">BB</span><span class="p">)</span>  <span class="c1"># box that encompases the whole domain.</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;boundingBox&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">BB</span><span class="p">,</span> <span class="n">constructionZone</span><span class="p">]</span>
-        <span class="n">delete</span><span class="p">(</span><span class="n">substrateUnion</span><span class="p">)</span>  <span class="c1"># not needed for next steps</span>
-        <span class="n">delete</span><span class="p">(</span><span class="n">constructionZone</span><span class="p">)</span>  <span class="c1"># not needed for next steps</span>
-        <span class="c1"># Next, we add two prisms for each sketch. The first, which we denote &quot;B&quot;,</span>
-        <span class="c1"># is bounded by the base from the bottom and the layer thickness on the top.</span>
-        <span class="c1"># These serve as &quot;stencils&quot; that would be the deposited shape if no other.</span>
-        <span class="c1"># objects got in the way. The second set of prisms, denoted &quot;C&quot;, covers the</span>
-        <span class="c1"># base of the layer to the top of the entire domain box. This is used for</span>
-        <span class="c1"># forming the volumes occupied when substrate objects are offset and</span>
-        <span class="c1"># checking for overlaps.</span>
-        <span class="k">for</span> <span class="n">layerNum</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">base</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;base&#39;</span><span class="p">]</span>
-            <span class="n">thickness</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;thickness&#39;</span><span class="p">]</span>
-            <span class="k">for</span> <span class="n">objID</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">]:</span>
-                <span class="n">sketch</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;sketch&#39;</span><span class="p">]</span>
-                <span class="n">B</span> <span class="o">=</span> <span class="n">extrudeBetween</span><span class="p">(</span><span class="n">sketch</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">base</span> <span class="o">+</span> <span class="n">thickness</span><span class="p">)</span>
-                <span class="n">C</span> <span class="o">=</span> <span class="n">extrudeBetween</span><span class="p">(</span><span class="n">sketch</span><span class="p">,</span> <span class="n">base</span><span class="p">,</span> <span class="n">BB</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;B&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">B</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;C&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">C</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">trash</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">B</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">trash</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">C</span><span class="p">)</span>
-                <span class="c1"># In addition, add a hook for the HDict, which will contain the &quot;H&quot;</span>
-                <span class="c1"># constructions for this object, but offset to thicknesses of various</span>
-                <span class="c1"># layers, according to the keys.</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span>
-                    <span class="s1">&#39;HDict&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
 
-    <span class="k">def</span> <span class="nf">_screened_H_union_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">offsetTuple</span><span class="p">,</span> <span class="n">checkOffsetTuple</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Foremd the &quot;screened union list&quot; of obj with the layer m, objID j H object that has</span>
-<span class="sd">        been offset according to offsetTuple. The screened union list is defined by checking</span>
-<span class="sd">        first whether the object intersects with the components of the checkOffset version</span>
-<span class="sd">        of the H object. Then, for each component that would intersect, we return the a list</span>
-<span class="sd">        of the offsetTuple version of the object.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># First, we need to check to see if we need to compute either of the</span>
-        <span class="c1"># underlying H obj lists:</span>
-        <span class="n">HDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">m</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="s1">&#39;HDict&#39;</span><span class="p">]</span>
-        <span class="c1"># HDict stores a collection of H object component lists for each (layerNum,objID)</span>
-        <span class="c1"># pair. The index of this dictionary is a tuple: () indicates no</span>
-        <span class="c1"># offset, while other indices indicate an offset by summing the thicknesses</span>
-        <span class="c1"># from corresponding layers.</span>
-        <span class="k">if</span> <span class="n">checkOffsetTuple</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">HDict</span><span class="p">:</span>  <span class="c1"># If we haven&#39;t computed this yet</span>
-            <span class="n">HDict</span><span class="p">[</span><span class="n">checkOffsetTuple</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_H_offset</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">tList</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span>
-                <span class="n">checkOffsetTuple</span><span class="p">))</span>  <span class="c1"># list of H parts</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">trash</span> <span class="o">+=</span> <span class="n">HDict</span><span class="p">[</span><span class="n">checkOffsetTuple</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">offsetTuple</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">HDict</span><span class="p">:</span>  <span class="c1"># If we haven&#39;t computed this yet</span>
-            <span class="n">HDict</span><span class="p">[</span><span class="n">offsetTuple</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_H_offset</span><span class="p">(</span>
-                <span class="n">m</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">tList</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">offsetTuple</span><span class="p">))</span>  <span class="c1"># list of H parts</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">trash</span> <span class="o">+=</span> <span class="n">HDict</span><span class="p">[</span><span class="n">offsetTuple</span><span class="p">]</span>
-        <span class="n">HObjCheckList</span> <span class="o">=</span> <span class="n">HDict</span><span class="p">[</span><span class="n">checkOffsetTuple</span><span class="p">]</span>
-        <span class="n">HObjList</span> <span class="o">=</span> <span class="n">HDict</span><span class="p">[</span><span class="n">offsetTuple</span><span class="p">]</span>
-        <span class="n">returnList</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">HObjPart</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">HObjCheckList</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">checkOverlap</span><span class="p">(</span>
-                    <span class="p">[</span><span class="n">obj</span><span class="p">,</span> <span class="n">HObjPart</span><span class="p">]):</span>  <span class="c1"># if we need to include an overlap</span>
-                <span class="n">returnList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">HObjList</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-        <span class="k">return</span> <span class="n">returnList</span>
+<div class="viewcode-block" id="screened_H_union_list"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.screened_H_union_list">[docs]</a><span class="k">def</span> <span class="nf">screened_H_union_list</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">offsetTuple</span><span class="p">,</span> <span class="n">checkOffsetTuple</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Foremd the &quot;screened union list&quot; of obj with the layer m, objID j H object that has</span>
+<span class="sd">    been offset according to offsetTuple. The screened union list is defined by checking</span>
+<span class="sd">    first whether the object intersects with the components of the checkOffset version</span>
+<span class="sd">    of the H object. Then, for each component that would intersect, we return the a list</span>
+<span class="sd">    of the offsetTuple version of the object.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># First, we need to check to see if we need to compute either of the</span>
+    <span class="c1"># underlying H obj lists:</span>
+    <span class="n">HDict</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">m</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="s1">&#39;HDict&#39;</span><span class="p">]</span>
+    <span class="c1"># HDict stores a collection of H object component lists for each (layerNum,objID)</span>
+    <span class="c1"># pair. The index of this dictionary is a tuple: () indicates no</span>
+    <span class="c1"># offset, while other indices indicate an offset by summing the thicknesses</span>
+    <span class="c1"># from corresponding layers.</span>
+    <span class="k">if</span> <span class="n">checkOffsetTuple</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">HDict</span><span class="p">:</span>  <span class="c1"># If we haven&#39;t computed this yet</span>
+        <span class="n">HDict</span><span class="p">[</span><span class="n">checkOffsetTuple</span><span class="p">]</span> <span class="o">=</span> <span class="n">H_offset</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">tList</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">checkOffsetTuple</span><span class="p">))</span>  <span class="c1"># list of H parts</span>
+        <span class="n">info</span><span class="o">.</span><span class="n">trash</span> <span class="o">+=</span> <span class="n">HDict</span><span class="p">[</span><span class="n">checkOffsetTuple</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">offsetTuple</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">HDict</span><span class="p">:</span>  <span class="c1"># If we haven&#39;t computed this yet</span>
+        <span class="n">HDict</span><span class="p">[</span><span class="n">offsetTuple</span><span class="p">]</span> <span class="o">=</span> <span class="n">H_offset</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">tList</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">offsetTuple</span><span class="p">))</span>  <span class="c1"># list of H parts</span>
+        <span class="n">info</span><span class="o">.</span><span class="n">trash</span> <span class="o">+=</span> <span class="n">HDict</span><span class="p">[</span><span class="n">offsetTuple</span><span class="p">]</span>
+    <span class="n">HObjCheckList</span> <span class="o">=</span> <span class="n">HDict</span><span class="p">[</span><span class="n">checkOffsetTuple</span><span class="p">]</span>
+    <span class="n">HObjList</span> <span class="o">=</span> <span class="n">HDict</span><span class="p">[</span><span class="n">offsetTuple</span><span class="p">]</span>
+    <span class="n">returnList</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">HObjPart</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">HObjCheckList</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">checkOverlap</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">obj</span><span class="p">,</span> <span class="n">HObjPart</span><span class="p">]):</span>  <span class="c1"># if we need to include an overlap</span>
+            <span class="n">returnList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">HObjList</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">returnList</span></div>
 
-    <span class="k">def</span> <span class="nf">_screened_A_UnionList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">ti</span><span class="p">,</span> <span class="n">offsetTuple</span><span class="p">,</span> <span class="n">checkOffsetTuple</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Foremd the &quot;screened union list&quot; of obj with the substrate A that has</span>
-<span class="sd">        been offset according to offsetTuple.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># First, we need to see if we have built the objects before:</span>
-        <span class="k">if</span> <span class="n">checkOffsetTuple</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">]:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">][</span><span class="n">checkOffsetTuple</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">A</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">][()]:</span>
-                <span class="n">AObj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gen_offset</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">trash</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">AObj</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">][</span><span class="n">checkOffsetTuple</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">AObj</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">offsetTuple</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">]:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">][</span><span class="n">offsetTuple</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">A</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">][()]:</span>
-                <span class="n">AObj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gen_offset</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">t</span> <span class="o">+</span> <span class="n">ti</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">trash</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">AObj</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">][</span><span class="n">offsetTuple</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">AObj</span><span class="p">)</span>
 
-        <span class="n">returnList</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ACheck</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">][</span><span class="n">checkOffsetTuple</span><span class="p">]):</span>
-            <span class="k">if</span> <span class="n">checkOverlap</span><span class="p">([</span><span class="n">obj</span><span class="p">,</span> <span class="n">ACheck</span><span class="p">]):</span>
-                <span class="n">returnList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">][</span><span class="n">offsetTuple</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
-        <span class="k">return</span> <span class="n">returnList</span>
+<div class="viewcode-block" id="screened_A_UnionList"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.screened_A_UnionList">[docs]</a><span class="k">def</span> <span class="nf">screened_A_UnionList</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">ti</span><span class="p">,</span> <span class="n">offsetTuple</span><span class="p">,</span> <span class="n">checkOffsetTuple</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Foremd the &quot;screened union list&quot; of obj with the substrate A that has</span>
+<span class="sd">    been offset according to offsetTuple.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># First, we need to see if we have built the objects before:</span>
+    <span class="k">if</span> <span class="n">checkOffsetTuple</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">]:</span>
+        <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">][</span><span class="n">checkOffsetTuple</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">A</span> <span class="ow">in</span> <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">][()]:</span>
+            <span class="n">AObj</span> <span class="o">=</span> <span class="n">gen_offset</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+            <span class="n">info</span><span class="o">.</span><span class="n">trash</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">AObj</span><span class="p">)</span>
+            <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">][</span><span class="n">checkOffsetTuple</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">AObj</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">offsetTuple</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">]:</span>
+        <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">][</span><span class="n">offsetTuple</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">A</span> <span class="ow">in</span> <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">][()]:</span>
+            <span class="n">AObj</span> <span class="o">=</span> <span class="n">gen_offset</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">t</span> <span class="o">+</span> <span class="n">ti</span><span class="p">)</span>
+            <span class="n">info</span><span class="o">.</span><span class="n">trash</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">AObj</span><span class="p">)</span>
+            <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">][</span><span class="n">offsetTuple</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">AObj</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">_H_offset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layerNum</span><span class="p">,</span> <span class="n">objID</span><span class="p">,</span> <span class="n">tList</span><span class="o">=</span><span class="p">[]):</span>
-        <span class="sd">&quot;&quot;&quot;For a given layerNum=n and ObjID=i, compute the deposited object.</span>
+    <span class="n">returnList</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">ACheck</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span>
+            <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">][</span><span class="n">checkOffsetTuple</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="n">checkOverlap</span><span class="p">([</span><span class="n">obj</span><span class="p">,</span> <span class="n">ACheck</span><span class="p">]):</span>
+            <span class="n">returnList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">][</span><span class="n">offsetTuple</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">returnList</span></div>
 
-<span class="sd">        ```latex</span>
-<span class="sd">        H_{n,i}(t) = C_{n,i}(t) \cap [ B_{n,i}(t) \cup (\cup_{m&lt;n;j} H_{m,j}(t_i+t)) \cup (\cup_k A_k(t_i + t))],</span>
-<span class="sd">        ```</span>
-<span class="sd">        where A_k is from the base substrate list. This is computed recursively. The list of integers</span>
-<span class="sd">        tList determines the offset t; t = the sum of all layer thicknesses ti that appear</span>
-<span class="sd">        in tList. For example, tList = [1,2,3] -&gt; t = t1+t2+t3.</span>
 
-<span class="sd">        Note: this object is returned as a list of objects that need to be unioned together</span>
-<span class="sd">        in order to form the full H.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># This is a tuple that encodes the check offset t:</span>
-        <span class="n">checkOffsetTuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">tList</span><span class="p">))</span>
-        <span class="c1"># This is a tuple that encodes the total offset t_i+t:</span>
-        <span class="n">offsetTuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">tList</span> <span class="o">+</span> <span class="p">[</span><span class="n">layerNum</span><span class="p">]))</span>
-        <span class="c1"># First, check if we have to do anything:</span>
-        <span class="n">layers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">checkOffsetTuple</span> <span class="ow">in</span> <span class="n">layers</span><span class="p">[</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span>
-                <span class="n">objID</span><span class="p">][</span><span class="s1">&#39;HDict&#39;</span><span class="p">]:</span>
-            <span class="k">return</span> <span class="n">layers</span><span class="p">[</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span>
-                <span class="s1">&#39;HDict&#39;</span><span class="p">][</span><span class="n">checkOffsetTuple</span><span class="p">]</span>
-        <span class="c1"># First, compute t:</span>
-        <span class="n">t</span> <span class="o">=</span> <span class="mf">0.0</span>
-        <span class="k">for</span> <span class="n">tIndex</span> <span class="ow">in</span> <span class="n">tList</span><span class="p">:</span>
-            <span class="n">t</span> <span class="o">+=</span> <span class="n">layers</span><span class="p">[</span><span class="n">tIndex</span><span class="p">][</span><span class="s1">&#39;thickness&#39;</span><span class="p">]</span>
-        <span class="c1"># thickness of this layer</span>
-        <span class="n">ti</span> <span class="o">=</span> <span class="n">layers</span><span class="p">[</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;thickness&#39;</span><span class="p">]</span>
-        <span class="c1"># Set the aux. thickness t:</span>
-        <span class="n">B</span> <span class="o">=</span> <span class="n">layers</span><span class="p">[</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span>
-            <span class="s1">&#39;B&#39;</span><span class="p">]</span>  <span class="c1"># B prism for this layer &amp; objID</span>
-        <span class="n">C</span> <span class="o">=</span> <span class="n">layers</span><span class="p">[</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span>
-            <span class="s1">&#39;C&#39;</span><span class="p">]</span>  <span class="c1"># C prism for this layer &amp; ObjID</span>
-        <span class="n">B_t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gen_offset</span><span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>  <span class="c1"># offset the B prism</span>
-        <span class="n">C_t</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gen_offset</span><span class="p">(</span><span class="n">C</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>  <span class="c1"># offset the C prism</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">trash</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">B_t</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">trash</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">C_t</span><span class="p">)</span>
-        <span class="c1"># Build up the substrate due to previously deposited gates</span>
-        <span class="n">HOffsetList</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">layers</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">m</span> <span class="o">&lt;</span> <span class="n">layerNum</span><span class="p">:</span>  <span class="c1"># then this is a lower layer</span>
-                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">layers</span><span class="p">[</span><span class="n">m</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                    <span class="n">HOffsetList</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_screened_H_union_list</span><span class="p">(</span>
-                        <span class="n">C_t</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">offsetTuple</span><span class="p">,</span> <span class="n">checkOffsetTuple</span><span class="p">)</span>
-                    <span class="c1"># Next, build up the original substrate list:</span>
-        <span class="n">AOffsetList</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">AOffsetList</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_screened_A_UnionList</span><span class="p">(</span>
-            <span class="n">C_t</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">ti</span><span class="p">,</span> <span class="n">offsetTuple</span><span class="p">,</span> <span class="n">checkOffsetTuple</span><span class="p">)</span>
-        <span class="n">unionList</span> <span class="o">=</span> <span class="n">HOffsetList</span> <span class="o">+</span> <span class="n">AOffsetList</span>
-        <span class="n">returnList</span> <span class="o">=</span> <span class="p">[</span><span class="n">B_t</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">unionList</span><span class="p">:</span>
-            <span class="n">intObj</span> <span class="o">=</span> <span class="n">intersect</span><span class="p">([</span><span class="n">C_t</span><span class="p">,</span> <span class="n">obj</span><span class="p">])</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">trash</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">intObj</span><span class="p">)</span>
-            <span class="n">returnList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">intObj</span><span class="p">)</span>
-        <span class="n">layers</span><span class="p">[</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;HDict&#39;</span><span class="p">][</span>
-            <span class="n">checkOffsetTuple</span><span class="p">]</span> <span class="o">=</span> <span class="n">returnList</span>
-        <span class="k">return</span> <span class="n">returnList</span>
+<div class="viewcode-block" id="H_offset"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.H_offset">[docs]</a><span class="k">def</span> <span class="nf">H_offset</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">layerNum</span><span class="p">,</span> <span class="n">objID</span><span class="p">,</span> <span class="n">tList</span><span class="o">=</span><span class="p">[]):</span>
+    <span class="sd">&quot;&quot;&quot;For a given layerNum=n and ObjID=i, compute the deposited object.</span>
 
-    <span class="k">def</span> <span class="nf">_gen_U</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layerNum</span><span class="p">,</span> <span class="n">objID</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;For a given layerNum and objID, compute the quantity:</span>
-<span class="sd">        ```latex</span>
-<span class="sd">        U_{n,i}(t) = (\cup_{m&lt;n;j} G_{m,j}) \cup (\cup_{k} A_k),</span>
-<span class="sd">        ```</span>
-<span class="sd">        where the inner union terms are not included if their intersection</span>
-<span class="sd">        with B_i is empty.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">layers</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">]</span>
-        <span class="n">B</span> <span class="o">=</span> <span class="n">layers</span><span class="p">[</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span>
-            <span class="s1">&#39;B&#39;</span><span class="p">]</span>  <span class="c1"># B prism for this layer &amp; objID</span>
-        <span class="n">GList</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">layers</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">m</span> <span class="o">&lt;</span> <span class="n">layerNum</span><span class="p">:</span>  <span class="c1"># then this is a lower layer</span>
-                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">layers</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                    <span class="k">if</span> <span class="s1">&#39;G&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">layers</span><span class="p">[</span><span class="n">layerNum</span><span class="p">][</span>
-                            <span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">]:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">_gen_G</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
-                    <span class="n">G</span> <span class="o">=</span> <span class="n">layers</span><span class="p">[</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;G&#39;</span><span class="p">]</span>
-                    <span class="k">if</span> <span class="n">checkOverlap</span><span class="p">([</span><span class="n">B</span><span class="p">,</span> <span class="n">G</span><span class="p">]):</span>
-                        <span class="n">GList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
-        <span class="n">AList</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">A</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">][()]:</span>
-            <span class="k">if</span> <span class="n">checkOverlap</span><span class="p">([</span><span class="n">B</span><span class="p">,</span> <span class="n">A</span><span class="p">]):</span>
-                <span class="n">AList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
-        <span class="n">unionList</span> <span class="o">=</span> <span class="n">GList</span> <span class="o">+</span> <span class="n">AList</span>
-        <span class="n">unionObj</span> <span class="o">=</span> <span class="n">genUnion</span><span class="p">(</span><span class="n">unionList</span><span class="p">,</span> <span class="n">consumeInputs</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">unionObj</span>
+<span class="sd">    ```latex</span>
+<span class="sd">    H_{n,i}(t) = C_{n,i}(t) \cap [ B_{n,i}(t) \cup (\cup_{m&lt;n;j} H_{m,j}(t_i+t)) \cup (\cup_k A_k(t_i + t))],</span>
+<span class="sd">    ```</span>
+<span class="sd">    where A_k is from the base substrate list. This is computed recursively. The list of integers</span>
+<span class="sd">    tList determines the offset t; t = the sum of all layer thicknesses ti that appear</span>
+<span class="sd">    in tList. For example, tList = [1,2,3] -&gt; t = t1+t2+t3.</span>
 
-    <span class="k">def</span> <span class="nf">_gen_G</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">layerNum</span><span class="p">,</span> <span class="n">objID</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Generate the gate deposition for a given layerNum and objID.&quot;&quot;&quot;</span>
-        <span class="n">layer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">]</span>
-        <span class="k">if</span> <span class="s1">&#39;G&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">]:</span>
-            <span class="k">if</span> <span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;HDict&#39;</span><span class="p">]:</span>
-                <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span>
-                    <span class="s1">&#39;HDict&#39;</span><span class="p">][()]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_H_offset</span><span class="p">(</span><span class="n">layerNum</span><span class="p">,</span> <span class="n">objID</span><span class="p">)</span>
-            <span class="n">H</span> <span class="o">=</span> <span class="n">genUnion</span><span class="p">(</span><span class="n">layer</span><span class="p">[</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;HDict&#39;</span><span class="p">][()],</span>
-                         <span class="n">consumeInputs</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">trash</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">H</span><span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">fillShells</span><span class="p">:</span>
-                <span class="n">G</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">H</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">U</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gen_U</span><span class="p">(</span><span class="n">layerNum</span><span class="p">,</span> <span class="n">objID</span><span class="p">)</span>
-                <span class="n">G</span> <span class="o">=</span> <span class="n">subtract</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">U</span><span class="p">)</span>
-                <span class="n">delete</span><span class="p">(</span><span class="n">U</span><span class="p">)</span>
-            <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;G&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">G</span>
-        <span class="n">G</span> <span class="o">=</span> <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;G&#39;</span><span class="p">]</span>
-        <span class="n">partName</span> <span class="o">=</span> <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;partName&#39;</span><span class="p">]</span>
-        <span class="n">G</span><span class="o">.</span><span class="n">Label</span> <span class="o">=</span> <span class="n">partName</span>
-        <span class="k">return</span> <span class="n">G</span>
+<span class="sd">    Note: this object is returned as a list of objects that need to be unioned together</span>
+<span class="sd">    in order to form the full H.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># This is a tuple that encodes the check offset t:</span>
+    <span class="n">checkOffsetTuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">tList</span><span class="p">))</span>
+    <span class="c1"># This is a tuple that encodes the total offset t_i+t:</span>
+    <span class="n">offsetTuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">tList</span> <span class="o">+</span> <span class="p">[</span><span class="n">layerNum</span><span class="p">]))</span>
+    <span class="c1"># First, check if we have to do anything:</span>
+    <span class="n">layers</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">checkOffsetTuple</span> <span class="ow">in</span> <span class="n">layers</span><span class="p">[</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span>
+            <span class="n">objID</span><span class="p">][</span><span class="s1">&#39;HDict&#39;</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">layers</span><span class="p">[</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span>
+            <span class="s1">&#39;HDict&#39;</span><span class="p">][</span><span class="n">checkOffsetTuple</span><span class="p">]</span>
+    <span class="c1"># First, compute t:</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="mf">0.0</span>
+    <span class="k">for</span> <span class="n">tIndex</span> <span class="ow">in</span> <span class="n">tList</span><span class="p">:</span>
+        <span class="n">t</span> <span class="o">+=</span> <span class="n">layers</span><span class="p">[</span><span class="n">tIndex</span><span class="p">][</span><span class="s1">&#39;thickness&#39;</span><span class="p">]</span>
+    <span class="c1"># thickness of this layer</span>
+    <span class="n">ti</span> <span class="o">=</span> <span class="n">layers</span><span class="p">[</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;thickness&#39;</span><span class="p">]</span>
+    <span class="c1"># Set the aux. thickness t:</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="n">layers</span><span class="p">[</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span>
+        <span class="s1">&#39;B&#39;</span><span class="p">]</span>  <span class="c1"># B prism for this layer &amp; objID</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">layers</span><span class="p">[</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span>
+        <span class="s1">&#39;C&#39;</span><span class="p">]</span>  <span class="c1"># C prism for this layer &amp; ObjID</span>
+    <span class="n">B_t</span> <span class="o">=</span> <span class="n">gen_offset</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>  <span class="c1"># offset the B prism</span>
+    <span class="n">C_t</span> <span class="o">=</span> <span class="n">gen_offset</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>  <span class="c1"># offset the C prism</span>
+    <span class="n">info</span><span class="o">.</span><span class="n">trash</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">B_t</span><span class="p">)</span>
+    <span class="n">info</span><span class="o">.</span><span class="n">trash</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">C_t</span><span class="p">)</span>
+    <span class="c1"># Build up the substrate due to previously deposited gates</span>
+    <span class="n">HOffsetList</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">layers</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">m</span> <span class="o">&lt;</span> <span class="n">layerNum</span><span class="p">:</span>  <span class="c1"># then this is a lower layer</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">layers</span><span class="p">[</span><span class="n">m</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">HOffsetList</span> <span class="o">+=</span> <span class="n">screened_H_union_list</span><span class="p">(</span>
+                    <span class="n">info</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">C_t</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">offsetTuple</span><span class="p">,</span> <span class="n">checkOffsetTuple</span><span class="p">)</span>
+                <span class="c1"># Next, build up the original substrate list:</span>
+    <span class="n">AOffsetList</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">AOffsetList</span> <span class="o">+=</span> <span class="n">screened_A_UnionList</span><span class="p">(</span>
+        <span class="n">info</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">C_t</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">ti</span><span class="p">,</span> <span class="n">offsetTuple</span><span class="p">,</span> <span class="n">checkOffsetTuple</span><span class="p">)</span>
+    <span class="n">unionList</span> <span class="o">=</span> <span class="n">HOffsetList</span> <span class="o">+</span> <span class="n">AOffsetList</span>
+    <span class="n">returnList</span> <span class="o">=</span> <span class="p">[</span><span class="n">B_t</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">unionList</span><span class="p">:</span>
+        <span class="n">intObj</span> <span class="o">=</span> <span class="n">intersect</span><span class="p">([</span><span class="n">C_t</span><span class="p">,</span> <span class="n">obj</span><span class="p">])</span>
+        <span class="n">info</span><span class="o">.</span><span class="n">trash</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">intObj</span><span class="p">)</span>
+        <span class="n">returnList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">intObj</span><span class="p">)</span>
+    <span class="n">layers</span><span class="p">[</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;HDict&#39;</span><span class="p">][</span>
+        <span class="n">checkOffsetTuple</span><span class="p">]</span> <span class="o">=</span> <span class="n">returnList</span>
+    <span class="k">return</span> <span class="n">returnList</span></div>
 
-    <span class="k">def</span> <span class="nf">_collect_garbarge</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Delete all the objects in self.trash.&quot;&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">trash</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">delete</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
-            <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
-                <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="gen_U"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.gen_U">[docs]</a><span class="k">def</span> <span class="nf">gen_U</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">layerNum</span><span class="p">,</span> <span class="n">objID</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;For a given layerNum and objID, compute the quantity:</span>
+<span class="sd">    ```latex</span>
+<span class="sd">    U_{n,i}(t) = (\cup_{m&lt;n;j} G_{m,j}) \cup (\cup_{k} A_k),</span>
+<span class="sd">    ```</span>
+<span class="sd">    where the inner union terms are not included if their intersection</span>
+<span class="sd">    with B_i is empty.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">layers</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">]</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="n">layers</span><span class="p">[</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span>
+        <span class="s1">&#39;B&#39;</span><span class="p">]</span>  <span class="c1"># B prism for this layer &amp; objID</span>
+    <span class="n">GList</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">layers</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">m</span> <span class="o">&lt;</span> <span class="n">layerNum</span><span class="p">:</span>  <span class="c1"># then this is a lower layer</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">layers</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">if</span> <span class="s1">&#39;G&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">layers</span><span class="p">[</span><span class="n">layerNum</span><span class="p">][</span>
+                        <span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">]:</span>
+                    <span class="n">gen_G</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
+                <span class="n">G</span> <span class="o">=</span> <span class="n">layers</span><span class="p">[</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;G&#39;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">checkOverlap</span><span class="p">([</span><span class="n">B</span><span class="p">,</span> <span class="n">G</span><span class="p">]):</span>
+                    <span class="n">GList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">G</span><span class="p">)</span>
+    <span class="n">AList</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">A</span> <span class="ow">in</span> <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">][()]:</span>
+        <span class="k">if</span> <span class="n">checkOverlap</span><span class="p">([</span><span class="n">B</span><span class="p">,</span> <span class="n">A</span><span class="p">]):</span>
+            <span class="n">AList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+    <span class="n">unionList</span> <span class="o">=</span> <span class="n">GList</span> <span class="o">+</span> <span class="n">AList</span>
+    <span class="n">unionObj</span> <span class="o">=</span> <span class="n">genUnion</span><span class="p">(</span><span class="n">unionList</span><span class="p">,</span> <span class="n">consumeInputs</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">unionObj</span></div>
+
+
+<div class="viewcode-block" id="gen_G"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.gen_G">[docs]</a><span class="k">def</span> <span class="nf">gen_G</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">layerNum</span><span class="p">,</span> <span class="n">objID</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate the gate deposition for a given layerNum and objID.&quot;&quot;&quot;</span>
+    <span class="n">layer</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s1">&#39;G&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;HDict&#39;</span><span class="p">]:</span>
+            <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span>
+                <span class="s1">&#39;HDict&#39;</span><span class="p">][()]</span> <span class="o">=</span> <span class="n">H_offset</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">layerNum</span><span class="p">,</span> <span class="n">objID</span><span class="p">)</span>
+
+        <span class="c1"># TODO: reuse new function</span>
+        <span class="c1"># This block fixes multifuses for wireshells with too big offsets,</span>
+        <span class="c1"># by forcing all participating object shells into a new solid.</span>
+        <span class="n">solid_hlist</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="kn">import</span> <span class="nn">Part</span>
+        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;HDict&#39;</span><span class="p">][()]:</span>
+            <span class="n">__s__</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">Faces</span>
+            <span class="n">__s__</span> <span class="o">=</span> <span class="n">Part</span><span class="o">.</span><span class="n">Solid</span><span class="p">(</span><span class="n">Part</span><span class="o">.</span><span class="n">Shell</span><span class="p">(</span><span class="n">__s__</span><span class="p">))</span>
+            <span class="n">__o__</span> <span class="o">=</span> <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span><span class="o">.</span><span class="n">addObject</span><span class="p">(</span><span class="s2">&quot;Part::Feature&quot;</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">Label</span> <span class="o">+</span> <span class="s2">&quot;_solid&quot;</span><span class="p">)</span>
+            <span class="n">__o__</span><span class="o">.</span><span class="n">Label</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">Label</span> <span class="o">+</span> <span class="s2">&quot;_solid&quot;</span>
+            <span class="n">__o__</span><span class="o">.</span><span class="n">Shape</span> <span class="o">=</span> <span class="n">__s__</span>
+            <span class="n">solid_hlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">__o__</span><span class="p">)</span>
+            <span class="n">info</span><span class="o">.</span><span class="n">trash</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+            <span class="n">info</span><span class="o">.</span><span class="n">trash</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">__o__</span><span class="p">)</span>
+            <span class="n">info</span><span class="o">.</span><span class="n">trash</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">__s__</span><span class="p">)</span>
+        <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;HDict&#39;</span><span class="p">][()]</span> <span class="o">=</span> <span class="n">solid_hlist</span>
+
+        <span class="n">H</span> <span class="o">=</span> <span class="n">genUnion</span><span class="p">(</span><span class="n">layer</span><span class="p">[</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;HDict&#39;</span><span class="p">][()],</span>
+                     <span class="n">consumeInputs</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">info</span><span class="o">.</span><span class="n">trash</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">H</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">fillShells</span><span class="p">:</span>
+            <span class="n">G</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">H</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">U</span> <span class="o">=</span> <span class="n">gen_U</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">layerNum</span><span class="p">,</span> <span class="n">objID</span><span class="p">)</span>
+            <span class="n">G</span> <span class="o">=</span> <span class="n">subtract</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">U</span><span class="p">)</span>
+            <span class="n">delete</span><span class="p">(</span><span class="n">U</span><span class="p">)</span>
+        <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;G&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">G</span>
+    <span class="n">G</span> <span class="o">=</span> <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;G&#39;</span><span class="p">]</span>
+    <span class="n">partName</span> <span class="o">=</span> <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;partName&#39;</span><span class="p">]</span>
+    <span class="n">G</span><span class="o">.</span><span class="n">Label</span> <span class="o">=</span> <span class="n">partName</span>
+    <span class="k">return</span> <span class="n">G</span></div>
+
+
+<div class="viewcode-block" id="collect_garbage"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.collect_garbage">[docs]</a><span class="k">def</span> <span class="nf">collect_garbage</span><span class="p">(</span><span class="n">info</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Delete all the objects in trash.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">info</span><span class="o">.</span><span class="n">trash</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">delete</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
+            <span class="k">pass</span></div>
 
 
 <div class="viewcode-block" id="buildCrossSection"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.buildCrossSection">[docs]</a><span class="k">def</span> <span class="nf">buildCrossSection</span><span class="p">(</span><span class="n">sliceInfo</span><span class="p">,</span> <span class="n">passModel</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>

@@ -377,7 +377,7 @@ class ReducedSweep(object):
 
     Public Attributes:
         sweep_manager: The whole sweep being performed.
-        list_of_tags: The tags corresponding to the part of the sweep that this
+        list_of_tags: The tags corresponding to the part of the sweep that this\
             SweepHolder is restricted to.
     """
 

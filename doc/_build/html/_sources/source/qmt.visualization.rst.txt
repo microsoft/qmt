@@ -12,6 +12,22 @@ qmt\.visualization\.density\_1d\_plot module
     :undoc-members:
     :show-inheritance:
 
+qmt\.visualization\.density\_2d\_plot module
+--------------------------------------------
+
+.. automodule:: qmt.visualization.density_2d_plot
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+qmt\.visualization\.mobility\_plots module
+------------------------------------------
+
+.. automodule:: qmt.visualization.mobility_plots
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 qmt\.visualization\.plot module
 -------------------------------
 

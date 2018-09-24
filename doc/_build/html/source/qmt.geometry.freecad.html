@@ -29,7 +29,9 @@
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" /> 
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="qmt.tasks package" href="qmt.tasks.html" />
+    <link rel="prev" title="qmt.geometry package" href="qmt.geometry.html" /> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -86,8 +88,25 @@
             
             
               <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../rst/tutorial.html">Tutorial</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="qmt.html">qmt package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="qmt.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="qmt.data.html">qmt.data package</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="qmt.geometry.html">qmt.geometry package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qmt.tasks.html">qmt.tasks package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qmt.visualization.html">qmt.visualization package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qmt.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qmt.html#module-qmt.materials">qmt.materials module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qmt.html#module-qmt.physics_constants">qmt.physics_constants module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qmt.html#module-qmt">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="../rst/dev_overview.html">Structure of QMT</a></li>
 </ul>
 
@@ -134,6 +153,12 @@
     
       <li><a href="../index.html">Docs</a> &raquo;</li>
         
+          <li><a href="modules.html">qmt</a> &raquo;</li>
+        
+          <li><a href="qmt.html">qmt package</a> &raquo;</li>
+        
+          <li><a href="qmt.geometry.html">qmt.geometry package</a> &raquo;</li>
+        
       <li>qmt.geometry.freecad package</li>
     
     
@@ -174,6 +199,12 @@
 </dd></dl>
 
 <dl class="function">
+<dt id="qmt.geometry.freecad.auxiliary.silent_stdout">
+<code class="descclassname">qmt.geometry.freecad.auxiliary.</code><code class="descname">silent_stdout</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/auxiliary.html#silent_stdout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.auxiliary.silent_stdout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Suppress standard output.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="qmt.geometry.freecad.auxiliary.make_objects_visible">
 <code class="descclassname">qmt.geometry.freecad.auxiliary.</code><code class="descname">make_objects_visible</code><span class="sig-paren">(</span><em>zipfname</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/auxiliary.html#make_objects_visible"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.auxiliary.make_objects_visible" title="Permalink to this definition">¶</a></dt>
 <dd><p>Make objects visible in a fcstd file with GuiDocument.xml.</p>
@@ -205,20 +236,6 @@
 </tr>
 </tbody>
 </table>
-</dd></dl>
-
-<dl class="function">
-<dt id="qmt.geometry.freecad.fileIO.updateParams">
-<code class="descclassname">qmt.geometry.freecad.fileIO.</code><code class="descname">updateParams</code><span class="sig-paren">(</span><em>doc</em>, <em>paramDict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/fileIO.html#updateParams"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.fileIO.updateParams" title="Permalink to this definition">¶</a></dt>
-<dd><p>Update the parameters in the modelParams spreadsheet to reflect the
-current value in the dict.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="qmt.geometry.freecad.fileIO.store_serial">
-<code class="descclassname">qmt.geometry.freecad.fileIO.</code><code class="descname">store_serial</code><span class="sig-paren">(</span><em>target_dict</em>, <em>target_label</em>, <em>save_fct</em>, <em>ext</em>, <em>obj</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/fileIO.html#store_serial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.fileIO.store_serial" title="Permalink to this definition">¶</a></dt>
-<dd><p>Store a serialised representation of save_fct(obj, temporary_file.ext)
-inside target_dict[target_label].</p>
 </dd></dl>
 
 </div>
@@ -314,6 +331,13 @@ in the space swept out.</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="qmt.geometry.freecad.geomUtils.draftOffset">
+<code class="descclassname">qmt.geometry.freecad.geomUtils.</code><code class="descname">draftOffset</code><span class="sig-paren">(</span><em>inputSketch</em>, <em>t</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/geomUtils.html#draftOffset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.geomUtils.draftOffset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Attempt to offset the draft figure by a thickness t. Positive t is an
+inflation, while negative t is a deflation.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="qmt.geometry.freecad.geomUtils.centerObjects">
 <code class="descclassname">qmt.geometry.freecad.geomUtils.</code><code class="descname">centerObjects</code><span class="sig-paren">(</span><em>objsList</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/geomUtils.html#centerObjects"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.geomUtils.centerObjects" title="Permalink to this definition">¶</a></dt>
 <dd><p>Move all the objects in the list in the x-y plane so that they are
@@ -331,16 +355,28 @@ centered about the origin.</p>
 <span id="qmt-geometry-freecad-objectconstruction-module"></span><h2>qmt.geometry.freecad.objectConstruction module<a class="headerlink" href="#module-qmt.geometry.freecad.objectConstruction" title="Permalink to this headline">¶</a></h2>
 <p>Functions that perform composite executions.</p>
 <dl class="function">
+<dt id="qmt.geometry.freecad.objectConstruction.set_params">
+<code class="descclassname">qmt.geometry.freecad.objectConstruction.</code><code class="descname">set_params</code><span class="sig-paren">(</span><em>doc</em>, <em>paramDict</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/objectConstruction.html#set_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.objectConstruction.set_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the parameters in the modelParams spreadsheet to reflect the
+current value in the dict.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="qmt.geometry.freecad.objectConstruction.DummyInfo">
+<em class="property">class </em><code class="descclassname">qmt.geometry.freecad.objectConstruction.</code><code class="descname">DummyInfo</code><a class="reference internal" href="../_modules/qmt/geometry/freecad/objectConstruction.html#DummyInfo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.objectConstruction.DummyInfo" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
 <dt id="qmt.geometry.freecad.objectConstruction.build">
 <code class="descclassname">qmt.geometry.freecad.objectConstruction.</code><code class="descname">build</code><span class="sig-paren">(</span><em>opts</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/objectConstruction.html#build"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.objectConstruction.build" title="Permalink to this definition">¶</a></dt>
-<dd><p>Build the 3D geometry.</p>
+<dd><p>Build the 3D geometry in FreeCAD.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>opts</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – Options dict in the QMT 3D geometry input format.</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>opts</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – Options dict in the QMT Geometry3D.__init__ input format.</td>
 </tr>
-<tr class="field-even field"><th class="field-name">Return dict:</th><td class="field-body">Modified options dict.</td>
+<tr class="field-even field"><th class="field-name">Return geo:</th><td class="field-body">Geo3DData object with the built objects.</td>
 </tr>
 </tbody>
 </table>
@@ -378,7 +414,7 @@ centered about the origin.</p>
 
 <dl class="function">
 <dt id="qmt.geometry.freecad.objectConstruction.build_lithography">
-<code class="descclassname">qmt.geometry.freecad.objectConstruction.</code><code class="descname">build_lithography</code><span class="sig-paren">(</span><em>part</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/objectConstruction.html#build_lithography"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.objectConstruction.build_lithography" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">qmt.geometry.freecad.objectConstruction.</code><code class="descname">build_lithography</code><span class="sig-paren">(</span><em>part</em>, <em>opts</em>, <em>info_holder</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/objectConstruction.html#build_lithography"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.objectConstruction.build_lithography" title="Permalink to this definition">¶</a></dt>
 <dd><p>Build a lithography part.</p>
 </dd></dl>
 
@@ -407,20 +443,69 @@ already taken up by the wire.</p>
 <code class="descclassname">qmt.geometry.freecad.objectConstruction.</code><code class="descname">makeSAG</code><span class="sig-paren">(</span><em>sketch</em>, <em>zBot</em>, <em>zMid</em>, <em>zTop</em>, <em>tIn</em>, <em>tOut</em>, <em>offset=0.0</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/objectConstruction.html#makeSAG"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.objectConstruction.makeSAG" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="class">
-<dt id="qmt.geometry.freecad.objectConstruction.modelBuilder">
-<em class="property">class </em><code class="descclassname">qmt.geometry.freecad.objectConstruction.</code><code class="descname">modelBuilder</code><span class="sig-paren">(</span><em>passModel=None</em>, <em>debugMode=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/objectConstruction.html#modelBuilder"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.objectConstruction.modelBuilder" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
-<dt id="qmt.geometry.freecad.objectConstruction.modelBuilder.buildPart">
-<code class="descname">buildPart</code><span class="sig-paren">(</span><em>partName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/objectConstruction.html#modelBuilder.buildPart"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.objectConstruction.modelBuilder.buildPart" title="Permalink to this definition">¶</a></dt>
+<dl class="function">
+<dt id="qmt.geometry.freecad.objectConstruction.initialize_lithography">
+<code class="descclassname">qmt.geometry.freecad.objectConstruction.</code><code class="descname">initialize_lithography</code><span class="sig-paren">(</span><em>info</em>, <em>opts</em>, <em>fillShells=True</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/objectConstruction.html#initialize_lithography"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.objectConstruction.initialize_lithography" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
-<dt id="qmt.geometry.freecad.objectConstruction.modelBuilder.saveFreeCADState">
-<code class="descname">saveFreeCADState</code><span class="sig-paren">(</span><em>fileName</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/objectConstruction.html#modelBuilder.saveFreeCADState"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.objectConstruction.modelBuilder.saveFreeCADState" title="Permalink to this definition">¶</a></dt>
-<dd><p>Save a copy of the freeCAD model and do garbage collection.</p>
+<dl class="function">
+<dt id="qmt.geometry.freecad.objectConstruction.gen_offset">
+<code class="descclassname">qmt.geometry.freecad.objectConstruction.</code><code class="descname">gen_offset</code><span class="sig-paren">(</span><em>opts</em>, <em>obj</em>, <em>offsetVal</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/objectConstruction.html#gen_offset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.objectConstruction.gen_offset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generates an offset non-destructively.</p>
 </dd></dl>
 
+<dl class="function">
+<dt id="qmt.geometry.freecad.objectConstruction.screened_H_union_list">
+<code class="descclassname">qmt.geometry.freecad.objectConstruction.</code><code class="descname">screened_H_union_list</code><span class="sig-paren">(</span><em>info</em>, <em>opts</em>, <em>obj</em>, <em>m</em>, <em>j</em>, <em>offsetTuple</em>, <em>checkOffsetTuple</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/objectConstruction.html#screened_H_union_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.objectConstruction.screened_H_union_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Foremd the “screened union list” of obj with the layer m, objID j H object that has
+been offset according to offsetTuple. The screened union list is defined by checking
+first whether the object intersects with the components of the checkOffset version
+of the H object. Then, for each component that would intersect, we return the a list
+of the offsetTuple version of the object.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="qmt.geometry.freecad.objectConstruction.screened_A_UnionList">
+<code class="descclassname">qmt.geometry.freecad.objectConstruction.</code><code class="descname">screened_A_UnionList</code><span class="sig-paren">(</span><em>info</em>, <em>opts</em>, <em>obj</em>, <em>t</em>, <em>ti</em>, <em>offsetTuple</em>, <em>checkOffsetTuple</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/objectConstruction.html#screened_A_UnionList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.objectConstruction.screened_A_UnionList" title="Permalink to this definition">¶</a></dt>
+<dd><p>Foremd the “screened union list” of obj with the substrate A that has
+been offset according to offsetTuple.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="qmt.geometry.freecad.objectConstruction.H_offset">
+<code class="descclassname">qmt.geometry.freecad.objectConstruction.</code><code class="descname">H_offset</code><span class="sig-paren">(</span><em>info</em>, <em>opts</em>, <em>layerNum</em>, <em>objID</em>, <em>tList=[]</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/objectConstruction.html#H_offset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.objectConstruction.H_offset" title="Permalink to this definition">¶</a></dt>
+<dd><p>For a given layerNum=n and ObjID=i, compute the deposited object.</p>
+<p><code class="docutils literal"><span class="pre">`latex</span>
+<span class="pre">H_{n,i}(t)</span> <span class="pre">=</span> <span class="pre">C_{n,i}(t)</span> <span class="pre">\cap</span> <span class="pre">[</span> <span class="pre">B_{n,i}(t)</span> <span class="pre">\cup</span> <span class="pre">(\cup_{m&lt;n;j}</span> <span class="pre">H_{m,j}(t_i+t))</span> <span class="pre">\cup</span> <span class="pre">(\cup_k</span> <span class="pre">A_k(t_i</span> <span class="pre">+</span> <span class="pre">t))],</span>
+<span class="pre">`</span></code>
+where A_k is from the base substrate list. This is computed recursively. The list of integers
+tList determines the offset t; t = the sum of all layer thicknesses ti that appear
+in tList. For example, tList = [1,2,3] -&gt; t = t1+t2+t3.</p>
+<p>Note: this object is returned as a list of objects that need to be unioned together
+in order to form the full H.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="qmt.geometry.freecad.objectConstruction.gen_U">
+<code class="descclassname">qmt.geometry.freecad.objectConstruction.</code><code class="descname">gen_U</code><span class="sig-paren">(</span><em>info</em>, <em>layerNum</em>, <em>objID</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/objectConstruction.html#gen_U"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.objectConstruction.gen_U" title="Permalink to this definition">¶</a></dt>
+<dd><p>For a given layerNum and objID, compute the quantity:
+<code class="docutils literal"><span class="pre">`latex</span>
+<span class="pre">U_{n,i}(t)</span> <span class="pre">=</span> <span class="pre">(\cup_{m&lt;n;j}</span> <span class="pre">G_{m,j})</span> <span class="pre">\cup</span> <span class="pre">(\cup_{k}</span> <span class="pre">A_k),</span>
+<span class="pre">`</span></code>
+where the inner union terms are not included if their intersection
+with B_i is empty.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="qmt.geometry.freecad.objectConstruction.gen_G">
+<code class="descclassname">qmt.geometry.freecad.objectConstruction.</code><code class="descname">gen_G</code><span class="sig-paren">(</span><em>info</em>, <em>opts</em>, <em>layerNum</em>, <em>objID</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/objectConstruction.html#gen_G"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.objectConstruction.gen_G" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate the gate deposition for a given layerNum and objID.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="qmt.geometry.freecad.objectConstruction.collect_garbage">
+<code class="descclassname">qmt.geometry.freecad.objectConstruction.</code><code class="descname">collect_garbage</code><span class="sig-paren">(</span><em>info</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/objectConstruction.html#collect_garbage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.objectConstruction.collect_garbage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete all the objects in trash.</p>
 </dd></dl>
 
 <dl class="function">
@@ -443,7 +528,6 @@ already taken up by the wire.</p>
 <dt id="qmt.geometry.freecad.run.main">
 <code class="descclassname">qmt.geometry.freecad.run.</code><code class="descname">main</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/run.html#main"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.run.main" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fetch input data and dispatch instructions.</p>
-<p>WARNING: you must use send_back() to return data to the parent process.</p>
 </dd></dl>
 
 <dl class="function">
@@ -503,13 +587,7 @@ Return the list of indices in the cycle.</p>
 
 <dl class="function">
 <dt id="qmt.geometry.freecad.sketchUtils.addCycleSketch">
-<code class="descclassname">qmt.geometry.freecad.sketchUtils.</code><code class="descname">addCycleSketch</code><span class="sig-paren">(</span><em>name</em>, <em>doc</em>, <em>cycleSegIndList</em>, <em>lineSegments</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/sketchUtils.html#addCycleSketch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.sketchUtils.addCycleSketch" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add a sketch of a cycle to a FC document.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="qmt.geometry.freecad.sketchUtils.addCycleSketch2">
-<code class="descclassname">qmt.geometry.freecad.sketchUtils.</code><code class="descname">addCycleSketch2</code><span class="sig-paren">(</span><em>name</em>, <em>wire</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/sketchUtils.html#addCycleSketch2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.sketchUtils.addCycleSketch2" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">qmt.geometry.freecad.sketchUtils.</code><code class="descname">addCycleSketch</code><span class="sig-paren">(</span><em>name</em>, <em>wire</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/sketchUtils.html#addCycleSketch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.sketchUtils.addCycleSketch" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a sketch of a cycle (closed wire) to a FC document.</p>
 </dd></dl>
 
@@ -532,12 +610,6 @@ Return the list of indices in the cycle.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="qmt.geometry.freecad.sketchUtils.splitSketch_old">
-<code class="descclassname">qmt.geometry.freecad.sketchUtils.</code><code class="descname">splitSketch_old</code><span class="sig-paren">(</span><em>sketch</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/sketchUtils.html#splitSketch_old"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.sketchUtils.splitSketch_old" title="Permalink to this definition">¶</a></dt>
-<dd><p>Splits a sketch into several, returning a list of names of the new sketches.</p>
-</dd></dl>
-
-<dl class="function">
 <dt id="qmt.geometry.freecad.sketchUtils.splitSketch">
 <code class="descclassname">qmt.geometry.freecad.sketchUtils.</code><code class="descname">splitSketch</code><span class="sig-paren">(</span><em>sketch</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/sketchUtils.html#splitSketch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.sketchUtils.splitSketch" title="Permalink to this definition">¶</a></dt>
 <dd><p>Splits a sketch into several, returning a list of names of the new sketches.</p>
@@ -556,13 +628,6 @@ a distance d.</p>
 <dd><p>Turn a 2D generic object like a polyline into a sketch.</p>
 </dd></dl>
 
-<dl class="function">
-<dt id="qmt.geometry.freecad.sketchUtils.draftOffset">
-<code class="descclassname">qmt.geometry.freecad.sketchUtils.</code><code class="descname">draftOffset</code><span class="sig-paren">(</span><em>inputSketch</em>, <em>t</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad/sketchUtils.html#draftOffset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad.sketchUtils.draftOffset" title="Permalink to this definition">¶</a></dt>
-<dd><p>Attempt to offset the draft figure by a thickness t. Positive t is an
-inflation, while negative t is a deflation.</p>
-</dd></dl>
-
 </div>
 <div class="section" id="module-qmt.geometry.freecad">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-qmt.geometry.freecad" title="Permalink to this headline">¶</a></h2>
@@ -575,6 +640,15 @@ inflation, while negative t is a deflation.</p>
            
           </div>
           <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="qmt.tasks.html" class="btn btn-neutral float-right" title="qmt.tasks package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="qmt.geometry.html" class="btn btn-neutral" title="qmt.geometry package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
   
 
   <hr/>

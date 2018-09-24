@@ -135,6 +135,15 @@ def test_liftObject(fix_FCDoc, fix_unit_square_sketch):
     #~ assert vol.Shape.Volume == 42
 
 
+def test_draftOffset(fix_FCDoc):
+    '''Check if draft offset resizes the object. TODO: edge cases'''
+    pl = FreeCAD.Placement()
+    pl.Base = vec(1, 1, 0)
+    draft = Draft.makeRectangle(length=2, height=2, placement=pl, face=False, support=None)
+    draft2 = draftOffset(draft, 20)
+    assert draft.Height.Value + 40 == draft2.Height.Value
+
+
 def test_centerObjects(fix_FCDoc):
     '''Check centering of boxes.'''
     # TODO: centering or snapping to zero?

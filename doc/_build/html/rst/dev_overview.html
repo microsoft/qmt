@@ -30,7 +30,7 @@
   <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="prev" title="Tutorial" href="tutorial.html" /> 
+    <link rel="prev" title="qmt.visualization package" href="../source/qmt.visualization.html" /> 
 
   
   <script src="../_static/js/modernizr.min.js"></script>
@@ -89,10 +89,11 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../source/modules.html">Modules</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Structure of QMT</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#package-overview">Package Overview</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#class-overview">Class Overview</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#module-qmt">Member Documentation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-qmt">Direct QMT Package Member Documentation</a></li>
 </ul>
 </li>
 </ul>
@@ -170,53 +171,7 @@
 <a class="reference external image-reference" href="../../../source/classes.png"><img alt="Class Overview" class="align-center" src="../_images/classes.png" /></a>
 </div>
 <div class="section" id="module-qmt">
-<span id="member-documentation"></span><h2>Member Documentation<a class="headerlink" href="#module-qmt" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="qmt.Material">
-<em class="property">class </em><code class="descclassname">qmt.</code><code class="descname">Material</code><span class="sig-paren">(</span><em>name</em>, <em>properties</em>, <em>eunit=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/materials.html#Material"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.Material" title="Permalink to this definition">¶</a></dt>
-<dd><p>Wrapper for an entry in the materials database.</p>
-<p>Allows for the retrieval of a material’s properties. Adds units awareness on top of a plain
-dict containing the properties.</p>
-<dl class="docutils">
-<dt>name: str</dt>
-<dd>Material name.</dd>
-<dt>properties: dict</dt>
-<dd>Collection of material properties.</dd>
-<dt>eunit: str, default None</dt>
-<dd>Unit of energy. If specified, all queries for band parameters
-that have the dimension of an energy return floats with respect
-to this energy unit. With the default (None), such queries
-return sympy quantities that have the dimension of an energy.</dd>
-</dl>
-<dl class="method">
-<dt id="qmt.Material.hole_mass">
-<code class="descname">hole_mass</code><span class="sig-paren">(</span><em>band</em>, <em>direction</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/materials.html#Material.hole_mass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.Material.hole_mass" title="Permalink to this definition">¶</a></dt>
-<dd><p>Determine effective mass for a valence band.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
-<li><strong>band</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Which valence band: ‘heavy’ or ‘light’ for a specific band. Also ‘dos’ for
-a density-of-states mass corresponding to both bands.</li>
-<li><strong>direction</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Momentum direction: One of ‘001’, ‘110’, or ‘111’. ‘z’ is equivalent
-to ‘001’. Can also be ‘dos’ for the scalar density-of-states mass of a corresponding
-isotropic band dispersion.</li>
-</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="qmt.Material.serialize_dict">
-<code class="descname">serialize_dict</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/materials.html#Material.serialize_dict"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.Material.serialize_dict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return a dict with the material properties that can be dumped to json.</p>
-</dd></dl>
-
-</dd></dl>
-
+<span id="direct-qmt-package-member-documentation"></span><h2>Direct QMT Package Member Documentation<a class="headerlink" href="#module-qmt" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="qmt.Materials">
 <em class="property">class </em><code class="descclassname">qmt.</code><code class="descname">Materials</code><span class="sig-paren">(</span><em>matPath=None</em>, <em>matDict=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/materials.html#Materials"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.Materials" title="Permalink to this definition">¶</a></dt>
@@ -316,18 +271,6 @@ of InSb. See conduction_band_minimum for additional details.</p>
 </dd></dl>
 
 <dl class="function">
-<dt id="qmt.conduction_band_offset">
-<code class="descclassname">qmt.</code><code class="descname">conduction_band_offset</code><span class="sig-paren">(</span><em>mat</em>, <em>ref_mat</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/materials.html#conduction_band_offset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.conduction_band_offset" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate the conduction band offset $E_c - E_{c,ref}$ between two semiconductor materials.</p>
-<dl class="docutils">
-<dt>mat: Material</dt>
-<dd>Material whose conduction band position is to be determined.</dd>
-<dt>ref_mat: Material</dt>
-<dd>Material whose conduction band minimum is used as reference energy.</dd>
-</dl>
-</dd></dl>
-
-<dl class="function">
 <dt id="qmt.parse_unit">
 <code class="descclassname">qmt.</code><code class="descname">parse_unit</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/physics_constants.html#parse_unit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.parse_unit" title="Permalink to this definition">¶</a></dt>
 <dd><p>convert name of a unit into the corresponding sympy value</p>
@@ -337,18 +280,6 @@ of InSb. See conduction_band_minimum for additional details.</p>
 <dt id="qmt.to_float">
 <code class="descclassname">qmt.</code><code class="descname">to_float</code><span class="sig-paren">(</span><em>expr</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/physics_constants.html#to_float"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.to_float" title="Permalink to this definition">¶</a></dt>
 <dd><p>Convert sympy expression involving units to a float. Fails if expr is not dimensionless.</p>
-</dd></dl>
-
-<dl class="function">
-<dt id="qmt.valence_band_offset">
-<code class="descclassname">qmt.</code><code class="descname">valence_band_offset</code><span class="sig-paren">(</span><em>mat</em>, <em>ref_mat</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/materials.html#valence_band_offset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.valence_band_offset" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculate the valence band offset $E_v - E_{v,ref}$ between two semiconductor materials.</p>
-<dl class="docutils">
-<dt>mat: Material</dt>
-<dd>Material whose valence band position is to be determined.</dd>
-<dt>ref_mat: Material</dt>
-<dd>Material whose valence band maximum is used as reference energy</dd>
-</dl>
 </dd></dl>
 
 </div>
@@ -363,7 +294,7 @@ of InSb. See conduction_band_minimum for additional details.</p>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
       
-        <a href="tutorial.html" class="btn btn-neutral" title="Tutorial" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../source/qmt.visualization.html" class="btn btn-neutral" title="qmt.visualization package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

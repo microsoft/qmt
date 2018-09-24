@@ -19,8 +19,8 @@ Class Overview
     :target: ../../../source/classes.png
 
 
-Member Documentation
---------------------
+Direct QMT Package Member Documentation
+---------------------------------------
 
 .. automodule:: qmt
     :members:

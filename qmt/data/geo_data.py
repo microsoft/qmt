@@ -195,8 +195,8 @@ class Geo3DData(Data):
     def set_data(self, data_name, data, scratch_dir=None):
         """
         Set data to a serial format that is easily portable.
-        :param str data_name:  "fcdoc" freeCAD document
-                               "mesh"  fenics mesh
+        :param str data_name:  "fcdoc" freeCAD document \
+                               "mesh"  fenics mesh \
                                "rmf"   fenics region marker function
         :param data:           The corresponding data that we would like to set.
         :param scratch_dir:    Optional existing temporary (fast) storage location.
@@ -223,8 +223,8 @@ class Geo3DData(Data):
     def get_data(self, data_name, mesh=None, scratch_dir=None):
         """
         Get data from stored serial format.
-        :param str data_name:  "fcdoc" freeCAD document
-                               "mesh"  fenics mesh
+        :param str data_name:  "fcdoc" freeCAD document \
+                               "mesh"  fenics mesh \
                                "rmf"   fenics region marker function
         :param mesh:
         :param scratch_dir:    Optional existing temporary (fast) storage location.

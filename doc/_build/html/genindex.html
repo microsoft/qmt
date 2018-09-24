@@ -89,6 +89,7 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="rst/tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source/modules.html">Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rst/dev_overview.html">Structure of QMT</a></li>
 </ul>
 
@@ -168,12 +169,12 @@
  | <a href="#L"><strong>L</strong></a>
  | <a href="#M"><strong>M</strong></a>
  | <a href="#N"><strong>N</strong></a>
+ | <a href="#O"><strong>O</strong></a>
  | <a href="#P"><strong>P</strong></a>
  | <a href="#Q"><strong>Q</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
  | <a href="#T"><strong>T</strong></a>
- | <a href="#U"><strong>U</strong></a>
  | <a href="#V"><strong>V</strong></a>
  | <a href="#W"><strong>W</strong></a>
  
@@ -183,13 +184,9 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.run.activate_doc_from">activate_doc_from() (in module qmt.geometry.freecad.run)</a>
 </li>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.sweep.ReducedSweepDelayed.add">add() (qmt.task_framework.sweep.ReducedSweepDelayed method)</a>
-
-      <ul>
-        <li><a href="source/qmt.task_framework.html#qmt.task_framework.sweep.ReducedSweepFutures.add">(qmt.task_framework.sweep.ReducedSweepFutures method)</a>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepWithData.add">add() (qmt.tasks.sweep.ReducedSweepWithData method)</a>
 </li>
-      </ul></li>
-      <li><a href="source/qmt.geometry.html#qmt.geometry.geo_data.Geo2DData.add_edge">add_edge() (qmt.geometry.geo_data.Geo2DData method)</a>
+      <li><a href="source/qmt.data.html#qmt.data.geo_data.Geo2DData.add_edge">add_edge() (qmt.data.geo_data.Geo2DData method)</a>
 </li>
       <li><a href="rst/dev_overview.html#qmt.Materials.add_material">add_material() (qmt.Materials method)</a>
 
@@ -199,17 +196,15 @@
       </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="source/qmt.geometry.html#qmt.geometry.geo_data.Geo1DData.add_part">add_part() (qmt.geometry.geo_data.Geo1DData method)</a>
+      <li><a href="source/qmt.data.html#qmt.data.geo_data.Geo1DData.add_part">add_part() (qmt.data.geo_data.Geo1DData method)</a>
 
       <ul>
-        <li><a href="source/qmt.geometry.html#qmt.geometry.geo_data.Geo2DData.add_part">(qmt.geometry.geo_data.Geo2DData method)</a>
+        <li><a href="source/qmt.data.html#qmt.data.geo_data.Geo2DData.add_part">(qmt.data.geo_data.Geo2DData method)</a>
 </li>
-        <li><a href="source/qmt.geometry.html#qmt.geometry.geo_data.Geo3DData.add_part">(qmt.geometry.geo_data.Geo3DData method)</a>
+        <li><a href="source/qmt.data.html#qmt.data.geo_data.Geo3DData.add_part">(qmt.data.geo_data.Geo3DData method)</a>
 </li>
       </ul></li>
       <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.sketchUtils.addCycleSketch">addCycleSketch() (in module qmt.geometry.freecad.sketchUtils)</a>
-</li>
-      <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.sketchUtils.addCycleSketch2">addCycleSketch2() (in module qmt.geometry.freecad.sketchUtils)</a>
 </li>
       <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.sketchUtils.addPolyLineSketch">addPolyLineSketch() (in module qmt.geometry.freecad.sketchUtils)</a>
 </li>
@@ -229,10 +224,10 @@
 </li>
       <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.build_pass">build_pass() (in module qmt.geometry.freecad.objectConstruction)</a>
 </li>
-      <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.build_sag">build_sag() (in module qmt.geometry.freecad.objectConstruction)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.build_sag">build_sag() (in module qmt.geometry.freecad.objectConstruction)</a>
+</li>
       <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.build_wire">build_wire() (in module qmt.geometry.freecad.objectConstruction)</a>
 </li>
       <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.build_wire_shell">build_wire_shell() (in module qmt.geometry.freecad.objectConstruction)</a>
@@ -240,8 +235,6 @@
       <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.buildAlShell">buildAlShell() (in module qmt.geometry.freecad.objectConstruction)</a>
 </li>
       <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.buildCrossSection">buildCrossSection() (in module qmt.geometry.freecad.objectConstruction)</a>
-</li>
-      <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.modelBuilder.buildPart">buildPart() (qmt.geometry.freecad.objectConstruction.modelBuilder method)</a>
 </li>
       <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.buildWire">buildWire() (in module qmt.geometry.freecad.objectConstruction)</a>
 </li>
@@ -251,13 +244,15 @@
 <h2 id="C">C</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.sweep.ReducedSweepDelayed.calculate_futures">calculate_futures() (qmt.task_framework.sweep.ReducedSweepDelayed method)</a>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepFutures.calculate_completed_results">calculate_completed_results() (qmt.tasks.sweep.ReducedSweepFutures method)</a>
+</li>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepDelayed.calculate_futures">calculate_futures() (qmt.tasks.sweep.ReducedSweepDelayed method)</a>
 </li>
       <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.centerObjects">centerObjects() (in module qmt.geometry.freecad.geomUtils)</a>
 </li>
       <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.checkOverlap">checkOverlap() (in module qmt.geometry.freecad.geomUtils)</a>
 </li>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.task.TaskMetaclass.class_registry">class_registry (qmt.task_framework.task.TaskMetaclass attribute)</a>
+      <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.collect_garbage">collect_garbage() (in module qmt.geometry.freecad.objectConstruction)</a>
 </li>
       <li><a href="rst/dev_overview.html#qmt.Materials.conduction_band_minimum">conduction_band_minimum() (qmt.Materials method)</a>
 
@@ -265,33 +260,29 @@
         <li><a href="source/qmt.html#qmt.materials.Materials.conduction_band_minimum">(qmt.materials.Materials method)</a>
 </li>
       </ul></li>
-      <li><a href="rst/dev_overview.html#qmt.conduction_band_offset">conduction_band_offset() (in module qmt)</a>
-
-      <ul>
-        <li><a href="source/qmt.html#qmt.materials.conduction_band_offset">(in module qmt.materials)</a>
+      <li><a href="source/qmt.html#qmt.materials.conduction_band_offset">conduction_band_offset() (in module qmt.materials)</a>
 </li>
-      </ul></li>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.sweep.SweepManager.construct_cartesian_product">construct_cartesian_product() (qmt.task_framework.sweep.SweepManager static method)</a>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.SweepManager.construct_cartesian_product">construct_cartesian_product() (qmt.tasks.sweep.SweepManager static method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.sweep.ReducedSweep.convert_to_reduced_index">convert_to_reduced_index() (qmt.task_framework.sweep.ReducedSweep method)</a>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweep.convert_to_reduced_index">convert_to_reduced_index() (qmt.tasks.sweep.ReducedSweep method)</a>
 </li>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.sweep.ReducedSweep.convert_to_total_indices">convert_to_total_indices() (qmt.task_framework.sweep.ReducedSweep method)</a>
-</li>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.sweep.ReducedSweepDelayed.copy_empty">copy_empty() (qmt.task_framework.sweep.ReducedSweepDelayed method)</a>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweep.convert_to_total_indices">convert_to_total_indices() (qmt.tasks.sweep.ReducedSweep method)</a>
 </li>
       <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.copy_move">copy_move() (in module qmt.geometry.freecad.geomUtils)</a>
 </li>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.sweep.ReducedSweep.create_from_manager_and_tags">create_from_manager_and_tags() (qmt.task_framework.sweep.ReducedSweep static method)</a>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepResults.create_empty_from_manager_and_tags">create_empty_from_manager_and_tags() (qmt.tasks.sweep.ReducedSweepResults static method)</a>
 </li>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.sweep.ReducedSweepDelayed.create_from_reduced_sweep_and_manager">create_from_reduced_sweep_and_manager() (qmt.task_framework.sweep.ReducedSweepDelayed static method)</a>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.SweepManager.create_empty_sweep">create_empty_sweep() (qmt.tasks.sweep.SweepManager static method)</a>
 </li>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.sweep.SweepManager.createEmptySweep">createEmptySweep() (qmt.task_framework.sweep.SweepManager method)</a>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweep.create_from_manager_and_tags">create_from_manager_and_tags() (qmt.tasks.sweep.ReducedSweep static method)</a>
+</li>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepDelayed.create_from_reduced_sweep_and_manager">create_from_reduced_sweep_and_manager() (qmt.tasks.sweep.ReducedSweepDelayed static method)</a>
 </li>
       <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.crossSection">crossSection() (in module qmt.geometry.freecad.geomUtils)</a>
 </li>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.task.Task.current_instance_id">current_instance_id (qmt.task_framework.task.Task attribute)</a>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.task.Task.current_instance_id">current_instance_id (qmt.tasks.task.Task attribute)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -299,7 +290,7 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.data_template.Data">Data (class in qmt.task_framework.data_template)</a>
+      <li><a href="source/qmt.data.html#qmt.data.template.Data">Data (class in qmt.data.template)</a>
 </li>
       <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.auxiliary.deepRemove">deepRemove() (in module qmt.geometry.freecad.auxiliary)</a>
 </li>
@@ -307,11 +298,13 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="source/qmt.ms_tasks.html#qmt.ms_tasks.density_data.Density1D">Density1D (class in qmt.ms_tasks.density_data)</a>
+      <li><a href="source/qmt.data.html#qmt.data.density_data.Density1DData">Density1DData (class in qmt.data.density_data)</a>
 </li>
       <li><a href="source/qmt.html#qmt.materials.Materials.deserialize_dict">deserialize_dict() (qmt.materials.Materials method)</a>
 </li>
-      <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.sketchUtils.draftOffset">draftOffset() (in module qmt.geometry.freecad.sketchUtils)</a>
+      <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.draftOffset">draftOffset() (in module qmt.geometry.freecad.geomUtils)</a>
+</li>
+      <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.DummyInfo">DummyInfo (class in qmt.geometry.freecad.objectConstruction)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -319,6 +312,8 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweep.empty_data">empty_data() (qmt.tasks.sweep.ReducedSweep method)</a>
+</li>
       <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.fileIO.exportCAD">exportCAD() (in module qmt.geometry.freecad.fileIO)</a>
 </li>
       <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.fileIO.exportMeshed">exportMeshed() (in module qmt.geometry.freecad.fileIO)</a>
@@ -327,6 +322,8 @@
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="source/qmt.data.html#qmt.data.geo_data.Geo3DData.EXTERIOR_BC_NAME">EXTERIOR_BC_NAME (qmt.data.geo_data.Geo3DData attribute)</a>
+</li>
       <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.extrude">extrude() (in module qmt.geometry.freecad.geomUtils)</a>
 </li>
       <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.extrude_partwb">extrude_partwb() (in module qmt.geometry.freecad.geomUtils)</a>
@@ -363,41 +360,79 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.task.Task.gather_futures">gather_futures() (qmt.task_framework.task.Task static method)</a>
+      <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.gen_G">gen_G() (in module qmt.geometry.freecad.objectConstruction)</a>
 </li>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.sweep.gen_tag_extract">gen_tag_extract() (in module qmt.task_framework.sweep)</a>
+      <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.gen_offset">gen_offset() (in module qmt.geometry.freecad.objectConstruction)</a>
 </li>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.sweep.gen_tag_extract_list">gen_tag_extract_list() (in module qmt.task_framework.sweep)</a>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.gen_tag_extract">gen_tag_extract() (in module qmt.tasks.sweep)</a>
+</li>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.gen_tag_extract_list">gen_tag_extract_list() (in module qmt.tasks.sweep)</a>
+</li>
+      <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.gen_U">gen_U() (in module qmt.geometry.freecad.objectConstruction)</a>
 </li>
       <li><a href="source/qmt.visualization.html#qmt.visualization.density_1d_plot.generate_1d_density_plot">generate_1d_density_plot() (in module qmt.visualization.density_1d_plot)</a>
 </li>
+      <li><a href="source/qmt.visualization.html#qmt.visualization.density_2d_plot.generate_2d_density_plot">generate_2d_density_plot() (in module qmt.visualization.density_2d_plot)</a>
+</li>
+      <li><a href="source/qmt.visualization.html#qmt.visualization.mobility_plots.generate_mobility_plots">generate_mobility_plots() (in module qmt.visualization.mobility_plots)</a>
+</li>
       <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.genUnion">genUnion() (in module qmt.geometry.freecad.geomUtils)</a>
 </li>
-      <li><a href="source/qmt.geometry.html#qmt.geometry.geo_data.Geo1DData">Geo1DData (class in qmt.geometry.geo_data)</a>
+      <li><a href="source/qmt.data.html#qmt.data.geo_data.Geo1DData">Geo1DData (class in qmt.data.geo_data)</a>
 </li>
-      <li><a href="source/qmt.geometry.html#qmt.geometry.geo_data.Geo2DData">Geo2DData (class in qmt.geometry.geo_data)</a>
+      <li><a href="source/qmt.data.html#qmt.data.geo_data.Geo2DData">Geo2DData (class in qmt.data.geo_data)</a>
 </li>
-      <li><a href="source/qmt.geometry.html#qmt.geometry.geo_data.Geo3DData">Geo3DData (class in qmt.geometry.geo_data)</a>
+      <li><a href="source/qmt.data.html#qmt.data.geo_data.Geo3DData">Geo3DData (class in qmt.data.geo_data)</a>
+</li>
+      <li><a href="source/qmt.data.html#qmt.data.geo_data.GeoData">GeoData (class in qmt.data.geo_data)</a>
+</li>
+      <li><a href="source/qmt.tasks.basic.html#qmt.tasks.basic.geometry.Geometry1D">Geometry1D (class in qmt.tasks.basic.geometry)</a>
+</li>
+      <li><a href="source/qmt.tasks.basic.html#qmt.tasks.basic.geometry.Geometry2D">Geometry2D (class in qmt.tasks.basic.geometry)</a>
+</li>
+      <li><a href="source/qmt.tasks.basic.html#qmt.tasks.basic.geometry.Geometry3D">Geometry3D (class in qmt.tasks.basic.geometry)</a>
+</li>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepFutures.get_completed_result">get_completed_result() (qmt.tasks.sweep.ReducedSweepFutures method)</a>
+</li>
+      <li><a href="source/qmt.data.html#qmt.data.geo_data.Geo3DData.get_data">get_data() (qmt.data.geo_data.Geo3DData method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="source/qmt.basic_tasks.html#qmt.basic_tasks.geometry.Geometry1D">Geometry1D (class in qmt.basic_tasks.geometry)</a>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepWithData.get_datum">get_datum() (qmt.tasks.sweep.ReducedSweepWithData method)</a>
 </li>
-      <li><a href="source/qmt.basic_tasks.html#qmt.basic_tasks.geometry.Geometry2D">Geometry2D (class in qmt.basic_tasks.geometry)</a>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepDelayed.get_delayed">get_delayed() (qmt.tasks.sweep.ReducedSweepDelayed method)</a>
 </li>
-      <li><a href="source/qmt.basic_tasks.html#qmt.basic_tasks.geometry.Geometry3D">Geometry3D (class in qmt.basic_tasks.geometry)</a>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepFutures.get_future">get_future() (qmt.tasks.sweep.ReducedSweepFutures method)</a>
 </li>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.sweep.ReducedSweepFutures.get_each_element_function">get_each_element_function() (qmt.task_framework.sweep.ReducedSweepFutures static method)</a>
+      <li><a href="source/qmt.data.html#qmt.data.geo_data.Geo3DData.get_material">get_material() (qmt.data.geo_data.Geo3DData method)</a>
 </li>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.sweep.ReducedSweepDelayed.get_object">get_object() (qmt.task_framework.sweep.ReducedSweepDelayed method)</a>
-
-      <ul>
-        <li><a href="source/qmt.task_framework.html#qmt.task_framework.sweep.ReducedSweepFutures.get_object">(qmt.task_framework.sweep.ReducedSweepFutures method)</a>
+      <li><a href="source/qmt.data.html#qmt.data.geo_data.Geo3DData.get_material_mapping">get_material_mapping() (qmt.data.geo_data.Geo3DData method)</a>
 </li>
-      </ul></li>
+      <li><a href="source/qmt.data.html#qmt.data.geo_data.Geo3DData.get_names_to_default_bcs">get_names_to_default_bcs() (qmt.data.geo_data.Geo3DData method)</a>
+</li>
+      <li><a href="source/qmt.data.html#qmt.data.geo_data.Geo3DData.get_names_to_default_dirichlet_bcs">get_names_to_default_dirichlet_bcs() (qmt.data.geo_data.Geo3DData method)</a>
+</li>
+      <li><a href="source/qmt.data.html#qmt.data.geo_data.Geo3DData.get_names_to_default_ds">get_names_to_default_ds() (qmt.data.geo_data.Geo3DData method)</a>
+</li>
+      <li><a href="source/qmt.data.html#qmt.data.geo_data.Geo3DData.get_names_to_default_neumann_bcs">get_names_to_default_neumann_bcs() (qmt.data.geo_data.Geo3DData method)</a>
+</li>
+      <li><a href="source/qmt.data.html#qmt.data.geo_data.Geo3DData.get_names_to_default_ns">get_names_to_default_ns() (qmt.data.geo_data.Geo3DData method)</a>
+</li>
+      <li><a href="source/qmt.data.html#qmt.data.geo_data.Geo3DData.get_names_to_default_phi_nl">get_names_to_default_phi_nl() (qmt.data.geo_data.Geo3DData method)</a>
+</li>
+      <li><a href="source/qmt.data.html#qmt.data.geo_data.Geo3DData.get_names_to_default_phi_nl_and_ds">get_names_to_default_phi_nl_and_ds() (qmt.data.geo_data.Geo3DData method)</a>
+</li>
+      <li><a href="source/qmt.data.html#qmt.data.geo_data.Geo3DData.get_names_to_region_ids">get_names_to_region_ids() (qmt.data.geo_data.Geo3DData method)</a>
+</li>
       <li><a href="source/qmt.geometry.html#qmt.geometry.property_map.PropertyMap.get_part">get_part() (qmt.geometry.property_map.PropertyMap method)</a>
 </li>
-      <li><a href="source/qmt.geometry.html#qmt.geometry.geo_data.Geo3DData.get_parts">get_parts() (qmt.geometry.geo_data.Geo3DData method)</a>
+      <li><a href="source/qmt.data.html#qmt.data.geo_data.Geo3DData.get_region_ids">get_region_ids() (qmt.data.geo_data.Geo3DData method)</a>
+</li>
+      <li><a href="source/qmt.data.html#qmt.data.geo_data.Geo3DData.get_region_ids_to_names">get_region_ids_to_names() (qmt.data.geo_data.Geo3DData method)</a>
+</li>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepResults.get_result">get_result() (qmt.tasks.sweep.ReducedSweepResults method)</a>
+</li>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepWithData.get_tags_with_data">get_tags_with_data() (qmt.tasks.sweep.ReducedSweepWithData method)</a>
 </li>
       <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.getBB">getBB() (in module qmt.geometry.freecad.geomUtils)</a>
 </li>
@@ -407,22 +442,24 @@
 <h2 id="H">H</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="rst/dev_overview.html#qmt.Material.hole_mass">hole_mass() (qmt.Material method)</a>
-
-      <ul>
-        <li><a href="source/qmt.html#qmt.materials.Material.hole_mass">(qmt.materials.Material method)</a>
+      <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.H_offset">H_offset() (in module qmt.geometry.freecad.objectConstruction)</a>
 </li>
-      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="source/qmt.html#qmt.materials.Material.hole_mass">hole_mass() (qmt.materials.Material method)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.intersect">intersect() (in module qmt.geometry.freecad.geomUtils)</a>
+      <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.initialize_lithography">initialize_lithography() (in module qmt.geometry.freecad.objectConstruction)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.intersect">intersect() (in module qmt.geometry.freecad.geomUtils)</a>
+</li>
       <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.isNonempty">isNonempty() (in module qmt.geometry.freecad.geomUtils)</a>
 </li>
   </ul></td>
@@ -433,14 +470,18 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.liftObject">liftObject() (in module qmt.geometry.freecad.geomUtils)</a>
 </li>
-      <li><a href="rst/dev_overview.html#qmt.Materials.load">load() (qmt.Materials method)</a>
+      <li><a href="source/qmt.data.html#qmt.data.template.Data.load">load() (qmt.data.template.Data method)</a>
 
       <ul>
+        <li><a href="rst/dev_overview.html#qmt.Materials.load">(qmt.Materials method)</a>
+</li>
         <li><a href="source/qmt.html#qmt.materials.Materials.load">(qmt.materials.Materials method)</a>
 </li>
-        <li><a href="source/qmt.task_framework.html#qmt.task_framework.data_template.Data.load">(qmt.task_framework.data_template.Data method)</a>
-</li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="source/qmt.data.html#qmt.data.data_utils.load_serial">load_serial() (in module qmt.data.data_utils)</a>
+</li>
   </ul></td>
 </tr></table>
 
@@ -457,16 +498,12 @@
 </li>
       <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.sketchUtils.makeIntoSketch">makeIntoSketch() (in module qmt.geometry.freecad.sketchUtils)</a>
 </li>
-      <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.makeSAG">makeSAG() (in module qmt.geometry.freecad.objectConstruction)</a>
-</li>
-      <li><a href="rst/dev_overview.html#qmt.Material">Material (class in qmt)</a>
-
-      <ul>
-        <li><a href="source/qmt.html#qmt.materials.Material">(class in qmt.materials)</a>
-</li>
-      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.makeSAG">makeSAG() (in module qmt.geometry.freecad.objectConstruction)</a>
+</li>
+      <li><a href="source/qmt.html#qmt.materials.Material">Material (class in qmt.materials)</a>
+</li>
       <li><a href="source/qmt.geometry.html#qmt.geometry.property_map.MaterialPropertyMap">MaterialPropertyMap (class in qmt.geometry.property_map)</a>
 </li>
       <li><a href="rst/dev_overview.html#qmt.Materials">Materials (class in qmt)</a>
@@ -475,15 +512,7 @@
         <li><a href="source/qmt.html#qmt.materials.Materials">(class in qmt.materials)</a>
 </li>
       </ul></li>
-      <li><a href="source/qmt.ms_tasks.html#qmt.ms_tasks.mesh.Mesh">Mesh (class in qmt.ms_tasks.mesh)</a>
-</li>
-      <li><a href="source/qmt.ms_tasks.html#qmt.ms_tasks.mesh.Mesh1D">Mesh1D (class in qmt.ms_tasks.mesh)</a>
-</li>
-      <li><a href="source/qmt.ms_tasks.html#qmt.ms_tasks.mesh.Mesh2D">Mesh2D (class in qmt.ms_tasks.mesh)</a>
-</li>
-      <li><a href="source/qmt.ms_tasks.html#qmt.ms_tasks.mesh.Mesh3D">Mesh3D (class in qmt.ms_tasks.mesh)</a>
-</li>
-      <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.modelBuilder">modelBuilder (class in qmt.geometry.freecad.objectConstruction)</a>
+      <li><a href="source/qmt.data.html#qmt.data.mobility_data.MobilityData">MobilityData (class in qmt.data.mobility_data)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -492,6 +521,14 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.sketchUtils.nextSegment">nextSegment() (in module qmt.geometry.freecad.sketchUtils)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="O">O</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepWithData.only">only() (qmt.tasks.sweep.ReducedSweepWithData method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -505,19 +542,11 @@
         <li><a href="source/qmt.html#qmt.physics_constants.parse_unit">(in module qmt.physics_constants)</a>
 </li>
       </ul></li>
-      <li><a href="source/qmt.geometry.html#qmt.geometry.parts.Part3D">Part3D (class in qmt.geometry.parts)</a>
-</li>
-      <li><a href="source/qmt.visualization.html#qmt.visualization.plot.plot">plot() (in module qmt.visualization.plot)</a>
-</li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="source/qmt.ms_tasks.html#qmt.ms_tasks.poisson_task.PoissonTask">PoissonTask (class in qmt.ms_tasks.poisson_task)</a>
+      <li><a href="source/qmt.data.html#qmt.data.part_data.Part3DData">Part3DData (class in qmt.data.part_data)</a>
 </li>
-      <li><a href="source/qmt.ms_tasks.html#qmt.ms_tasks.potential_data.Potential1D">Potential1D (class in qmt.ms_tasks.potential_data)</a>
-</li>
-      <li><a href="source/qmt.ms_tasks.html#qmt.ms_tasks.potential_data.Potential2D">Potential2D (class in qmt.ms_tasks.potential_data)</a>
-</li>
-      <li><a href="source/qmt.ms_tasks.html#qmt.ms_tasks.potential_data.Potential3D">Potential3D (class in qmt.ms_tasks.potential_data)</a>
+      <li><a href="source/qmt.visualization.html#qmt.visualization.plot.plot">plot() (in module qmt.visualization.plot)</a>
 </li>
       <li><a href="source/qmt.geometry.html#qmt.geometry.property_map.PropertyMap">PropertyMap (class in qmt.geometry.property_map)</a>
 </li>
@@ -529,11 +558,23 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="rst/dev_overview.html#module-qmt">qmt (module)</a>, <a href="source/qmt.html#module-qmt">[1]</a>
 </li>
-      <li><a href="source/qmt.basic_tasks.html#module-qmt.basic_tasks">qmt.basic_tasks (module)</a>
+      <li><a href="source/qmt.data.html#module-qmt.data">qmt.data (module)</a>
 </li>
-      <li><a href="source/qmt.basic_tasks.html#module-qmt.basic_tasks.geometry">qmt.basic_tasks.geometry (module)</a>
+      <li><a href="source/qmt.data.html#module-qmt.data.data_utils">qmt.data.data_utils (module)</a>
 </li>
-      <li><a href="source/qmt.basic_tasks.html#module-qmt.basic_tasks.reduce_dim">qmt.basic_tasks.reduce_dim (module)</a>
+      <li><a href="source/qmt.data.html#module-qmt.data.density_data">qmt.data.density_data (module)</a>
+</li>
+      <li><a href="source/qmt.data.html#module-qmt.data.geo_data">qmt.data.geo_data (module)</a>
+</li>
+      <li><a href="source/qmt.data.html#module-qmt.data.mobility_data">qmt.data.mobility_data (module)</a>
+</li>
+      <li><a href="source/qmt.data.html#module-qmt.data.part_data">qmt.data.part_data (module)</a>
+</li>
+      <li><a href="source/qmt.data.html#module-qmt.data.schrodinger_poisson_data">qmt.data.schrodinger_poisson_data (module)</a>
+</li>
+      <li><a href="source/qmt.data.html#module-qmt.data.template">qmt.data.template (module)</a>
+</li>
+      <li><a href="source/qmt.data.html#module-qmt.data.thomas_fermi_data">qmt.data.thomas_fermi_data (module)</a>
 </li>
       <li><a href="source/qmt.geometry.html#module-qmt.geometry">qmt.geometry (module)</a>
 </li>
@@ -549,43 +590,39 @@
 </li>
       <li><a href="source/qmt.geometry.freecad.html#module-qmt.geometry.freecad.run">qmt.geometry.freecad.run (module)</a>
 </li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="source/qmt.geometry.freecad.html#module-qmt.geometry.freecad.sketchUtils">qmt.geometry.freecad.sketchUtils (module)</a>
 </li>
       <li><a href="source/qmt.geometry.html#module-qmt.geometry.freecad_wrapper">qmt.geometry.freecad_wrapper (module)</a>
 </li>
-      <li><a href="source/qmt.geometry.html#module-qmt.geometry.geo_data">qmt.geometry.geo_data (module)</a>
-</li>
-      <li><a href="source/qmt.geometry.html#module-qmt.geometry.parts">qmt.geometry.parts (module)</a>
-</li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="source/qmt.geometry.html#module-qmt.geometry.property_map">qmt.geometry.property_map (module)</a>
 </li>
       <li><a href="source/qmt.html#module-qmt.materials">qmt.materials (module)</a>
 </li>
-      <li><a href="source/qmt.ms_tasks.html#module-qmt.ms_tasks">qmt.ms_tasks (module)</a>
-</li>
-      <li><a href="source/qmt.ms_tasks.html#module-qmt.ms_tasks.density_data">qmt.ms_tasks.density_data (module)</a>
-</li>
-      <li><a href="source/qmt.ms_tasks.html#module-qmt.ms_tasks.mesh">qmt.ms_tasks.mesh (module)</a>
-</li>
-      <li><a href="source/qmt.ms_tasks.html#module-qmt.ms_tasks.poisson_task">qmt.ms_tasks.poisson_task (module)</a>
-</li>
-      <li><a href="source/qmt.ms_tasks.html#module-qmt.ms_tasks.potential_data">qmt.ms_tasks.potential_data (module)</a>
-</li>
       <li><a href="source/qmt.html#module-qmt.physics_constants">qmt.physics_constants (module)</a>
 </li>
-      <li><a href="source/qmt.task_framework.html#module-qmt.task_framework">qmt.task_framework (module)</a>
+      <li><a href="source/qmt.tasks.html#module-qmt.tasks">qmt.tasks (module)</a>
 </li>
-      <li><a href="source/qmt.task_framework.html#module-qmt.task_framework.data_template">qmt.task_framework.data_template (module)</a>
+      <li><a href="source/qmt.tasks.basic.html#module-qmt.tasks.basic">qmt.tasks.basic (module)</a>
 </li>
-      <li><a href="source/qmt.task_framework.html#module-qmt.task_framework.sweep">qmt.task_framework.sweep (module)</a>
+      <li><a href="source/qmt.tasks.basic.html#module-qmt.tasks.basic.geometry">qmt.tasks.basic.geometry (module)</a>
 </li>
-      <li><a href="source/qmt.task_framework.html#module-qmt.task_framework.task">qmt.task_framework.task (module)</a>
+      <li><a href="source/qmt.tasks.basic.html#module-qmt.tasks.basic.reduce_dim">qmt.tasks.basic.reduce_dim (module)</a>
+</li>
+      <li><a href="source/qmt.tasks.ms.html#module-qmt.tasks.ms">qmt.tasks.ms (module)</a>
+</li>
+      <li><a href="source/qmt.tasks.html#module-qmt.tasks.sweep">qmt.tasks.sweep (module)</a>
+</li>
+      <li><a href="source/qmt.tasks.html#module-qmt.tasks.task">qmt.tasks.task (module)</a>
 </li>
       <li><a href="source/qmt.visualization.html#module-qmt.visualization">qmt.visualization (module)</a>
 </li>
       <li><a href="source/qmt.visualization.html#module-qmt.visualization.density_1d_plot">qmt.visualization.density_1d_plot (module)</a>
+</li>
+      <li><a href="source/qmt.visualization.html#module-qmt.visualization.density_2d_plot">qmt.visualization.density_2d_plot (module)</a>
+</li>
+      <li><a href="source/qmt.visualization.html#module-qmt.visualization.mobility_plots">qmt.visualization.mobility_plots (module)</a>
 </li>
       <li><a href="source/qmt.visualization.html#module-qmt.visualization.plot">qmt.visualization.plot (module)</a>
 </li>
@@ -597,93 +634,107 @@
 <h2 id="R">R</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.task.Task.reduce">reduce() (qmt.task_framework.task.Task method)</a>
+      <li><a href="source/qmt.tasks.basic.html#qmt.tasks.basic.reduce_dim.ReduceDim2D">ReduceDim2D (class in qmt.tasks.basic.reduce_dim)</a>
 </li>
-      <li><a href="source/qmt.basic_tasks.html#qmt.basic_tasks.reduce_dim.ReduceDim2D">ReduceDim2D (class in qmt.basic_tasks.reduce_dim)</a>
+      <li><a href="source/qmt.tasks.basic.html#qmt.tasks.basic.reduce_dim.ReduceDim3D">ReduceDim3D (class in qmt.tasks.basic.reduce_dim)</a>
 </li>
-      <li><a href="source/qmt.basic_tasks.html#qmt.basic_tasks.reduce_dim.ReduceDim3D">ReduceDim3D (class in qmt.basic_tasks.reduce_dim)</a>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweep">ReducedSweep (class in qmt.tasks.sweep)</a>
 </li>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.sweep.ReducedSweep">ReducedSweep (class in qmt.task_framework.sweep)</a>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepDelayed">ReducedSweepDelayed (class in qmt.tasks.sweep)</a>
 </li>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.sweep.ReducedSweepDelayed">ReducedSweepDelayed (class in qmt.task_framework.sweep)</a>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepFutures">ReducedSweepFutures (class in qmt.tasks.sweep)</a>
 </li>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.sweep.ReducedSweepFutures">ReducedSweepFutures (class in qmt.task_framework.sweep)</a>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepResults">ReducedSweepResults (class in qmt.tasks.sweep)</a>
 </li>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.task.TaskMetaclass.register_class">register_class() (qmt.task_framework.task.TaskMetaclass static method)</a>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepWithData">ReducedSweepWithData (class in qmt.tasks.sweep)</a>
 </li>
-      <li><a href="source/qmt.geometry.html#qmt.geometry.geo_data.Geo2DData.remove_edge">remove_edge() (qmt.geometry.geo_data.Geo2DData method)</a>
+      <li><a href="source/qmt.html#qmt.materials.Materials.reference_level">reference_level() (qmt.materials.Materials method)</a>
+</li>
+      <li><a href="source/qmt.data.html#qmt.data.geo_data.Geo2DData.remove_edge">remove_edge() (qmt.data.geo_data.Geo2DData method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="source/qmt.geometry.html#qmt.geometry.geo_data.Geo1DData.remove_part">remove_part() (qmt.geometry.geo_data.Geo1DData method)</a>
+      <li><a href="source/qmt.data.html#qmt.data.geo_data.Geo1DData.remove_part">remove_part() (qmt.data.geo_data.Geo1DData method)</a>
 
       <ul>
-        <li><a href="source/qmt.geometry.html#qmt.geometry.geo_data.Geo2DData.remove_part">(qmt.geometry.geo_data.Geo2DData method)</a>
+        <li><a href="source/qmt.data.html#qmt.data.geo_data.Geo2DData.remove_part">(qmt.data.geo_data.Geo2DData method)</a>
 </li>
-        <li><a href="source/qmt.geometry.html#qmt.geometry.geo_data.Geo3DData.remove_part">(qmt.geometry.geo_data.Geo3DData method)</a>
-</li>
-      </ul></li>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.sweep.SweepTag.replace">replace() (qmt.task_framework.sweep.SweepTag method)</a>
-</li>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.sweep.replace_tag_with_value">replace_tag_with_value() (in module qmt.task_framework.sweep)</a>
-</li>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.sweep.replace_tag_with_value_list">replace_tag_with_value_list() (in module qmt.task_framework.sweep)</a>
-</li>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.sweep.SweepManager.run">run() (qmt.task_framework.sweep.SweepManager method)</a>
-
-      <ul>
-        <li><a href="source/qmt.task_framework.html#qmt.task_framework.task.Task.run">(qmt.task_framework.task.Task method)</a>
+        <li><a href="source/qmt.data.html#qmt.data.geo_data.Geo3DData.remove_part">(qmt.data.geo_data.Geo3DData method)</a>
 </li>
       </ul></li>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.SweepTag.replace">replace() (qmt.tasks.sweep.SweepTag method)</a>
+</li>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.replace_tag_with_value">replace_tag_with_value() (in module qmt.tasks.sweep)</a>
+</li>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.replace_tag_with_value_list">replace_tag_with_value_list() (in module qmt.tasks.sweep)</a>
+</li>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepFutures.result">result() (qmt.tasks.sweep.ReducedSweepFutures method)</a>
+</li>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.SweepManager.run">run() (qmt.tasks.sweep.SweepManager method)</a>
+</li>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.task.Task.run_daskless">run_daskless() (qmt.tasks.task.Task method)</a>
+</li>
   </ul></td>
 </tr></table>
 
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="rst/dev_overview.html#qmt.Materials.save">save() (qmt.Materials method)</a>
+      <li><a href="source/qmt.data.html#qmt.data.template.Data.save">save() (qmt.data.template.Data method)</a>
 
       <ul>
-        <li><a href="source/qmt.html#qmt.materials.Materials.save">(qmt.materials.Materials method)</a>
+        <li><a href="rst/dev_overview.html#qmt.Materials.save">(qmt.Materials method)</a>
 </li>
-        <li><a href="source/qmt.task_framework.html#qmt.task_framework.data_template.Data.save">(qmt.task_framework.data_template.Data method)</a>
+        <li><a href="source/qmt.html#qmt.materials.Materials.save">(qmt.materials.Materials method)</a>
 </li>
       </ul></li>
       <li><a href="source/qmt.visualization.html#qmt.visualization.plot_helpers.save_relevant_data">save_relevant_data() (in module qmt.visualization.plot_helpers)</a>
 </li>
-      <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.modelBuilder.saveFreeCADState">saveFreeCADState() (qmt.geometry.freecad.objectConstruction.modelBuilder method)</a>
+      <li><a href="source/qmt.data.html#qmt.data.schrodinger_poisson_data.SchrodingerPoissonData">SchrodingerPoissonData (class in qmt.data.schrodinger_poisson_data)</a>
+</li>
+      <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.screened_A_UnionList">screened_A_UnionList() (in module qmt.geometry.freecad.objectConstruction)</a>
+</li>
+      <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.screened_H_union_list">screened_H_union_list() (in module qmt.geometry.freecad.objectConstruction)</a>
 </li>
       <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.run.send_back">send_back() (in module qmt.geometry.freecad.run)</a>
 </li>
-      <li><a href="rst/dev_overview.html#qmt.Material.serialize_dict">serialize_dict() (qmt.Material method)</a>
+      <li><a href="source/qmt.data.html#qmt.data.data_utils.serialised_file">serialised_file() (in module qmt.data.data_utils)</a>
+</li>
+      <li><a href="source/qmt.html#qmt.materials.Material.serialize_dict">serialize_dict() (qmt.materials.Material method)</a>
 
       <ul>
-        <li><a href="source/qmt.html#qmt.materials.Material.serialize_dict">(qmt.materials.Material method)</a>
-</li>
         <li><a href="source/qmt.html#qmt.materials.Materials.serialize_dict">(qmt.materials.Materials method)</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="rst/dev_overview.html#qmt.Materials.set_bowing_parameters">set_bowing_parameters() (qmt.Materials method)</a>
 
       <ul>
         <li><a href="source/qmt.html#qmt.materials.Materials.set_bowing_parameters">(qmt.materials.Materials method)</a>
 </li>
       </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="source/qmt.data.html#qmt.data.geo_data.Geo3DData.set_data">set_data() (qmt.data.geo_data.Geo3DData method)</a>
+</li>
+      <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.set_params">set_params() (in module qmt.geometry.freecad.objectConstruction)</a>
+</li>
+      <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.auxiliary.silent_stdout">silent_stdout() (in module qmt.geometry.freecad.auxiliary)</a>
+</li>
       <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.sketchUtils.splitSketch">splitSketch() (in module qmt.geometry.freecad.sketchUtils)</a>
 </li>
-      <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.sketchUtils.splitSketch_old">splitSketch_old() (in module qmt.geometry.freecad.sketchUtils)</a>
-</li>
-      <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.fileIO.store_serial">store_serial() (in module qmt.geometry.freecad.fileIO)</a>
+      <li><a href="source/qmt.data.html#qmt.data.data_utils.store_serial">store_serial() (in module qmt.data.data_utils)</a>
 </li>
       <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.subtract">subtract() (in module qmt.geometry.freecad.geomUtils)</a>
 </li>
       <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.subtractParts">subtractParts() (in module qmt.geometry.freecad.geomUtils)</a>
 </li>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.sweep.SweepManager">SweepManager (class in qmt.task_framework.sweep)</a>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepWithData.sweep_and_empty_data_from_manager_and_tags">sweep_and_empty_data_from_manager_and_tags() (qmt.tasks.sweep.ReducedSweepWithData static method)</a>
 </li>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.sweep.SweepTag">SweepTag (class in qmt.task_framework.sweep)</a>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepWithData.sweep_points_to_data">sweep_points_to_data() (qmt.tasks.sweep.ReducedSweepWithData method)</a>
+</li>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.SweepManager">SweepManager (class in qmt.tasks.sweep)</a>
+</li>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.SweepTag">SweepTag (class in qmt.tasks.sweep)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -691,9 +742,9 @@
 <h2 id="T">T</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.task.Task">Task (class in qmt.task_framework.task)</a>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.task.Task">Task (class in qmt.tasks.task)</a>
 </li>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.task.TaskMetaclass">TaskMetaclass (class in qmt.task_framework.task)</a>
+      <li><a href="source/qmt.data.html#qmt.data.thomas_fermi_data.ThomasFermiData">ThomasFermiData (class in qmt.data.thomas_fermi_data)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -706,14 +757,6 @@
   </ul></td>
 </tr></table>
 
-<h2 id="U">U</h2>
-<table style="width: 100%" class="indextable genindextable"><tr>
-  <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="source/qmt.geometry.freecad.html#qmt.geometry.freecad.fileIO.updateParams">updateParams() (in module qmt.geometry.freecad.fileIO)</a>
-</li>
-  </ul></td>
-</tr></table>
-
 <h2 id="V">V</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
@@ -723,24 +766,20 @@
         <li><a href="source/qmt.html#qmt.materials.Materials.valence_band_maximum">(qmt.materials.Materials method)</a>
 </li>
       </ul></li>
-      <li><a href="rst/dev_overview.html#qmt.valence_band_offset">valence_band_offset() (in module qmt)</a>
-
-      <ul>
-        <li><a href="source/qmt.html#qmt.materials.valence_band_offset">(in module qmt.materials)</a>
+      <li><a href="source/qmt.html#qmt.materials.valence_band_offset">valence_band_offset() (in module qmt.materials)</a>
 </li>
-      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.sweep.ReducedSweepDelayed.visualize_entire_sweep">visualize_entire_sweep() (qmt.task_framework.sweep.ReducedSweepDelayed method)</a>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepDelayed.visualize_entire_sweep">visualize_entire_sweep() (qmt.tasks.sweep.ReducedSweepDelayed method)</a>
 
       <ul>
-        <li><a href="source/qmt.task_framework.html#qmt.task_framework.task.Task.visualize_entire_sweep">(qmt.task_framework.task.Task method)</a>
+        <li><a href="source/qmt.tasks.html#qmt.tasks.task.Task.visualize_entire_sweep">(qmt.tasks.task.Task method)</a>
 </li>
       </ul></li>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.sweep.ReducedSweepDelayed.visualize_single_sweep_element">visualize_single_sweep_element() (qmt.task_framework.sweep.ReducedSweepDelayed method)</a>
+      <li><a href="source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepDelayed.visualize_single_sweep_element">visualize_single_sweep_element() (qmt.tasks.sweep.ReducedSweepDelayed method)</a>
 
       <ul>
-        <li><a href="source/qmt.task_framework.html#qmt.task_framework.task.Task.visualize_single_sweep_element">(qmt.task_framework.task.Task method)</a>
+        <li><a href="source/qmt.tasks.html#qmt.tasks.task.Task.visualize_single_sweep_element">(qmt.tasks.task.Task method)</a>
 </li>
       </ul></li>
   </ul></td>
@@ -749,13 +788,13 @@
 <h2 id="W">W</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="source/qmt.task_framework.html#qmt.task_framework.sweep.ReducedSweepFutures.wait">wait() (qmt.task_framework.sweep.ReducedSweepFutures method)</a>
+      <li><a href="source/qmt.data.html#qmt.data.data_utils.write_deserialised">write_deserialised() (in module qmt.data.data_utils)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="source/qmt.geometry.html#qmt.geometry.geo_data.Geo3DData.write_fcstd">write_fcstd() (qmt.geometry.geo_data.Geo3DData method)</a>
+      <li><a href="source/qmt.data.html#qmt.data.geo_data.Geo3DData.write_fcstd">write_fcstd() (qmt.data.geo_data.Geo3DData method)</a>
 </li>
-      <li><a href="source/qmt.geometry.html#qmt.geometry.parts.Part3D.write_stp">write_stp() (qmt.geometry.parts.Part3D method)</a>
+      <li><a href="source/qmt.data.html#qmt.data.part_data.Part3DData.write_stp">write_stp() (qmt.data.part_data.Part3DData method)</a>
 </li>
   </ul></td>
 </tr></table>

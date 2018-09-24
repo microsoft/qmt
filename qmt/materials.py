@@ -358,7 +358,7 @@ class Materials(collections.Mapping):
         effectively falling back on Anderson's rule.
 
         Parameters
-        ---------
+        ----------
         mat: Material
             Material whose conduction band position is to be determined.
 

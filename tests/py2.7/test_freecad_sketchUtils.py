@@ -167,11 +167,3 @@ def test_extendSketch(fix_FCDoc):
 def test_makeIntoSketch(fix_FCDoc):
     #TODO
     pass
-
-def test_draftOffset(fix_FCDoc):
-    '''Check if draft offset resizes the object. TODO: edge cases'''
-    pl = FreeCAD.Placement()
-    pl.Base = vec(1, 1, 0)
-    draft = Draft.makeRectangle(length=2, height=2, placement=pl, face=False, support=None)
-    draft2 = draftOffset(draft, 20)
-    assert draft.Height.Value + 40 == draft2.Height.Value
