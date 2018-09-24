@@ -1,0 +1,303 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Qubit Modeling Tools (QMT) &mdash; QMT 2.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Tutorial" href="rst/tutorial.html" /> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="#" class="icon icon-home"> QMT
+          
+
+          
+            
+            <img src="_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="rst/tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="source/modules.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rst/dev_overview.html">Structure of QMT</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">QMT</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#">Docs</a> &raquo;</li>
+        
+      <li>Qubit Modeling Tools (QMT)</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="qubit-modeling-tools-qmt">
+<h1>Qubit Modeling Tools (QMT)<a class="headerlink" href="#qubit-modeling-tools-qmt" title="Permalink to this headline">¶</a></h1>
+<a class="reference external image-reference" href="https://travis-ci.org/Microsoft/qmt"><img alt="Build Status" src="https://travis-ci.org/Microsoft/qmt.svg?branch=master" /></a>
+<p>Welcome to our qubit modeling tools (qmt)! This package is designed to automate
+the setup of complex geometries appropriate to physical qubit simulations. This
+package is licensed with an MIT open source license.</p>
+<p>To set up your Python environment, see the <code class="docutils literal"><span class="pre">environment.yml</span></code> file. If you use
+<code class="docutils literal"><span class="pre">conda</span></code>, simply run</p>
+<div class="highlight-guess"><div class="highlight"><pre><span></span>conda env create -f environment.yml
+</pre></div>
+</div>
+<p>or only install <code class="docutils literal"><span class="pre">pyside</span></code> in your current environment with <code class="docutils literal"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">pyside</span></code></p>
+<p>and then use <code class="docutils literal"><span class="pre">pip</span></code> inside this repository</p>
+<div class="highlight-guess"><div class="highlight"><pre><span></span>pip install .
+</pre></div>
+</div>
+<p>Optionally per user (not system wide) and in development mode (symlinks)</p>
+<div class="highlight-guess"><div class="highlight"><pre><span></span>pip install --user -e .
+</pre></div>
+</div>
+<p>A significant part of the repository consists of Python functions and macros to
+be executed within FreeCAD, either interactively or in batch mode. These
+require the latest stable version of FreeCAD (0.17). Currently, FreeCAD only
+supports Python 2.7. So while the non-FreeCAD sections of the code are designed
+to work with either Python 3.6 or Python 2.7, the FreeCAD module will only run
+with 2.7.</p>
+<p>Note that this initial release does not contain examples or introductory
+documentation, which we plan to add in time. If you want to get started, feel
+free to email John Gamble at <a class="reference external" href="mailto:john&#46;gamble&#37;&#52;&#48;microsoft&#46;com">john<span>&#46;</span>gamble<span>&#64;</span>microsoft<span>&#46;</span>com</a>.</p>
+</div>
+<div class="section" id="development-notes">
+<h1>Development notes<a class="headerlink" href="#development-notes" title="Permalink to this headline">¶</a></h1>
+<p>We are using GitHub Flow for the development of this code. Please see
+<a class="reference external" href="https://guides.github.com/introduction/flow/">here</a>
+for a tutorial.</p>
+</div>
+<div class="section" id="contributing">
+<h1>Contributing<a class="headerlink" href="#contributing" title="Permalink to this headline">¶</a></h1>
+<p>This project welcomes contributions and suggestions, but please coordinate with
+the maintainers before setting out to implement significant changes or new
+features. Most contributions require you to agree to a Contributor License
+Agreement (CLA) declaring that you have the right to, and actually do, grant us
+the rights to use your contribution. For details, visit
+<a class="reference external" href="https://cla.microsoft.com">https://cla.microsoft.com</a>.</p>
+<p>When you submit a pull request, a CLA-bot will automatically determine whether
+you need to provide a CLA and decorate the PR appropriately (e.g., label,
+comment). Simply follow the instructions provided by the bot. You will only need
+to do this once across all repositories using our CLA.</p>
+<p>This project has adopted the <a class="reference external" href="https://opensource.microsoft.com/codeofconduct/">Microsoft Open Source Code of Conduct</a>.
+For more information see the <a class="reference external" href="https://opensource.microsoft.com/codeofconduct/faq/">Code of Conduct FAQ</a>
+or contact <a class="reference external" href="mailto:opencode&#37;&#52;&#48;microsoft&#46;com">opencode<span>&#64;</span>microsoft<span>&#46;</span>com</a> with any
+additional questions or comments.</p>
+<div class="toctree-wrapper compound">
+<p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="rst/tutorial.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="rst/tutorial.html#geometry-sweep">Geometry Sweep</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rst/tutorial.html#hello-world-task">Hello World Task</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="source/modules.html">Modules</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="source/qmt.html">qmt package</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="rst/dev_overview.html">Structure of QMT</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="rst/dev_overview.html#package-overview">Package Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rst/dev_overview.html#class-overview">Class Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rst/dev_overview.html#module-qmt">Direct QMT Package Member Documentation</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></li>
+<li><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></li>
+</ul>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="rst/tutorial.html" class="btn btn-neutral float-right" title="Tutorial" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Microsoft Corporation.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'2.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

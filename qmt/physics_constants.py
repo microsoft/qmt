@@ -2,10 +2,11 @@
 # Licensed under the MIT License.
 
 from __future__ import absolute_import, division, print_function
+
 import sympy.physics.units as spu
 from scipy import constants as sc
-from sympy.physics.matrices import msigma
 from sympy.matrices import eye
+from sympy.physics.matrices import msigma
 from sympy.physics.quantum import TensorProduct as kron
 
 try:
@@ -51,7 +52,7 @@ units = SimpleNamespace(
 )
 
 
-def parseUnit(s):
+def parse_unit(s):
     """convert name of a unit into the corresponding sympy value"""
     for u in dir(units):
         if u[:2] == '__':
@@ -95,7 +96,7 @@ def cancel(expr):
     return canonicalize(expr, 1)
 
 
-def toFloat(expr):
+def to_float(expr):
     """Convert sympy expression involving units to a float. Fails if expr is not dimensionless."""
     return float(cancel(expr))
 
@@ -106,11 +107,25 @@ matrices = SimpleNamespace(
     s_y=msigma(2),
     s_z=msigma(3),
 )
-matrices.tau_z0 = kron(matrices.s_z, matrices.s_0)
+
 matrices.tau_00 = kron(matrices.s_0, matrices.s_0)
+matrices.tau_0x = kron(matrices.s_0, matrices.s_x)
+matrices.tau_0y = kron(matrices.s_0, matrices.s_y)
+matrices.tau_0z = kron(matrices.s_0, matrices.s_z)
+
+matrices.tau_x0 = kron(matrices.s_x, matrices.s_0)
+matrices.tau_xx = kron(matrices.s_x, matrices.s_x)
+matrices.tau_xy = kron(matrices.s_x, matrices.s_y)
+matrices.tau_xz = kron(matrices.s_x, matrices.s_z)
+
+matrices.tau_y0 = kron(matrices.s_y, matrices.s_0)
+matrices.tau_yx = kron(matrices.s_y, matrices.s_x)
+matrices.tau_yy = kron(matrices.s_y, matrices.s_y)
+matrices.tau_yz = kron(matrices.s_y, matrices.s_z)
+
+matrices.tau_z0 = kron(matrices.s_z, matrices.s_0)
 matrices.tau_zx = kron(matrices.s_z, matrices.s_x)
 matrices.tau_zy = kron(matrices.s_z, matrices.s_y)
 matrices.tau_zz = kron(matrices.s_z, matrices.s_z)
-matrices.tau_yy = kron(matrices.s_y, matrices.s_y)
 
-__all__ = ["units", "constants", "matrices", "parseUnit", "toFloat"]
+__all__ = ["units", "constants", "matrices", "parse_unit", "to_float"]

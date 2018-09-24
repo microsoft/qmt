@@ -1,0 +1,270 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>qmt.visualization.density_2d_plot &mdash; QMT 2.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> QMT
+          
+
+          
+            
+            <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../rst/tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/modules.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rst/dev_overview.html">Structure of QMT</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">QMT</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>qmt.visualization.density_2d_plot</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for qmt.visualization.density_2d_plot</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">qmt.visualization.plot_helpers</span> <span class="k">import</span> <span class="n">save_relevant_data</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<div class="viewcode-block" id="generate_2d_density_plot"><a class="viewcode-back" href="../../../source/qmt.visualization.html#qmt.visualization.density_2d_plot.generate_2d_density_plot">[docs]</a><span class="k">def</span> <span class="nf">generate_2d_density_plot</span><span class="p">(</span><span class="n">generic_task</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">dask_client</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function takes as input a 2D ThomasFermi or SchrodingerPoisson task, and a filename. </span>
+<span class="sd">    It then saves all of the data relevant to this plot.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">dask_client</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">dask_client</span> <span class="o">=</span> <span class="n">generic_task</span><span class="o">.</span><span class="n">sweep_manager</span><span class="o">.</span><span class="n">dask_client</span>
+    <span class="k">def</span> <span class="nf">_get_relevant_data</span><span class="p">(</span><span class="n">density_data</span><span class="p">):</span>
+        <span class="n">density_data</span><span class="o">.</span><span class="n">_serialize</span><span class="p">()</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">output</span><span class="p">[</span><span class="s1">&#39;rho&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">density_data</span><span class="o">.</span><span class="n">content</span><span class="p">[</span><span class="s1">&#39;rho&#39;</span><span class="p">]</span>
+        <span class="n">output</span><span class="p">[</span><span class="s1">&#39;rho_units&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">density_data</span><span class="o">.</span><span class="n">content</span><span class="p">[</span><span class="s1">&#39;rho_units&#39;</span><span class="p">]</span>
+        <span class="n">output</span><span class="p">[</span><span class="s1">&#39;mesh&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">density_data</span><span class="o">.</span><span class="n">content</span><span class="p">[</span><span class="s1">&#39;mesh&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">()</span>
+        <span class="n">output</span><span class="p">[</span><span class="s1">&#39;mesh_units&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">density_data</span><span class="o">.</span><span class="n">content</span><span class="p">[</span><span class="s1">&#39;mesh_units&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">output</span>
+    
+    <span class="n">save_relevant_data</span><span class="p">(</span><span class="n">generic_task</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">dask_client</span><span class="p">,</span> <span class="n">_get_relevant_data</span><span class="p">,</span> <span class="n">plot_type</span> <span class="o">=</span> <span class="s1">&#39;2d_density_plot&#39;</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_plot_2d_density</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">hv</span><span class="p">):</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function is called by the qmt.visualizer.plot function - it is responsible for generating the</span>
+<span class="sd">    Holoviews plots</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#First, read in the relevant data</span>
+    <span class="n">data_file</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span>
+    <span class="n">kdims</span> <span class="o">=</span> <span class="n">data_file</span><span class="p">[</span><span class="s1">&#39;list_of_tags&#39;</span><span class="p">]</span>
+    <span class="n">points</span> <span class="o">=</span> <span class="n">data_file</span><span class="p">[</span><span class="s1">&#39;tagged_value_list&#39;</span><span class="p">]</span>
+    <span class="n">densities</span> <span class="o">=</span> <span class="p">[</span><span class="n">data_file</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">index</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_rho&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">))]</span>
+    <span class="n">density_units</span> <span class="o">=</span> <span class="p">[</span><span class="n">data_file</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">index</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_rho_units&#39;</span><span class="p">][()]</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">))]</span>
+    <span class="n">meshes</span> <span class="o">=</span> <span class="p">[</span><span class="n">data_file</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">index</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_mesh&#39;</span><span class="p">]</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">))]</span>
+    <span class="n">mesh_units</span> <span class="o">=</span> <span class="p">[</span><span class="n">data_file</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">index</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_mesh_units&#39;</span><span class="p">][()]</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">))]</span>
+    <span class="c1">#Next, we define the plots</span>
+    <span class="k">def</span> <span class="nf">density_plot</span><span class="p">(</span><span class="n">index</span><span class="p">):</span>
+        <span class="n">mesh_data</span> <span class="o">=</span> <span class="n">meshes</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="n">density_data</span> <span class="o">=</span> <span class="n">densities</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+        <span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">mesh_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="mi">0</span><span class="p">,:]</span>
+        <span class="n">ys</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">mesh_data</span><span class="p">[</span><span class="mi">1</span><span class="p">])[:,</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1">#This plots the electrons and holes on top of one another in a log scale</span>
+        <span class="n">im1</span> <span class="o">=</span> <span class="n">hv</span><span class="o">.</span><span class="n">Image</span><span class="p">((</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">density_data</span><span class="p">)</span><span class="o">&lt;-</span><span class="mf">1.e16</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">density_data</span><span class="p">)))),</span>
+                               <span class="n">kdims</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;x (&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">mesh_units</span><span class="p">[</span><span class="n">index</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39;)&#39;</span><span class="p">),(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span><span class="s1">&#39;y (&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">mesh_units</span><span class="p">[</span><span class="n">index</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39;)&#39;</span><span class="p">)],</span>
+                               <span class="n">vdims</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;density&#39;</span><span class="p">,</span><span class="s1">&#39;electron density (e/&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">density_units</span><span class="p">[</span><span class="n">index</span><span class="p">])</span><span class="o">+</span><span class="sa">r</span><span class="s1">&#39;$^3$)&#39;</span><span class="p">)],</span><span class="n">group</span><span class="o">=</span><span class="s1">&#39;electrons&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">options</span><span class="p">(</span><span class="n">clims</span><span class="o">=</span><span class="p">(</span><span class="mf">1.e16</span><span class="p">,</span><span class="mf">1.e19</span><span class="p">),</span><span class="n">logz</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">im2</span> <span class="o">=</span> <span class="n">hv</span><span class="o">.</span><span class="n">Image</span><span class="p">((</span><span class="n">xs</span><span class="p">,</span> <span class="n">ys</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">density_data</span><span class="p">)</span><span class="o">&gt;</span><span class="mf">1.e16</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">density_data</span><span class="p">)))),</span>
+                               <span class="n">kdims</span><span class="o">=</span><span class="p">[(</span><span class="s1">&#39;x&#39;</span><span class="p">,</span><span class="s1">&#39;x (&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">mesh_units</span><span class="p">[</span><span class="n">index</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39;)&#39;</span><span class="p">),(</span><span class="s1">&#39;y&#39;</span><span class="p">,</span><span class="s1">&#39;y (&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">mesh_units</span><span class="p">[</span><span class="n">index</span><span class="p">])</span><span class="o">+</span><span class="s1">&#39;)&#39;</span><span class="p">)],</span>
+                               <span class="n">vdims</span> <span class="o">=</span> <span class="p">[(</span><span class="s1">&#39;density&#39;</span><span class="p">,</span><span class="s1">&#39;hole density (e/&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">density_units</span><span class="p">[</span><span class="n">index</span><span class="p">])</span><span class="o">+</span><span class="sa">r</span><span class="s1">&#39;$^3$)&#39;</span><span class="p">)],</span><span class="n">group</span><span class="o">=</span><span class="s1">&#39;holes&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">options</span><span class="p">(</span><span class="n">clims</span><span class="o">=</span><span class="p">(</span><span class="mf">1.e16</span><span class="p">,</span><span class="mf">1.e19</span><span class="p">),</span><span class="n">logz</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">hv</span><span class="o">.</span><span class="n">opts</span><span class="p">(</span><span class="s2">&quot;Image.electrons (cmap=&#39;Reds&#39;) [colorbar=True,cbar_padding=0]&quot;</span><span class="p">)</span>
+        <span class="n">hv</span><span class="o">.</span><span class="n">opts</span><span class="p">(</span><span class="s2">&quot;Image.holes (cmap=&#39;Blues&#39;) [colorbar=True,cbar_padding=0.1,title_format=&#39;Charge density&#39;]&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">im1</span><span class="o">*</span><span class="n">im2</span>
+    <span class="n">plot_dict</span> <span class="o">=</span> <span class="p">{</span><span class="nb">tuple</span><span class="p">(</span><span class="n">points</span><span class="p">[</span><span class="n">index</span><span class="p">]):</span><span class="n">density_plot</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">points</span><span class="p">))}</span>
+    <span class="c1">#Note that this is a Dynamic map, meaning it renders the plots live.</span>
+    <span class="k">return</span> <span class="n">hv</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">Dynamic</span><span class="p">(</span><span class="n">hv</span><span class="o">.</span><span class="n">HoloMap</span><span class="p">(</span><span class="n">plot_dict</span><span class="p">,</span> <span class="n">kdims</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">kdims</span><span class="p">)))</span>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Microsoft Corporation.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../../',
+            VERSION:'2.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

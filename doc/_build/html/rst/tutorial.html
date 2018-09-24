@@ -1,0 +1,388 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Tutorial &mdash; QMT 2.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="qmt" href="../source/modules.html" />
+    <link rel="prev" title="Qubit Modeling Tools (QMT)" href="../index.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> QMT
+          
+
+          
+            
+            <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#geometry-sweep">Geometry Sweep</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hello-world-task">Hello World Task</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../source/modules.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dev_overview.html">Structure of QMT</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QMT</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Tutorial</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/rst/tutorial.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="tutorial">
+<h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="geometry-sweep">
+<h2>Geometry Sweep<a class="headerlink" href="#geometry-sweep" title="Permalink to this headline">¶</a></h2>
+<p>This example showcases geometry building. It is directly executable as <cite>examples/geometry_sweep.py</cite>.</p>
+<p>A FreeCAD template document is located at <cite>examples/geometry_sweep_showcase.fcstd</cite>.
+It contains sketches with FreeCAD-internal names, which are visible when selecting an object
+(not to be confused with the human-readable labels in the model tree view).</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">qmt.data.part_data</span> <span class="kn">import</span> <span class="n">Part3DData</span>
+<span class="kn">from</span> <span class="nn">qmt.tasks.basic.geometry</span> <span class="kn">import</span> <span class="n">Geometry3D</span>
+<span class="kn">from</span> <span class="nn">qmt.tasks.sweep</span> <span class="kn">import</span> <span class="n">SweepTag</span><span class="p">,</span> <span class="n">SweepManager</span>
+
+</pre></div>
+</div>
+<p>First we use the internal names to generate <a class="reference internal" href="../source/qmt.data.html#qmt.data.part_data.Part3DData" title="qmt.data.part_data.Part3DData"><code class="xref py py-mod docutils literal"><span class="pre">qmt.data.part_data.Part3DData</span></code></a>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">block1</span> <span class="o">=</span> <span class="n">Part3DData</span><span class="p">(</span><span class="s1">&#39;Parametrised block&#39;</span><span class="p">,</span> <span class="s1">&#39;Sketch&#39;</span><span class="p">,</span> <span class="s1">&#39;extrude&#39;</span><span class="p">,</span> <span class="s1">&#39;dielectric&#39;</span><span class="p">,</span>
+                <span class="n">material</span><span class="o">=</span><span class="s1">&#39;air&#39;</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">z0</span><span class="o">=-</span><span class="mf">2.5</span><span class="p">)</span>
+<span class="n">block2</span> <span class="o">=</span> <span class="n">Part3DData</span><span class="p">(</span><span class="s1">&#39;Two blocks&#39;</span><span class="p">,</span> <span class="s1">&#39;Sketch001&#39;</span><span class="p">,</span> <span class="s1">&#39;extrude&#39;</span><span class="p">,</span> <span class="s1">&#39;metal_gate&#39;</span><span class="p">,</span>
+                <span class="n">material</span><span class="o">=</span><span class="s1">&#39;Au&#39;</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">sag</span> <span class="o">=</span> <span class="n">Part3DData</span><span class="p">(</span><span class="s1">&#39;Garage&#39;</span><span class="p">,</span> <span class="s1">&#39;Sketch002&#39;</span><span class="p">,</span> <span class="s1">&#39;SAG&#39;</span><span class="p">,</span> <span class="s1">&#39;metal_gate&#39;</span><span class="p">,</span>
+                <span class="n">material</span><span class="o">=</span><span class="s1">&#39;Au&#39;</span><span class="p">,</span> <span class="n">z0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">z_middle</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span>
+                <span class="n">t_in</span><span class="o">=</span><span class="mf">2.5</span><span class="p">,</span> <span class="n">t_out</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">wire</span> <span class="o">=</span> <span class="n">Part3DData</span><span class="p">(</span><span class="s1">&#39;Nanowire&#39;</span><span class="p">,</span> <span class="s1">&#39;Sketch003&#39;</span><span class="p">,</span> <span class="s1">&#39;wire&#39;</span><span class="p">,</span> <span class="s1">&#39;semiconductor&#39;</span><span class="p">,</span>
+                <span class="n">z0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">shell</span> <span class="o">=</span> <span class="n">Part3DData</span><span class="p">(</span><span class="s1">&#39;Wire cover&#39;</span><span class="p">,</span> <span class="s1">&#39;Sketch004&#39;</span><span class="p">,</span> <span class="s1">&#39;wire_shell&#39;</span><span class="p">,</span> <span class="s1">&#39;metal_gate&#39;</span><span class="p">,</span>
+                <span class="n">depo_mode</span><span class="o">=</span><span class="s1">&#39;depo&#39;</span><span class="p">,</span> <span class="n">target_wire</span><span class="o">=</span><span class="n">wire</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">shell_verts</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+<span class="n">block3</span> <span class="o">=</span> <span class="n">Part3DData</span><span class="p">(</span><span class="s1">&#39;Passthrough&#39;</span><span class="p">,</span> <span class="s1">&#39;Box&#39;</span><span class="p">,</span> <span class="s1">&#39;3d_shape&#39;</span><span class="p">,</span> <span class="s1">&#39;metal_gate&#39;</span><span class="p">)</span>
+<span class="n">substrate</span> <span class="o">=</span> <span class="n">Part3DData</span><span class="p">(</span><span class="s1">&#39;Substrate&#39;</span><span class="p">,</span> <span class="s1">&#39;Sketch005&#39;</span><span class="p">,</span> <span class="s1">&#39;extrude&#39;</span><span class="p">,</span> <span class="s1">&#39;dielectric&#39;</span><span class="p">,</span>
+                <span class="n">z0</span><span class="o">=-</span><span class="mi">2</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">wrap</span> <span class="o">=</span> <span class="n">Part3DData</span><span class="p">(</span><span class="s1">&#39;First Layer&#39;</span><span class="p">,</span> <span class="s1">&#39;Sketch006&#39;</span><span class="p">,</span> <span class="s1">&#39;lithography&#39;</span><span class="p">,</span> <span class="s1">&#39;dielectric&#39;</span><span class="p">,</span>
+                <span class="n">z0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">layer_num</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">litho_base</span><span class="o">=</span><span class="p">[</span><span class="n">substrate</span><span class="p">])</span>
+<span class="n">wrap2</span> <span class="o">=</span> <span class="n">Part3DData</span><span class="p">(</span><span class="s1">&#39;Second Layer&#39;</span><span class="p">,</span> <span class="s1">&#39;Sketch007&#39;</span><span class="p">,</span> <span class="s1">&#39;lithography&#39;</span><span class="p">,</span> <span class="s1">&#39;dielectric&#39;</span><span class="p">,</span>
+                <span class="n">layer_num</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+</pre></div>
+</div>
+<p>Then we package these 3D parts into a specific dict scheme, feed them to a <code class="code docutils literal"><span class="pre">Geometry3D</span></code> task and run it.
+The <code class="code docutils literal"><span class="pre">pyenv</span></code> path must correspond to a callable Python 2 interpreter.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>
+<span class="n">freecad_dict</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;pyenv&#39;</span><span class="p">:</span> <span class="s1">&#39;python2&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;input_file&#39;</span><span class="p">:</span> <span class="s1">&#39;geometry_sweep_showcase.fcstd&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;input_parts&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">block1</span><span class="p">,</span> <span class="n">block2</span><span class="p">,</span> <span class="n">sag</span><span class="p">,</span> <span class="n">wire</span><span class="p">,</span> <span class="n">shell</span><span class="p">,</span> <span class="n">block3</span><span class="p">,</span> <span class="n">substrate</span><span class="p">,</span> <span class="n">wrap</span><span class="p">,</span> <span class="n">wrap2</span><span class="p">],</span>
+    <span class="s1">&#39;params&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;d1&#39;</span><span class="p">:</span> <span class="n">tag1</span><span class="p">}</span>
+<span class="p">}</span>
+<span class="n">geo_task</span> <span class="o">=</span> <span class="n">Geometry3D</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="n">freecad_dict</span><span class="p">)</span>
+
+<span class="c1"># Run sweeps</span>
+<span class="n">sweeps</span> <span class="o">=</span> <span class="p">[{</span><span class="n">tag1</span><span class="p">:</span> <span class="n">val</span><span class="p">}</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">3</span><span class="p">)]</span>
+<span class="n">result</span> <span class="o">=</span> <span class="n">SweepManager</span><span class="p">(</span><span class="n">sweeps</span><span class="p">)</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">geo_task</span><span class="p">)</span>
+
+</pre></div>
+</div>
+<p>The result should contain three instances of the built geometry. They differ in the length of
+the ‘Parametrised Block’, which was set up to correspond to the parameter <code class="code docutils literal"><span class="pre">d1</span></code> in the template document.</p>
+<p>Finally we write these documents to a temporary directory for visual inspection, along with STEP exports of all objects.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s1">&#39;tmp&#39;</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="s1">&#39;tmp&#39;</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s2">&quot;Writing in directory tmp:&quot;</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">future</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">futures</span><span class="p">):</span>
+    <span class="n">geo</span> <span class="o">=</span> <span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Writing instance &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; to FreeCAD file.&#39;</span><span class="p">)</span>
+    <span class="n">geo</span><span class="o">.</span><span class="n">write_fcstd</span><span class="p">(</span><span class="s1">&#39;tmp/&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.fcstd&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">geo</span><span class="o">.</span><span class="n">parts</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;: &#39;</span> <span class="o">+</span> <span class="n">label</span> <span class="o">+</span>
+              <span class="s1">&#39; (&#39;</span> <span class="o">+</span> <span class="n">part</span><span class="o">.</span><span class="n">fc_name</span> <span class="o">+</span> <span class="s1">&#39; -&gt; &#39;</span> <span class="o">+</span> <span class="n">part</span><span class="o">.</span><span class="n">built_fc_name</span> <span class="o">+</span> <span class="s1">&#39;) to STEP file.&#39;</span><span class="p">)</span>
+        <span class="n">part</span><span class="o">.</span><span class="n">write_stp</span><span class="p">(</span><span class="s1">&#39;tmp/&#39;</span> <span class="o">+</span> <span class="n">label</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.stp&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="hello-world-task">
+<h2>Hello World Task<a class="headerlink" href="#hello-world-task" title="Permalink to this headline">¶</a></h2>
+<div class="line-block">
+<div class="line">This example shows how to greet the world with self written QMT tasks.</div>
+<div class="line">The fundamentals for <code class="code docutils literal"><span class="pre">Task</span></code> objects are explained in <a class="reference internal" href="../source/qmt.tasks.html#module-qmt.tasks.task" title="qmt.tasks.task"><code class="xref py py-mod docutils literal"><span class="pre">qmt.tasks.task</span></code></a>.</div>
+<div class="line">For a directly executable example of the following snippets, check out <cite>examples/task_hello.py</cite>.</div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span>
+<span class="kn">from</span> <span class="nn">qmt.tasks</span> <span class="kn">import</span> <span class="n">Task</span><span class="p">,</span> <span class="n">SweepManager</span>
+
+<span class="n">sweep</span> <span class="o">=</span> <span class="n">SweepManager</span><span class="o">.</span><span class="n">create_empty_sweep</span><span class="p">()</span>  <span class="c1"># our dask sweep manager</span>
+
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">The above is common setup code. Below we define our task class.</div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span>
+<span class="k">class</span> <span class="nc">HelloTask</span><span class="p">(</span><span class="n">Task</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>  <span class="c1"># required init</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_solve_instance</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>  <span class="c1"># required task solver function</span>
+        <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Hello World&#39;</span><span class="p">)</span>
+
+<span class="n">hi</span> <span class="o">=</span> <span class="n">HelloTask</span><span class="p">()</span>        <span class="c1"># create a new task</span>
+<span class="n">sweep</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">hi</span><span class="p">)</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>  <span class="c1"># run through dask and resolve future.result()</span>
+<span class="n">hi</span><span class="o">.</span><span class="n">run_daskless</span><span class="p">()</span>       <span class="c1"># can also run locally</span>
+
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">We can use dicts to pass options.</div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span>
+<span class="k">class</span> <span class="nc">HelloOptionTask</span><span class="p">(</span><span class="n">Task</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">language_options</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="n">language_options</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_solve_instance</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+        <span class="n">greetings</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;English&#39;</span><span class="p">:</span> <span class="s1">&#39;Hello&#39;</span><span class="p">,</span> <span class="s1">&#39;Spanish&#39;</span><span class="p">:</span> <span class="s1">&#39;Hola&#39;</span><span class="p">}</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">greetings</span><span class="p">[</span><span class="n">options</span><span class="p">[</span><span class="s1">&#39;language&#39;</span><span class="p">]]</span> <span class="o">+</span> <span class="s1">&#39; World&#39;</span><span class="p">)</span>
+
+<span class="n">hola</span> <span class="o">=</span> <span class="n">HelloOptionTask</span><span class="p">({</span><span class="s1">&#39;language&#39;</span><span class="p">:</span> <span class="s1">&#39;Spanish&#39;</span><span class="p">})</span>
+<span class="n">sweep</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">hola</span><span class="p">)</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+
+</pre></div>
+</div>
+<div class="line-block">
+<div class="line">And tasks can depend on each other.</div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span>
+<span class="k">class</span> <span class="nc">NameTask</span><span class="p">(</span><span class="n">Task</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name_options</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">options</span><span class="o">=</span><span class="n">name_options</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_solve_instance</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">options</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span>
+
+<span class="k">class</span> <span class="nc">HelloDependentTask</span><span class="p">(</span><span class="n">Task</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name_task</span><span class="p">,</span> <span class="n">language_options</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">task_list</span><span class="o">=</span><span class="p">[</span><span class="n">name_task</span><span class="p">],</span> <span class="n">options</span><span class="o">=</span><span class="n">language_options</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_solve_instance</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">greetings</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;English&#39;</span><span class="p">:</span> <span class="s1">&#39;Hello&#39;</span><span class="p">,</span> <span class="s1">&#39;Spanish&#39;</span><span class="p">:</span> <span class="s1">&#39;Hola&#39;</span><span class="p">}</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">greetings</span><span class="p">[</span><span class="n">options</span><span class="p">[</span><span class="s1">&#39;language&#39;</span><span class="p">]]</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">name</span><span class="p">)</span>
+
+<span class="n">name</span> <span class="o">=</span> <span class="n">NameTask</span><span class="p">({</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;John&#39;</span><span class="p">})</span>
+<span class="n">hola</span> <span class="o">=</span> <span class="n">HelloDependentTask</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;language&#39;</span><span class="p">:</span> <span class="s1">&#39;Spanish&#39;</span><span class="p">})</span>
+<span class="n">sweep</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">hola</span><span class="p">)</span><span class="o">.</span><span class="n">result</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../source/modules.html" class="btn btn-neutral float-right" title="qmt" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../index.html" class="btn btn-neutral" title="Qubit Modeling Tools (QMT)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Microsoft Corporation.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'2.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

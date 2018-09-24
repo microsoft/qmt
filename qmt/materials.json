@@ -1,6 +1,7 @@
 {
     "Al": {
         "electronMass": 1.0,
+        "fermiEnergy": 11700.0,
         "relativePermittivity": 1000,
         "type": "metal",
         "workFunction": 4280.0
@@ -37,6 +38,7 @@
     },
     "Au": {
         "electronMass": 1.0,
+        "fermiEnergy": 5530.0,
         "relativePermittivity": 1000,
         "type": "metal",
         "workFunction": 5285.0
@@ -117,6 +119,7 @@
     },
     "NbTiN": {
         "electronMass": 1.0,
+        "fermiEnergy": 5530.0,
         "relativePermittivity": 1000,
         "type": "metal",
         "workFunction": 4280.0
@@ -187,6 +190,7 @@
     },
     "degenDopedSi": {
         "electronMass": 1.0,
+        "fermiEnergy": 5530.0,
         "relativePermittivity": 1000,
         "type": "metal",
         "workFunction": 4050.0

@@ -1,0 +1,742 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>qmt.tasks package &mdash; QMT 2.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="qmt.tasks.basic package" href="qmt.tasks.basic.html" />
+    <link rel="prev" title="qmt.geometry.freecad package" href="qmt.geometry.freecad.html" /> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> QMT
+          
+
+          
+            
+            <img src="../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../rst/tutorial.html">Tutorial</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Modules</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="qmt.html">qmt package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="qmt.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="qmt.data.html">qmt.data package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qmt.geometry.html">qmt.geometry package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">qmt.tasks package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="qmt.visualization.html">qmt.visualization package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="qmt.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qmt.html#module-qmt.materials">qmt.materials module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qmt.html#module-qmt.physics_constants">qmt.physics_constants module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qmt.html#module-qmt">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../rst/dev_overview.html">Structure of QMT</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">QMT</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="modules.html">qmt</a> &raquo;</li>
+        
+          <li><a href="qmt.html">qmt package</a> &raquo;</li>
+        
+      <li>qmt.tasks package</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/source/qmt.tasks.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="qmt-tasks-package">
+<h1>qmt.tasks package<a class="headerlink" href="#qmt-tasks-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="qmt.tasks.basic.html">qmt.tasks.basic package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qmt.tasks.basic.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qmt.tasks.basic.html#module-qmt.tasks.basic.geometry">qmt.tasks.basic.geometry module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qmt.tasks.basic.html#module-qmt.tasks.basic.reduce_dim">qmt.tasks.basic.reduce_dim module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qmt.tasks.basic.html#module-qmt.tasks.basic">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="qmt.tasks.ms.html">qmt.tasks.ms package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="qmt.tasks.ms.html#module-qmt.tasks.ms">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-qmt.tasks.sweep">
+<span id="qmt-tasks-sweep-module"></span><h2>qmt.tasks.sweep module<a class="headerlink" href="#module-qmt.tasks.sweep" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="qmt.tasks.sweep.SweepManager">
+<em class="property">class </em><code class="descclassname">qmt.tasks.sweep.</code><code class="descname">SweepManager</code><span class="sig-paren">(</span><em>sweep_list</em>, <em>dask_client=None</em>, <em>no_dask=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#SweepManager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.SweepManager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Represents a sweep over simulation input values.</p>
+<p>More precisely, represents a subset of the cartesian product of the input domains.</p>
+<dl class="docutils">
+<dt>Attributes:</dt>
+<dd>sweep_list: The sweep elements represented by this</dd>
+</dl>
+<dl class="staticmethod">
+<dt id="qmt.tasks.sweep.SweepManager.create_empty_sweep">
+<em class="property">static </em><code class="descname">create_empty_sweep</code><span class="sig-paren">(</span><em>dask_client=None</em>, <em>no_dask=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#SweepManager.create_empty_sweep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.SweepManager.create_empty_sweep" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="staticmethod">
+<dt id="qmt.tasks.sweep.SweepManager.construct_cartesian_product">
+<em class="property">static </em><code class="descname">construct_cartesian_product</code><span class="sig-paren">(</span><em>params_to_product</em>, <em>dask_client=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#SweepManager.construct_cartesian_product"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.SweepManager.construct_cartesian_product" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs a new SweepManager from data values for each input.
+:param params_to_product: a dictionary mapping tags to lists of input values
+:return: a SweepManager over the cartesian product of the
+input values in each input list</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.tasks.sweep.SweepManager.run">
+<code class="descname">run</code><span class="sig-paren">(</span><em>task</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#SweepManager.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.SweepManager.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs the sweep represented by this.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>task</strong> – the top level task to run</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the ReducedSweepFutures representing the result</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="qmt.tasks.sweep.ReducedSweepWithData">
+<em class="property">class </em><code class="descclassname">qmt.tasks.sweep.</code><code class="descname">ReducedSweepWithData</code><span class="sig-paren">(</span><em>sweep</em>, <em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#ReducedSweepWithData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.ReducedSweepWithData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Represents a reduced sweep (see ReducedSweep) where each sweep element is associated with a datum.</p>
+<dl class="docutils">
+<dt>Public attributes:</dt>
+<dd>sweep: ReducedSweep: the reduced sweep
+tagged_value_list: list: the sweep elements
+tags_with_data: [(tag, data)] association of sweep elements with data</dd>
+</dl>
+<dl class="staticmethod">
+<dt id="qmt.tasks.sweep.ReducedSweepWithData.sweep_and_empty_data_from_manager_and_tags">
+<em class="property">static </em><code class="descname">sweep_and_empty_data_from_manager_and_tags</code><span class="sig-paren">(</span><em>sweep_manager</em>, <em>tags</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#ReducedSweepWithData.sweep_and_empty_data_from_manager_and_tags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.ReducedSweepWithData.sweep_and_empty_data_from_manager_and_tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a ReducedSweepWithData representing the reduction of sweep_manager to tags with None data.
+:param sweep_manager: the sweep_manager representing the total sweep
+:param tags: the tags being swept over
+:return:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.tasks.sweep.ReducedSweepWithData.get_datum">
+<code class="descname">get_datum</code><span class="sig-paren">(</span><em>total_index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#ReducedSweepWithData.get_datum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.ReducedSweepWithData.get_datum" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the datum associated with index total_index in the total sweep.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>total_index</strong> – index in the total sweep</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the datum associated with total_index</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.tasks.sweep.ReducedSweepWithData.add">
+<code class="descname">add</code><span class="sig-paren">(</span><em>item</em>, <em>object_list_index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#ReducedSweepWithData.add"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.ReducedSweepWithData.add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds the result item to the results of this restricted sweep.
+:param item: the result to add
+:param object_list_index: the index of the result IN THE RESTRICTED SWEEP</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.tasks.sweep.ReducedSweepWithData.sweep_points_to_data">
+<code class="descname">sweep_points_to_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#ReducedSweepWithData.sweep_points_to_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.ReducedSweepWithData.sweep_points_to_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qmt.tasks.sweep.ReducedSweepWithData.only">
+<code class="descname">only</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#ReducedSweepWithData.only"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.ReducedSweepWithData.only" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convenience method to get the only data value in this if this has only one sweep element.</p>
+<p>Precondition: this is a sweep with only one sweep element.
+:return: the only data value in this.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.tasks.sweep.ReducedSweepWithData.get_tags_with_data">
+<code class="descname">get_tags_with_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#ReducedSweepWithData.get_tags_with_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.ReducedSweepWithData.get_tags_with_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the association between tags and values in this.
+:return: [(tag, value)] the association between tags and values in this.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="qmt.tasks.sweep.ReducedSweepDelayed">
+<em class="property">class </em><code class="descclassname">qmt.tasks.sweep.</code><code class="descname">ReducedSweepDelayed</code><span class="sig-paren">(</span><em>sweep</em>, <em>dask_client</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#ReducedSweepDelayed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.ReducedSweepDelayed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qmt.tasks.sweep.ReducedSweepWithData" title="qmt.tasks.sweep.ReducedSweepWithData"><code class="xref py py-class docutils literal"><span class="pre">qmt.tasks.sweep.ReducedSweepWithData</span></code></a></p>
+<p>Represents a reduced sweep with associated delayed objects.</p>
+<p>Public attributes:
+delayed_results: [dask.Delayed]: the delayed objects
+dask_client: dask.distributed.Client: the client to be used to compute the delayed objects</p>
+<dl class="staticmethod">
+<dt id="qmt.tasks.sweep.ReducedSweepDelayed.create_from_reduced_sweep_and_manager">
+<em class="property">static </em><code class="descname">create_from_reduced_sweep_and_manager</code><span class="sig-paren">(</span><em>sweep</em>, <em>manager</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#ReducedSweepDelayed.create_from_reduced_sweep_and_manager"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.ReducedSweepDelayed.create_from_reduced_sweep_and_manager" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a ReducedSweepDelayed from the ReducedSweep sweep, with empty data.
+:param sweep:
+:param manager:
+:return: ReducedSweepDelayed sweeping over the entries in sweep, with empty data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.tasks.sweep.ReducedSweepDelayed.get_delayed">
+<code class="descname">get_delayed</code><span class="sig-paren">(</span><em>total_index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#ReducedSweepDelayed.get_delayed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.ReducedSweepDelayed.get_delayed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the delayed object at total_index in the total sweep.
+:param total_index: index in the total sweep
+:return: the delayed object at total_index in the total sweep</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.tasks.sweep.ReducedSweepDelayed.calculate_futures">
+<code class="descname">calculate_futures</code><span class="sig-paren">(</span><em>resources</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#ReducedSweepDelayed.calculate_futures"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.ReducedSweepDelayed.calculate_futures" title="Permalink to this definition">¶</a></dt>
+<dd><p>Triggers the execution of the sweep. Returns a ReducedSweepFutures representing the in-process result.
+:param resources: the computational resources that the dask_client should use #TODO what data type?</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.tasks.sweep.ReducedSweepDelayed.visualize_entire_sweep">
+<code class="descname">visualize_entire_sweep</code><span class="sig-paren">(</span><em>filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#ReducedSweepDelayed.visualize_entire_sweep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.ReducedSweepDelayed.visualize_entire_sweep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a visualization of the entire task graph of the sweep rooted at this as an IPython image object.</p>
+<p>If filename is given, also exports the visualization to the given file.
+Supported</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> – Optional file to export the visualization to</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A visualization of he entire task graph of the sweep rooted at this as an IPython image object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.tasks.sweep.ReducedSweepDelayed.visualize_single_sweep_element">
+<code class="descname">visualize_single_sweep_element</code><span class="sig-paren">(</span><em>filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#ReducedSweepDelayed.visualize_single_sweep_element"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.ReducedSweepDelayed.visualize_single_sweep_element" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a visualization of task graph of one element of the sweep rooted at this as an IPython image object.</p>
+<p>If filename is given, also exports the visualization to the given file.
+:param filename: Optional file to export the visualization to
+:return: a visualization of task graph of one element of the sweep rooted at this as an IPython image object.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="qmt.tasks.sweep.ReducedSweepFutures">
+<em class="property">class </em><code class="descclassname">qmt.tasks.sweep.</code><code class="descname">ReducedSweepFutures</code><span class="sig-paren">(</span><em>sweep</em>, <em>futures</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#ReducedSweepFutures"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.ReducedSweepFutures" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qmt.tasks.sweep.ReducedSweepWithData" title="qmt.tasks.sweep.ReducedSweepWithData"><code class="xref py py-class docutils literal"><span class="pre">qmt.tasks.sweep.ReducedSweepWithData</span></code></a></p>
+<p>Represents a reduced sweep with associated Futures–results in computation.</p>
+<p>Public attributes:
+futures: [dask.Future]: the future objects</p>
+<dl class="method">
+<dt id="qmt.tasks.sweep.ReducedSweepFutures.calculate_completed_results">
+<code class="descname">calculate_completed_results</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#ReducedSweepFutures.calculate_completed_results"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.ReducedSweepFutures.calculate_completed_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get another sweep with the futures in this converted to results in local memory.
+:return: another sweep with the futures in this converted to results in local memory</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.tasks.sweep.ReducedSweepFutures.result">
+<code class="descname">result</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#ReducedSweepFutures.result"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.ReducedSweepFutures.result" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get another sweep with the futures in this converted to results in local memory.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">another sweep with the futures in this converted to results in local memory</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.tasks.sweep.ReducedSweepFutures.get_future">
+<code class="descname">get_future</code><span class="sig-paren">(</span><em>total_index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#ReducedSweepFutures.get_future"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.ReducedSweepFutures.get_future" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qmt.tasks.sweep.ReducedSweepFutures.get_completed_result">
+<code class="descname">get_completed_result</code><span class="sig-paren">(</span><em>total_index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#ReducedSweepFutures.get_completed_result"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.ReducedSweepFutures.get_completed_result" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the completed result associated with total_index in the total sweep in local memory.
+:param total_index: index in the total sweep
+:return: the completed result in local memory</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="qmt.tasks.sweep.ReducedSweepResults">
+<em class="property">class </em><code class="descclassname">qmt.tasks.sweep.</code><code class="descname">ReducedSweepResults</code><span class="sig-paren">(</span><em>sweep</em>, <em>results</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#ReducedSweepResults"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.ReducedSweepResults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#qmt.tasks.sweep.ReducedSweepWithData" title="qmt.tasks.sweep.ReducedSweepWithData"><code class="xref py py-class docutils literal"><span class="pre">qmt.tasks.sweep.ReducedSweepWithData</span></code></a></p>
+<p>Represents a reduced sweep with associated results in local memory.</p>
+<p>Public attributes:
+results: []: the results of the calculation</p>
+<dl class="staticmethod">
+<dt id="qmt.tasks.sweep.ReducedSweepResults.create_empty_from_manager_and_tags">
+<em class="property">static </em><code class="descname">create_empty_from_manager_and_tags</code><span class="sig-paren">(</span><em>manager</em>, <em>tags</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#ReducedSweepResults.create_empty_from_manager_and_tags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.ReducedSweepResults.create_empty_from_manager_and_tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a ReducedSweepResults corresponding to manager restricted to tags, with empty data.
+:param manager: SweepManager: the total sweep
+:param tags: the tags being swept over
+Create a ReducedSweepResults corresponding to manager restricted to tags, with empty data.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.tasks.sweep.ReducedSweepResults.get_result">
+<code class="descname">get_result</code><span class="sig-paren">(</span><em>total_index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#ReducedSweepResults.get_result"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.ReducedSweepResults.get_result" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>total_index</strong> – </td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="qmt.tasks.sweep.ReducedSweep">
+<em class="property">class </em><code class="descclassname">qmt.tasks.sweep.</code><code class="descname">ReducedSweep</code><span class="sig-paren">(</span><em>list_of_tags</em>, <em>sweep_list</em>, <em>tagged_value_list</em>, <em>index_in_sweep</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#ReducedSweep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.ReducedSweep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Represents the output of a sweep, restricted to the relevant subset of the input tags.</p>
+<p>SweepHolder represents the restriction of a sweep over many parameters,
+to a sweep over a subset of these parameters that is the input for a particular task.</p>
+<dl class="docutils">
+<dt>Public Attributes:</dt>
+<dd>sweep_manager: The whole sweep being performed.
+list_of_tags: The tags corresponding to the part of the sweep that this            SweepHolder is restricted to.</dd>
+</dl>
+<dl class="staticmethod">
+<dt id="qmt.tasks.sweep.ReducedSweep.create_from_manager_and_tags">
+<em class="property">static </em><code class="descname">create_from_manager_and_tags</code><span class="sig-paren">(</span><em>sweep_manager</em>, <em>list_of_tags</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#ReducedSweep.create_from_manager_and_tags"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.ReducedSweep.create_from_manager_and_tags" title="Permalink to this definition">¶</a></dt>
+<dd><p>Constructs the restriction of the sweep sweep_manager to the input tagged by list_of_tags.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>sweep_manager</strong> – The sweep to restrict</li>
+<li><strong>list_of_tags</strong> – The tags to restrict the input to</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.tasks.sweep.ReducedSweep.convert_to_reduced_index">
+<code class="descname">convert_to_reduced_index</code><span class="sig-paren">(</span><em>total_index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#ReducedSweep.convert_to_reduced_index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.ReducedSweep.convert_to_reduced_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts the index of a sweep element in the total sweep to the corresponding index in the reduced sweep.
+:param total_index: index of a sweep element in the total sweep
+:return: corresponding index in the reduced sweep</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.tasks.sweep.ReducedSweep.convert_to_total_indices">
+<code class="descname">convert_to_total_indices</code><span class="sig-paren">(</span><em>reduced_index</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#ReducedSweep.convert_to_total_indices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.ReducedSweep.convert_to_total_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a list of indices in the total sweep corresponding to the index of an element in the reduced sweep.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>reduced_index</strong> – index of an element in the reduced sweep</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of corresponding indices in the total sweep</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.tasks.sweep.ReducedSweep.empty_data">
+<code class="descname">empty_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#ReducedSweep.empty_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.ReducedSweep.empty_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="qmt.tasks.sweep.SweepTag">
+<em class="property">class </em><code class="descclassname">qmt.tasks.sweep.</code><code class="descname">SweepTag</code><span class="sig-paren">(</span><em>tag_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#SweepTag"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.SweepTag" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Unique tag for id’ing parameters in the sweep.</p>
+<dl class="method">
+<dt id="qmt.tasks.sweep.SweepTag.replace">
+<code class="descname">replace</code><span class="sig-paren">(</span><em>value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#SweepTag.replace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.SweepTag.replace" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="qmt.tasks.sweep.gen_tag_extract">
+<code class="descclassname">qmt.tasks.sweep.</code><code class="descname">gen_tag_extract</code><span class="sig-paren">(</span><em>nested_dictionary_of_tags</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#gen_tag_extract"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.gen_tag_extract" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract all tags from nested dictionary that may have tags
+as values at any level
+:param nested_dictionary_of_tags: exactly what it sounds like
+:return: a generator that yields all the tags in the dictionary</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="qmt.tasks.sweep.gen_tag_extract_list">
+<code class="descclassname">qmt.tasks.sweep.</code><code class="descname">gen_tag_extract_list</code><span class="sig-paren">(</span><em>nested_list_of_tags</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#gen_tag_extract_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.gen_tag_extract_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract all tags from nested dictionary that may have tags
+as values at any level
+:param nested_list_of_tags: exactly what it sounds like
+:return: a generator that yields all the tags in the dictionary</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="qmt.tasks.sweep.replace_tag_with_value">
+<code class="descclassname">qmt.tasks.sweep.</code><code class="descname">replace_tag_with_value</code><span class="sig-paren">(</span><em>name_to_tag_mapping</em>, <em>tag</em>, <em>new_value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#replace_tag_with_value"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.replace_tag_with_value" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a copy of name_to_tag_mapping with values of tag replaced with new_value.
+:param name_to_tag_mapping: Dictionary mapping parameter names to SweepTags.
+:param tag: The SweepTag to replace.
+:param new_value: the value to replace it with.
+:return: a copy of name_to_tag_mapping with values of tag replaced with new_value</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="qmt.tasks.sweep.replace_tag_with_value_list">
+<code class="descclassname">qmt.tasks.sweep.</code><code class="descname">replace_tag_with_value_list</code><span class="sig-paren">(</span><em>name_to_tag_mapping</em>, <em>tag</em>, <em>new_value</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/sweep.html#replace_tag_with_value_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.sweep.replace_tag_with_value_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns a copy of name_to_tag_mapping with values of tag replaced with new_value.
+:param name_to_tag_mapping: Dictionary mapping parameter names to SweepTags.
+:param tag: The SweepTag to replace.
+:param new_value: the value to replace it with.
+:return: a copy of name_to_tag_mapping with values of tag replaced with new_value</p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-qmt.tasks.task">
+<span id="qmt-tasks-task-module"></span><h2>qmt.tasks.task module<a class="headerlink" href="#module-qmt.tasks.task" title="Permalink to this headline">¶</a></h2>
+<p>Core module of the Task framework. Contains the base Task class,
+from which all special purpose tasks are subclassed.</p>
+<dl class="docutils">
+<dt>How to use, in a nutshell:</dt>
+<dd><p class="first">To create a new task, subclass Task.
+The constructor for the subclass must call the superclass constructor with         task_list=list of all dependent tasks,         options=dictionary containing all other inputs to the subclass task,         and optionally name=arbitrary name.
+These should also, in most cases, be the arguments to the subclass constructor–
+any arguments that the subclass constructor needs that are not dependent tasks should
+be placed into the options argument.
+See basic/geometry.py for an example.</p>
+<p>The actual work done by your Task subclass will be done in the _solve_instance callback,
+which you must implement.
+The _solve_instance callback expects two parameters:
+input_result_list and current_options.
+The input_result_list stores the outputs of the dependent tasks in the same order these tasks
+were given in the constructor, and current_options stores the options to the current task.</p>
+<p>There is also a _solve_gather callback for use in specialized situations.</p>
+<p>IMPORTANT: object references in both of these callback parameters must be treated as read-only
+or copied before modification,
+since they are shared across parameter sweeps.</p>
+<p>Both the input results and options
+may be dependent on an automatically-handled sweep. Your _solve_instance does not have to know about this–
+it just has to compute its result dependent on the outputs of dependent tasks and its options,
+and return this result.</p>
+<p>Finally, to run a task, use the run() method,
+which begins the actual calculation. run() returns immediately and stores pointers to the results undergoing
+computation in a SweepHolderFutures object in the .computed_result field of the task. This object
+associates sweep parameters with the results being computed. You can iterate over results being computed,
+wait for the results to be computed with calculate_completed_results(), or wait for any particular result
+with get_completed_result().</p>
+<p class="last">For an example of how to set up a sweep, see ./tests/test_tasks_sweep.py and refer
+to the documentation of the sweeping classes in sweep.py.</p>
+</dd>
+<dt>Classes:</dt>
+<dd>Task</dd>
+</dl>
+<dl class="class">
+<dt id="qmt.tasks.task.Task">
+<em class="property">class </em><code class="descclassname">qmt.tasks.task.</code><code class="descname">Task</code><span class="sig-paren">(</span><em>task_list=None</em>, <em>options=None</em>, <em>name='Task'</em>, <em>gather=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/task.html#Task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.task.Task" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Abstract class for general simulation tasks run within the Dask framework.</p>
+<p>Translates the dependencies between Task instances reflected in their constructors
+into a Dask task graph and provides facilities for examining and evaluating this graph.</p>
+<dl class="docutils">
+<dt>Class attributes:</dt>
+<dd>current_instance_id: unique id for each task for serialization.</dd>
+<dt>Attributes:</dt>
+<dd>previous_tasks: The tasks that this depends on.
+options: Additional options that control the operation of this.
+resources: resources for the Dask client.
+gather: default False. If false, the task is assumed to have a _solve_instance method, and takes in             one sweep point’s worth of inputs. If true, the task is assumed to have a _solve_gathered method,             and takes in inputs from every sweep point in its restricted sweep.
+name: The name of the task.
+list_of_tags: the list of sweep input tags that the sweep over this depends on
+delayed_result: the task graph rooted at this
+computed_result: SweepHolderFutures pointing at (possibly pending) results.
+daskless_result: result, if the task was run with run_daskless</dd>
+</dl>
+<dl class="attribute">
+<dt id="qmt.tasks.task.Task.current_instance_id">
+<code class="descname">current_instance_id</code><em class="property"> = 0</em><a class="headerlink" href="#qmt.tasks.task.Task.current_instance_id" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qmt.tasks.task.Task.visualize_entire_sweep">
+<code class="descname">visualize_entire_sweep</code><span class="sig-paren">(</span><em>filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/task.html#Task.visualize_entire_sweep"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.task.Task.visualize_entire_sweep" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a visualization of the entire task graph of the sweep rooted at this as an IPython image object.</p>
+<p>If filename is given, also exports the visualization to the given file.
+Supported</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>filename</strong> – Optional file to export the visualization to</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">A visualization of he entire task graph of the sweep rooted at this as an IPython image object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.tasks.task.Task.visualize_single_sweep_element">
+<code class="descname">visualize_single_sweep_element</code><span class="sig-paren">(</span><em>filename=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/task.html#Task.visualize_single_sweep_element"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.task.Task.visualize_single_sweep_element" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a visualization of task graph of one element of the sweep rooted at this as an IPython image object.</p>
+<p>If filename is given, also exports the visualization to the given file.
+:param filename: Optional file to export the visualization to
+:return: a visualization of task graph of one element of the sweep rooted at this as an IPython image object.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.tasks.task.Task.run_daskless">
+<code class="descname">run_daskless</code><span class="sig-paren">(</span><em>clear_cache=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/task.html#Task.run_daskless"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.task.Task.run_daskless" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs the task chain without using Dask. This is useful for local debugging with the
+number of moving parts kept to a minimum. The results are stored in self.daskless_result.</p>
+<p>TODO: This debugging mode does not currently support sweeping.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>clear_cache</strong> – If True, then force a recompute even if run_daskless has previously run.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-qmt.tasks">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-qmt.tasks" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="qmt.tasks.basic.html" class="btn btn-neutral float-right" title="qmt.tasks.basic package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="qmt.geometry.freecad.html" class="btn btn-neutral" title="qmt.geometry.freecad package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Microsoft Corporation.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'2.0',
+            LANGUAGE:'None',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true,
+            SOURCELINK_SUFFIX: '.txt'
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+
+  
+
+  <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

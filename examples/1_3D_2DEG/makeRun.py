@@ -4,10 +4,12 @@
 ####################
 ####################
 
+import os
+
+import numpy as np
+
 # Load the modules:
 import qmt
-import numpy as np
-import os
 
 # Path information -- change this to your configuration!
 rootPath = 'PATH_TO_QMT/qmt/examples/1_3D_2DEG'
@@ -34,7 +36,7 @@ runModel.modelDict = runModel.genEmptyModelDict()
 
 # Import the materials we need:
 matLib = qmt.Materials()
-runModel.modelDict['materials'] = matLib.serializeDict()
+runModel.modelDict['materials'] = matLib.serialize_dict()
 
 # Tell FreeCAD what to do with the names we passed in. All the units here are in microns.
 # The simplest type of object directive is an extrude, which just takes one 2D
