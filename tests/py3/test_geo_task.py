@@ -48,8 +48,8 @@ def test_geo_task(fix_py2env,fix_testDir):
     result = SweepManager(sweeps).run(geo_task)
 
     # Investigate results
-    assert not os.path.exists('tmp')
-    os.makedirs('tmp')
+    if not os.path.exists('tmp'):
+        os.makedirs('tmp')
 
     for i, future in enumerate(result.futures):
         geo = future.result()

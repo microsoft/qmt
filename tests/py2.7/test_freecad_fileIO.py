@@ -55,23 +55,3 @@ def test_exportCAD(fix_testDir, fix_FCDoc):
     with pytest.raises(ValueError) as err:
         exportCAD([testShape], 'not_a_step_file')
     assert 'not a supported extension' in str(err.value)
-
-def test_store_serial(fix_testDir, fix_FCDoc):
-    '''Test serialisation to memory.'''
-    # Serialise document
-    obj = fix_FCDoc.addObject('App::FeaturePython', 'some_content')
-    serial_data = store_serial(fix_FCDoc, lambda d, p: d.saveAs(p), 'fcstd')
-
-    # Write to a file
-    file_path = 'test.fcstd'
-    import codecs
-    data = codecs.decode(serial_data.encode(), 'base64')
-    with open(file_path, 'wb') as of:
-        of.write(data)
-
-    # Load back and check
-    doc = FreeCAD.newDocument('instance')
-    FreeCAD.setActiveDocument('instance')
-    doc.load(file_path)
-
-    assert doc.getObject('some_content') is not None
