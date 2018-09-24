@@ -4,13 +4,12 @@
 """Testing data utilities."""
 
 
-import FreeCAD
-
 from qmt.data.data_utils import *
 
 
 def test_store_serial(fix_testDir, fix_FCDoc):
     '''Test serialisation to memory.'''
+    import FreeCAD
     # Serialise document
     obj = fix_FCDoc.addObject('App::FeaturePython', 'some_content')
     serial_data = store_serial(fix_FCDoc, lambda d, p: d.saveAs(p), 'fcstd')
