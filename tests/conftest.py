@@ -35,41 +35,36 @@ def fix_FCDoc():
 
 
 @pytest.fixture(scope='session')
-def fix_host_settings_dir(fix_testDir):
-    '''Host setting directory.'''
-    settings_dir = os.path.join(fix_testDir, 'host_settings')
-    if not os.path.exists(settings_dir):
-        os.mkdir(settings_dir)
-    return settings_dir
+def fix_host_settings(fix_testDir):
+    '''Host specific settings.'''
+    schema = {
+        'py2env': None
+    }
+
+    import yaml
+    settings_file = os.path.join(fix_testDir, 'host_settings.yml')
+    if not os.path.exists(settings_file):
+        with open(settings_file, 'a') as f:
+            yaml.dump(schema, f, default_flow_style=False)
+    with open(settings_file) as f:
+        data = yaml.load(f)
+    data['settings_file'] = settings_file
+    return data
 
 
 @pytest.fixture(scope='session')
-def fix_py2env(fix_host_settings_dir):
+def fix_py2env(fix_host_settings):
     '''Host setting for python2.7 environment.'''
-
-    py2env_file = os.path.join(fix_host_settings_dir, 'py2env_path')
-
-    # Check for file existence and help the user fill it.
-    not_found_error = FileNotFoundError if sys.version_info[0] >= 3 else IOError
-    try:
-        with open(py2env_file) as f:
-            py2env = f.read().strip()
-    except not_found_error:
-        with open(py2env_file, 'a'):
-            os.utime(py2env_file, None)  # touch the file
-        raise ValueError("Please specify a valid Python2.7 executable path in " +
-                         py2env_file)
-
-    # Check for file correctness and scold the user.
-    not_found_error = FileNotFoundError if sys.version_info[0] >= 3 else OSError
+    py2env = fix_host_settings['py2env']
     try:
         import subprocess
-        p = subprocess.Popen([py2env, '--version'])
-        p.terminate()
-    except not_found_error:
-        raise ValueError('Invalid Python 2.7 environment ' + py2env +
-                         ' in ' + py2env_file)
-
+        p = subprocess.Popen([py2env, '-c', 'import sys; print sys.version_info'],
+                             stdout=subprocess.PIPE)
+        assert 'sys.version_info(major=2, minor=7' in p.communicate()[0].decode()
+    except:
+        raise RuntimeError('Invalid path to Python 2.7 environment (' + str(py2env) +
+                           ') in ' + fix_host_settings['settings_file'] + '. ' +
+                           'Please edit this file.')
     return py2env
 
 
