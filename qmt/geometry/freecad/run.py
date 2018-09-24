@@ -3,12 +3,15 @@
 
 """Landing script for Python 2.7 calls to FreeCAD."""
 
+####
+# Don't touch these imports! If fenics accidentially gets imported first and then FreeCAD is loaded,
+# we get a segfault...
+import FreeCAD
+import fenics
+####
 
 import pickle
 import sys
-
-import FreeCAD
-
 
 def main():
     """Fetch input data and dispatch instructions."""
@@ -27,7 +30,7 @@ def main():
         pass
 
     elif instruction == 'region_map_function':
-        from qms.fem.python2 import make_region_marker_function
+        from qms.meshing.make_region_marker_wrapper import make_region_marker_function
         new_data = make_region_marker_function(data)  # the updated Geo3DData object
         send_back(new_data)
 
