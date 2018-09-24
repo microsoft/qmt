@@ -29,21 +29,16 @@ install:
       conda install freecad;
     fi
   - python setup.py develop
-  
+  - mkdir /home/travis/build/Microsoft/qmt/tests/host_settings
+  - echo python2 > /home/travis/build/Microsoft/qmt/tests/host_settings/py2env_path
+  - echo $TRAVIS_BUILD_DIR
+
 script:
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
       export PYTHONPATH=$PYTHONPATH:/usr/lib/freecad/lib ;
     else
       export PYTHONPATH=$PYTHONPATH:$HOME/miniconda/envs/test-environment/lib ;
     fi
-  - echo python2 > /home/travis/build/Microsoft/qmt/tests/host_settings/py2env_path
-  - ls /home/
-  - ls /home/travis/
-  - ls /home/travis/build/
-  - ls /home/travis/build/Microsoft/
-  - ls /home/travis/build/Microsoft/qmt/
-  - ls /home/travis/build/Microsoft/qmt/tests/
-  - ls /home/travis/build/Microsoft/qmt/tests/host_settings/
   - pytest tests
 
    
