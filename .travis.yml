@@ -29,8 +29,7 @@ install:
       conda install freecad;
     fi
   - python setup.py develop
-  - mkdir $TRAVIS_BUILD_DIR/tests/host_settings
-  - echo python2 > $TRAVIS_BUILD_DIR/tests/host_settings/py2env_path
+  - echo py2env: python2 >> $TRAVIS_BUILD_DIR/tests/host_settings.yml
 
 script:
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
