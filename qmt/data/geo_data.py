@@ -227,7 +227,7 @@ class Geo3DData(Data):
                                "mesh"  fenics mesh
                                "rmf"   fenics region marker function
         :param mesh:
-        :param scratch_dir:    Optional temporary (fast) storage location.
+        :param scratch_dir:    Optional existing temporary (fast) storage location.
         :return data:          The freeCAD document or fenics object that was stored.
         """
         if data_name == 'fcdoc':
