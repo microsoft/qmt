@@ -342,7 +342,7 @@ class Materials(collections.Mapping):
         try:
             with open(self.matPath, 'r') as myFile:
                 db = json.load(myFile)
-            self.deserializeDict(db)
+            self.deserialize_dict(db)
         except IOError:
             print("Could not load materials file %s." % self.matPath)
             print("Generating a new file at that location...")
