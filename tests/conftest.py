@@ -22,7 +22,7 @@ def fix_testDir():
 def fix_exampleDir():
     '''Return the example directory path.'''
     rootPath = os.path.join(os.path.dirname(qmt.__file__), os.pardir)
-    return os.path.join(rootPath, 'examples')
+    return os.path.abspath(os.path.join(rootPath, 'examples'))
 
 
 @pytest.fixture(scope='function')
