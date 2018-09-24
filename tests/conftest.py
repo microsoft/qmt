@@ -15,7 +15,7 @@ import qmt
 def fix_testDir():
     '''Return the test directory path.'''
     rootPath = os.path.join(os.path.dirname(qmt.__file__), os.pardir)
-    return os.path.join(rootPath, 'tests')
+    return os.path.abspath(os.path.join(rootPath, 'tests'))
 
 
 @pytest.fixture(scope='session')

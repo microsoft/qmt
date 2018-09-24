@@ -29,6 +29,7 @@ install:
       conda install freecad;
     fi
   - python setup.py develop
+  - echo python2 > /home/travis/build/Microsoft/qmt/tests/host_settings/py2env_path
   
 script:
   - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
