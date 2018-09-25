@@ -48,7 +48,8 @@ class PropertyMap(object):
 class MaterialPropertyMap(PropertyMap):
     """Map points in the simulation domain to material properties of parts containing the points.
 
-    :param PartMap part_map: Mapper from spatial location to part identifier.
+    :param PartMap part_map: Function that takes a spatial location and maps it to a part
+    identifier.
     :param dict part_materials: Dict mapping from part identifier to a material name.
     :param qmt.Materials mat_lib: Materials library used to look up the material properties.
     :param str prop_name: Name of the material property to be retrieved for each part.
