@@ -5,33 +5,8 @@
 
 from shapely.geometry import Polygon, LineString
 
-from qmt.data import Geo1DData, Geo2DData, Geo3DData, serialised_file
+from qmt.data import Geo2DData, Geo3DData, serialised_file
 from qmt.tasks import Task
-
-
-class Geometry1D(Task):
-    """Task for handling of 1D geometries."""
-    def __init__(self, options=None, name='geometry_1d_task'):
-        """
-        Builds a geometry in 1D.
-        :param dict options: The dictionary specifying parts, of the form
-        {"part_name":(start_coord,stop_coord)}
-        :param str name: The name of this task.
-        """
-        super(Geometry1D, self).__init__([], options, name)
-
-    @staticmethod
-    def _solve_instance(input_result_list, current_options):
-        """
-        :param list input_result_list: This is an empty list.
-        :param dict current_options: The dictionary specifying parts from above.
-        :return geo_1d: A Geo1DData object.
-        """
-        geo_1d = Geo1DData()
-        for part_name in current_options:
-            geo_1d.add_part(part_name, current_options[part_name][0], current_options[part_name][1])
-        return geo_1d
-
 
 class Geometry2D(Task):
     """Task for handling of 2D geometries with Shapely."""

@@ -86,7 +86,7 @@ class Geo2DData(Data):
                     "Attempted to remove the edge " + edge_name + ", which doesn't exist.")
             else:
                 pass
-            
+
     def compute_bb(self):
         """
         Computes the bounding box of all of the parts and edges in the geometry.
@@ -99,7 +99,6 @@ class Geo2DData(Data):
         min_y = min(bbox_vertices[1])
         max_y = max(bbox_vertices[1])
         return [min_x, max_x,min_y, max_y]
-
 
 class Geo3DData(Data):
     """Class holding 3D geometry data."""
