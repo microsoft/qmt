@@ -5,8 +5,8 @@
 
 from qmt.materials import Materials
 from qmt.data.template import Data
-
 from .data_utils import load_serial, store_serial, write_deserialised
+from shapely.ops import cascaded_union
 
 
 
@@ -86,8 +86,19 @@ class Geo2DData(Data):
                     "Attempted to remove the edge " + edge_name + ", which doesn't exist.")
             else:
                 pass
-
-
+            
+    def compute_bb(self):
+        """
+        Computes the bounding box of all of the parts and edges in the geometry.
+        :return bb_list: List of [min_x,max_x,min_y,max_y]
+        """
+        all_shapes = list(self.parts.values()) + list(self.edges.values())
+        bbox_vertices = cascaded_union(all_shapes).envelope.exterior.coords.xy
+        min_x = min(bbox_vertices[0])
+        max_x = max(bbox_vertices[0])
+        min_y = min(bbox_vertices[1])
+        max_y = max(bbox_vertices[1])
+        return [min_x, max_x,min_y, max_y]
 
 
 class Geo3DData(Data):
