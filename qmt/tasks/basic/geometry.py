@@ -14,9 +14,13 @@ class Geometry2D(Task):
         """
         Builds a geometry in 2D.
         :param dict options: The dictionary holding parts and edges. It should be of the form:
-        {'parts':{'part_name':list of 2d points}, 'edges':{'edge_name':list of 2d points}, where these lists are turned into Polygon and
+        {
+        'parts':{'part_name':list of 2d points},
+        'edges':{'edge_name':list of 2d points},
+        'lunit':length_unit (nm)
+        }
+        , where these lists are turned into Polygon and
         LineString objects, which are instances of shapely.geometry.
-        "part_name":Part3D}
         :param str name: The name of this task.
         """
         super(Geometry2D, self).__init__([], options, name)
@@ -37,6 +41,7 @@ class Geometry2D(Task):
             geo_2d.add_part(part_name, Polygon(current_options['parts'][part_name]))
         for edge_name in current_options['edges']:
             geo_2d.add_edge(edge_name, LineString(current_options['edges'][edge_name]))
+        geo_2d.lunit = current_options.get('lunit', 'nm')
         return geo_2d
 
 

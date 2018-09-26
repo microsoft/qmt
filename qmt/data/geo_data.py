@@ -24,6 +24,7 @@ class Geo2DData(Data):
         self.parts = {}
         self.edges = {}
         self.build_order = []
+        self.lunit = None # length unit
 
     def add_part(self, part_name, part, overwrite=False):
         """
