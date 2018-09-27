@@ -17,10 +17,14 @@ class Geometry2D(Task):
         {
         'parts':{'part_name':list of 2d points},
         'edges':{'edge_name':list of 2d points},
-        'lunit':length_unit (nm)
+        'lunit':length_unit (nm),
+        'build_order':[list, of, all, parts]
         }
         , where these lists are turned into Polygon and
         LineString objects, which are instances of shapely.geometry.
+        The build_order controls the order in which the objects are parsed, which matters for
+        overlapping domains and overlapping boundary conditions. The highest priority items are
+        listed first.
         :param str name: The name of this task.
         """
         super(Geometry2D, self).__init__([], options, name)
@@ -33,14 +37,24 @@ class Geometry2D(Task):
         :return: geo_2d: A Geo2DData object.
         """
         geo_2d = Geo2DData()
-        build_order = list(current_options.get('build_order', current_options['parts']))
+        build_order = list(current_options.get('build_order',
+                                               current_options['parts']))
+        edges = current_options.get('edges',{})
+        # Set up the complete build order:
         for part in current_options['parts']:
             if part not in build_order:
                 build_order.append(part)
-        for part_name in build_order:
-            geo_2d.add_part(part_name, Polygon(current_options['parts'][part_name]))
-        for edge_name in current_options['edges']:
-            geo_2d.add_edge(edge_name, LineString(current_options['edges'][edge_name]))
+        for edge in edges:
+            if edge not in build_order:
+                build_order.append(edge)
+        for object_name in build_order:
+            if object_name in current_options['parts']:
+                geo_2d.add_part(object_name, Polygon(current_options['parts'][object_name]))
+            elif object_name in edges:
+                geo_2d.add_edge(object_name, LineString(current_options['edges'][object_name]))
+            else:
+                raise ValueError("Object of name "+object_name+" was found neither in edges nor "
+                                                               "parts.")
         geo_2d.lunit = current_options.get('lunit', 'nm')
         return geo_2d
 
