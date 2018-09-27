@@ -12,7 +12,7 @@ from shapely.ops import cascaded_union
 
 class Geo2DData(Data):
     """Class holding 2D geometry data."""
-    def __init__(self):
+    def __init__(self,lunit='nm'):
         """
         Class for holding a 2D geometry specification. This class holds two main dicts:
             - parts is a dictionary of shapely Polygon objects
@@ -24,7 +24,8 @@ class Geo2DData(Data):
         self.parts = {}
         self.edges = {}
         self.build_order = []
-        self.lunit = None # length unit
+        self.lunit = lunit
+
 
     def add_part(self, part_name, part, overwrite=False):
         """
@@ -100,6 +101,17 @@ class Geo2DData(Data):
         min_y = min(bbox_vertices[1])
         max_y = max(bbox_vertices[1])
         return [min_x, max_x,min_y, max_y]
+
+    def part_build_order(self):
+        """
+        Returns the build order restricted to parts.
+        :return build_order: build order restricted to parts.
+        """
+        priority = []
+        for geo_item in self.build_order:
+            if geo_item in self.parts:
+                priority += [geo_item]
+        return priority
 
 class Geo3DData(Data):
     """Class holding 3D geometry data."""
