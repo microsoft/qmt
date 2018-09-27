@@ -7,6 +7,7 @@ from qmt.materials import Materials
 from qmt.data.template import Data
 from .data_utils import load_serial, store_serial, write_deserialised
 from shapely.ops import cascaded_union
+import numpy as np
 
 
 
@@ -112,6 +113,25 @@ class Geo2DData(Data):
             if geo_item in self.parts:
                 priority += [geo_item]
         return priority
+
+    def part_coord_list(self,part_name):
+        """
+        Get the list of vertex coordinates for a part
+        :param str part_name: Name of the part
+        :return list coord_list: List of coordinates of the vertices of the part.
+        """
+        # Note that in shapely, the first coord is repeated at the end, which we trim off:
+        coord_list = list(np.array(self.parts[part_name].exterior.coords.xy).T)[:-1]
+        return coord_list
+
+    def edge_coord_list(self,edge_name):
+        """
+        Get the list of vertex coordinates for an edge.
+        :param str edge_name: Name of the edge.
+        :return list coord_list: List of the coordinates of the edge.
+        """
+        coord_list = list(np.array(self.edges[edge_name].coords.xy).T)[:]
+        return coord_list
 
 class Geo3DData(Data):
     """Class holding 3D geometry data."""
