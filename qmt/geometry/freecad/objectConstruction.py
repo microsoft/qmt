@@ -20,7 +20,7 @@ from qmt.geometry.freecad.geomUtils import (extrude, copy_move, genUnion,# make_
 from qmt.geometry.freecad.sketchUtils import (findSegments, splitSketch, extendSketch,
                                               findEdgeCycles)
 
-from qmt.data.geo_data import Geo3DData, store_serial
+from qmt.data.geometry import Geo3DData, store_serial
 
 
 def set_params(doc, paramDict):

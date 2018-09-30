@@ -6,7 +6,7 @@
 import os
 import numpy as np
 
-from qmt.data.part_data import Part3DData
+from qmt.data import Part3DData
 from qmt.tasks.basic.geometry import Geometry3D
 from qmt.tasks.sweep import SweepTag, SweepManager
 

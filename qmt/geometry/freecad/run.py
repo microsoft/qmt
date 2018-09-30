@@ -43,7 +43,7 @@ def activate_doc_from(opts):
     """
 
     if 'serial_fcdoc' in opts:
-        from qmt.data.geo_data import Geo3DData
+        from qmt.data.geometry import Geo3DData
         data = Geo3DData()
         data.serial_fcdoc = opts['serial_fcdoc']
         doc = data.get_data('fcdoc')

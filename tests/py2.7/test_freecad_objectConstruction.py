@@ -7,7 +7,7 @@ from qmt.geometry.freecad.objectConstruction import *
 
 
 def test_build(fix_exampleDir, fix_FCDoc):
-    from qmt.data.part_data import Part3DData
+    from qmt.data import Part3DData
     myPart = Part3DData('block_of_gold', 'Sketch', 'extrude', 'metal_gate',
                         material='Au', thickness=10)
     opts = {
@@ -21,7 +21,7 @@ def test_build(fix_exampleDir, fix_FCDoc):
 
 
 def test_build_extrude(fix_FCDoc, fix_hexagon_sketch):
-    from qmt.data.part_data import Part3DData
+    from qmt.data import Part3DData
     sketch = fix_hexagon_sketch()
     input_part = Part3DData('label', sketch.Name, 'extrude', 'metal_gate',
                             material='Au', thickness=10)

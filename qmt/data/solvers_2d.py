@@ -1,13 +1,36 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
+from collections import namedtuple
 from qmt.data import Data
 
+Potential2dData = namedtuple('Potential2dData', ['coordinates', 'coordinate_units', 'potential',
+                                                 'potential_units'])
+ThomasFermi2dData = namedtuple('ThomasFermi2dData', ['coordinates',
+                                                     'potential',
+                                                     'conduction_band',
+                                                     'valence_band',
+                                                     'reference_level',
+                                                     'temperature',
+                                                     'coordinate_units',
+                                                     'potential_units',
+                                                     'energy_units'
+                                                     ])
+
+Bdg2dData = namedtuple('Bdg2dData', ['coordinates',
+                                     'energies',
+                                     'wave_functions',
+                                     'coordinate_units',
+                                     'energy_units'
+                                     ])
+
+
+#TODO: this needs to be pruned
 class SchrodingerPoissonData(Data):
     def __init__(self, poisson_obj, density, density_per_subband, density_units, rho, rho_units, psis, energies, potential, potential_units, mesh, mesh_units, bands, temperature, band_charges, Dit, neutral_level, fixed_charge_sites, fixed_charge_site_perimeters):
         """
         Constructs Data object stores outputs of Thomas-Fermi Task.
-         
+
         :param poisson_obj: A qms.physics.Poisson object containing relevant boundary conditions, etc.
         :param densities: list of numpy arrays, corresponding to the density in [conduction band, light holes, heavy holes]
         :param density_units: units of density
