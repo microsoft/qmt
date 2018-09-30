@@ -2,16 +2,14 @@
 # Licensed under the MIT License.
 
 """Geometry data classes."""
-from qmt.data import Data
 from qmt.materials import Materials
-from qmt.data.template import Data
 from .data_utils import load_serial, store_serial, write_deserialised
 from shapely.ops import cascaded_union
 import numpy as np
 
 
 
-class Geo2DData(Data):
+class Geo2DData:
     """Class holding 2D geometry data."""
     def __init__(self,lunit='nm'):
         """
@@ -21,7 +19,6 @@ class Geo2DData(Data):
         Parts are intended to be 2D domains, while edges are used for setting boundary conditions
         and surface conditions.
         """
-        super(Geo2DData, self).__init__()
         self.parts = {}
         self.edges = {}
         self.build_order = []
@@ -133,7 +130,7 @@ class Geo2DData(Data):
         coord_list = list(np.array(self.edges[edge_name].coords.xy).T)[:]
         return coord_list
 
-class Geo3DData(Data):
+class Geo3DData:
     """Class holding 3D geometry data."""
     EXTERIOR_BC_NAME = "exterior"
 
@@ -143,8 +140,6 @@ class Geo3DData(Data):
             - parts is a dict of Part3D objects, keyed by the label of each Part3D object.
             - build_order is a list of strings indicating the construction order.
         """
-        super(Geo3DData, self).__init__()
-
         self.build_order = []
         self.parts = {}  # dict of parts in this geometry
         self.serial_fcdoc = None  # serialized FreeCAD document for this geometry
@@ -323,7 +318,7 @@ class Geo3DData(Data):
         return {name: part.boundary_condition["neumann"] for name, part in self.parts.items() if
                 part.boundary_condition is not None and "neumann" in part.boundary_condition}
 
-class Part3DData(Data):
+class Part3DData:
     def __init__(
             self, label, fc_name, directive, domain_type=None, material=None,
             z0=0, thickness=None, target_wire=None, shell_verts=None,
@@ -397,7 +392,6 @@ class Part3DData(Data):
                              the valence band maximum (semiconductor only).
         :param float ds: Density of interface traps; units are 1/(cm^2*eV).
         """
-        super(Part3DData, self).__init__()
         # Input validation
         if directive not in ['extrude', 'wire', 'wire_shell', 'SAG', 'lithography', '3d_shape']:
             raise NameError('Error - directive ' + directive + ' is not a valid directive!')

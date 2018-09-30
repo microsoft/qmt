@@ -2,7 +2,6 @@
 # Licensed under the MIT License.
 
 from collections import namedtuple
-from qmt.data import Data
 
 Potential2dData = namedtuple('Potential2dData', ['coordinates', 'coordinate_units', 'potential',
                                                  'potential_units'])
@@ -26,7 +25,7 @@ Bdg2dData = namedtuple('Bdg2dData', ['coordinates',
 
 
 #TODO: this needs to be pruned
-class SchrodingerPoissonData(Data):
+class SchrodingerPoissonDatas:
     def __init__(self, poisson_obj, density, density_per_subband, density_units, rho, rho_units, psis, energies, potential, potential_units, mesh, mesh_units, bands, temperature, band_charges, Dit, neutral_level, fixed_charge_sites, fixed_charge_site_perimeters):
         """
         Constructs Data object stores outputs of Thomas-Fermi Task.
@@ -37,8 +36,7 @@ class SchrodingerPoissonData(Data):
         :param mesh: numpy array with the 1d mesh
         :param mesh_units: units of mesh points
         """
-        super(SchrodingerPoissonData, self).__init__()
-
+        self.content = {}
         self.poisson = poisson_obj
         self.density = density
         self.density_per_subband = density_per_subband
