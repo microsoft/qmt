@@ -8,10 +8,10 @@ from shapely.ops import cascaded_union
 import numpy as np
 
 
-
 class Geo2DData:
     """Class holding 2D geometry data."""
-    def __init__(self,lunit='nm'):
+
+    def __init__(self, lunit='nm'):
         """
         Class for holding a 2D geometry specification. This class holds two main dicts:
             - parts is a dictionary of shapely Polygon objects
@@ -24,7 +24,6 @@ class Geo2DData:
         self.build_order = []
         self.lunit = lunit
 
-
     def add_part(self, part_name, part, overwrite=False):
         """
         Add a part to this geometry.
@@ -35,7 +34,8 @@ class Geo2DData:
         if not part.is_valid:
             raise ValueError("Part " + part_name + " is not a valid polygon.")
         if (part_name in self.parts) and (not overwrite):
-            raise ValueError("Attempted to overwrite the part " + part_name + ".")
+            raise ValueError(
+                "Attempted to overwrite the part " + part_name + ".")
         else:
             self.parts[part_name] = part
             self.build_order += [part_name]
@@ -65,7 +65,8 @@ class Geo2DData:
         :param bool overwrite: Should we allow this to overwrite?
         """
         if (edge_name in self.edges) and (not overwrite):
-            raise ValueError("Attempted to overwrite the edge " + edge_name + ".")
+            raise ValueError(
+                "Attempted to overwrite the edge " + edge_name + ".")
         else:
             self.edges[edge_name] = edge
             self.build_order += [edge_name]
@@ -98,7 +99,7 @@ class Geo2DData:
         max_x = max(bbox_vertices[0])
         min_y = min(bbox_vertices[1])
         max_y = max(bbox_vertices[1])
-        return [min_x, max_x,min_y, max_y]
+        return [min_x, max_x, min_y, max_y]
 
     def part_build_order(self):
         """
@@ -111,17 +112,18 @@ class Geo2DData:
                 priority += [geo_item]
         return priority
 
-    def part_coord_list(self,part_name):
+    def part_coord_list(self, part_name):
         """
         Get the list of vertex coordinates for a part
         :param str part_name: Name of the part
         :return list coord_list: List of coordinates of the vertices of the part.
         """
         # Note that in shapely, the first coord is repeated at the end, which we trim off:
-        coord_list = list(np.array(self.parts[part_name].exterior.coords.xy).T)[:-1]
+        coord_list = list(
+            np.array(self.parts[part_name].exterior.coords.xy).T)[:-1]
         return coord_list
 
-    def edge_coord_list(self,edge_name):
+    def edge_coord_list(self, edge_name):
         """
         Get the list of vertex coordinates for an edge.
         :param str edge_name: Name of the edge.
@@ -129,6 +131,7 @@ class Geo2DData:
         """
         coord_list = list(np.array(self.edges[edge_name].coords.xy).T)[:]
         return coord_list
+
 
 class Geo3DData:
     """Class holding 3D geometry data."""
@@ -143,10 +146,13 @@ class Geo3DData:
         self.build_order = []
         self.parts = {}  # dict of parts in this geometry
         self.serial_fcdoc = None  # serialized FreeCAD document for this geometry
-        self.serial_mesh = None  # Holding container for the serialized xml of the meshed geometry
-        self.serial_region_marker = None  # Holding container for the serialized xml of the region
+        # Holding container for the serialized xml of the meshed geometry
+        self.serial_mesh = None
+        # Holding container for the serialized xml of the region
+        self.serial_region_marker = None
         # marker function
-        self.fenics_ids = None  # dictionary with part name keys mapping to fenics ids.
+        # dictionary with part name keys mapping to fenics ids.
+        self.fenics_ids = None
         self.materials_database = Materials()
 
     def get_material(self, part_name):
@@ -167,7 +173,8 @@ class Geo3DData:
         :param bool overwrite: Should we allow this to overwrite?
         """
         if (part_name in self.parts) and (not overwrite):
-            raise ValueError("Attempted to overwrite the part " + part_name + ".")
+            raise ValueError(
+                "Attempted to overwrite the part " + part_name + ".")
         else:
             self.build_order.append(part.label)
             self.parts[part_name] = part
@@ -200,7 +207,8 @@ class Geo3DData:
         if data_name == 'fcdoc':
             def _save_fct(doc, path):
                 doc.saveAs(path)
-            self.serial_fcdoc = store_serial(data, _save_fct, 'fcstd', scratch_dir=scratch_dir)
+            self.serial_fcdoc = store_serial(
+                data, _save_fct, 'fcstd', scratch_dir=scratch_dir)
 
         elif data_name == 'mesh' or data_name == 'rmf':
             import fenics as fn
@@ -208,7 +216,8 @@ class Geo3DData:
             def _save_fct(data, path):
                 fn.File(path) << data
             if data_name == 'mesh':
-                self.serial_mesh = store_serial(data, _save_fct, 'xml', scratch_dir=scratch_dir)
+                self.serial_mesh = store_serial(
+                    data, _save_fct, 'xml', scratch_dir=scratch_dir)
             if data_name == 'rmf':
                 self.serial_region_marker = store_serial(data, _save_fct, 'xml',
                                                          scratch_dir=scratch_dir)
@@ -264,7 +273,8 @@ class Geo3DData:
         Returns the fcstd file path.
         """
         if file_path is None:
-            file_path = '_'.join([item[0:4].replace(' ', '_') for item in self.build_order]) + '.fcstd'
+            file_path = '_'.join([item[0:4].replace(' ', '_')
+                                  for item in self.build_order]) + '.fcstd'
         write_deserialised(self.serial_fcdoc, file_path)
         return file_path
 
@@ -295,11 +305,13 @@ class Geo3DData:
 
             if self.parts[name].ds is not None:
                 if name not in result:
-                    raise ValueError("both phi_nl and ds must be specified together")
+                    raise ValueError(
+                        "both phi_nl and ds must be specified together")
                 result[name]["ds"] = self.parts[name].ds
             else:
                 if name in result:
-                    raise ValueError("both phi_nl and ds must be specified together")
+                    raise ValueError(
+                        "both phi_nl and ds must be specified together")
 
         return result
 
@@ -317,6 +329,7 @@ class Geo3DData:
     def get_names_to_default_neumann_bcs(self):
         return {name: part.boundary_condition["neumann"] for name, part in self.parts.items() if
                 part.boundary_condition is not None and "neumann" in part.boundary_condition}
+
 
 class Part3DData:
     def __init__(
@@ -394,14 +407,17 @@ class Part3DData:
         """
         # Input validation
         if directive not in ['extrude', 'wire', 'wire_shell', 'SAG', 'lithography', '3d_shape']:
-            raise NameError('Error - directive ' + directive + ' is not a valid directive!')
+            raise NameError('Error - directive ' + directive +
+                            ' is not a valid directive!')
         if domain_type not in ['semiconductor', 'metal_gate', 'virtual', 'dielectric']:
-            raise NameError('Error - domainType ' + domain_type + ' not valid!')
+            raise NameError('Error - domainType ' +
+                            domain_type + ' not valid!')
         # ~ if (etch_zone is not None) and (depo_zone is not None):
             # ~ raise NameError(
-                # ~ 'Error - etch_zone and depo_zone cannot both be set!')
+            # ~ 'Error - etch_zone and depo_zone cannot both be set!')
         if domain_type not in ["semiconductor", "dielectric"] and ns is not None:
-            raise ValueError("Cannot set a volume charge density on a gate or virtual part.")
+            raise ValueError(
+                "Cannot set a volume charge density on a gate or virtual part.")
 
         # Input storage
         self.label = label
@@ -425,13 +441,13 @@ class Part3DData:
         self.mesh_growth_rate = mesh_growth_rate
         self.mesh_scale_vector = mesh_scale_vector
         self.boundary_condition = boundary_condition
-        self.subtract_list = [] if subtract_list is None else subtract_list  # TODO: scheduled for removal
+        # TODO: scheduled for removal
+        self.subtract_list = [] if subtract_list is None else subtract_list
         self.ns = ns
         self.phi_nl = phi_nl
         self.ds = ds
         self.serial_stp = None  # This gets set on geometry build
         self.built_fc_name = None  # This gets set on geometry build
-
 
     def write_stp(self, file_path=None):
         """Write part geometry to a STEP file.

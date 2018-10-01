@@ -349,7 +349,6 @@ class Materials(collections.Mapping):
             generate_file(self.matPath)
             self.load()
 
-
     def conduction_band_minimum(self, mat):
         """Calculate the energy of the conduction band minimum $E_c$ of a semiconductor material.
 
@@ -379,7 +378,7 @@ class Materials(collections.Mapping):
         if mat['type'] == 'metal':
             return -mat['workFunction'] - mat['fermiEnergy']
         elif mat['type'] == 'dielectric':
-            return 0.*mat.energyUnit #vacuum energy
+            return 0.*mat.energyUnit  # vacuum energy
         assert mat['type'] == 'semi'
         try:
             cbo = mat['valenceBandOffset'] + mat['directBandGap']
@@ -421,9 +420,9 @@ class Materials(collections.Mapping):
           `self.valence_band_maximum(mat1) - self.valence_band_maximum(mat2)`
         """
         if mat['type'] == 'metal':
-            return -10.e3*mat.energyUnit #very low
+            return -10.e3*mat.energyUnit  # very low
         elif mat['type'] == 'dielectric':
-            return -10.e3*mat.energyUnit #very low
+            return -10.e3*mat.energyUnit  # very low
         assert mat['type'] == 'semi'
         ref_name = 'InSb'
         try:
@@ -446,7 +445,7 @@ class Materials(collections.Mapping):
             print(msg)
             return -(mat['electronAffinity'] + mat['directBandGap'])
 
-    #TODO: make this user-configurable and shift all energy properties reported by materials
+    # TODO: make this user-configurable and shift all energy properties reported by materials
     def reference_level(self, eunit=None):
         if eunit is None:
             eunit = units.meV
@@ -483,7 +482,6 @@ def conduction_band_offset(mat, ref_mat):
         print(msg)
         chi = mat['electronAffinity']
         return ref_mat['electronAffinity'] - chi
-
 
 
 def valence_band_offset(mat, ref_mat):
@@ -662,20 +660,20 @@ def generate_file(fname=None):
                            # source? Wikipedia and others quote 4.06 - 4.26 eV
                            # depending on face.
                            workFunction=4280.,
-                           #Ashcroft and Mermin:
+                           # Ashcroft and Mermin:
                            fermiEnergy=11700.)
     materials.add_material('Au', 'metal', relativePermittivity=1000,
                            # source- Wikipedia quotes it as 5.1-5.47; this is the
                            # average.
                            workFunction=5285.,
-                           #Ashcroft and Mermin:
+                           # Ashcroft and Mermin:
                            fermiEnergy=5530.)
     materials.add_material('degenDopedSi', 'metal', relativePermittivity=1000,
                            # source - Ioffe Institute,
                            # http://www.ioffe.ru/SVA/NSM/Semicond/Si/basic.html
                            workFunction=4050.,
-                           #unknown / probably depends on doping density; setting
-                           #it to Au for now.
+                           # unknown / probably depends on doping density; setting
+                           # it to Au for now.
                            fermiEnergy=5530.)
     materials.add_material('NbTiN', 'metal', relativePermittivity=1000,
                            # Unknown; just setting it to Al for now.
@@ -810,7 +808,8 @@ def generate_file(fname=None):
                            # 300 K,
                            # http://www.ioffe.ru/SVA/NSM/Semicond/Si/basic.html
                            relativePermittivity=11.7, electronAffinity=4050.,
-                           electronMass=(0.98 + 0.19 * 2)**(1. / 3.),  # DOS mass
+                           electronMass=(
+                               0.98 + 0.19 * 2)**(1. / 3.),  # DOS mass
                            # Yu & Cardona
                            directBandGap=3480.,
                            luttingerGamma1=4.28, luttingerGamma2=0.339, luttingerGamma3=1.446,

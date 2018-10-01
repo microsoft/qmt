@@ -12,7 +12,6 @@ import dask
 import dask.delayed
 
 
-
 def serialised_file(path):
     '''Return a serialised blob of the contents of a given file path.'''
     with open(path, 'rb') as f:
@@ -58,6 +57,7 @@ def load_serial(serial_obj, load_fct, ext_format=None, scratch_dir=None):
     os.remove(tmp_path)
     return obj
 
+
 def reduce_data(reduce_function, task, dask_client):
     """
     Given a task that has or will be been run, apply a reduce function to all of its outputs in
@@ -71,15 +71,19 @@ def reduce_data(reduce_function, task, dask_client):
     :return sweep_vals,extracted_data: Returns a list of the sweep tags and a list of the futures
     corresponding to the data objects.
     """
-    sweep_holder = task.computed_result #List of futures that resolve to the data
-    sweep_vals = task.computed_result.sweep.sweep_list # List of the tag values
+    sweep_holder = task.computed_result  # List of futures that resolve to the data
+    sweep_vals = task.computed_result.sweep.sweep_list  # List of the tag values
     # First, map the get_data method as a delayed function over the futures:
-    mappped_futures = list(map(lambda x: dask.delayed(reduce_function)(x),sweep_holder.futures))
+    mappped_futures = list(map(lambda x: dask.delayed(
+        reduce_function)(x), sweep_holder.futures))
     # Next, send these futures to the client to perform the reduction remotely:
-    extracted_data = list(map(lambda x: dask_client.compute(x), mappped_futures)) #list of futures pointing to processed data
-    return sweep_vals,extracted_data
+    # list of futures pointing to processed data
+    extracted_data = list(
+        map(lambda x: dask_client.compute(x), mappped_futures))
+    return sweep_vals, extracted_data
 
-def retrieve_data(extracted_data,dask_client):
+
+def retrieve_data(extracted_data, dask_client):
     """
     Retrieves all of the data stored in a list of futures.
     :param extracted_data: List of futures we ant to retrieve.
@@ -90,7 +94,7 @@ def retrieve_data(extracted_data,dask_client):
     return retrieved_data
 
 
-def stream_data_to_file(extracted_data,filename,dask_client,sweep_vals=None):
+def stream_data_to_file(extracted_data, filename, dask_client, sweep_vals=None):
     """
     Instead of simply retrieving all the data, we can stream it to a file on disk as the runs
     complete. The data are stored in an hdf5 file with a single level. Data entries are given by
@@ -105,8 +109,8 @@ def stream_data_to_file(extracted_data,filename,dask_client,sweep_vals=None):
     from tqdm import tqdm
     if sweep_vals is None:
         sweep_vals = range(len(extracted_data))
-    with h5py.File(filename,'w') as data_file:
-        #loop through data, write data as it comes in
+    with h5py.File(filename, 'w') as data_file:
+        # loop through data, write data as it comes in
         job_finished = [False]*len(extracted_data)
         pbar = tqdm(total=len(extracted_data))
         while not all(job_finished):
@@ -114,8 +118,10 @@ def stream_data_to_file(extracted_data,filename,dask_client,sweep_vals=None):
             for index, future in enumerate(extracted_data):
                 if future.status == 'finished' and not job_finished[index]:
                     for k in future.result().keys():
-                        data_file.create_dataset(str(index)+'_'+k, data = future.result()[k])
+                        data_file.create_dataset(
+                            str(index)+'_'+k, data=future.result()[k])
                     for k in sweep_vals[index].keys():
-                        data_file.create_dataset(str(index)+'_'+str(k),data=sweep_vals[index][k])
+                        data_file.create_dataset(
+                            str(index)+'_'+str(k), data=sweep_vals[index][k])
                     job_finished[index] = True
                     pbar.update(1)

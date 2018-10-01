@@ -3,6 +3,7 @@ import dask.distributed
 from six import iteritems
 import cloudpickle
 
+
 class SweepManager(object):
     """
     Represents a sweep over simulation input values.
@@ -19,7 +20,7 @@ class SweepManager(object):
     # Each entry has the form {tag1: value1, ... tagN: valueN}
     # mapping SweepTag objects to values in each of the input domains.
 
-    def __init__(self, sweep_list, dask_client=None,no_dask=False):
+    def __init__(self, sweep_list, dask_client=None, no_dask=False):
         """
         Constructs a new SweepManager directly from sweep entries.
         :param sweep_list: a list representing values in the cartesian
@@ -31,22 +32,23 @@ class SweepManager(object):
         """
         self.sweep_list = sweep_list
         assert isinstance(self.sweep_list, list) and \
-               isinstance(self.sweep_list[0], dict), \
+            isinstance(self.sweep_list[0], dict), \
             'sweep_list must be a list of dicts.'
-        assert all([set(sweep_list[0].keys()) == \
+        assert all([set(sweep_list[0].keys()) ==
                     set(x.keys()) for x in sweep_list]), \
             'All dicts in sweep_list must have same keys.'
 
         if dask_client is None and not no_dask:
-            dask_client = dask.distributed.Client(processes=False)  # client on the local machine
+            dask_client = dask.distributed.Client(
+                processes=False)  # client on the local machine
 
         self.dask_client = dask_client
         self.results = None
 
     # TODO test
     @staticmethod
-    def create_empty_sweep(dask_client=None,no_dask=False):
-        return SweepManager([{}], dask_client=dask_client,no_dask=no_dask)
+    def create_empty_sweep(dask_client=None, no_dask=False):
+        return SweepManager([{}], dask_client=dask_client, no_dask=no_dask)
 
     @staticmethod
     def construct_cartesian_product(params_to_product, dask_client=None):
@@ -74,7 +76,8 @@ class SweepManager(object):
         result = [{}]
         for key in params_to_product:
             pool = params_to_product[key]
-            result = [merge_two_dicts(x, {key: y}) for x in result for y in pool]
+            result = [merge_two_dicts(x, {key: y})
+                      for x in result for y in pool]
         return SweepManager(result, dask_client)
 
     def run(self, task):
@@ -111,7 +114,8 @@ class ReducedSweepWithData(object):
         self.sweep = sweep
         self._data = data
         self.tagged_value_list = sweep.tagged_value_list
-        self.tags_with_data = [(self.tagged_value_list[i], self._data[i]) for i in range(len(self))]
+        self.tags_with_data = [
+            (self.tagged_value_list[i], self._data[i]) for i in range(len(self))]
         assert len(self._data) == len(self.tagged_value_list)
 
     @staticmethod
@@ -236,7 +240,8 @@ class ReducedSweepDelayed(ReducedSweepWithData):
         assert self.delayed_results[0] is not None
         futures = []
         for delayed_result in self.delayed_results:
-            futures.append(self.dask_client.compute(delayed_result, resources=resources))
+            futures.append(self.dask_client.compute(
+                delayed_result, resources=resources))
 
         return ReducedSweepFutures(self.sweep, futures)
 
@@ -427,7 +432,8 @@ class ReducedSweep(object):
             # add the corresponding sweep element {tag1: value1, ... tagN: valueN}
             # to the list of values
             if new_point:
-                tagged_value_list += [dict((tag, sweep_point[tag]) for tag in list_of_tags)]
+                tagged_value_list += [dict((tag, sweep_point[tag])
+                                           for tag in list_of_tags)]
                 index_in_sweep += [[i]]
             else:
                 index_in_sweep[point_small_index] += [i]
@@ -442,7 +448,8 @@ class ReducedSweep(object):
         :param total_index: index of a sweep element in the total sweep
         :return: corresponding index in the reduced sweep
         """
-        reduced_index = [total_index in sublist for sublist in self._index_in_sweep].index(True)
+        reduced_index = [
+            total_index in sublist for sublist in self._index_in_sweep].index(True)
         return reduced_index
 
     def convert_to_total_indices(self, reduced_index):

@@ -62,7 +62,8 @@ class MaterialPropertyMap(PropertyMap):
     def __init__(self, part_map, part_materials, mat_lib, prop_name, eunit=None,
                  fill_value='raise'):
         self.fillValue = fill_value
-        self.materialsDict = dict((p, mat_lib.find(m, eunit)) for p, m in iteritems(part_materials))
+        self.materialsDict = dict((p, mat_lib.find(m, eunit))
+                                  for p, m in iteritems(part_materials))
 
         self.partProps = {}
         for p, mat in iteritems(self.materialsDict):
@@ -76,7 +77,7 @@ class MaterialPropertyMap(PropertyMap):
                 elif prop_name == 'heavyHoleMass':
                     self.partProps[p] = mat.hole_mass('heavy', 'dos')
                 elif prop_name == 'dosHoleMass':
-                    self.partProps[p] = mat.hole_mass('dos','dos')
+                    self.partProps[p] = mat.hole_mass('dos', 'dos')
                 else:
                     self.partProps[p] = mat[prop_name]
             except KeyError:
