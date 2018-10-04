@@ -9,7 +9,7 @@ import numpy as np
 
 
 
-class Geo2DData:
+class Geo2DData(object):
     """Class holding 2D geometry data."""
     def __init__(self,lunit='nm'):
         """
@@ -130,7 +130,7 @@ class Geo2DData:
         coord_list = list(np.array(self.edges[edge_name].coords.xy).T)[:]
         return coord_list
 
-class Geo3DData:
+class Geo3DData(object):
     """Class holding 3D geometry data."""
     EXTERIOR_BC_NAME = "exterior"
 
