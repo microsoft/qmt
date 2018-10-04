@@ -318,7 +318,7 @@ class Geo3DData:
         return {name: part.boundary_condition["neumann"] for name, part in self.parts.items() if
                 part.boundary_condition is not None and "neumann" in part.boundary_condition}
 
-class Part3DData:
+class Part3DData(object):
     def __init__(
             self, label, fc_name, directive, domain_type=None, material=None,
             z0=0, thickness=None, target_wire=None, shell_verts=None,
