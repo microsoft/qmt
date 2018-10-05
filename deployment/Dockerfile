@@ -34,7 +34,8 @@ RUN apt-get update && apt-get install -y \
     vim \
     apt-transport-https \
     gnupg2 \
-    ca-certificates
+    ca-certificates \
+    slurm-client
 
 
 # install freecad 0.16 and 0.17

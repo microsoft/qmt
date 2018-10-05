@@ -23,3 +23,8 @@ dependencies:
   - kwant
   - mkl
   - mkl-service
+  - adaptive
+  - hpc05
+  - pip
+  - pip:
+   - numpy-stl
