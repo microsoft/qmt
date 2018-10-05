@@ -14,6 +14,9 @@ steps:
     docker build -t qmt_test:latest -f Dockerfile .
     docker run qmt_test /usr/local/envs/py27/bin/pytest --junitxml=TEST-unit_tests.xml 
     docker run qmt_test cat /app/qmt/TEST-unit_tests.xml > TEST-unit_tests.xml 
+    ls TEST-unit_tests.xml
+    cat TEST-unit_tests.xml
+    pwd
 - task: PublishTestResults@2
   inputs:
     testResultsFiles: 'TEST-*.xml'
