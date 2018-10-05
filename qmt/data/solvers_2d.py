@@ -7,6 +7,7 @@ Potential2dData = namedtuple('Potential2dData', ['coordinates', 'coordinate_unit
                                                  'potential_units'])
 ThomasFermi2dData = namedtuple('ThomasFermi2dData', ['coordinates',
                                                      'potential',
+                                                     'density',
                                                      'conduction_band',
                                                      'valence_band',
                                                      'reference_level',
