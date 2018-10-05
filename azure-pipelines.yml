@@ -12,7 +12,8 @@ variables:
 steps:
 - script: |
     docker build -t qmt_test:latest -f Dockerfile .
-    docker run qmt_test cat TEST-*.xml > TEST-unit_tests.xml 
+    docker run qmt_test pytest --junitxml=TEST-unit_tests.xml qmt/tests/unit_tests
+    docker run qmt_test cat TEST-unit_tests.xml > TEST-unit_tests.xml 
 - task: PublishTestResults@2
   inputs:
     testResultsFiles: 'TEST-*.xml'
