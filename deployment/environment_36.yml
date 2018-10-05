@@ -27,4 +27,4 @@ dependencies:
   - hpc05
   - pip
   - pip:
-   - numpy-stl
+    - numpy-stl
