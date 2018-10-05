@@ -12,8 +12,8 @@ variables:
 steps:
 - script: |
     docker build -t qmt_test:latest -f Dockerfile .
-    docker run qmt_test /bin/bash -c " /usr/local/envs/py27/bin/pytest --verbose --capture=no /app/qmt/tests/py2.7 --junit-xml=/app/tests2.7.xml > /dev/null && cat /app/tests2.7.xml" > TEST-2.7.xml
-    #docker run qmt_test /bin/bash -c "/usr/local/envs/py36/bin/pytest --noconftest /app/qmt/tests/py3 --junit-xml=tests3.xml"
+    docker run qmt_test /bin/bash -c "/usr/local/envs/py27/bin/pytest --verbose --capture=no /app/qmt/tests/py2.7 --junit-xml=/app/tests2.7.xml > /dev/null ; cat /app/tests2.7.xml" > TEST-2.7.xml
+    docker run qmt_test /bin/bash -c "/usr/local/envs/py36/bin/pytest --verbose --capture=no --noconftest /app/qmt/tests/py3 --junit-xml=tests3.xml > /dev/null ; cat /app/tests3.xml" > TEST-3.xml
 - task: PublishTestResults@2
   inputs:
     testResultsFiles: 'TEST-*.xml'
