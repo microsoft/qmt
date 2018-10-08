@@ -11,11 +11,15 @@ from qmt.data import store_serial, load_serial
 
 
 class Fem3DData(object):
-    def __init__(self, coordinates=None, coordinate_units=None, data=None, data_units=None, fenics_3d_data=None):
+    def __init__(self, coordinates=None, coordinate_units=None, potential=None, units=None,
+                 charge=None, surface_charge_integrals=None, volume_charge_integrals=None, fenics_3d_data=None):
         self.coordinates = coordinates
         self.coordinate_units = coordinate_units
-        self.data = data
-        self.data_units = data_units
+        self.potential = potential
+        self.units = units
+        self.charge = charge
+        self.surface_charge_integrals = surface_charge_integrals
+        self.volume_charge_integrals = volume_charge_integrals
         self.fenics_3d_data = fenics_3d_data
 
     def get_data(self, data):
@@ -24,10 +28,12 @@ class Fem3DData(object):
         else:
             print('Unknown datatype {data} for get_data function'.format(data=data))
 
+
 class SerialFenicsFunctionData(object):
     def __init__(self, serial_mesh, serial_function):
         self.serial_mesh = serial_mesh
         self.serial_function = serial_function
+
 
 def serialize_fenics_function(mesh, fenics_function):
     import fenics as fn
@@ -38,6 +44,7 @@ def serialize_fenics_function(mesh, fenics_function):
     serial_function = store_serial(fenics_function, _write_fenics_file, 'xml')
 
     return SerialFenicsFunctionData(serial_mesh, serial_function)
+
 
 def deserialize_fenics_function(serial_function_data, element_type='P', element_degree=1):
     serial_mesh = serial_function_data.serial_mesh
