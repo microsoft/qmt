@@ -232,6 +232,7 @@ def build_wire_shell(part, offset=0.):
 def build_lithography(part, opts, info_holder):
     """Build a lithography part."""
     assert part.directive == 'lithography'
+    part.litho_base = [obj for obj in part.litho_base if obj.directive != 'wire_shell' ] # filter implicitly considered shells
     if not info_holder.litho_setup_done:
         initialize_lithography(info_holder, opts, fillShells=part.fill_litho)
         info_holder.litho_setup_done = True
@@ -575,7 +576,7 @@ def screened_H_union_list(info, opts, obj, m, j, offsetTuple, checkOffsetTuple):
 
 
 def screened_A_UnionList(info, opts, obj, t, ti, offsetTuple, checkOffsetTuple):
-    """Foremd the "screened union list" of obj with the substrate A that has
+    """Form the "screened union list" of obj with the substrate A that has
     been offset according to offsetTuple.
     """
     # First, we need to see if we have built the objects before:

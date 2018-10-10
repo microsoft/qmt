@@ -354,10 +354,6 @@ class Part3DData(object):
         this way?
         :param list shell_verts: Vertices to use when rendering the coating. Required
                                  for the shell directive.
-        # ~ :param str depo_zone: FreeCAD sketch defining the (positive) mask for the deposition
-                              # ~ of a wire coating. Note that only one of depoZone or etchZone may be used.
-        # ~ :param str etch_zone: FreeCAD sketch defining the (negative) amsek for the deposition of a
-                              # ~ wire coating. Note that only one of depoZone or etchZone may be used.
         :param str depo_mode:  'depo' or 'etch' defines the positive or negative mask for the deposition
                                 of a wire coating.
         :param float z_middle: The location for the "flare out" of the SAG directive.
