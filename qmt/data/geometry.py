@@ -143,10 +143,10 @@ class Geo3DData(object):
         self.build_order = []
         self.parts = {}  # dict of parts in this geometry
         self.serial_fcdoc = None  # serialized FreeCAD document for this geometry
-        self.serial_mesh = None  # Holding container for the serialized xml of the meshed geometry
-        self.serial_region_marker = None  # Holding container for the serialized xml of the region
-        # marker function
-        self.fenics_ids = None  # dictionary with part name keys mapping to fenics ids.
+        self.mesh_verts = None  # numpy array corresponding to the mesh vertices
+        self.mesh_tets = None  # numpy array; each row contains the vertex indices in one tet
+        self.mesh_regions = None # 1D array; each entry is the region ID of the corresponding tet
+        self.mesh_ids = None  # dictionary with part name keys mapping to region IDs
         self.materials_database = Materials()
 
     def get_material(self, part_name):
@@ -219,9 +219,7 @@ class Geo3DData(object):
     def get_data(self, data_name, mesh=None, scratch_dir=None):
         """
         Get data from stored serial format.
-        :param str data_name:  "fcdoc" freeCAD document \
-                               "mesh"  fenics mesh \
-                               "rmf"   fenics region marker function
+        :param str data_name:  "fcdoc" freeCAD document.
         :param mesh:
         :param scratch_dir:    Optional existing temporary (fast) storage location.
         :return data:          The freeCAD document or fenics object that was stored.
@@ -235,26 +233,6 @@ class Geo3DData(object):
                 doc.load(path)
                 return doc
             return load_serial(self.serial_fcdoc, _load_fct, scratch_dir=scratch_dir)
-
-        elif data_name == 'mesh':
-            import fenics as fn
-
-            def _load_fct(path):
-                return fn.Mesh(path)
-            return load_serial(self.serial_mesh, _load_fct, ext_format='xml',
-                               scratch_dir=scratch_dir)
-
-        elif data_name == 'rmf':
-            import fenics as fn
-
-            def _load_fct(path):
-                assert mesh, 'Need to specify a mesh on which to generate the region marker function'
-                data = fn.MeshFunction('size_t', mesh, mesh.topology().dim())
-                fn.File(path) >> data
-                return data
-            return load_serial(self.serial_region_marker, _load_fct, ext_format='xml',
-                               scratch_dir=scratch_dir)
-
         else:
             raise ValueError(str(data_name) + ' was not a valid data_name.')
 
