@@ -1,0 +1,18 @@
+There are two ways of building the local QMT documentation.
+Either install the dependencies
+
+  sphinx, pylint (pyreverse), graphviz, m2r, sphinx_rtd_theme
+
+and run:
+
+  ./configure.sh
+  make html
+
+Or directly run:
+
+  docker build -t make_qmt_doc .
+  docker run --rm -v `pwd`/..:/qmt make_qmt_doc
+
+The local QMT project will be pulled into the docker container at every run.
+
+TODO: docker image to hub, change second line to e.g. microsoft/make_qmt_doc

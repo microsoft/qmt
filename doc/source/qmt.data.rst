@@ -12,58 +12,26 @@ qmt\.data\.data\_utils module
     :undoc-members:
     :show-inheritance:
 
-qmt\.data\.density\_data module
--------------------------------
-
-.. automodule:: qmt.data.density_data
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-qmt\.data\.geo\_data module
----------------------------
-
-.. automodule:: qmt.data.geo_data
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-qmt\.data\.mobility\_data module
---------------------------------
-
-.. automodule:: qmt.data.mobility_data
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-qmt\.data\.part\_data module
-----------------------------
-
-.. automodule:: qmt.data.part_data
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-qmt\.data\.schrodinger\_poisson\_data module
---------------------------------------------
-
-.. automodule:: qmt.data.schrodinger_poisson_data
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-qmt\.data\.template module
+qmt\.data\.geometry module
 --------------------------
 
-.. automodule:: qmt.data.template
+.. automodule:: qmt.data.geometry
     :members:
     :undoc-members:
     :show-inheritance:
 
-qmt\.data\.thomas\_fermi\_data module
--------------------------------------
+qmt\.data\.solvers\_2d module
+-----------------------------
 
-.. automodule:: qmt.data.thomas_fermi_data
+.. automodule:: qmt.data.solvers_2d
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+qmt\.data\.solvers\_3d module
+-----------------------------
+
+.. automodule:: qmt.data.solvers_3d
     :members:
     :undoc-members:
     :show-inheritance:

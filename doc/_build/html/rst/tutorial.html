@@ -172,13 +172,13 @@ It contains sketches with FreeCAD-internal names, which are visible when selecti
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">qmt.data.part_data</span> <span class="kn">import</span> <span class="n">Part3DData</span>
+<span class="kn">from</span> <span class="nn">qmt.data</span> <span class="kn">import</span> <span class="n">Part3DData</span>
 <span class="kn">from</span> <span class="nn">qmt.tasks.basic.geometry</span> <span class="kn">import</span> <span class="n">Geometry3D</span>
 <span class="kn">from</span> <span class="nn">qmt.tasks.sweep</span> <span class="kn">import</span> <span class="n">SweepTag</span><span class="p">,</span> <span class="n">SweepManager</span>
 
 </pre></div>
 </div>
-<p>First we use the internal names to generate <a class="reference internal" href="../source/qmt.data.html#qmt.data.part_data.Part3DData" title="qmt.data.part_data.Part3DData"><code class="xref py py-mod docutils literal"><span class="pre">qmt.data.part_data.Part3DData</span></code></a>.</p>
+<p>First we use the internal names to generate <code class="xref py py-mod docutils literal"><span class="pre">qmt.data.part_data.Part3DData</span></code>.</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">block1</span> <span class="o">=</span> <span class="n">Part3DData</span><span class="p">(</span><span class="s1">&#39;Parametrised block&#39;</span><span class="p">,</span> <span class="s1">&#39;Sketch&#39;</span><span class="p">,</span> <span class="s1">&#39;extrude&#39;</span><span class="p">,</span> <span class="s1">&#39;dielectric&#39;</span><span class="p">,</span>
                 <span class="n">material</span><span class="o">=</span><span class="s1">&#39;air&#39;</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">z0</span><span class="o">=-</span><span class="mf">2.5</span><span class="p">)</span>
 <span class="n">block2</span> <span class="o">=</span> <span class="n">Part3DData</span><span class="p">(</span><span class="s1">&#39;Two blocks&#39;</span><span class="p">,</span> <span class="s1">&#39;Sketch001&#39;</span><span class="p">,</span> <span class="s1">&#39;extrude&#39;</span><span class="p">,</span> <span class="s1">&#39;metal_gate&#39;</span><span class="p">,</span>
@@ -194,7 +194,7 @@ It contains sketches with FreeCAD-internal names, which are visible when selecti
 <span class="n">substrate</span> <span class="o">=</span> <span class="n">Part3DData</span><span class="p">(</span><span class="s1">&#39;Substrate&#39;</span><span class="p">,</span> <span class="s1">&#39;Sketch005&#39;</span><span class="p">,</span> <span class="s1">&#39;extrude&#39;</span><span class="p">,</span> <span class="s1">&#39;dielectric&#39;</span><span class="p">,</span>
                 <span class="n">z0</span><span class="o">=-</span><span class="mi">2</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 <span class="n">wrap</span> <span class="o">=</span> <span class="n">Part3DData</span><span class="p">(</span><span class="s1">&#39;First Layer&#39;</span><span class="p">,</span> <span class="s1">&#39;Sketch006&#39;</span><span class="p">,</span> <span class="s1">&#39;lithography&#39;</span><span class="p">,</span> <span class="s1">&#39;dielectric&#39;</span><span class="p">,</span>
-                <span class="n">z0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">layer_num</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">litho_base</span><span class="o">=</span><span class="p">[</span><span class="n">substrate</span><span class="p">])</span>
+                <span class="n">z0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">layer_num</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="mf">0.4</span><span class="p">,</span> <span class="n">litho_base</span><span class="o">=</span><span class="p">[</span><span class="n">substrate</span><span class="p">,</span> <span class="n">wire</span><span class="p">,</span> <span class="n">shell</span><span class="p">])</span>
 <span class="n">wrap2</span> <span class="o">=</span> <span class="n">Part3DData</span><span class="p">(</span><span class="s1">&#39;Second Layer&#39;</span><span class="p">,</span> <span class="s1">&#39;Sketch007&#39;</span><span class="p">,</span> <span class="s1">&#39;lithography&#39;</span><span class="p">,</span> <span class="s1">&#39;dielectric&#39;</span><span class="p">,</span>
                 <span class="n">layer_num</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
@@ -239,7 +239,7 @@ the ‘Parametrised Block’, which was set up to correspond to the parameter <c
 <h2>Hello World Task<a class="headerlink" href="#hello-world-task" title="Permalink to this headline">¶</a></h2>
 <div class="line-block">
 <div class="line">This example shows how to greet the world with self written QMT tasks.</div>
-<div class="line">The fundamentals for <code class="code docutils literal"><span class="pre">Task</span></code> objects are explained in <a class="reference internal" href="../source/qmt.tasks.html#module-qmt.tasks.task" title="qmt.tasks.task"><code class="xref py py-mod docutils literal"><span class="pre">qmt.tasks.task</span></code></a>.</div>
+<div class="line">The fundamentals for <code class="code docutils literal"><span class="pre">Task</span></code> objects are explained in <code class="xref py py-mod docutils literal"><span class="pre">qmt.tasks.task</span></code>.</div>
 <div class="line">For a directly executable example of the following snippets, check out <cite>examples/task_hello.py</cite>.</div>
 </div>
 <div class="highlight-python"><div class="highlight"><pre><span></span>
@@ -339,7 +339,7 @@ the ‘Parametrised Block’, which was set up to correspond to the parameter <c
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2018, Microsoft Corporation.
+        &copy; Copyright 2018, Microsoft Corporation
 
     </p>
   </div>
@@ -358,21 +358,24 @@ the ‘Parametrised Block’, which was set up to correspond to the parameter <c
 
   
 
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'2.0',
-            LANGUAGE:'None',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
-      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../',
+              VERSION:'2.0',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
 
   
 

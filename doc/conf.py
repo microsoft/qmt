@@ -189,6 +189,6 @@ intersphinx_mapping = {'https://docs.python.org/': None}
 
 # Create package and class graphs
 import subprocess
-subprocess.check_call(['pyreverse','-o','png','../qmt'])
+subprocess.check_call(['pyreverse3','-o','png','../qmt'])
 os.rename('packages.png', 'source/packages.png')
 os.rename('classes.png', 'source/classes.png')

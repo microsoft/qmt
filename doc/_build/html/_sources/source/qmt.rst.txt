@@ -9,7 +9,6 @@ Subpackages
     qmt.data
     qmt.geometry
     qmt.tasks
-    qmt.visualization
 
 Submodules
 ----------
