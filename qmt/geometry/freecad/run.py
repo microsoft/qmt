@@ -25,12 +25,6 @@ def main():
     elif instruction == 'writeFCfile':
         pass
 
-    elif instruction == 'region_map_function':
-        import fenics  # DON'T TOUCH: this controls fenics mesh module loading order
-        from qms.meshing.make_region_marker_wrapper import make_region_marker_function
-        new_data = make_region_marker_function(data)  # the updated Geo3DData object
-        send_back(new_data)
-
     else:
         raise ValueError('Not a registered FreeCAD QMT instruction')
 
