@@ -85,7 +85,7 @@ class Geometry3D(Task):
         :param dict current_options: The dictionary specifying parts from above.
         :return geo_3d: A Geo3DData object.
         """
-        from qmt.geometry.freecad_wrapper import fcwrapper
+        assert 'serial_fcdoc' in current_options  # make sure the fc doc is in options
 
         # Convert NumPy3 floats to something that Python2 can unpickle
         if 'params' in current_options:
@@ -93,11 +93,11 @@ class Geometry3D(Task):
                 k: float(v) for k, v in current_options['params'].items()
             }
 
-        pyenv = current_options['pyenv']  # the python 2 environment
-
-        assert 'serial_fcdoc' in current_options  # make sure the fc doc is in options
-
         # Send off the instructions
-        geo = fcwrapper(pyenv, 'build3d', {'current_options': current_options}, debug=False)
+        from qmt.geometry.freecad_wrapper import fcwrapper
+        geo = fcwrapper(current_options['pyenv'],
+                        'build3d',
+                        {'current_options': current_options},
+                        debug=False)
 
         return geo

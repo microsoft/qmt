@@ -234,7 +234,7 @@ def build_lithography(part, opts, info_holder):
     assert part.directive == 'lithography'
     part.litho_base = [obj for obj in part.litho_base if obj.directive != 'wire_shell' ] # filter implicitly considered shells
     if not info_holder.litho_setup_done:
-        initialize_lithography(info_holder, opts, fillShells=part.fill_litho)
+        initialize_lithography(info_holder, opts, fillShells=True)
         info_holder.litho_setup_done = True
 
     layerNum = part.layer_num

@@ -2,16 +2,17 @@
 # Licensed under the MIT License.
 
 """Geometry data classes."""
+
+import numpy as np
+from shapely.ops import cascaded_union
+
 from qmt.materials import Materials
 from .data_utils import load_serial, store_serial, write_deserialised
-from shapely.ops import cascaded_union
-import numpy as np
-
 
 
 class Geo2DData(object):
     """Class holding 2D geometry data."""
-    def __init__(self,lunit='nm'):
+    def __init__(self, lunit='nm'):
         """
         Class for holding a 2D geometry specification. This class holds two main dicts:
             - parts is a dictionary of shapely Polygon objects
@@ -23,7 +24,6 @@ class Geo2DData(object):
         self.edges = {}
         self.build_order = []
         self.lunit = lunit
-
 
     def add_part(self, part_name, part, overwrite=False):
         """
@@ -98,7 +98,7 @@ class Geo2DData(object):
         max_x = max(bbox_vertices[0])
         min_y = min(bbox_vertices[1])
         max_y = max(bbox_vertices[1])
-        return [min_x, max_x,min_y, max_y]
+        return [min_x, max_x, min_y, max_y]
 
     def part_build_order(self):
         """
@@ -111,7 +111,7 @@ class Geo2DData(object):
                 priority += [geo_item]
         return priority
 
-    def part_coord_list(self,part_name):
+    def part_coord_list(self, part_name):
         """
         Get the list of vertex coordinates for a part
         :param str part_name: Name of the part
@@ -121,7 +121,7 @@ class Geo2DData(object):
         coord_list = list(np.array(self.parts[part_name].exterior.coords.xy).T)[:-1]
         return coord_list
 
-    def edge_coord_list(self,edge_name):
+    def edge_coord_list(self, edge_name):
         """
         Get the list of vertex coordinates for an edge.
         :param str edge_name: Name of the edge.
@@ -129,6 +129,7 @@ class Geo2DData(object):
         """
         coord_list = list(np.array(self.edges[edge_name].coords.xy).T)[:]
         return coord_list
+
 
 class Geo3DData(object):
     """Class holding 3D geometry data."""
@@ -145,7 +146,7 @@ class Geo3DData(object):
         self.serial_fcdoc = None  # serialized FreeCAD document for this geometry
         self.mesh_verts = None  # numpy array corresponding to the mesh vertices
         self.mesh_tets = None  # numpy array; each row contains the vertex indices in one tet
-        self.mesh_regions = None # 1D array; each entry is the region ID of the corresponding tet
+        self.mesh_regions = None  # 1D array; each entry is the region ID of the corresponding tet
         self.mesh_id_dict = None  # dictionary with part name keys mapping to region IDs
         self.materials_database = Materials()
 
@@ -296,14 +297,15 @@ class Geo3DData(object):
         return {name: part.boundary_condition["neumann"] for name, part in self.parts.items() if
                 part.boundary_condition is not None and "neumann" in part.boundary_condition}
 
+
 class Part3DData(object):
     def __init__(
             self, label, fc_name, directive, domain_type=None, material=None,
             z0=0, thickness=None, target_wire=None, shell_verts=None,
             depo_mode=None, z_middle=None, t_in=None, t_out=None,
             layer_num=None, litho_base=None,
-            fill_litho=True, mesh_max_size=None, mesh_min_size=None, mesh_growth_rate=None,
-            mesh_scale_vector=None, boundary_condition=None, subtract_list=None,
+            mesh_max_size=None, mesh_min_size=None, mesh_growth_rate=None,
+            mesh_scale_vector=None, boundary_condition=None,
             ns=None, phi_nl=None, ds=None):
         """
         Add a geometric part to the model.
@@ -344,9 +346,6 @@ class Part3DData(object):
         :param list litho_base: The base partNames to use for the lithography directive.
                                 For multi-step lithography, the bases are just all merged,
                                 so there is no need to list this more than once.
-        :param bool fill_litho: If set to false, will attempt to hollow out lithography
-                                steps by subtracting the base and subsequent lithography
-                                layers, but this can sometimes fail in opencascade.
         :param float mesh_max_size: The maximum allowable mesh size for this part, in microns.
         :param float mesh_min_size: The minimum allowable mesh size for this part, in microns.
         :param float mesh_growth_rate: The maximum allowable mesh growth rate for this part.
@@ -371,9 +370,6 @@ class Part3DData(object):
             raise NameError('Error - directive ' + directive + ' is not a valid directive!')
         if domain_type not in ['semiconductor', 'metal_gate', 'virtual', 'dielectric']:
             raise NameError('Error - domainType ' + domain_type + ' not valid!')
-        # ~ if (etch_zone is not None) and (depo_zone is not None):
-            # ~ raise NameError(
-                # ~ 'Error - etch_zone and depo_zone cannot both be set!')
         if domain_type not in ["semiconductor", "dielectric"] and ns is not None:
             raise ValueError("Cannot set a volume charge density on a gate or virtual part.")
 
@@ -393,19 +389,16 @@ class Part3DData(object):
         self.t_out = t_out
         self.layer_num = layer_num
         self.litho_base = [] if litho_base is None else litho_base
-        self.fill_litho = fill_litho  # TODO: scheduled for removal
         self.mesh_max_size = mesh_max_size
         self.mesh_min_size = mesh_min_size
         self.mesh_growth_rate = mesh_growth_rate
         self.mesh_scale_vector = mesh_scale_vector
         self.boundary_condition = boundary_condition
-        self.subtract_list = [] if subtract_list is None else subtract_list  # TODO: scheduled for removal
         self.ns = ns
         self.phi_nl = phi_nl
         self.ds = ds
         self.serial_stp = None  # This gets set on geometry build
         self.built_fc_name = None  # This gets set on geometry build
-
 
     def write_stp(self, file_path=None):
         """Write part geometry to a STEP file.
@@ -414,8 +407,5 @@ class Part3DData(object):
         """
         if file_path is None:
             file_path = self.label + '.stp'
-        import codecs
-        data = codecs.decode(self.serial_stp.encode(), 'base64')
-        with open(file_path, 'wb') as of:
-            of.write(data)
+        write_deserialised(self.serial_stp, file_path)
         return file_path
