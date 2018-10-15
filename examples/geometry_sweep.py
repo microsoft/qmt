@@ -28,6 +28,7 @@ substrate = Part3DData('Substrate', 'Sketch005', 'extrude', 'dielectric',
                 z0=-2, thickness=2)
 wrap = Part3DData('First Layer', 'Sketch006', 'lithography', 'dielectric',
                 z0=0, layer_num=1, thickness=0.4, litho_base=[substrate, wire, shell])
+                # ~ z0=0, layer_num=1, thickness=0.4, litho_base=[substrate, wire])
 wrap2 = Part3DData('Second Layer', 'Sketch007', 'lithography', 'dielectric',
                 layer_num=2, thickness=1)
 
