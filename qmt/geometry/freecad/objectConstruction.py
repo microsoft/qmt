@@ -3,7 +3,6 @@
 
 """Functions that perform composite executions."""
 
-import sys #####################################################################
 import FreeCAD
 
 import Draft
@@ -708,23 +707,26 @@ def gen_G(info, opts, layerNum, objID):
             layer['objIDs'][objID][
                 'HDict'][()] = H_offset(info, opts, layerNum, objID)
 
-        # TODO: reuse new function
-        # This block fixes multifuses for wireshells with too big offsets,
-        # by forcing all participating object shells into a new solid.
-        solid_hlist = []
-        import Part
-        for obj in layer['objIDs'][objID]['HDict'][()]:
-            __s__ = obj.Shape.Faces
-            __s__ = Part.Solid(Part.Shell(__s__))
-            __o__ = FreeCAD.ActiveDocument.addObject("Part::Feature", obj.Name + "_solid")
-            __o__.Label = obj.Label + "_solid"
-            __o__.Shape = __s__
-            solid_hlist.append(__o__)
-            info.trash.append(obj)
-            info.trash.append(__o__)
-            info.trash.append(__s__)
+        # ~ import sys
+        # ~ sys.stderr.write('>>> ' + str(layer['objIDs'][objID]['HDict']) + '\n')
+        # ~ # TODO: reuse new function
+        # ~ # This block fixes multifuses for wireshells with too big offsets,
+        # ~ # by forcing all participating object shells into a new solid.
+        # ~ solid_hlist = []
+        # ~ import Part
+        # ~ for obj in layer['objIDs'][objID]['HDict'][()]:
+            # ~ __s__ = obj.Shape.Faces
+            # ~ __s__ = Part.Solid(Part.Shell(__s__))
+            # ~ __o__ = FreeCAD.ActiveDocument.addObject("Part::Feature", obj.Name + "_solid")
+            # ~ __o__.Label = obj.Label + "_solid"
+            # ~ __o__.Shape = __s__
+            # ~ solid_hlist.append(__o__)
+            # ~ info.trash.append(obj)
+            # ~ info.trash.append(__o__)
+            # ~ info.trash.append(__s__)
 
-        layer['objIDs'][objID]['HDict'][()] = solid_hlist
+        # ~ layer['objIDs'][objID]['HDict'][()] = solid_hlist
+        # ~ sys.stderr.write('>>> ' + str(layer['objIDs'][objID]['HDict']) + '\n')
 
         H = genUnion(layer['objIDs'][objID]['HDict'][()],
                      consumeInputs=False)
