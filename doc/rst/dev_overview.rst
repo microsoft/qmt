@@ -1,5 +1,5 @@
-Structure of QMT
-================
+Developing QMT
+==============
 
 Package Overview
 ----------------
@@ -19,9 +19,8 @@ Class Overview
     :target: ../../../source/classes.png
 
 
-Direct QMT Package Member Documentation
----------------------------------------
+Conventions
+-----------
 
-.. automodule:: qmt
-    :members:
-    :imported-members:
+Please check the official repository:
+https://github.com/Microsoft/qmt

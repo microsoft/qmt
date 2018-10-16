@@ -11,8 +11,8 @@
    :caption: Contents:
 
    rst/tutorial.rst
-   Modules <source/modules.rst>
    rst/dev_overview.rst
+   Modules <source/modules.rst>
 
 Indices and tables
 ==================

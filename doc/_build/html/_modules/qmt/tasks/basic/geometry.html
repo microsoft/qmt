@@ -1,0 +1,320 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>qmt.tasks.basic.geometry &mdash; QMT 2.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> QMT
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../rst/tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../rst/dev_overview.html">Developing QMT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../source/modules.html">Modules</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">QMT</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>qmt.tasks.basic.geometry</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for qmt.tasks.basic.geometry</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) Microsoft Corporation. All rights reserved.</span>
+<span class="c1"># Licensed under the MIT License.</span>
+
+<span class="sd">&quot;&quot;&quot;Geometry task classes for 1D, 2D and 3D.&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">shapely.geometry</span> <span class="k">import</span> <span class="n">Polygon</span><span class="p">,</span> <span class="n">LineString</span>
+
+<span class="kn">from</span> <span class="nn">qmt.data</span> <span class="k">import</span> <span class="n">Geo2DData</span><span class="p">,</span> <span class="n">Geo3DData</span><span class="p">,</span> <span class="n">serialised_file</span>
+<span class="kn">from</span> <span class="nn">qmt.tasks</span> <span class="k">import</span> <span class="n">Task</span>
+
+<div class="viewcode-block" id="Geometry2D"><a class="viewcode-back" href="../../../../source/qmt.tasks.basic.html#qmt.tasks.basic.geometry.Geometry2D">[docs]</a><span class="k">class</span> <span class="nc">Geometry2D</span><span class="p">(</span><span class="n">Task</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Task for handling of 2D geometries with Shapely.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;geometry_2d_task&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Builds a geometry in 2D.</span>
+<span class="sd">        :param dict options: The dictionary holding parts and edges. It should be of the form:</span>
+<span class="sd">        {</span>
+<span class="sd">        &#39;parts&#39;:{&#39;part_name&#39;:list of 2d points},</span>
+<span class="sd">        &#39;edges&#39;:{&#39;edge_name&#39;:list of 2d points},</span>
+<span class="sd">        &#39;lunit&#39;:length_unit (nm),</span>
+<span class="sd">        &#39;build_order&#39;:[list, of, all, parts]</span>
+<span class="sd">        }</span>
+<span class="sd">        , where these lists are turned into Polygon and</span>
+<span class="sd">        LineString objects, which are instances of shapely.geometry.</span>
+<span class="sd">        The build_order controls the order in which the objects are parsed, which matters for</span>
+<span class="sd">        overlapping domains and overlapping boundary conditions. The highest priority items are</span>
+<span class="sd">        listed first.</span>
+<span class="sd">        :param str name: The name of this task.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Geometry2D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">([],</span> <span class="n">options</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_solve_instance</span><span class="p">(</span><span class="n">input_result_list</span><span class="p">,</span> <span class="n">current_options</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param list input_result_list: This is an empty list.</span>
+<span class="sd">        :param dict current_options: The dictionary specification from above.</span>
+<span class="sd">        :return: geo_2d: A Geo2DData object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">geo_2d</span> <span class="o">=</span> <span class="n">Geo2DData</span><span class="p">()</span>
+        <span class="n">build_order</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">current_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;build_order&#39;</span><span class="p">,</span>
+                                               <span class="n">current_options</span><span class="p">[</span><span class="s1">&#39;parts&#39;</span><span class="p">]))</span>
+        <span class="n">edges</span> <span class="o">=</span> <span class="n">current_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;edges&#39;</span><span class="p">,{})</span>
+        <span class="c1"># Set up the complete build order:</span>
+        <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">current_options</span><span class="p">[</span><span class="s1">&#39;parts&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">part</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">build_order</span><span class="p">:</span>
+                <span class="n">build_order</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">part</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">edge</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">edge</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">build_order</span><span class="p">:</span>
+                <span class="n">build_order</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">edge</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">object_name</span> <span class="ow">in</span> <span class="n">build_order</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">object_name</span> <span class="ow">in</span> <span class="n">current_options</span><span class="p">[</span><span class="s1">&#39;parts&#39;</span><span class="p">]:</span>
+                <span class="n">geo_2d</span><span class="o">.</span><span class="n">add_part</span><span class="p">(</span><span class="n">object_name</span><span class="p">,</span> <span class="n">Polygon</span><span class="p">(</span><span class="n">current_options</span><span class="p">[</span><span class="s1">&#39;parts&#39;</span><span class="p">][</span><span class="n">object_name</span><span class="p">]))</span>
+            <span class="k">elif</span> <span class="n">object_name</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">:</span>
+                <span class="n">geo_2d</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">object_name</span><span class="p">,</span> <span class="n">LineString</span><span class="p">(</span><span class="n">current_options</span><span class="p">[</span><span class="s1">&#39;edges&#39;</span><span class="p">][</span><span class="n">object_name</span><span class="p">]))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Object of name &quot;</span><span class="o">+</span><span class="n">object_name</span><span class="o">+</span><span class="s2">&quot; was found neither in edges nor &quot;</span>
+                                                               <span class="s2">&quot;parts.&quot;</span><span class="p">)</span>
+        <span class="n">geo_2d</span><span class="o">.</span><span class="n">lunit</span> <span class="o">=</span> <span class="n">current_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;lunit&#39;</span><span class="p">,</span> <span class="s1">&#39;nm&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">geo_2d</span></div>
+
+
+<div class="viewcode-block" id="Geometry3D"><a class="viewcode-back" href="../../../../source/qmt.tasks.basic.html#qmt.tasks.basic.geometry.Geometry3D">[docs]</a><span class="k">class</span> <span class="nc">Geometry3D</span><span class="p">(</span><span class="n">Task</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Task for handling of 3D geometries with FreeCAD.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;geometry_3d_task&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Builds a geometry in 3D.</span>
+
+<span class="sd">        :param dict options: The dictionary specifying FreeCAD infromation.</span>
+<span class="sd">        It should be of the form</span>
+<span class="sd">        {</span>
+<span class="sd">          &#39;pyenv&#39;:       path or callable name of the Python 2 executable,</span>
+<span class="sd">          &#39;input_file&#39;:  path to FreeCAD template file,</span>
+<span class="sd">          &#39;input_parts&#39;: ordered list of input parts, leftmost items get built first</span>
+<span class="sd">          &#39;params&#39;:      dict{ &#39;param_name&#39;: SweepTag }</span>
+<span class="sd">        }</span>
+<span class="sd">        :param str name: The name of this task.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">options</span><span class="p">[</span><span class="s1">&#39;serial_fcdoc&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">serialised_file</span><span class="p">(</span><span class="n">options</span><span class="p">[</span><span class="s1">&#39;input_file&#39;</span><span class="p">])</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Geometry3D</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">([],</span> <span class="n">options</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_solve_instance</span><span class="p">(</span><span class="n">input_result_list</span><span class="p">,</span> <span class="n">current_options</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        :param list input_result_list: This is an empty list.</span>
+<span class="sd">        :param dict current_options: The dictionary specifying parts from above.</span>
+<span class="sd">        :return geo_3d: A Geo3DData object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="s1">&#39;serial_fcdoc&#39;</span> <span class="ow">in</span> <span class="n">current_options</span>  <span class="c1"># make sure the fc doc is in options</span>
+
+        <span class="c1"># Convert NumPy3 floats to something that Python2 can unpickle</span>
+        <span class="k">if</span> <span class="s1">&#39;params&#39;</span> <span class="ow">in</span> <span class="n">current_options</span><span class="p">:</span>
+            <span class="n">current_options</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">k</span><span class="p">:</span> <span class="nb">float</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">current_options</span><span class="p">[</span><span class="s1">&#39;params&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="p">}</span>
+
+        <span class="c1"># Send off the instructions</span>
+        <span class="kn">from</span> <span class="nn">qmt.geometry.freecad_wrapper</span> <span class="k">import</span> <span class="n">fcwrapper</span>
+        <span class="n">geo</span> <span class="o">=</span> <span class="n">fcwrapper</span><span class="p">(</span><span class="n">current_options</span><span class="p">[</span><span class="s1">&#39;pyenv&#39;</span><span class="p">],</span>
+                        <span class="s1">&#39;build3d&#39;</span><span class="p">,</span>
+                        <span class="p">{</span><span class="s1">&#39;current_options&#39;</span><span class="p">:</span> <span class="n">current_options</span><span class="p">},</span>
+                        <span class="n">debug</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">geo</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Microsoft Corporation
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../../../',
+              VERSION:'2.0',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

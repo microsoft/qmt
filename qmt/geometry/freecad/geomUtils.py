@@ -53,17 +53,17 @@ def copy_move(obj, moveVec=(0., 0., 0.), copy=True):
     return f
 
 
-# TODO: consuming is questionable because inputs might be needed in a delayed fashion
-# ~ def make_solid(obj, consumeInputs=False):
-    # ~ doc = FreeCAD.ActiveDocument
-    # ~ shell = obj.Shape.Faces
-    # ~ shell = Part.Solid(Part.Shell(shell))
-    # ~ solid = doc.addObject("Part::Feature",obj.Label+"_solid")
-    # ~ solid.Label = obj.Label+"_solid"
-    # ~ solid.Shape = shell
-    # ~ doc.recompute()
-    # ~ del shell, solid
-    # ~ return solid
+# ~ # TODO: consuming is questionable because inputs might be needed in a delayed fashion
+def make_solid(obj, consumeInputs=False):
+    doc = FreeCAD.ActiveDocument
+    shell = obj.Shape.Faces
+    shell = Part.Solid(Part.Shell(shell))
+    solid = doc.addObject("Part::Feature",obj.Label+"_solid")
+    solid.Label = obj.Label+"_solid"
+    solid.Shape = shell
+    doc.recompute()
+    del shell, solid
+    return solid
 
 
 def makeHexFace(sketch, zBottom, width):

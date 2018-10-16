@@ -1,0 +1,849 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>qmt.tasks.sweep &mdash; QMT 2.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+
+  
+  <script src="../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> QMT
+          
+
+          
+            
+            <img src="../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../rst/tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../rst/dev_overview.html">Developing QMT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../source/modules.html">Modules</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">QMT</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>qmt.tasks.sweep</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for qmt.tasks.sweep</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">dask</span>
+<span class="kn">import</span> <span class="nn">dask.distributed</span>
+<span class="kn">from</span> <span class="nn">six</span> <span class="k">import</span> <span class="n">iteritems</span>
+<span class="kn">import</span> <span class="nn">cloudpickle</span>
+
+<div class="viewcode-block" id="SweepManager"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.SweepManager">[docs]</a><span class="k">class</span> <span class="nc">SweepManager</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents a sweep over simulation input values.</span>
+
+<span class="sd">    More precisely, represents a subset of the cartesian product of the input domains.</span>
+
+<span class="sd">    Attributes:</span>
+<span class="sd">        sweep_list: The sweep elements represented by this</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Abstraction function:</span>
+    <span class="c1"># Each entry in the list self.sweep_list is an element in the product of input domains.</span>
+    <span class="c1"># Each entry has the form {tag1: value1, ... tagN: valueN}</span>
+    <span class="c1"># mapping SweepTag objects to values in each of the input domains.</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sweep_list</span><span class="p">,</span> <span class="n">dask_client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">no_dask</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructs a new SweepManager directly from sweep entries.</span>
+<span class="sd">        :param sweep_list: a list representing values in the cartesian</span>
+<span class="sd">        product of input domains. Each entry has the form {tag1: value1, ... tagN: valueN}</span>
+<span class="sd">        :param dask_client: the dask client to run the sweep on. Defaults to</span>
+<span class="sd">        a client on the local machine.</span>
+<span class="sd">        :param no_dask: set this to True to avoid starting a dask client. Note that self.dask_client</span>
+<span class="sd">        will need to be set manually before running a sweep.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sweep_list</span> <span class="o">=</span> <span class="n">sweep_list</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sweep_list</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> \
+               <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sweep_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">dict</span><span class="p">),</span> \
+            <span class="s1">&#39;sweep_list must be a list of dicts.&#39;</span>
+        <span class="k">assert</span> <span class="nb">all</span><span class="p">([</span><span class="nb">set</span><span class="p">(</span><span class="n">sweep_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">==</span> \
+                    <span class="nb">set</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">sweep_list</span><span class="p">]),</span> \
+            <span class="s1">&#39;All dicts in sweep_list must have same keys.&#39;</span>
+
+        <span class="k">if</span> <span class="n">dask_client</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">no_dask</span><span class="p">:</span>
+            <span class="n">dask_client</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">distributed</span><span class="o">.</span><span class="n">Client</span><span class="p">(</span><span class="n">processes</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># client on the local machine</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">dask_client</span> <span class="o">=</span> <span class="n">dask_client</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># TODO test</span>
+<div class="viewcode-block" id="SweepManager.create_empty_sweep"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.SweepManager.create_empty_sweep">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">create_empty_sweep</span><span class="p">(</span><span class="n">dask_client</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">no_dask</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">SweepManager</span><span class="p">([{}],</span> <span class="n">dask_client</span><span class="o">=</span><span class="n">dask_client</span><span class="p">,</span><span class="n">no_dask</span><span class="o">=</span><span class="n">no_dask</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SweepManager.construct_cartesian_product"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.SweepManager.construct_cartesian_product">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">construct_cartesian_product</span><span class="p">(</span><span class="n">params_to_product</span><span class="p">,</span> <span class="n">dask_client</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Constructs a new SweepManager from data values for each input.</span>
+<span class="sd">        :param params_to_product: a dictionary mapping tags to lists of input values</span>
+<span class="sd">        :return: a SweepManager over the cartesian product of the</span>
+<span class="sd">        input values in each input list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">params_to_product</span><span class="p">)</span> <span class="o">==</span> <span class="nb">type</span><span class="p">({}),</span> \
+            <span class="s1">&#39;params_to_product must be a dict of lists.&#39;</span>
+
+        <span class="k">def</span> <span class="nf">merge_two_dicts</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Creates a new dictionary which contains both the mapping</span>
+<span class="sd">            in x and the mapping in y, overwriting keys in y if necessary.</span>
+<span class="sd">            :param x: the first dict to merge</span>
+<span class="sd">            :param y: the second dict to merge</span>
+<span class="sd">            :return: a union of x and y</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">z</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>  <span class="c1"># start with x&#39;s keys and values</span>
+            <span class="n">z</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>  <span class="c1"># modifies z with y&#39;s keys and values &amp; returns None</span>
+            <span class="k">return</span> <span class="n">z</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[{}]</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">params_to_product</span><span class="p">:</span>
+            <span class="n">pool</span> <span class="o">=</span> <span class="n">params_to_product</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="p">[</span><span class="n">merge_two_dicts</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">y</span><span class="p">})</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">result</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">pool</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">SweepManager</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">dask_client</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SweepManager.run"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.SweepManager.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Runs the sweep represented by this.</span>
+
+<span class="sd">        :param task: the top level task to run</span>
+<span class="sd">        :return: the ReducedSweepFutures representing the result</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">set_sweep_manager</span><span class="p">(</span><span class="n">current_task</span><span class="p">):</span>
+            <span class="n">current_task</span><span class="o">.</span><span class="n">sweep_manager</span> <span class="o">=</span> <span class="bp">self</span>
+            <span class="k">for</span> <span class="n">child_task</span> <span class="ow">in</span> <span class="n">current_task</span><span class="o">.</span><span class="n">previous_tasks</span><span class="p">:</span>
+                <span class="n">set_sweep_manager</span><span class="p">(</span><span class="n">child_task</span><span class="p">)</span>
+
+        <span class="n">set_sweep_manager</span><span class="p">(</span><span class="n">task</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">task</span><span class="o">.</span><span class="n">_run</span><span class="p">()</span></div>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;SweepManager with &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sweep_list</span><span class="p">))</span> <span class="o">+</span> <span class="s2">&quot; entries&gt;&quot;</span></div>
+
+
+<div class="viewcode-block" id="ReducedSweepWithData"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepWithData">[docs]</a><span class="k">class</span> <span class="nc">ReducedSweepWithData</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents a reduced sweep (see ReducedSweep) where each sweep element is associated with a datum.</span>
+
+<span class="sd">    Public attributes:</span>
+<span class="sd">        sweep: ReducedSweep: the reduced sweep</span>
+<span class="sd">        tagged_value_list: list: the sweep elements</span>
+<span class="sd">        tags_with_data: [(tag, data)] association of sweep elements with data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sweep</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sweep</span> <span class="o">=</span> <span class="n">sweep</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="n">data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tagged_value_list</span> <span class="o">=</span> <span class="n">sweep</span><span class="o">.</span><span class="n">tagged_value_list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tags_with_data</span> <span class="o">=</span> <span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">tagged_value_list</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))]</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tagged_value_list</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ReducedSweepWithData.sweep_and_empty_data_from_manager_and_tags"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepWithData.sweep_and_empty_data_from_manager_and_tags">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">sweep_and_empty_data_from_manager_and_tags</span><span class="p">(</span><span class="n">sweep_manager</span><span class="p">,</span> <span class="n">tags</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct a ReducedSweepWithData representing the reduction of sweep_manager to tags with None data.</span>
+<span class="sd">        :param sweep_manager: the sweep_manager representing the total sweep</span>
+<span class="sd">        :param tags: the tags being swept over</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sweep</span> <span class="o">=</span> <span class="n">ReducedSweep</span><span class="o">.</span><span class="n">create_from_manager_and_tags</span><span class="p">(</span><span class="n">sweep_manager</span><span class="p">,</span> <span class="n">tags</span><span class="p">)</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">sweep</span><span class="o">.</span><span class="n">empty_data</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">sweep</span><span class="p">,</span> <span class="n">data</span></div>
+
+    <span class="c1"># TODO make private</span>
+<div class="viewcode-block" id="ReducedSweepWithData.get_datum"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepWithData.get_datum">[docs]</a>    <span class="k">def</span> <span class="nf">get_datum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">total_index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the datum associated with index total_index in the total sweep.</span>
+
+<span class="sd">        :param total_index: index in the total sweep</span>
+<span class="sd">        :return: the datum associated with total_index</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">sweep</span><span class="o">.</span><span class="n">convert_to_reduced_index</span><span class="p">(</span><span class="n">total_index</span><span class="p">)]</span></div>
+
+<div class="viewcode-block" id="ReducedSweepWithData.add"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepWithData.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">,</span> <span class="n">object_list_index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds the result item to the results of this restricted sweep.</span>
+<span class="sd">        :param item: the result to add</span>
+<span class="sd">        :param object_list_index: the index of the result IN THE RESTRICTED SWEEP</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">object_list_index</span><span class="p">]</span> <span class="o">=</span> <span class="n">item</span></div>
+
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Iterate over the data values of this.</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ReducedSweepWithData.sweep_points_to_data"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepWithData.sweep_points_to_data">[docs]</a>    <span class="k">def</span> <span class="nf">sweep_points_to_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="bp">self</span><span class="o">.</span><span class="n">sweep</span><span class="o">.</span><span class="n">tagged_value_list</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sweep</span><span class="p">))]</span></div>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The number of sweep points in this.</span>
+<span class="sd">        :return: The number of sweep points in this.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ReducedSweepWithData.only"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepWithData.only">[docs]</a>    <span class="k">def</span> <span class="nf">only</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convenience method to get the only data value in this if this has only one sweep element.</span>
+
+<span class="sd">        Precondition: this is a sweep with only one sweep element.</span>
+<span class="sd">        :return: the only data value in this.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+    <span class="c1"># Don&#39;t modify result.</span>
+<div class="viewcode-block" id="ReducedSweepWithData.get_tags_with_data"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepWithData.get_tags_with_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_tags_with_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the association between tags and values in this.</span>
+<span class="sd">        :return: [(tag, value)] the association between tags and values in this.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tags_with_data</span></div></div>
+
+
+<div class="viewcode-block" id="ReducedSweepDelayed"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepDelayed">[docs]</a><span class="k">class</span> <span class="nc">ReducedSweepDelayed</span><span class="p">(</span><span class="n">ReducedSweepWithData</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents a reduced sweep with associated delayed objects.</span>
+
+<span class="sd">    Public attributes:</span>
+<span class="sd">    delayed_results: [dask.Delayed]: the delayed objects</span>
+<span class="sd">    dask_client: dask.distributed.Client: the client to be used to compute the delayed objects</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sweep</span><span class="p">,</span> <span class="n">dask_client</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delayed_results</span> <span class="o">=</span> <span class="n">sweep</span><span class="o">.</span><span class="n">empty_data</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ReducedSweepDelayed</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sweep</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">delayed_results</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dask_client</span> <span class="o">=</span> <span class="n">dask_client</span>
+
+<div class="viewcode-block" id="ReducedSweepDelayed.create_from_reduced_sweep_and_manager"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepDelayed.create_from_reduced_sweep_and_manager">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">create_from_reduced_sweep_and_manager</span><span class="p">(</span><span class="n">sweep</span><span class="p">,</span> <span class="n">manager</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a ReducedSweepDelayed from the ReducedSweep sweep, with empty data.</span>
+<span class="sd">        :param sweep:</span>
+<span class="sd">        :param manager:</span>
+<span class="sd">        :return: ReducedSweepDelayed sweeping over the entries in sweep, with empty data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sweep</span> <span class="o">=</span> <span class="n">sweep</span>
+        <span class="n">dask_client</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">dask_client</span>
+        <span class="c1"># contains a ReducedSweep and forwards its methods</span>
+        <span class="c1"># needs to take the dask client as well</span>
+        <span class="c1"># has methods for producing the list of delayed objects</span>
+        <span class="c1"># and reducing over itself using an arbitrary function.</span>
+        <span class="c1"># This reduction can then be used in conjunction with the ReducedSweep</span>
+        <span class="c1"># contained in this.</span>
+        <span class="k">return</span> <span class="n">ReducedSweepDelayed</span><span class="p">(</span><span class="n">sweep</span><span class="p">,</span> <span class="n">dask_client</span><span class="p">)</span></div>
+
+    <span class="c1"># TODO deprecate? No uses.</span>
+    <span class="c1"># def copy_empty(self):</span>
+    <span class="c1">#     return self.__init__(self.sweep, self.dask_client)</span>
+
+<div class="viewcode-block" id="ReducedSweepDelayed.get_delayed"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepDelayed.get_delayed">[docs]</a>    <span class="k">def</span> <span class="nf">get_delayed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">total_index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the delayed object at total_index in the total sweep.</span>
+<span class="sd">        :param total_index: index in the total sweep</span>
+<span class="sd">        :return: the delayed object at total_index in the total sweep</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_datum</span><span class="p">(</span><span class="n">total_index</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ReducedSweepDelayed.calculate_futures"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepDelayed.calculate_futures">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_futures</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">resources</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Triggers the execution of the sweep. Returns a ReducedSweepFutures representing the in-process result.</span>
+<span class="sd">        :param resources: the computational resources that the dask_client should use #TODO what data type?</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">delayed_results</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="n">futures</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">delayed_result</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">delayed_results</span><span class="p">:</span>
+            <span class="n">futures</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dask_client</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">delayed_result</span><span class="p">,</span> <span class="n">resources</span><span class="o">=</span><span class="n">resources</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">ReducedSweepFutures</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sweep</span><span class="p">,</span> <span class="n">futures</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ReducedSweepDelayed.visualize_entire_sweep"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepDelayed.visualize_entire_sweep">[docs]</a>    <span class="k">def</span> <span class="nf">visualize_entire_sweep</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">       Return a visualization of the entire task graph of the sweep rooted at this as an IPython image object.</span>
+
+<span class="sd">       If filename is given, also exports the visualization to the given file.</span>
+<span class="sd">       Supported</span>
+
+<span class="sd">       :param filename: Optional file to export the visualization to</span>
+<span class="sd">       :return: A visualization of he entire task graph of the sweep rooted at this as an IPython image object.</span>
+<span class="sd">       &quot;&quot;&quot;</span>
+        <span class="n">delayed_proxy</span> <span class="o">=</span> <span class="n">dask</span><span class="o">.</span><span class="n">delayed</span><span class="p">(</span><span class="nb">id</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">delayed_results</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">filename</span><span class="p">:</span>
+            <span class="n">delayed_proxy</span><span class="o">.</span><span class="n">visualize</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">delayed_proxy</span><span class="o">.</span><span class="n">visualize</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ReducedSweepDelayed.visualize_single_sweep_element"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepDelayed.visualize_single_sweep_element">[docs]</a>    <span class="k">def</span> <span class="nf">visualize_single_sweep_element</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a visualization of task graph of one element of the sweep rooted at this as an IPython image object.</span>
+
+<span class="sd">        If filename is given, also exports the visualization to the given file.</span>
+<span class="sd">        :param filename: Optional file to export the visualization to</span>
+<span class="sd">        :return: a visualization of task graph of one element of the sweep rooted at this as an IPython image object.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">filename</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">delayed_results</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">visualize</span><span class="p">(</span><span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">delayed_results</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">visualize</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="ReducedSweepFutures"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepFutures">[docs]</a><span class="k">class</span> <span class="nc">ReducedSweepFutures</span><span class="p">(</span><span class="n">ReducedSweepWithData</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents a reduced sweep with associated Futures--results in computation.</span>
+
+<span class="sd">    Public attributes:</span>
+<span class="sd">    futures: [dask.Future]: the future objects</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sweep</span><span class="p">,</span> <span class="n">futures</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ReducedSweepFutures</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sweep</span><span class="p">,</span> <span class="n">futures</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">futures</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
+
+    <span class="c1"># TODO deprecate?</span>
+    <span class="c1"># def wait(self):</span>
+    <span class="c1">#     return dask.distributed.wait(self.futures)</span>
+
+    <span class="c1"># TODO deprecate?</span>
+    <span class="c1"># @staticmethod</span>
+    <span class="c1"># def get_each_element_function(self):</span>
+    <span class="c1">#     return self.sweep, [future.result() for future in self.futures]</span>
+
+    <span class="c1"># TODO deprecate? No usages.</span>
+    <span class="c1"># def get_gathered_results(self):</span>
+    <span class="c1">#     gathered =[]</span>
+    <span class="c1">#     for future in self.futures:</span>
+    <span class="c1">#         gathered.append(future.result())</span>
+    <span class="c1">#</span>
+    <span class="c1">#     return gathered</span>
+
+<div class="viewcode-block" id="ReducedSweepFutures.calculate_completed_results"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepFutures.calculate_completed_results">[docs]</a>    <span class="k">def</span> <span class="nf">calculate_completed_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get another sweep with the futures in this converted to results in local memory.</span>
+<span class="sd">        :return: another sweep with the futures in this converted to results in local memory</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">completed_results</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">future</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">futures</span><span class="p">:</span>
+            <span class="n">completed_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">future</span><span class="o">.</span><span class="n">result</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">ReducedSweepResults</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sweep</span><span class="p">,</span> <span class="n">completed_results</span><span class="p">)</span></div>
+        <span class="c1"># if not self.results:</span>
+        <span class="c1">#     for future in self.futures:</span>
+        <span class="c1">#         self.results.append(future.result())</span>
+
+    <span class="c1"># for consistency with Dask API</span>
+<div class="viewcode-block" id="ReducedSweepFutures.result"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepFutures.result">[docs]</a>    <span class="k">def</span> <span class="nf">result</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get another sweep with the futures in this converted to results in local memory.</span>
+
+<span class="sd">        :return: another sweep with the futures in this converted to results in local memory</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_completed_results</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ReducedSweepFutures.get_future"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepFutures.get_future">[docs]</a>    <span class="k">def</span> <span class="nf">get_future</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">total_index</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_datum</span><span class="p">(</span><span class="n">total_index</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ReducedSweepFutures.get_completed_result"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepFutures.get_completed_result">[docs]</a>    <span class="k">def</span> <span class="nf">get_completed_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">total_index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the completed result associated with total_index in the total sweep in local memory.</span>
+<span class="sd">        :param total_index: index in the total sweep</span>
+<span class="sd">        :return: the completed result in local memory</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_datum</span><span class="p">(</span><span class="n">total_index</span><span class="p">)</span><span class="o">.</span><span class="n">result</span><span class="p">()</span></div></div>
+
+    <span class="c1"># TODO Reduce function goes here</span>
+
+
+<div class="viewcode-block" id="ReducedSweepResults"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepResults">[docs]</a><span class="k">class</span> <span class="nc">ReducedSweepResults</span><span class="p">(</span><span class="n">ReducedSweepWithData</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents a reduced sweep with associated results in local memory.</span>
+
+<span class="sd">    Public attributes:</span>
+<span class="sd">    results: []: the results of the calculation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sweep</span><span class="p">,</span> <span class="n">results</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ReducedSweepResults</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sweep</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
+
+<div class="viewcode-block" id="ReducedSweepResults.create_empty_from_manager_and_tags"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepResults.create_empty_from_manager_and_tags">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">create_empty_from_manager_and_tags</span><span class="p">(</span><span class="n">manager</span><span class="p">,</span> <span class="n">tags</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a ReducedSweepResults corresponding to manager restricted to tags, with empty data.</span>
+<span class="sd">        :param manager: SweepManager: the total sweep</span>
+<span class="sd">        :param tags: the tags being swept over</span>
+<span class="sd">        Create a ReducedSweepResults corresponding to manager restricted to tags, with empty data.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sweep</span> <span class="o">=</span> <span class="n">ReducedSweep</span><span class="o">.</span><span class="n">create_from_manager_and_tags</span><span class="p">(</span><span class="n">manager</span><span class="p">,</span> <span class="n">tags</span><span class="p">)</span>
+        <span class="n">empty_results</span> <span class="o">=</span> <span class="n">sweep</span><span class="o">.</span><span class="n">empty_data</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">ReducedSweepResults</span><span class="p">(</span><span class="n">sweep</span><span class="p">,</span> <span class="n">empty_results</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ReducedSweepResults.get_result"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweepResults.get_result">[docs]</a>    <span class="k">def</span> <span class="nf">get_result</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">total_index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param total_index:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_datum</span><span class="p">(</span><span class="n">total_index</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="ReducedSweep"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweep">[docs]</a><span class="k">class</span> <span class="nc">ReducedSweep</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents the output of a sweep, restricted to the relevant subset of the input tags.</span>
+
+<span class="sd">    SweepHolder represents the restriction of a sweep over many parameters,</span>
+<span class="sd">    to a sweep over a subset of these parameters that is the input for a particular task.</span>
+
+<span class="sd">    Public Attributes:</span>
+<span class="sd">        sweep_manager: The whole sweep being performed.</span>
+<span class="sd">        list_of_tags: The tags corresponding to the part of the sweep that this\</span>
+<span class="sd">            SweepHolder is restricted to.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">list_of_tags</span><span class="p">,</span> <span class="n">sweep_list</span><span class="p">,</span> <span class="n">tagged_value_list</span><span class="p">,</span> <span class="n">index_in_sweep</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">list_of_tags</span> <span class="o">=</span> <span class="n">list_of_tags</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sweep_list</span> <span class="o">=</span> <span class="n">sweep_list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tagged_value_list</span> <span class="o">=</span> <span class="n">tagged_value_list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_index_in_sweep</span> <span class="o">=</span> <span class="n">index_in_sweep</span>
+
+        <span class="c1"># contains info about the sweep points in the reduced sweep</span>
+        <span class="c1"># and the mapping of the reduced sweep to the total sweep</span>
+
+<div class="viewcode-block" id="ReducedSweep.create_from_manager_and_tags"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweep.create_from_manager_and_tags">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">create_from_manager_and_tags</span><span class="p">(</span><span class="n">sweep_manager</span><span class="p">,</span> <span class="n">list_of_tags</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                Constructs the restriction of the sweep sweep_manager to the input tagged by list_of_tags.</span>
+
+<span class="sd">                :param sweep_manager: The sweep to restrict</span>
+<span class="sd">                :param list_of_tags: The tags to restrict the input to</span>
+<span class="sd">                &quot;&quot;&quot;</span>
+
+        <span class="n">sweep_list</span> <span class="o">=</span> <span class="n">sweep_manager</span><span class="o">.</span><span class="n">sweep_list</span>
+
+        <span class="n">tagged_value_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">index_in_sweep</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># The following nested for-loops could probably be made more</span>
+        <span class="c1"># elegant, but it works for now</span>
+
+        <span class="c1"># For each point in the total sweep</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">sweep_point</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sweep_list</span><span class="p">):</span>
+
+            <span class="c1"># Check whether it is a new point with respect to the restricted</span>
+            <span class="c1"># list of tags in self.list_of_tags, or whether this combination</span>
+            <span class="c1"># of the relevant tags has already been encountered in the sweep</span>
+            <span class="n">new_point</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">point_small_index</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tagged_value_list</span><span class="p">)):</span>
+                <span class="n">small_sweep_point</span> <span class="o">=</span> <span class="n">tagged_value_list</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
+                <span class="c1"># for j, small_sweep_point in enumerate(tagged_value_list):</span>
+                <span class="c1"># TODO - this should be done in a way that is also py27 compatible. Using</span>
+                <span class="c1"># six.iteritems doesn&#39;t work.</span>
+                <span class="k">if</span> <span class="n">small_sweep_point</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="o">&lt;=</span> <span class="n">sweep_point</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">new_point</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">point_small_index</span> <span class="o">=</span> <span class="n">j</span>
+
+            <span class="c1"># If the sweep point is a new point,</span>
+            <span class="c1"># add the corresponding sweep element {tag1: value1, ... tagN: valueN}</span>
+            <span class="c1"># to the list of values</span>
+            <span class="k">if</span> <span class="n">new_point</span><span class="p">:</span>
+                <span class="n">tagged_value_list</span> <span class="o">+=</span> <span class="p">[</span><span class="nb">dict</span><span class="p">((</span><span class="n">tag</span><span class="p">,</span> <span class="n">sweep_point</span><span class="p">[</span><span class="n">tag</span><span class="p">])</span> <span class="k">for</span> <span class="n">tag</span> <span class="ow">in</span> <span class="n">list_of_tags</span><span class="p">)]</span>
+                <span class="n">index_in_sweep</span> <span class="o">+=</span> <span class="p">[[</span><span class="n">i</span><span class="p">]]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">index_in_sweep</span><span class="p">[</span><span class="n">point_small_index</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+        <span class="n">index_in_sweep</span> <span class="o">=</span> <span class="n">index_in_sweep</span>
+
+        <span class="k">return</span> <span class="n">ReducedSweep</span><span class="p">(</span><span class="n">list_of_tags</span><span class="p">,</span> <span class="n">sweep_list</span><span class="p">,</span> <span class="n">tagged_value_list</span><span class="p">,</span> <span class="n">index_in_sweep</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ReducedSweep.convert_to_reduced_index"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweep.convert_to_reduced_index">[docs]</a>    <span class="k">def</span> <span class="nf">convert_to_reduced_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">total_index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Converts the index of a sweep element in the total sweep to the corresponding index in the reduced sweep.</span>
+<span class="sd">        :param total_index: index of a sweep element in the total sweep</span>
+<span class="sd">        :return: corresponding index in the reduced sweep</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">reduced_index</span> <span class="o">=</span> <span class="p">[</span><span class="n">total_index</span> <span class="ow">in</span> <span class="n">sublist</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_index_in_sweep</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">reduced_index</span></div>
+
+<div class="viewcode-block" id="ReducedSweep.convert_to_total_indices"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweep.convert_to_total_indices">[docs]</a>    <span class="k">def</span> <span class="nf">convert_to_total_indices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reduced_index</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets a list of indices in the total sweep corresponding to the index of an element in the reduced sweep.</span>
+
+<span class="sd">        :param reduced_index: index of an element in the reduced sweep</span>
+<span class="sd">        :return: list of corresponding indices in the total sweep</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">total_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_index_in_sweep</span><span class="p">[</span><span class="n">reduced_index</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">total_index</span></div>
+
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_index_in_sweep</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ReducedSweep.empty_data"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.ReducedSweep.empty_data">[docs]</a>    <span class="k">def</span> <span class="nf">empty_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="kc">None</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">))]</span></div></div>
+
+
+<span class="c1"># TODO refactor the creation of sweeps and sweepTags to make script less noisy</span>
+<div class="viewcode-block" id="SweepTag"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.SweepTag">[docs]</a><span class="k">class</span> <span class="nc">SweepTag</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Unique tag for id&#39;ing parameters in the sweep.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tag_name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tag_name</span> <span class="o">=</span> <span class="n">tag_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tag_function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag_name</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag_name</span>
+
+    <span class="k">def</span> <span class="nf">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">SweepTag</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag_name</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">tag_name</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tag_name</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">SweepTag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tag_name</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">tag_function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag_function</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">other</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="nf">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__add__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__sub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">SweepTag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tag_name</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">tag_function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag_function</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">other</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="nf">__rsub__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">SweepTag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tag_name</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">tag_function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">other</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag_function</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="nf">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">SweepTag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tag_name</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">tag_function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag_function</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">*</span> <span class="n">other</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="nf">__rmul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__mul__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__truediv__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">SweepTag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tag_name</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">tag_function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag_function</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">other</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="nf">__pow__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">SweepTag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tag_name</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">tag_function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag_function</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">**</span> <span class="n">other</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="nf">__neg__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">SweepTag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tag_name</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">tag_function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">tag_function</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="nf">__abs__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">SweepTag</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tag_name</span><span class="p">)</span>
+        <span class="n">out</span><span class="o">.</span><span class="n">tag_function</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tag_function</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">out</span>
+
+    <span class="k">def</span> <span class="nf">__getstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="c1"># Remove the unpicklable entries.</span>
+        <span class="n">state</span><span class="p">[</span><span class="s1">&#39;tag_function&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cloudpickle</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tag_function</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">state</span>
+
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="c1"># Restore instance attributes.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">state</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tag_function</span> <span class="o">=</span> <span class="n">cloudpickle</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">state</span><span class="p">[</span><span class="s1">&#39;tag_function&#39;</span><span class="p">])</span>
+
+<div class="viewcode-block" id="SweepTag.replace"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.SweepTag.replace">[docs]</a>    <span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tag_function</span><span class="p">(</span><span class="n">value</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="gen_tag_extract"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.gen_tag_extract">[docs]</a><span class="k">def</span> <span class="nf">gen_tag_extract</span><span class="p">(</span><span class="n">nested_dictionary_of_tags</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract all tags from nested dictionary that may have tags</span>
+<span class="sd">    as values at any level</span>
+<span class="sd">    :param nested_dictionary_of_tags: exactly what it sounds like</span>
+<span class="sd">    :return: a generator that yields all the tags in the dictionary</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># if hasattr(nested_dictionary_of_tags, &#39;iteritems&#39;): # doesn&#39;t work with python3</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">iteritems</span><span class="p">(</span><span class="n">nested_dictionary_of_tags</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">SweepTag</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="n">v</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">gen_tag_extract</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">result</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">gen_tag_extract_list</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="gen_tag_extract_list"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.gen_tag_extract_list">[docs]</a><span class="k">def</span> <span class="nf">gen_tag_extract_list</span><span class="p">(</span><span class="n">nested_list_of_tags</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract all tags from nested dictionary that may have tags</span>
+<span class="sd">    as values at any level</span>
+<span class="sd">    :param nested_list_of_tags: exactly what it sounds like</span>
+<span class="sd">    :return: a generator that yields all the tags in the dictionary</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># if hasattr(nested_dictionary_of_tags, &#39;iteritems&#39;): # doesn&#39;t work with python3</span>
+    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">nested_list_of_tags</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">SweepTag</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="n">v</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">gen_tag_extract</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">result</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">gen_tag_extract_list</span><span class="p">(</span><span class="n">v</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="replace_tag_with_value"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.replace_tag_with_value">[docs]</a><span class="k">def</span> <span class="nf">replace_tag_with_value</span><span class="p">(</span><span class="n">name_to_tag_mapping</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">new_value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a copy of name_to_tag_mapping with values of tag replaced with new_value.</span>
+<span class="sd">    :param name_to_tag_mapping: Dictionary mapping parameter names to SweepTags.</span>
+<span class="sd">    :param tag: The SweepTag to replace.</span>
+<span class="sd">    :param new_value: the value to replace it with.</span>
+<span class="sd">    :return: a copy of name_to_tag_mapping with values of tag replaced with new_value</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">var_copy</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c1"># if hasattr(name_to_tag_mapping, &#39;iteritems&#39;):</span>
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">iteritems</span><span class="p">(</span><span class="n">name_to_tag_mapping</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">v</span> <span class="o">==</span> <span class="n">tag</span><span class="p">:</span>
+            <span class="n">var_copy</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">new_value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">var_copy</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">replace_tag_with_value</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">new_value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">var_copy</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">replace_tag_with_value_list</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">new_value</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">var_copy</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+    <span class="k">return</span> <span class="n">var_copy</span></div>
+
+
+<div class="viewcode-block" id="replace_tag_with_value_list"><a class="viewcode-back" href="../../../source/qmt.tasks.html#qmt.tasks.sweep.replace_tag_with_value_list">[docs]</a><span class="k">def</span> <span class="nf">replace_tag_with_value_list</span><span class="p">(</span><span class="n">name_to_tag_mapping</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">new_value</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a copy of name_to_tag_mapping with values of tag replaced with new_value.</span>
+<span class="sd">    :param name_to_tag_mapping: Dictionary mapping parameter names to SweepTags.</span>
+<span class="sd">    :param tag: The SweepTag to replace.</span>
+<span class="sd">    :param new_value: the value to replace it with.</span>
+<span class="sd">    :return: a copy of name_to_tag_mapping with values of tag replaced with new_value</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">var_copy</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># if hasattr(name_to_tag_mapping, &#39;iteritems&#39;):</span>
+    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">name_to_tag_mapping</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">v</span> <span class="o">==</span> <span class="n">tag</span><span class="p">:</span>
+            <span class="n">var_copy</span> <span class="o">+=</span> <span class="p">[</span><span class="n">v</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">new_value</span><span class="p">)]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">var_copy</span> <span class="o">+=</span> <span class="p">[</span><span class="n">replace_tag_with_value</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">new_value</span><span class="p">)]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">var_copy</span> <span class="o">+=</span> <span class="p">[</span><span class="n">replace_tag_with_value_list</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">tag</span><span class="p">,</span> <span class="n">new_value</span><span class="p">)]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">var_copy</span> <span class="o">+=</span> <span class="p">[</span><span class="n">v</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">var_copy</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Microsoft Corporation
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../../',
+              VERSION:'2.0',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

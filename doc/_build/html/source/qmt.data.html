@@ -90,6 +90,7 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../rst/tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../rst/dev_overview.html">Developing QMT</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="modules.html">Modules</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="qmt.html">qmt package</a><ul class="current">
 <li class="toctree-l3 current"><a class="reference internal" href="qmt.html#subpackages">Subpackages</a><ul class="current">
@@ -99,14 +100,13 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="qmt.html#submodules">Submodules</a></li>
-<li class="toctree-l3"><a class="reference internal" href="qmt.html#qmt-materials-module">qmt.materials module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="qmt.html#qmt-physics-constants-module">qmt.physics_constants module</a></li>
-<li class="toctree-l3"><a class="reference internal" href="qmt.html#module-contents">Module contents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qmt.html#module-qmt.materials">qmt.materials module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qmt.html#module-qmt.physics_constants">qmt.physics_constants module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="qmt.html#module-qmt">Module contents</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../rst/dev_overview.html">Structure of QMT</a></li>
 </ul>
 
             
@@ -180,20 +180,474 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="qmt-data-data-utils-module">
-<h2>qmt.data.data_utils module<a class="headerlink" href="#qmt-data-data-utils-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-qmt.data.data_utils">
+<span id="qmt-data-data-utils-module"></span><h2>qmt.data.data_utils module<a class="headerlink" href="#module-qmt.data.data_utils" title="Permalink to this headline">¶</a></h2>
+<p>Utility functions for dealing with data.</p>
+<dl class="function">
+<dt id="qmt.data.data_utils.serialised_file">
+<code class="descclassname">qmt.data.data_utils.</code><code class="descname">serialised_file</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/data_utils.html#serialised_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.data_utils.serialised_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a serialised blob of the contents of a given file path.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="qmt.data.data_utils.write_deserialised">
+<code class="descclassname">qmt.data.data_utils.</code><code class="descname">write_deserialised</code><span class="sig-paren">(</span><em>serial_obj</em>, <em>path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/data_utils.html#write_deserialised"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.data_utils.write_deserialised" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write a deserialised file from a serialised blob to a given file path.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="qmt.data.data_utils.store_serial">
+<code class="descclassname">qmt.data.data_utils.</code><code class="descname">store_serial</code><span class="sig-paren">(</span><em>obj</em>, <em>save_fct</em>, <em>ext_format</em>, <em>scratch_dir=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/data_utils.html#store_serial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.data_utils.store_serial" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a serialised representation of
+save_fct(obj, scratch_dir/temporary_file.ext_format).
+The temporary file has a unique name.
+The parameter ext_format can be used for format distinction in some save_fct.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="qmt.data.data_utils.load_serial">
+<code class="descclassname">qmt.data.data_utils.</code><code class="descname">load_serial</code><span class="sig-paren">(</span><em>serial_obj</em>, <em>load_fct</em>, <em>ext_format=None</em>, <em>scratch_dir=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/data_utils.html#load_serial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.data_utils.load_serial" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the original object stored with store_serial.
+The load_fct must be a correct complement of the previously used store_fct.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="qmt.data.data_utils.reduce_data">
+<code class="descclassname">qmt.data.data_utils.</code><code class="descname">reduce_data</code><span class="sig-paren">(</span><em>reduce_function</em>, <em>task</em>, <em>dask_client</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/data_utils.html#reduce_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.data_utils.reduce_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a task that has or will be been run, apply a reduce function to all of its outputs in
+dask. By specifying a custom reduce_function, the user is returning exactly what they want from
+a given run.
+:param function reduce_function: A function that takes the output data type of the supplied
+task and returns a dictionary of objects that can be stored in hdf5.
+:param Task task: The task that we would like to work on. Note that this function doesn’t run
+the task, but this can be set up either before or after running.
+:param dask_client: The client we are using for the calculation
+:return sweep_vals,extracted_data: Returns a list of the sweep tags and a list of the futures
+corresponding to the data objects.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="qmt.data.data_utils.retrieve_data">
+<code class="descclassname">qmt.data.data_utils.</code><code class="descname">retrieve_data</code><span class="sig-paren">(</span><em>extracted_data</em>, <em>dask_client</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/data_utils.html#retrieve_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.data_utils.retrieve_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Retrieves all of the data stored in a list of futures.
+:param extracted_data: List of futures we ant to retrieve.
+:param dask_client: Dask client we are using for the calculation.
+:return retrieved_data: The retrieved data in a list.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="qmt.data.data_utils.stream_data_to_file">
+<code class="descclassname">qmt.data.data_utils.</code><code class="descname">stream_data_to_file</code><span class="sig-paren">(</span><em>extracted_data</em>, <em>filename</em>, <em>dask_client</em>, <em>sweep_vals=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/data_utils.html#stream_data_to_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.data_utils.stream_data_to_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Instead of simply retrieving all the data, we can stream it to a file on disk as the runs
+complete. The data are stored in an hdf5 file with a single level. Data entries are given by
+kesy of the form “index_paramval”, where index is the numerical index of the result in the
+extracted_data list and paramval is the descriptive key for the datum of interest.
+:param extracted_data: List of futures we ant to retrieve.
+:param filename: File name for the local data store.
+:param dask_client: The client we are using for the calculation
+:param sweep_vals: Sweep point values to store along with the data. If None, then just uses
+an integer list.</p>
+</dd></dl>
+
 </div>
-<div class="section" id="qmt-data-geometry-module">
-<h2>qmt.data.geometry module<a class="headerlink" href="#qmt-data-geometry-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-qmt.data.geometry">
+<span id="qmt-data-geometry-module"></span><h2>qmt.data.geometry module<a class="headerlink" href="#module-qmt.data.geometry" title="Permalink to this headline">¶</a></h2>
+<p>Geometry data classes.</p>
+<dl class="class">
+<dt id="qmt.data.geometry.Geo2DData">
+<em class="property">class </em><code class="descclassname">qmt.data.geometry.</code><code class="descname">Geo2DData</code><span class="sig-paren">(</span><em>lunit='nm'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo2DData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo2DData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Class holding 2D geometry data.</p>
+<dl class="method">
+<dt id="qmt.data.geometry.Geo2DData.add_part">
+<code class="descname">add_part</code><span class="sig-paren">(</span><em>part_name</em>, <em>part</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo2DData.add_part"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo2DData.add_part" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a part to this geometry.
+:param str part_name: Name of the part to create
+:param Polygon part: Polygon object from shapely.geometry. This must be a valid Polygon.
+:param bool overwrite: Should we allow this to overwrite?</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.data.geometry.Geo2DData.remove_part">
+<code class="descname">remove_part</code><span class="sig-paren">(</span><em>part_name</em>, <em>ignore_if_absent=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo2DData.remove_part"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo2DData.remove_part" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove a part from this geometry.
+:param str part_name: Name of part to remove
+:param bool ignore_if_absent: Should we ignore an attempted removal if the part name
+is not found?</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.data.geometry.Geo2DData.add_edge">
+<code class="descname">add_edge</code><span class="sig-paren">(</span><em>edge_name</em>, <em>edge</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo2DData.add_edge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo2DData.add_edge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add an edge to this geometry.
+:param str edge_name: Name of the edge to create
+:param LineString edge: LineString object from shapely.geometry.
+:param bool overwrite: Should we allow this to overwrite?</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.data.geometry.Geo2DData.remove_edge">
+<code class="descname">remove_edge</code><span class="sig-paren">(</span><em>edge_name</em>, <em>ignore_if_absent=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo2DData.remove_edge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo2DData.remove_edge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove an edge from this geometry.
+:param str edge_name: Name of part to remove
+:param bool ignore_if_absent: Should we ignore an attempted removal if the part name
+is not found?</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.data.geometry.Geo2DData.compute_bb">
+<code class="descname">compute_bb</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo2DData.compute_bb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo2DData.compute_bb" title="Permalink to this definition">¶</a></dt>
+<dd><p>Computes the bounding box of all of the parts and edges in the geometry.
+:return bb_list: List of [min_x,max_x,min_y,max_y]</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.data.geometry.Geo2DData.part_build_order">
+<code class="descname">part_build_order</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo2DData.part_build_order"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo2DData.part_build_order" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the build order restricted to parts.
+:return build_order: build order restricted to parts.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.data.geometry.Geo2DData.part_coord_list">
+<code class="descname">part_coord_list</code><span class="sig-paren">(</span><em>part_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo2DData.part_coord_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo2DData.part_coord_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the list of vertex coordinates for a part
+:param str part_name: Name of the part
+:return list coord_list: List of coordinates of the vertices of the part.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.data.geometry.Geo2DData.edge_coord_list">
+<code class="descname">edge_coord_list</code><span class="sig-paren">(</span><em>edge_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo2DData.edge_coord_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo2DData.edge_coord_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the list of vertex coordinates for an edge.
+:param str edge_name: Name of the edge.
+:return list coord_list: List of the coordinates of the edge.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="qmt.data.geometry.Geo3DData">
+<em class="property">class </em><code class="descclassname">qmt.data.geometry.</code><code class="descname">Geo3DData</code><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Class holding 3D geometry data.</p>
+<dl class="attribute">
+<dt id="qmt.data.geometry.Geo3DData.EXTERIOR_BC_NAME">
+<code class="descname">EXTERIOR_BC_NAME</code><em class="property"> = 'exterior'</em><a class="headerlink" href="#qmt.data.geometry.Geo3DData.EXTERIOR_BC_NAME" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qmt.data.geometry.Geo3DData.get_material">
+<code class="descname">get_material</code><span class="sig-paren">(</span><em>part_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.get_material"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.get_material" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qmt.data.geometry.Geo3DData.get_material_mapping">
+<code class="descname">get_material_mapping</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.get_material_mapping"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.get_material_mapping" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get mapping of part names to materials.
+:return:</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.data.geometry.Geo3DData.add_part">
+<code class="descname">add_part</code><span class="sig-paren">(</span><em>part_name</em>, <em>part</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.add_part"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.add_part" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add a part to this geometry.
+:param str part_name: Name of the part to create
+:param Part3D part: Part3D object.
+:param bool overwrite: Should we allow this to overwrite?</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.data.geometry.Geo3DData.remove_part">
+<code class="descname">remove_part</code><span class="sig-paren">(</span><em>part_name</em>, <em>ignore_if_absent=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.remove_part"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.remove_part" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove a part from this geometry.
+:param str part_name: Name of part to remove
+:param bool ignore_if_absent: Should we ignore an attempted removal if the part name
+is not found?</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.data.geometry.Geo3DData.set_data">
+<code class="descname">set_data</code><span class="sig-paren">(</span><em>data_name</em>, <em>data</em>, <em>scratch_dir=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.set_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.set_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set data to a serial format that is easily portable.
+:param str data_name:  “fcdoc” freeCAD document                                “mesh”  fenics mesh                                “rmf”   fenics region marker function
+:param data:           The corresponding data that we would like to set.
+:param scratch_dir:    Optional existing temporary (fast) storage location.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.data.geometry.Geo3DData.get_data">
+<code class="descname">get_data</code><span class="sig-paren">(</span><em>data_name</em>, <em>mesh=None</em>, <em>scratch_dir=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.get_data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get data from stored serial format.
+:param str data_name:  “fcdoc” freeCAD document.
+:param mesh:
+:param scratch_dir:    Optional existing temporary (fast) storage location.
+:return data:          The freeCAD document or fenics object that was stored.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.data.geometry.Geo3DData.write_fcstd">
+<code class="descname">write_fcstd</code><span class="sig-paren">(</span><em>file_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.write_fcstd"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.write_fcstd" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write geometry to a fcstd file.</p>
+<p>Returns the fcstd file path.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="qmt.data.geometry.Geo3DData.get_names_to_region_ids">
+<code class="descname">get_names_to_region_ids</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.get_names_to_region_ids"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.get_names_to_region_ids" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qmt.data.geometry.Geo3DData.get_region_ids">
+<code class="descname">get_region_ids</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.get_region_ids"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.get_region_ids" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qmt.data.geometry.Geo3DData.get_region_ids_to_names">
+<code class="descname">get_region_ids_to_names</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.get_region_ids_to_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.get_region_ids_to_names" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qmt.data.geometry.Geo3DData.get_names_to_default_ns">
+<code class="descname">get_names_to_default_ns</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.get_names_to_default_ns"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.get_names_to_default_ns" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qmt.data.geometry.Geo3DData.get_names_to_default_phi_nl">
+<code class="descname">get_names_to_default_phi_nl</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.get_names_to_default_phi_nl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.get_names_to_default_phi_nl" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qmt.data.geometry.Geo3DData.get_names_to_default_phi_nl_and_ds">
+<code class="descname">get_names_to_default_phi_nl_and_ds</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.get_names_to_default_phi_nl_and_ds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.get_names_to_default_phi_nl_and_ds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qmt.data.geometry.Geo3DData.get_names_to_default_ds">
+<code class="descname">get_names_to_default_ds</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.get_names_to_default_ds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.get_names_to_default_ds" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qmt.data.geometry.Geo3DData.get_names_to_default_bcs">
+<code class="descname">get_names_to_default_bcs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.get_names_to_default_bcs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.get_names_to_default_bcs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qmt.data.geometry.Geo3DData.get_names_to_default_dirichlet_bcs">
+<code class="descname">get_names_to_default_dirichlet_bcs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.get_names_to_default_dirichlet_bcs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.get_names_to_default_dirichlet_bcs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="qmt.data.geometry.Geo3DData.get_names_to_default_neumann_bcs">
+<code class="descname">get_names_to_default_neumann_bcs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.get_names_to_default_neumann_bcs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.get_names_to_default_neumann_bcs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="qmt.data.geometry.Part3DData">
+<em class="property">class </em><code class="descclassname">qmt.data.geometry.</code><code class="descname">Part3DData</code><span class="sig-paren">(</span><em>label</em>, <em>fc_name</em>, <em>directive</em>, <em>domain_type=None</em>, <em>material=None</em>, <em>z0=0</em>, <em>thickness=None</em>, <em>target_wire=None</em>, <em>shell_verts=None</em>, <em>depo_mode=None</em>, <em>z_middle=None</em>, <em>t_in=None</em>, <em>t_out=None</em>, <em>layer_num=None</em>, <em>litho_base=None</em>, <em>mesh_max_size=None</em>, <em>mesh_min_size=None</em>, <em>mesh_growth_rate=None</em>, <em>mesh_scale_vector=None</em>, <em>boundary_condition=None</em>, <em>ns=None</em>, <em>phi_nl=None</em>, <em>ds=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Part3DData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Part3DData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dl class="method">
+<dt id="qmt.data.geometry.Part3DData.write_stp">
+<code class="descname">write_stp</code><span class="sig-paren">(</span><em>file_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Part3DData.write_stp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Part3DData.write_stp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Write part geometry to a STEP file.</p>
+<p>Returns the STEP file path.</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
-<div class="section" id="qmt-data-solvers-2d-module">
-<h2>qmt.data.solvers_2d module<a class="headerlink" href="#qmt-data-solvers-2d-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-qmt.data.solvers_2d">
+<span id="qmt-data-solvers-2d-module"></span><h2>qmt.data.solvers_2d module<a class="headerlink" href="#module-qmt.data.solvers_2d" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="qmt.data.solvers_2d.Potential2dData">
+<em class="property">class </em><code class="descclassname">qmt.data.solvers_2d.</code><code class="descname">Potential2dData</code><span class="sig-paren">(</span><em>coordinates</em>, <em>coordinate_units</em>, <em>potential</em>, <em>potential_units</em><span class="sig-paren">)</span><a class="headerlink" href="#qmt.data.solvers_2d.Potential2dData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></a></p>
+<dl class="attribute">
+<dt id="qmt.data.solvers_2d.Potential2dData.coordinate_units">
+<code class="descname">coordinate_units</code><a class="headerlink" href="#qmt.data.solvers_2d.Potential2dData.coordinate_units" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="qmt.data.solvers_2d.Potential2dData.coordinates">
+<code class="descname">coordinates</code><a class="headerlink" href="#qmt.data.solvers_2d.Potential2dData.coordinates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="qmt.data.solvers_2d.Potential2dData.potential">
+<code class="descname">potential</code><a class="headerlink" href="#qmt.data.solvers_2d.Potential2dData.potential" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="qmt.data.solvers_2d.Potential2dData.potential_units">
+<code class="descname">potential_units</code><a class="headerlink" href="#qmt.data.solvers_2d.Potential2dData.potential_units" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="qmt.data.solvers_2d.ThomasFermi2dData">
+<em class="property">class </em><code class="descclassname">qmt.data.solvers_2d.</code><code class="descname">ThomasFermi2dData</code><span class="sig-paren">(</span><em>coordinates</em>, <em>potential</em>, <em>density</em>, <em>conduction_band</em>, <em>valence_band</em>, <em>reference_level</em>, <em>temperature</em>, <em>coordinate_units</em>, <em>potential_units</em>, <em>energy_units</em><span class="sig-paren">)</span><a class="headerlink" href="#qmt.data.solvers_2d.ThomasFermi2dData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></a></p>
+<dl class="attribute">
+<dt id="qmt.data.solvers_2d.ThomasFermi2dData.conduction_band">
+<code class="descname">conduction_band</code><a class="headerlink" href="#qmt.data.solvers_2d.ThomasFermi2dData.conduction_band" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="qmt.data.solvers_2d.ThomasFermi2dData.coordinate_units">
+<code class="descname">coordinate_units</code><a class="headerlink" href="#qmt.data.solvers_2d.ThomasFermi2dData.coordinate_units" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 7</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="qmt.data.solvers_2d.ThomasFermi2dData.coordinates">
+<code class="descname">coordinates</code><a class="headerlink" href="#qmt.data.solvers_2d.ThomasFermi2dData.coordinates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="qmt.data.solvers_2d.ThomasFermi2dData.density">
+<code class="descname">density</code><a class="headerlink" href="#qmt.data.solvers_2d.ThomasFermi2dData.density" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="qmt.data.solvers_2d.ThomasFermi2dData.energy_units">
+<code class="descname">energy_units</code><a class="headerlink" href="#qmt.data.solvers_2d.ThomasFermi2dData.energy_units" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 9</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="qmt.data.solvers_2d.ThomasFermi2dData.potential">
+<code class="descname">potential</code><a class="headerlink" href="#qmt.data.solvers_2d.ThomasFermi2dData.potential" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="qmt.data.solvers_2d.ThomasFermi2dData.potential_units">
+<code class="descname">potential_units</code><a class="headerlink" href="#qmt.data.solvers_2d.ThomasFermi2dData.potential_units" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 8</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="qmt.data.solvers_2d.ThomasFermi2dData.reference_level">
+<code class="descname">reference_level</code><a class="headerlink" href="#qmt.data.solvers_2d.ThomasFermi2dData.reference_level" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 5</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="qmt.data.solvers_2d.ThomasFermi2dData.temperature">
+<code class="descname">temperature</code><a class="headerlink" href="#qmt.data.solvers_2d.ThomasFermi2dData.temperature" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 6</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="qmt.data.solvers_2d.ThomasFermi2dData.valence_band">
+<code class="descname">valence_band</code><a class="headerlink" href="#qmt.data.solvers_2d.ThomasFermi2dData.valence_band" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 4</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="qmt.data.solvers_2d.Bdg2dData">
+<em class="property">class </em><code class="descclassname">qmt.data.solvers_2d.</code><code class="descname">Bdg2dData</code><span class="sig-paren">(</span><em>coordinates</em>, <em>energies</em>, <em>wave_functions</em>, <em>coordinate_units</em>, <em>energy_units</em><span class="sig-paren">)</span><a class="headerlink" href="#qmt.data.solvers_2d.Bdg2dData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></a></p>
+<dl class="attribute">
+<dt id="qmt.data.solvers_2d.Bdg2dData.coordinate_units">
+<code class="descname">coordinate_units</code><a class="headerlink" href="#qmt.data.solvers_2d.Bdg2dData.coordinate_units" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 3</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="qmt.data.solvers_2d.Bdg2dData.coordinates">
+<code class="descname">coordinates</code><a class="headerlink" href="#qmt.data.solvers_2d.Bdg2dData.coordinates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="qmt.data.solvers_2d.Bdg2dData.energies">
+<code class="descname">energies</code><a class="headerlink" href="#qmt.data.solvers_2d.Bdg2dData.energies" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="qmt.data.solvers_2d.Bdg2dData.energy_units">
+<code class="descname">energy_units</code><a class="headerlink" href="#qmt.data.solvers_2d.Bdg2dData.energy_units" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 4</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="qmt.data.solvers_2d.Bdg2dData.wave_functions">
+<code class="descname">wave_functions</code><a class="headerlink" href="#qmt.data.solvers_2d.Bdg2dData.wave_functions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 2</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="qmt.data.solvers_2d.SchrodingerPoissonDatas">
+<em class="property">class </em><code class="descclassname">qmt.data.solvers_2d.</code><code class="descname">SchrodingerPoissonDatas</code><span class="sig-paren">(</span><em>poisson_obj</em>, <em>density</em>, <em>density_per_subband</em>, <em>density_units</em>, <em>rho</em>, <em>rho_units</em>, <em>psis</em>, <em>energies</em>, <em>potential</em>, <em>potential_units</em>, <em>mesh</em>, <em>mesh_units</em>, <em>bands</em>, <em>temperature</em>, <em>band_charges</em>, <em>Dit</em>, <em>neutral_level</em>, <em>fixed_charge_sites</em>, <em>fixed_charge_site_perimeters</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/solvers_2d.html#SchrodingerPoissonDatas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.solvers_2d.SchrodingerPoissonDatas" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
 </div>
-<div class="section" id="qmt-data-solvers-3d-module">
-<h2>qmt.data.solvers_3d module<a class="headerlink" href="#qmt-data-solvers-3d-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-qmt.data.solvers_3d">
+<span id="qmt-data-solvers-3d-module"></span><h2>qmt.data.solvers_3d module<a class="headerlink" href="#module-qmt.data.solvers_3d" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="qmt.data.solvers_3d.Fem3DData">
+<em class="property">class </em><code class="descclassname">qmt.data.solvers_3d.</code><code class="descname">Fem3DData</code><span class="sig-paren">(</span><em>coordinates=None</em>, <em>coordinate_units=None</em>, <em>potential=None</em>, <em>potential_units=None</em>, <em>charge=None</em>, <em>surface_charge_integrals=None</em>, <em>volume_charge_integrals=None</em>, <em>fenics_3d_data=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/solvers_3d.html#Fem3DData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.solvers_3d.Fem3DData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<dl class="method">
+<dt id="qmt.data.solvers_3d.Fem3DData.get_data">
+<code class="descname">get_data</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/solvers_3d.html#Fem3DData.get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.solvers_3d.Fem3DData.get_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="qmt.data.solvers_3d.SerialFenicsFunctionData">
+<em class="property">class </em><code class="descclassname">qmt.data.solvers_3d.</code><code class="descname">SerialFenicsFunctionData</code><span class="sig-paren">(</span><em>serial_mesh</em>, <em>serial_function</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/solvers_3d.html#SerialFenicsFunctionData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.solvers_3d.SerialFenicsFunctionData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="qmt.data.solvers_3d.serialize_fenics_function">
+<code class="descclassname">qmt.data.solvers_3d.</code><code class="descname">serialize_fenics_function</code><span class="sig-paren">(</span><em>mesh</em>, <em>fenics_function</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/solvers_3d.html#serialize_fenics_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.solvers_3d.serialize_fenics_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="qmt.data.solvers_3d.deserialize_fenics_function">
+<code class="descclassname">qmt.data.solvers_3d.</code><code class="descname">deserialize_fenics_function</code><span class="sig-paren">(</span><em>serial_function_data</em>, <em>element_type='P'</em>, <em>element_degree=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/solvers_3d.html#deserialize_fenics_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.solvers_3d.deserialize_fenics_function" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="qmt.data.solvers_3d.TransportData">
+<em class="property">class </em><code class="descclassname">qmt.data.solvers_3d.</code><code class="descname">TransportData</code><span class="sig-paren">(</span><em>conductance</em>, <em>smatrix</em><span class="sig-paren">)</span><a class="headerlink" href="#qmt.data.solvers_3d.TransportData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">tuple</span></code></a></p>
+<dl class="attribute">
+<dt id="qmt.data.solvers_3d.TransportData.conductance">
+<code class="descname">conductance</code><a class="headerlink" href="#qmt.data.solvers_3d.TransportData.conductance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 0</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="qmt.data.solvers_3d.TransportData.smatrix">
+<code class="descname">smatrix</code><a class="headerlink" href="#qmt.data.solvers_3d.TransportData.smatrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for field number 1</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
-<div class="section" id="module-contents">
-<h2>Module contents<a class="headerlink" href="#module-contents" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-qmt.data">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-qmt.data" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 

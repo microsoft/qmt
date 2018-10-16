@@ -3,6 +3,7 @@
 
 """Functions that perform composite executions."""
 
+import sys #####################################################################
 import FreeCAD
 
 import Draft
@@ -146,7 +147,7 @@ def build(opts):
 
 
 def build_pass(part):
-    '''Pas a part unchanged.'''
+    '''Pass a part unchanged.'''
     assert part.directive == '3d_shape'
     existing_part = FreeCAD.ActiveDocument.getObject(part.fc_name)
     assert existing_part is not None
@@ -232,7 +233,7 @@ def build_wire_shell(part, offset=0.):
 def build_lithography(part, opts, info_holder):
     """Build a lithography part."""
     assert part.directive == 'lithography'
-    part.litho_base = [obj for obj in part.litho_base if obj.directive != 'wire_shell' ] # filter implicitly considered shells
+    # ~ part.litho_base = [obj for obj in part.litho_base if obj.directive != 'wire_shell' ] # filter implicitly considered shells
     if not info_holder.litho_setup_done:
         initialize_lithography(info_holder, opts, fillShells=True)
         info_holder.litho_setup_done = True
@@ -511,16 +512,24 @@ def initialize_lithography(info, opts, fillShells=True):
 
 def gen_offset(opts, obj, offsetVal):
     """Generates an offset non-destructively."""
+
+
+# generate an offset around obj, depending on which input_part obj belongs to
+
     doc = FreeCAD.ActiveDocument
     # First, we need to check if the object needs special treatment:
     treatment = 'standard'
+    cur_part = None
     for input_part in opts['input_parts']:
+        sys.stderr.write('>>> ' + str(obj.Name)  + ' ? ' + str(input_part.fc_name) + '\n')
         if obj.Name == input_part.fc_name:
             treatment = input_part.directive
+            cur_part = input_part
             break
 
     if treatment == 'extrude' or treatment == 'lithography':
         treatment = 'standard'
+
     if treatment == 'standard':
         # Apparently the offset function is buggy for very small offsets...
         if offsetVal < 1e-5:
@@ -536,12 +545,17 @@ def gen_offset(opts, obj, offsetVal):
             doc.recompute()
             delete(offset)
     elif treatment == 'wire':
-        offsetDupe = build_wire(partName, offset=offsetVal)
+        offsetDupe = build_wire(cur_part, offset=offsetVal)
     elif treatment == 'wireShell':
-        offsetDupe = build_wire_shell(partName, offset=offsetVal)
+        sys.stderr.write('>>> WIRE SHELL IN GEN OFFSET ' + str(1) + '\n')
+        offsetDupe = build_wire_shell(cur_part, offset=offsetVal)
     elif treatment == 'SAG':
-        offsetDupe = build_sag(partName, offset=offsetVal)
+        offsetDupe = build_sag(cur_part, offset=offsetVal)
     doc.recompute()
+
+    sys.stderr.write('>>> generated offset ' + str(obj.Name) + ' -> ' + str(offsetDupe.Name) +
+                     ' from ' + str(cur_part) + '\n')
+
     return offsetDupe
 
 
@@ -639,6 +653,7 @@ def H_offset(info, opts, layerNum, objID, tList=[]):
     C_t = gen_offset(opts, C, t)  # offset the C prism
     info.trash.append(B_t)
     info.trash.append(C_t)
+
     # Build up the substrate due to previously deposited gates
     HOffsetList = []
     for m in layers.keys():
@@ -652,12 +667,15 @@ def H_offset(info, opts, layerNum, objID, tList=[]):
         info, opts, C_t, t, ti, offsetTuple, checkOffsetTuple)
     unionList = HOffsetList + AOffsetList
     returnList = [B_t]
+
     for obj in unionList:
         intObj = intersect([C_t, obj])
         info.trash.append(intObj)
         returnList.append(intObj)
     layers[layerNum]['objIDs'][objID]['HDict'][
         checkOffsetTuple] = returnList
+    sys.stderr.write('>>> H_offset returns obj ' + obj.Name +
+                     ' with names ' + str([o.Name for o in returnList]) + '\n')
     return returnList
 
 
@@ -699,12 +717,16 @@ def gen_G(info, opts, layerNum, objID):
             layer['objIDs'][objID][
                 'HDict'][()] = H_offset(info, opts, layerNum, objID)
 
+        sys.stderr.write('>>> --------------------    \n')
         # TODO: reuse new function
         # This block fixes multifuses for wireshells with too big offsets,
         # by forcing all participating object shells into a new solid.
         solid_hlist = []
         import Part
         for obj in layer['objIDs'][objID]['HDict'][()]:
+            FreeCAD.ActiveDocument.recompute()
+            sys.stderr.write('>>> ' + str(obj.Name) + '\n')
+            FreeCAD.ActiveDocument.saveAs('tmp_prefail_' + str(obj.Name) + '.fcstd')
             __s__ = obj.Shape.Faces
             __s__ = Part.Solid(Part.Shell(__s__))
             __o__ = FreeCAD.ActiveDocument.addObject("Part::Feature", obj.Label + "_solid")
@@ -714,6 +736,11 @@ def gen_G(info, opts, layerNum, objID):
             info.trash.append(obj)
             info.trash.append(__o__)
             info.trash.append(__s__)
+            FreeCAD.ActiveDocument.recompute()
+            sys.stderr.write('>>> ' + ' - ' + '\n')
+            # ~ if obj.Name == 'Part__MultiCommon002':
+                # ~ break
+
         layer['objIDs'][objID]['HDict'][()] = solid_hlist
 
         H = genUnion(layer['objIDs'][objID]['HDict'][()],

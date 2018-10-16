@@ -35,13 +35,15 @@ wrap2 = Part3DData('Second Layer', 'Sketch007', 'lithography', 'dielectric',
 freecad_dict = {
     'pyenv': 'python2',
     'input_file': 'geometry_sweep_showcase.fcstd',
-    'input_parts': [block1, block2, sag, wire, shell, block3, substrate, wrap, wrap2],
+    # ~ 'input_parts': [block1, block2, sag, wire, shell, block3, substrate, wrap, wrap2],
+    'input_parts': [wire, shell, substrate, wrap],
     'params': {'d1': tag1}
 }
 geo_task = Geometry3D(options=freecad_dict)
 
 # Run sweeps
-sweeps = [{tag1: val} for val in np.linspace(2, 7, 3)]
+# ~ sweeps = [{tag1: val} for val in np.linspace(2, 7, 3)]
+sweeps = [{tag1: val} for val in np.linspace(2, 7, 1)]
 result = SweepManager(sweeps).run(geo_task)
 
 # Investigate results

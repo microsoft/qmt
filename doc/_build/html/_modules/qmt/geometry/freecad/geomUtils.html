@@ -1,0 +1,598 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>qmt.geometry.freecad.geomUtils &mdash; QMT 2.0 documentation</title>
+  
+
+  
+  
+    <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
+  
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+
+  
+  <script src="../../../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> QMT
+          
+
+          
+            
+            <img src="../../../../_static/logo.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../rst/tutorial.html">Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../rst/dev_overview.html">Developing QMT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../source/modules.html">Modules</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">QMT</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>qmt.geometry.freecad.geomUtils</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for qmt.geometry.freecad.geomUtils</h1><div class="highlight"><pre>
+<span></span><span class="c1"># Copyright (c) Microsoft Corporation. All rights reserved.</span>
+<span class="c1"># Licensed under the MIT License.</span>
+
+<span class="sd">&quot;&quot;&quot;Utilities to work with general geometries.&quot;&quot;&quot;</span>
+
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">FreeCAD</span>
+<span class="kn">import</span> <span class="nn">Draft</span>
+<span class="kn">import</span> <span class="nn">Part</span>
+
+<span class="kn">from</span> <span class="nn">.auxiliary</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">.sketchUtils</span> <span class="k">import</span> <span class="n">findSegments</span>
+
+<span class="n">vec</span> <span class="o">=</span> <span class="n">FreeCAD</span><span class="o">.</span><span class="n">Vector</span>
+
+
+<div class="viewcode-block" id="extrude_partwb"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.extrude_partwb">[docs]</a><span class="k">def</span> <span class="nf">extrude_partwb</span><span class="p">(</span><span class="n">sketch</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Extrude via Part workbench.&#39;&#39;&#39;</span>
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">addObject</span><span class="p">(</span><span class="s1">&#39;Part::Extrusion&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">f</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">addObject</span><span class="p">(</span><span class="s1">&#39;Part::Extrusion&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">Base</span> <span class="o">=</span> <span class="n">sketch</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">DirMode</span> <span class="o">=</span> <span class="s2">&quot;Normal&quot;</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">DirLink</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">LengthFwd</span> <span class="o">=</span> <span class="n">length</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">LengthRev</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">Solid</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">Reversed</span> <span class="o">=</span> <span class="n">reverse</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">Symmetric</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">TaperAngle</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="n">f</span><span class="o">.</span><span class="n">TaperAngleRev</span> <span class="o">=</span> <span class="mf">0.</span>
+    <span class="c1"># ~ f.Base.ViewObject.hide()</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">f</span></div>
+
+
+<div class="viewcode-block" id="extrude"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.extrude">[docs]</a><span class="k">def</span> <span class="nf">extrude</span><span class="p">(</span><span class="n">sketch</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Selector for extrude method.&#39;&#39;&#39;</span>
+    <span class="k">return</span> <span class="n">extrude_partwb</span><span class="p">(</span><span class="n">sketch</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">reverse</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="copy_move"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.copy_move">[docs]</a><span class="k">def</span> <span class="nf">copy_move</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">moveVec</span><span class="o">=</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">),</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Create a duplciate of the object using a draft move operation.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="n">Draft</span><span class="o">.</span><span class="n">move</span><span class="p">([</span><span class="n">obj</span><span class="p">],</span> <span class="n">vec</span><span class="p">(</span><span class="n">moveVec</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">moveVec</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">moveVec</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span> <span class="n">copy</span><span class="o">=</span><span class="n">copy</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">Vertexes</span><span class="p">:</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">Shape</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">removeSplitter</span><span class="p">()</span>  <span class="c1"># get rid of redundant lines</span>
+    <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">f</span></div>
+
+
+<span class="c1"># ~ # TODO: consuming is questionable because inputs might be needed in a delayed fashion</span>
+<div class="viewcode-block" id="make_solid"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.make_solid">[docs]</a><span class="k">def</span> <span class="nf">make_solid</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">consumeInputs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span>
+    <span class="n">shell</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">Faces</span>
+    <span class="n">shell</span> <span class="o">=</span> <span class="n">Part</span><span class="o">.</span><span class="n">Solid</span><span class="p">(</span><span class="n">Part</span><span class="o">.</span><span class="n">Shell</span><span class="p">(</span><span class="n">shell</span><span class="p">))</span>
+    <span class="n">solid</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">addObject</span><span class="p">(</span><span class="s2">&quot;Part::Feature&quot;</span><span class="p">,</span><span class="n">obj</span><span class="o">.</span><span class="n">Label</span><span class="o">+</span><span class="s2">&quot;_solid&quot;</span><span class="p">)</span>
+    <span class="n">solid</span><span class="o">.</span><span class="n">Label</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">Label</span><span class="o">+</span><span class="s2">&quot;_solid&quot;</span>
+    <span class="n">solid</span><span class="o">.</span><span class="n">Shape</span> <span class="o">=</span> <span class="n">shell</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
+    <span class="k">del</span> <span class="n">shell</span><span class="p">,</span> <span class="n">solid</span>
+    <span class="k">return</span> <span class="n">solid</span></div>
+
+
+<div class="viewcode-block" id="makeHexFace"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.makeHexFace">[docs]</a><span class="k">def</span> <span class="nf">makeHexFace</span><span class="p">(</span><span class="n">sketch</span><span class="p">,</span> <span class="n">zBottom</span><span class="p">,</span> <span class="n">width</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Given a sketch for a wire, make the first face. Also need to make sure it</span>
+<span class="sd">    is placed normal to the initial line segment in the sketch. This will ensure</span>
+<span class="sd">    that the wire and shell can be constructed with sweep operations.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span>
+    <span class="n">lineSegments</span> <span class="o">=</span> <span class="n">findSegments</span><span class="p">(</span><span class="n">sketch</span><span class="p">)</span>
+    <span class="n">lineSegment</span> <span class="o">=</span> <span class="n">lineSegments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">lineSegment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">x1</span><span class="p">,</span> <span class="n">y1</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">lineSegment</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">dx</span> <span class="o">=</span> <span class="n">x1</span> <span class="o">-</span> <span class="n">x0</span>
+    <span class="n">dy</span> <span class="o">=</span> <span class="n">y1</span> <span class="o">-</span> <span class="n">y0</span>
+    <span class="c1"># First, make the initial face:</span>
+    <span class="n">face</span> <span class="o">=</span> <span class="n">Draft</span><span class="o">.</span><span class="n">makePolygon</span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="n">width</span> <span class="o">*</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">inscribed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">face</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
+    <span class="c1"># Spin the face so that its faces are oriented normal to the path:</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="mi">90</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan</span><span class="p">(</span><span class="o">-</span><span class="n">dy</span> <span class="o">/</span> <span class="n">dx</span><span class="p">)</span> <span class="o">*</span> <span class="mf">180.</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+    <span class="n">center</span> <span class="o">=</span> <span class="n">vec</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+    <span class="n">axis</span> <span class="o">=</span> <span class="n">vec</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">)</span>
+    <span class="n">face1</span> <span class="o">=</span> <span class="n">Draft</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">face</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">center</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
+    <span class="c1"># Rotate the wire into the proper plane:</span>
+    <span class="n">alpha</span> <span class="o">=</span> <span class="mf">90.</span>
+    <span class="n">center</span> <span class="o">=</span> <span class="n">vec</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+    <span class="n">axis</span> <span class="o">=</span> <span class="n">vec</span><span class="p">(</span><span class="o">-</span><span class="n">dy</span><span class="p">,</span> <span class="n">dx</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">face2</span> <span class="o">=</span> <span class="n">Draft</span><span class="o">.</span><span class="n">rotate</span><span class="p">(</span><span class="n">face1</span><span class="p">,</span> <span class="mf">90.</span><span class="p">,</span> <span class="n">center</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
+    <span class="c1"># Finally, move it into position:</span>
+    <span class="n">rVec</span> <span class="o">=</span> <span class="n">vec</span><span class="p">(</span><span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">width</span> <span class="o">+</span> <span class="n">zBottom</span><span class="p">)</span>
+    <span class="n">face3</span> <span class="o">=</span> <span class="n">Draft</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">face2</span><span class="p">,</span> <span class="n">rVec</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">delete</span><span class="p">(</span><span class="n">face</span><span class="p">)</span>
+    <span class="n">delete</span><span class="p">(</span><span class="n">face1</span><span class="p">)</span>
+    <span class="n">delete</span><span class="p">(</span><span class="n">face2</span><span class="p">)</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">face3</span></div>
+
+
+<div class="viewcode-block" id="genUnion"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.genUnion">[docs]</a><span class="k">def</span> <span class="nf">genUnion</span><span class="p">(</span><span class="n">objList</span><span class="p">,</span> <span class="n">consumeInputs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Generates a Union non-destructively.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">objList</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">objList</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">returnObj</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">objList</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">returnObj</span><span class="o">.</span><span class="n">Label</span> <span class="o">=</span> <span class="n">objList</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">Label</span>
+        <span class="k">if</span> <span class="n">consumeInputs</span><span class="p">:</span>
+            <span class="n">delete</span><span class="p">(</span><span class="n">objList</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">returnObj</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">union</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">addObject</span><span class="p">(</span><span class="s2">&quot;Part::MultiFuse&quot;</span><span class="p">)</span>
+        <span class="n">nonZeroList</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objList</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">isNonempty</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+                <span class="n">nonZeroList</span> <span class="o">+=</span> <span class="p">[</span><span class="n">obj</span><span class="p">]</span>
+        <span class="n">union</span><span class="o">.</span><span class="n">Shapes</span> <span class="o">=</span> <span class="n">nonZeroList</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>  <span class="c1"># crucial recompute</span>
+        <span class="n">unionDupe</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">union</span><span class="p">)</span>
+        <span class="n">unionDupe</span><span class="o">.</span><span class="n">Label</span> <span class="o">=</span> <span class="n">objList</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">Label</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">removeObject</span><span class="p">(</span><span class="n">union</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">consumeInputs</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objList</span><span class="p">:</span>
+                <span class="n">doc</span><span class="o">.</span><span class="n">removeObject</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">unionDupe</span></div>
+
+
+<div class="viewcode-block" id="getBB"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.getBB">[docs]</a><span class="k">def</span> <span class="nf">getBB</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Get the bounding box coords of an object.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">xMin</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">BoundBox</span><span class="o">.</span><span class="n">XMin</span>
+    <span class="n">xMax</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">BoundBox</span><span class="o">.</span><span class="n">XMax</span>
+    <span class="n">yMin</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">BoundBox</span><span class="o">.</span><span class="n">YMin</span>
+    <span class="n">yMax</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">BoundBox</span><span class="o">.</span><span class="n">YMax</span>
+    <span class="n">zMin</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">BoundBox</span><span class="o">.</span><span class="n">ZMin</span>
+    <span class="n">zMax</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">BoundBox</span><span class="o">.</span><span class="n">ZMax</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">xMin</span><span class="p">,</span> <span class="n">xMax</span><span class="p">,</span> <span class="n">yMin</span><span class="p">,</span> <span class="n">yMax</span><span class="p">,</span> <span class="n">zMin</span><span class="p">,</span> <span class="n">zMax</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="makeBB"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.makeBB">[docs]</a><span class="k">def</span> <span class="nf">makeBB</span><span class="p">(</span><span class="n">BB</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Make a bounding box given BB tuple.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span>
+    <span class="n">xMin</span><span class="p">,</span> <span class="n">xMax</span><span class="p">,</span> <span class="n">yMin</span><span class="p">,</span> <span class="n">yMax</span><span class="p">,</span> <span class="n">zMin</span><span class="p">,</span> <span class="n">zMax</span> <span class="o">=</span> <span class="n">BB</span>
+    <span class="n">box</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">addObject</span><span class="p">(</span><span class="s2">&quot;Part::Box&quot;</span><span class="p">)</span>
+    <span class="n">centerVector</span> <span class="o">=</span> <span class="n">vec</span><span class="p">(</span><span class="n">xMin</span><span class="p">,</span> <span class="n">yMin</span><span class="p">,</span> <span class="n">zMin</span><span class="p">)</span>
+    <span class="n">box</span><span class="o">.</span><span class="n">Placement</span> <span class="o">=</span> <span class="n">FreeCAD</span><span class="o">.</span><span class="n">Placement</span><span class="p">(</span><span class="n">centerVector</span><span class="p">,</span>
+                                      <span class="n">FreeCAD</span><span class="o">.</span><span class="n">Rotation</span><span class="p">(</span><span class="n">vec</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">),</span> <span class="mf">0.</span><span class="p">))</span>
+    <span class="n">box</span><span class="o">.</span><span class="n">Length</span> <span class="o">=</span> <span class="n">xMax</span> <span class="o">-</span> <span class="n">xMin</span>
+    <span class="n">box</span><span class="o">.</span><span class="n">Width</span> <span class="o">=</span> <span class="n">yMax</span> <span class="o">-</span> <span class="n">yMin</span>
+    <span class="n">box</span><span class="o">.</span><span class="n">Height</span> <span class="o">=</span> <span class="n">zMax</span> <span class="o">-</span> <span class="n">zMin</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">box</span></div>
+
+
+<div class="viewcode-block" id="subtract"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.subtract">[docs]</a><span class="k">def</span> <span class="nf">subtract</span><span class="p">(</span><span class="n">obj0</span><span class="p">,</span> <span class="n">obj1</span><span class="p">,</span> <span class="n">consumeInputs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Subtract two objects, optionally deleting the input objects.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span>
+    <span class="n">tempObj</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">addObject</span><span class="p">(</span><span class="s2">&quot;Part::Cut&quot;</span><span class="p">)</span>
+    <span class="n">tempObj</span><span class="o">.</span><span class="n">Base</span> <span class="o">=</span> <span class="n">obj0</span>
+    <span class="n">tempObj</span><span class="o">.</span><span class="n">Tool</span> <span class="o">=</span> <span class="n">obj1</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
+    <span class="n">returnObj</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">tempObj</span><span class="p">)</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">removeObject</span><span class="p">(</span><span class="n">tempObj</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">consumeInputs</span><span class="p">:</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">removeObject</span><span class="p">(</span><span class="n">obj0</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">removeObject</span><span class="p">(</span><span class="n">obj1</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">returnObj</span></div>
+
+
+<div class="viewcode-block" id="subtractParts"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.subtractParts">[docs]</a><span class="k">def</span> <span class="nf">subtractParts</span><span class="p">(</span><span class="n">domainObj</span><span class="p">,</span> <span class="n">partList</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Subtract given part objects from a domain.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span>
+    <span class="n">diffObj</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">domainObj</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">partList</span><span class="p">:</span>
+        <span class="n">diffObjTemp</span> <span class="o">=</span> <span class="n">Draft</span><span class="o">.</span><span class="n">downgrade</span><span class="p">([</span><span class="n">diffObj</span><span class="p">,</span> <span class="n">obj</span><span class="p">],</span> <span class="n">delete</span><span class="o">=</span><span class="kc">True</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
+        <span class="n">diffObj</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">diffObjTemp</span><span class="p">)</span>
+        <span class="n">delete</span><span class="p">(</span><span class="n">diffObjTemp</span><span class="p">)</span>
+    <span class="c1"># TODO : This routine is leaving some nuisance objects around that should be deleted.</span>
+    <span class="k">return</span> <span class="n">diffObj</span></div>
+
+
+<div class="viewcode-block" id="intersect"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.intersect">[docs]</a><span class="k">def</span> <span class="nf">intersect</span><span class="p">(</span><span class="n">objList</span><span class="p">,</span> <span class="n">consumeInputs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Intersect a list of objects, optionally deleting the input objects.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span>
+    <span class="n">intersectTemp</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">addObject</span><span class="p">(</span><span class="s2">&quot;Part::MultiCommon&quot;</span><span class="p">)</span>
+    <span class="n">intersectTemp</span><span class="o">.</span><span class="n">Shapes</span> <span class="o">=</span> <span class="n">objList</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
+    <span class="n">returnObj</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">intersectTemp</span><span class="p">)</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">removeObject</span><span class="p">(</span><span class="n">intersectTemp</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">consumeInputs</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objList</span><span class="p">:</span>
+            <span class="n">doc</span><span class="o">.</span><span class="n">removeObject</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">returnObj</span></div>
+
+
+<div class="viewcode-block" id="checkOverlap"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.checkOverlap">[docs]</a><span class="k">def</span> <span class="nf">checkOverlap</span><span class="p">(</span><span class="n">objList</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Checks if a list of objects, when intersected, contains a finite volume.abs</span>
+<span class="sd">    Returns true if it does, returns false if the intersection is empty.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">intObj</span> <span class="o">=</span> <span class="n">intersect</span><span class="p">(</span><span class="n">objList</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">intObj</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">Vertexes</span><span class="p">:</span>
+        <span class="n">overlap</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">overlap</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">delete</span><span class="p">(</span><span class="n">intObj</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">overlap</span></div>
+
+
+<div class="viewcode-block" id="isNonempty"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.isNonempty">[docs]</a><span class="k">def</span> <span class="nf">isNonempty</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Checks if an object is nonempty (returns True) or empty (returns False).</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">obj</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">Vertexes</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<div class="viewcode-block" id="extrudeBetween"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.extrudeBetween">[docs]</a><span class="k">def</span> <span class="nf">extrudeBetween</span><span class="p">(</span><span class="n">sketch</span><span class="p">,</span> <span class="n">zMin</span><span class="p">,</span> <span class="n">zMax</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Non-destructively extrude a sketch between zMin and zMax.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span>
+    <span class="n">tempExt</span> <span class="o">=</span> <span class="n">extrude</span><span class="p">(</span><span class="n">sketch</span><span class="p">,</span> <span class="n">zMax</span> <span class="o">-</span> <span class="n">zMin</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">ext</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">tempExt</span><span class="p">,</span> <span class="n">moveVec</span><span class="o">=</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">zMin</span><span class="p">))</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">removeObject</span><span class="p">(</span><span class="n">tempExt</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span>
+    <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">ext</span></div>
+
+
+<div class="viewcode-block" id="liftObject"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.liftObject">[docs]</a><span class="k">def</span> <span class="nf">liftObject</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">consumeInputs</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Create a new solid by lifting an object by a distance d along z, filling</span>
+<span class="sd">    in the space swept out.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">objBB</span> <span class="o">=</span> <span class="n">getBB</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="n">liftedObj</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">moveVec</span><span class="o">=</span><span class="p">(</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="n">d</span><span class="p">))</span>  <span class="c1"># lift up the original sketch</span>
+    <span class="n">fillBB</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">objBB</span><span class="p">)</span>
+    <span class="n">fillBB</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">=</span> <span class="n">fillBB</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">+</span> <span class="n">d</span>  <span class="c1"># Make a new BB defining the missing space</span>
+    <span class="n">fillObj</span> <span class="o">=</span> <span class="n">makeBB</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">fillBB</span><span class="p">))</span>  <span class="c1"># Make a box to fill the space</span>
+    <span class="n">returnObj</span> <span class="o">=</span> <span class="n">genUnion</span><span class="p">([</span><span class="n">fillObj</span><span class="p">,</span> <span class="n">liftedObj</span><span class="p">],</span> <span class="n">consumeInputs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">consumeInputs</span><span class="p">:</span>
+        <span class="n">deepRemove</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">returnObj</span></div>
+
+
+<div class="viewcode-block" id="draftOffset"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.draftOffset">[docs]</a><span class="k">def</span> <span class="nf">draftOffset</span><span class="p">(</span><span class="n">inputSketch</span><span class="p">,</span><span class="n">t</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Attempt to offset the draft figure by a thickness t. Positive t is an</span>
+<span class="sd">    inflation, while negative t is a deflation.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1"># ~ from qmt.geometry.freecad.geomUtils import extrude, copy_move, delete</span>
+
+    <span class="k">if</span> <span class="n">t</span> <span class="o">==</span> <span class="mf">0.</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">inputSketch</span><span class="p">)</span>
+    <span class="n">deltaT</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+    <span class="n">offsetVec1</span> <span class="o">=</span> <span class="n">vec</span><span class="p">(</span><span class="o">-</span><span class="n">deltaT</span><span class="p">,</span><span class="o">-</span><span class="n">deltaT</span><span class="p">,</span><span class="mf">0.</span><span class="p">)</span>
+    <span class="n">offsetVec2</span> <span class="o">=</span> <span class="n">vec</span><span class="p">(</span><span class="n">deltaT</span><span class="p">,</span><span class="n">deltaT</span><span class="p">,</span><span class="mf">0.</span><span class="p">)</span>
+    
+    <span class="n">offset0</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">inputSketch</span><span class="p">)</span>
+    <span class="n">offset1</span> <span class="o">=</span> <span class="n">Draft</span><span class="o">.</span><span class="n">offset</span><span class="p">(</span><span class="n">inputSketch</span><span class="p">,</span><span class="n">offsetVec1</span><span class="p">,</span><span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">offset2</span> <span class="o">=</span> <span class="n">Draft</span><span class="o">.</span><span class="n">offset</span><span class="p">(</span><span class="n">inputSketch</span><span class="p">,</span><span class="n">offsetVec2</span><span class="p">,</span><span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">solid0</span> <span class="o">=</span> <span class="n">extrude</span><span class="p">(</span><span class="n">offset0</span><span class="p">,</span><span class="mf">10.0</span><span class="p">)</span>
+    <span class="n">solid1</span> <span class="o">=</span> <span class="n">extrude</span><span class="p">(</span><span class="n">offset1</span><span class="p">,</span><span class="mf">10.0</span><span class="p">)</span>
+    <span class="n">solid2</span> <span class="o">=</span> <span class="n">extrude</span><span class="p">(</span><span class="n">offset2</span><span class="p">,</span><span class="mf">10.0</span><span class="p">)</span>
+
+    <span class="c1"># Compute the volumes of these solids:</span>
+    <span class="n">V0</span> <span class="o">=</span> <span class="n">solid0</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">Volume</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">V1</span> <span class="o">=</span> <span class="n">solid1</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">Volume</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">V1</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">V2</span> <span class="o">=</span> <span class="n">solid2</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">Volume</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">V2</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># If everything worked properly, these should either be ordered as</span>
+    <span class="c1"># V1&lt;V0&lt;V2 or V2&lt;V0&lt;V1:</span>
+    <span class="k">if</span> <span class="n">V2</span><span class="o">&gt;</span><span class="n">V0</span> <span class="ow">and</span> <span class="n">V0</span><span class="o">&gt;</span><span class="n">V1</span><span class="p">:</span>
+        <span class="n">bigSketch</span> <span class="o">=</span> <span class="n">offset2</span><span class="p">;</span> <span class="n">littleSketch</span> <span class="o">=</span> <span class="n">offset1</span>
+    <span class="k">elif</span> <span class="n">V1</span><span class="o">&gt;</span><span class="n">V0</span> <span class="ow">and</span> <span class="n">V0</span><span class="o">&gt;</span><span class="n">V2</span><span class="p">:</span>
+        <span class="n">bigSketch</span> <span class="o">=</span> <span class="n">offset1</span><span class="p">;</span> <span class="n">littleSketch</span> <span class="o">=</span> <span class="n">offset2</span>
+    <span class="k">elif</span> <span class="n">V2</span><span class="o">&gt;</span><span class="n">V1</span> <span class="ow">and</span> <span class="n">V1</span><span class="o">&gt;</span><span class="n">V0</span><span class="p">:</span>
+        <span class="n">bigSketch</span> <span class="o">=</span> <span class="n">offset2</span><span class="p">;</span> <span class="n">littleSketch</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="c1"># If we aren&#39;t in correct case, we still might be able to salvage things</span>
+    <span class="c1"># for certain values of t:</span>
+    <span class="k">elif</span> <span class="n">V1</span><span class="o">&gt;</span><span class="n">V2</span> <span class="ow">and</span> <span class="n">V2</span><span class="o">&gt;</span><span class="n">V0</span><span class="p">:</span>
+        <span class="n">bigSketch</span> <span class="o">=</span> <span class="n">offset1</span><span class="p">;</span> <span class="n">littleSketch</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">elif</span> <span class="n">V2</span><span class="o">&lt;</span><span class="n">V1</span> <span class="ow">and</span> <span class="n">V1</span><span class="o">&lt;</span><span class="n">V0</span><span class="p">:</span>
+        <span class="n">bigSketch</span> <span class="o">=</span> <span class="kc">None</span><span class="p">;</span> <span class="n">littleSketch</span> <span class="o">=</span> <span class="n">offset2</span>
+    <span class="k">elif</span> <span class="n">V1</span><span class="o">&lt;</span><span class="n">V2</span> <span class="ow">and</span> <span class="n">V2</span><span class="o">&lt;</span><span class="n">V0</span><span class="p">:</span>
+        <span class="n">bigSketch</span> <span class="o">=</span> <span class="kc">None</span><span class="p">;</span> <span class="n">littleSketch</span> <span class="o">=</span> <span class="n">offset1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">bigSketch</span> <span class="o">=</span> <span class="kc">None</span><span class="p">;</span> <span class="n">littleSketch</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">delete</span><span class="p">(</span><span class="n">solid0</span><span class="p">)</span>
+    <span class="n">delete</span><span class="p">(</span><span class="n">solid1</span><span class="p">)</span>
+    <span class="n">delete</span><span class="p">(</span><span class="n">solid2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">t</span><span class="o">&lt;</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">littleSketch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">returnSketch</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">littleSketch</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">t</span><span class="o">&gt;</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">bigSketch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">returnSketch</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">bigSketch</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Failed to offset the sketch &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">inputSketch</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39; by amount &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+    
+    <span class="c1"># # now that we have the three solids, we need to figure out which is bigger</span>
+    <span class="c1"># # and which is smaller.</span>
+    <span class="c1"># diff10 = subtract(solid1,solid0)</span>
+    <span class="c1"># diff20 = subtract(solid2,solid0)</span>
+    <span class="c1"># numVerts10 = len(diff10.Shape.Vertexes)</span>
+    <span class="c1"># numVerts20 = len(diff20.Shape.Vertexes)</span>
+    <span class="c1"># if numVerts10 &gt; 0 and numVerts20 == 0:</span>
+    <span class="c1">#     positiveOffsetIndex = 1</span>
+    <span class="c1"># elif numVerts10 == 0 and numVerts20 &gt; 0 :</span>
+    <span class="c1">#     positiveOffsetIndex = 2</span>
+    <span class="c1"># else:</span>
+    <span class="c1">#     raise ValueError(&#39;draftOffset has failed to give a non-empty shape!&#39;)</span>
+    <span class="c1"># delete(solid0)</span>
+    <span class="c1"># delete(solid1)</span>
+    <span class="c1"># delete(solid2)</span>
+    <span class="c1"># delete(diff10)</span>
+    <span class="c1"># delete(diff20)</span>
+    <span class="c1"># if t &gt; 0:</span>
+    <span class="c1">#     if positiveOffsetIndex == 1:</span>
+    <span class="c1">#         returnSketch = copy_move(offset1)</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         returnSketch = copy_move(offset2)</span>
+    <span class="c1"># elif t&lt;0:</span>
+    <span class="c1">#     if positiveOffsetIndex == 1:</span>
+    <span class="c1">#         returnSketch = copy_move(offset2)</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         returnSketch = copy_move(offset1)</span>
+    <span class="n">delete</span><span class="p">(</span><span class="n">offset0</span><span class="p">)</span>
+    <span class="n">delete</span><span class="p">(</span><span class="n">offset1</span><span class="p">)</span>
+    <span class="n">delete</span><span class="p">(</span><span class="n">offset2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">returnSketch</span></div>
+
+
+<div class="viewcode-block" id="centerObjects"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.centerObjects">[docs]</a><span class="k">def</span> <span class="nf">centerObjects</span><span class="p">(</span><span class="n">objsList</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39; Move all the objects in the list in the x-y plane so that they are</span>
+<span class="sd">    centered about the origin.</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">objsList</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="n">wholeObj</span> <span class="o">=</span> <span class="n">genUnion</span><span class="p">(</span><span class="n">objsList</span><span class="p">)</span>
+    <span class="n">wholeBB</span> <span class="o">=</span> <span class="n">getBB</span><span class="p">(</span><span class="n">wholeObj</span><span class="p">)</span>
+    <span class="n">x0</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">wholeBB</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">wholeBB</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">y0</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="n">wholeBB</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">wholeBB</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objsList</span><span class="p">:</span>
+        <span class="n">copy_move</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">moveVec</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="n">x0</span><span class="p">,</span> <span class="o">-</span><span class="n">y0</span><span class="p">,</span> <span class="mf">0.</span><span class="p">),</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">delete</span><span class="p">(</span><span class="n">wholeObj</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="crossSection"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.crossSection">[docs]</a><span class="k">def</span> <span class="nf">crossSection</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">),</span> <span class="n">d</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Return cross section of object along axis.&#39;&#39;&#39;</span>
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">Name</span> <span class="o">+</span> <span class="s1">&#39;_section&#39;</span>
+    <span class="n">wires</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+    <span class="n">shape</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">Shape</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">shape</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="n">vec</span><span class="p">(</span><span class="n">axis</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">axis</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">axis</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span> <span class="n">d</span><span class="p">):</span>
+        <span class="n">wires</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="n">returnObj</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">addObject</span><span class="p">(</span><span class="s2">&quot;Part::Feature&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+    <span class="n">returnObj</span><span class="o">.</span><span class="n">Shape</span> <span class="o">=</span> <span class="n">Part</span><span class="o">.</span><span class="n">Compound</span><span class="p">(</span><span class="n">wires</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">returnObj</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2018, Microsoft Corporation
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    
+    
+      <script type="text/javascript">
+          var DOCUMENTATION_OPTIONS = {
+              URL_ROOT:'../../../../',
+              VERSION:'2.0',
+              LANGUAGE:'None',
+              COLLAPSE_INDEX:false,
+              FILE_SUFFIX:'.html',
+              HAS_SOURCE:  true,
+              SOURCELINK_SUFFIX: '.txt'
+          };
+      </script>
+        <script type="text/javascript" src="../../../../_static/jquery.js"></script>
+        <script type="text/javascript" src="../../../../_static/underscore.js"></script>
+        <script type="text/javascript" src="../../../../_static/doctools.js"></script>
+        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+
+  
+
+  <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

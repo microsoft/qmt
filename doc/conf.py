@@ -18,6 +18,7 @@
 #
 import os
 import sys
+# ~ import FreeCAD
 sys.path.insert(0, os.path.abspath('..'))
 
 # -- General configuration ------------------------------------------------
@@ -189,6 +190,9 @@ intersphinx_mapping = {'https://docs.python.org/': None}
 
 # Create package and class graphs
 import subprocess
-subprocess.check_call(['pyreverse3','-o','png','../qmt'])
+try:
+    subprocess.check_call(['pyreverse3','-o','png','../qmt'])
+except:
+    subprocess.check_call(['pyreverse','-o','png','../qmt'])
 os.rename('packages.png', 'source/packages.png')
 os.rename('classes.png', 'source/classes.png')
