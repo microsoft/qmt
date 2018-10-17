@@ -3,7 +3,8 @@
 
 """Testing the geometry task."""
 
-def test_geo_task(fix_py2env,fix_testDir):
+
+def test_geo_task(fix_py2env, fix_testDir):
     """
     Tests the build geometry task. For now, just verifies that the build doesn't encounter errors.
     """
@@ -32,7 +33,7 @@ def test_geo_task(fix_py2env,fix_testDir):
                       z0=0, layer_num=1, thickness=4, litho_base=[substrate])
     wrap2 = Part3DData('Second Layer', 'Sketch007', 'lithography', 'dielectric',
                        layer_num=2, thickness=1)
-    print(os.path.join(fix_testDir,'py3','data','geometry_test.fcstd'))
+    print(os.path.join(fix_testDir, 'py3', 'data', 'geometry_test.fcstd'))
     # serial_fc_doc = Geometry3D.serialize_fc_file(
     input_file_path = os.path.join(fix_testDir, 'py3', 'data', 'geometry_test.fcstd')
     freecad_dict = {
@@ -55,6 +56,6 @@ def test_geo_task(fix_py2env,fix_testDir):
         geo = future.result()
         file_name = 'tmp/' + str(i) + '.fcstd'
         geo.write_fcstd(file_name)
-        #TODO: should find a meaningful test here
+        # TODO: should find a meaningful test here
 
     shutil.rmtree('tmp')

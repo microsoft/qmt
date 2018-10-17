@@ -5,6 +5,7 @@ from qmt.tasks import Task, SweepManager
 
 sweep = SweepManager.create_empty_sweep()  # our dask sweep manager
 
+
 class HelloTask(Task):
 
     def __init__(self):
@@ -14,9 +15,11 @@ class HelloTask(Task):
     def _solve_instance(inputs, options):  # required task solver function
         print('Hello World')
 
+
 hi = HelloTask()        # create a new task
 sweep.run(hi).result()  # run through dask and resolve future.result()
 hi.run_daskless()       # can also run locally
+
 
 class HelloOptionTask(Task):
 
@@ -28,8 +31,10 @@ class HelloOptionTask(Task):
         greetings = {'English': 'Hello', 'Spanish': 'Hola'}
         print(greetings[options['language']] + ' World')
 
+
 hola = HelloOptionTask({'language': 'Spanish'})
 sweep.run(hola).result()
+
 
 class NameTask(Task):
 
@@ -39,6 +44,7 @@ class NameTask(Task):
     @staticmethod
     def _solve_instance(inputs, options):
         return options['name']
+
 
 class HelloDependentTask(Task):
 
@@ -50,6 +56,7 @@ class HelloDependentTask(Task):
         name = inputs[0]
         greetings = {'English': 'Hello', 'Spanish': 'Hola'}
         print(greetings[options['language']] + ' ' + name)
+
 
 name = NameTask({'name': 'John'})
 hola = HelloDependentTask(name, {'language': 'Spanish'})
