@@ -38,7 +38,7 @@ def fix_FCDoc():
 def fix_host_settings(fix_testDir):
     '''Host specific settings.'''
     schema = {
-        'py2env': None
+        'py2env': '/usr/local/envs/py27/bin/python'
     }
 
     import yaml
