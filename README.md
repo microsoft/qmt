@@ -5,20 +5,17 @@ Welcome to our qubit modeling tools (qmt)! This package is designed to automate
 the setup of complex geometries appropriate to physical qubit simulations. This 
 package is licensed with an MIT open source license.
 
-To set up your Python environment, see the `environment.yml` file. If you use
-`conda`, simply run
+ For python package configuration, see the yml files in qmt/deployment. Note that qmt uses python 
+ 3.6, but to perform computational lithography you will also need the python 2.7 environment:
 
-    conda env create -f environment.yml
+    conda env create -f qmt/deployment/environment_27.yml
+    conda env create -f qmt/deployment/environment_36.yml    
 
-or only install `pyside` in your current environment with `conda install pyside`
-
-and then use `pip` inside this repository
-
-    pip install .
-
-Optionally per user (not system wide) and in development mode (symlinks)
-
-    pip install --user -e .
+Another option is to run the using Docker. To use the latest 
+image, from the root qmt directory, run 
+    
+    docker build --no-cache -t qmt:master .
+    docker run --network host -it qmt:master
 
 A significant part of the repository consists of Python functions and macros to
 be executed within FreeCAD, either interactively or in batch mode. These
