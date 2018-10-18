@@ -19,7 +19,7 @@ steps:
     test3_success=$?
     docker cp qmt_test_3:/app/tests3.xml $(System.DefaultWorkingDirectory)/TEST-3.xml
     # mark step as failed if either test run had errors
-    [ $test2_success -eq 0 ] && [ $test3_success -eq 0 ] || exit 1
+    [ $test2_success -eq 0 ] && [ $test3_success -eq 0 ] || (exit 1)
 - task: PublishTestResults@2
   inputs:
     testResultsFiles: 'TEST-*.xml'
