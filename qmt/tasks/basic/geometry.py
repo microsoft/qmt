@@ -9,7 +9,7 @@ from qmt.data import Geo2DData, Geo3DData, serialised_file
 
 def geometry_2d(parts,edges,lunit='nm',build_order=None):
     """
-    Builds a geometry in 2D.
+    Build a geometry in 2D.
     :param dict parts: Dictionary for holding the 2D parts, of the form
     {'part_name':list of 2d points}.
     :param dict edges: Dictionary of 2D edges, of the form:
@@ -41,45 +41,29 @@ def geometry_2d(parts,edges,lunit='nm',build_order=None):
     return geo_2d
 
 
-class Geometry3D(Task):
-    """Task for handling of 3D geometries with FreeCAD."""
-    def __init__(self, options=None, name='geometry_3d_task'):
-        """
-        Builds a geometry in 3D.
-
-        :param dict options: The dictionary specifying FreeCAD infromation.
-        It should be of the form
-        {
-          'pyenv':       path or callable name of the Python 2 executable,
-          'input_file':  path to FreeCAD template file,
-          'input_parts': ordered list of input parts, leftmost items get built first
-          'params':      dict{ 'param_name': SweepTag }
+def Geometry3D(pyenv,input_file,input_parts,params):
+    """
+    Build a geometry in 3D.
+    :param str pyenv: path or callable name of the Python 2 executable.
+    :param str input_file: path to FreeCAD template file.
+    :param list input_parts: ordered list of input parts, leftmost items get built first
+    :param dict params: dictionary of parameters to use in the freeCAD
+    :return:
+    """
+    serial_fcdoc = serialised_file('input_file')
+    options_dict = {}
+    options_dict['serial_fcdoc'] = serial_fcdoc
+    options_dict['input_parts'] = input_parts
+    options_dict['params'] = params
+    # Convert NumPy3 floats to something that Python2 can unpickle
+    if 'params' in options_dict:
+        options_dict['params'] = {
+            k: float(v) for k, v in options_dict['params'].items()
         }
-        :param str name: The name of this task.
-        """
-        options['serial_fcdoc'] = serialised_file(options['input_file'])
-        super(Geometry3D, self).__init__([], options, name)
-
-    @staticmethod
-    def _solve_instance(input_result_list, current_options):
-        """
-        :param list input_result_list: This is an empty list.
-        :param dict current_options: The dictionary specifying parts from above.
-        :return geo_3d: A Geo3DData object.
-        """
-        assert 'serial_fcdoc' in current_options  # make sure the fc doc is in options
-
-        # Convert NumPy3 floats to something that Python2 can unpickle
-        if 'params' in current_options:
-            current_options['params'] = {
-                k: float(v) for k, v in current_options['params'].items()
-            }
-
-        # Send off the instructions
-        from qmt.geometry.freecad_wrapper import fcwrapper
-        geo = fcwrapper(current_options['pyenv'],
-                        'build3d',
-                        {'current_options': current_options},
-                        debug=False)
-
-        return geo
+    # Send off the instructions
+    from qmt.geometry.freecad_wrapper import fcwrapper
+    geo = fcwrapper(pyenv,
+                    'build3d',
+                    {'current_options': options_dict},
+                    debug=False)
+    return geo
