@@ -98,6 +98,6 @@ class Geometry3D(Task):
         geo = fcwrapper(current_options['pyenv'],
                         'build3d',
                         {'current_options': current_options},
-                        debug=False)
+                        reprint_output=False)
 
         return geo

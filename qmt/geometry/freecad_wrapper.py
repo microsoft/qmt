@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-"""Wrapping FreeCAD calls within a Python 3 environment."""
+"""Wrapping FreeCAD Python 2.7 calls within a Python 3 environment."""
 
 from __future__ import print_function
 import os
@@ -11,13 +11,14 @@ import subprocess
 import qmt
 
 
-def fcwrapper(pyenv='python2', instruction=None, data=None, debug=False):
+def fcwrapper(pyenv='python2', instruction=None, data=None, reprint_output=False):
     """Wrapper to isolate FreeCAD Python 2.7 calls from the Python 3 code base.
 
-    :param str pyenv:       Python interpreter, defaults to 'python2'.
-    :param str instruction: A registered instruction for the QMT FreeCAD module.
-    :param     data:        Any data type serialisable through pickle.
-    :return:                Any data type serialisable through pickle.
+    :param str pyenv:            Python interpreter, defaults to 'python2'.
+    :param str instruction:      A registered instruction for the QMT FreeCAD module.
+    :param     data:             Any data type serialisable through pickle.
+    :param bool reprint_output:  Reprint suppressed output of wrapped call.
+    :return:                     Any data type serialisable through pickle.
     """
 
     qmtPath = os.path.join(os.path.dirname(qmt.__file__))
@@ -38,9 +39,9 @@ def fcwrapper(pyenv='python2', instruction=None, data=None, debug=False):
     # "MAGICQMTRANSFERBYTES". Most data preceding the separator corresponds to
     # FreeCAD notifications and gets discarded.
     pipe_data = output[0].decode().split('MAGICQMTRANSFERBYTES')
-    if debug is True:
+    if reprint_output is True:
         print(os.linesep + ' --- FC WRAPPED STDOUT ---' + os.linesep)
-        print(str(*pipe_data[0:-1]).decode())
+        print(str(*pipe_data[0:-1]))
         print(os.linesep + ' --- FC WRAPPED STDERR ---' + os.linesep)
         print(output[1].decode())
         print(os.linesep + ' --- END OF FC WRAPPED STDERR ---' + os.linesep)
