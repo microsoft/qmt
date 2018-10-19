@@ -23,5 +23,6 @@ steps:
 - task: PublishTestResults@2
   inputs:
     testResultsFiles: 'TEST-*.xml'
-    testRunTitle: 'Publish test results for docker'
+    testRunTitle: 'Publish test results'
+  condition: succeededOrFailed()  # publish results whether the tests had errors or not
 
