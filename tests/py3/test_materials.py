@@ -32,7 +32,6 @@ def test_band_offsets():
 
 def test_bowing_parameters():
     """Test calculation of alloy band positions with bowing parameters."""
-    assert False, 'just checking'
     matlib = materials.Materials()
     inas = matlib.find('InAs', eunit='meV')
     insb = matlib.find('InSb', eunit='meV')
