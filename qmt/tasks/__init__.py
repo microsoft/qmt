@@ -2,4 +2,4 @@
 # Licensed under the MIT License.
 from .task import Task
 from .sweep import ReducedSweep, ReducedSweepFutures, ReducedSweepDelayed, ReducedSweepResults, SweepManager, SweepTag
-from .basic.geometry import Geometry2D, Geometry3D
+from .basic.geometry import geometry_2d, geometry_3d

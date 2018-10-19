@@ -41,7 +41,7 @@ def geometry_2d(parts,edges,lunit='nm',build_order=None):
     return geo_2d
 
 
-def Geometry3D(pyenv,input_file,input_parts,params):
+def geometry_3d(pyenv,input_file,input_parts,params):
     """
     Build a geometry in 3D.
     :param str pyenv: path or callable name of the Python 2 executable.
@@ -50,7 +50,7 @@ def Geometry3D(pyenv,input_file,input_parts,params):
     :param dict params: dictionary of parameters to use in the freeCAD
     :return:
     """
-    serial_fcdoc = serialised_file('input_file')
+    serial_fcdoc = serialised_file(input_file)
     options_dict = {}
     options_dict['serial_fcdoc'] = serial_fcdoc
     options_dict['input_parts'] = input_parts
