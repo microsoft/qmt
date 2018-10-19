@@ -7,7 +7,7 @@ import numpy as np
 from six import iteritems, text_type
 
 import logging
-logging.getLogger().setLevel(logging.DEBUG)  # toggle debug logging for this file
+# ~ logging.getLogger().setLevel(logging.DEBUG)  # toggle debug logging for this file
 
 import FreeCAD
 import Draft
@@ -239,7 +239,7 @@ def build_lithography(part, opts, info_holder):
         initialize_lithography(info_holder, opts, fillShells=True)
         info_holder.litho_setup_done = True
 
-    logging.debug('save fcstd after init %s', None is FreeCAD.ActiveDocument.saveAs('tmp_after_init.fcstd'))
+    # ~ logging.debug('save fcstd after init %s', None is FreeCAD.ActiveDocument.saveAs('tmp_after_init.fcstd'))
     layerNum = part.layer_num
     returnObjs = []
     for objID in info_holder.lithoDict['layers'][layerNum]['objIDs']:
@@ -739,7 +739,7 @@ def gen_G(info, opts, layerNum, objID):
         if () not in layerobj['HDict']:
             layerobj['HDict'][()] = H_offset(info, opts, layerNum, objID)
 
-        logging.debug('save fcstd %s', None is FreeCAD.ActiveDocument.saveAs('tmp_after_H_offset.fcstd'))
+        # ~ logging.debug('save fcstd %s', None is FreeCAD.ActiveDocument.saveAs('tmp_after_H_offset.fcstd'))
         # TODO: reuse new function
         # This block fixes multifuses for wireshells with too big offsets,
         # by forcing all participating object shells into a new solid.
