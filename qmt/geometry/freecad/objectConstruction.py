@@ -12,18 +12,20 @@ import logging
 import FreeCAD
 import Draft
 
-# TODO: use namespace in code
-from qmt.geometry.freecad.auxiliary import *
-from qmt.geometry.freecad.fileIO import exportCAD
-from qmt.geometry.freecad.geomUtils import (extrude, copy_move, genUnion,# make_solid,
-                                            getBB, makeBB, makeHexFace,
-                                            extrudeBetween, draftOffset, intersect,
-                                            checkOverlap, subtract,
-                                            crossSection)
-from qmt.geometry.freecad.sketchUtils import (findSegments, splitSketch, extendSketch,
-                                              findEdgeCycles)
+from .auxiliary import *
+from .fileIO import exportCAD
+from .geomUtils import (extrude, copy_move, genUnion,# make_solid,
+                        getBB, makeBB, makeHexFace,
+                        extrudeBetween, draftOffset, intersect,
+                        checkOverlap, subtract,
+                        crossSection)
+from .sketchUtils import (findSegments, splitSketch, extendSketch,
+                          findEdgeCycles)
 
 from qmt.data.geometry import Geo3DData, store_serial
+
+
+DBG_OUT = (logging.getLogger().level <= logging.DEBUG)
 
 
 def set_params(doc, paramDict):
@@ -119,16 +121,18 @@ def build(opts):
         opts['built_part_names'][input_part.label] = part.Name  # needed for litho steps
 
     # Cleanup
-    collect_garbage(info_holder)
-    for obj in blacklist:
-        delete(obj)
-    doc.recompute()
+    if not DBG_OUT:
+        collect_garbage(info_holder)
+        for obj in blacklist:
+            delete(obj)
+        doc.recompute()
 
     # Subtraction (removes the need for subtractlists)
     for i, part in enumerate(built_parts):
         for other_part in built_parts[0:i]:
             if checkOverlap([part, other_part]):
-                cut = subtract(part, copy_move(other_part), consumeInputs=True)
+                cut = subtract(part, copy_move(other_part), consumeInputs=True
+                                                            if not DBG_OUT else False)
                 simple_copy = doc.addObject('Part::Feature', "simple_copy")
                 simple_copy.Shape = cut.Shape  # no solid, just its shape (can be disjoint)
                 delete(cut)
@@ -169,7 +173,8 @@ def build_extrude(part):
         extParts.append(extrudeBetween(sketch, z0, z0 + deltaz, name=part.label))
         delete(sketch)
     doc.recompute()
-    return genUnion(extParts, consumeInputs=True)
+    return genUnion(extParts, consumeInputs=True
+                              if not DBG_OUT else False)
 
 
 def build_sag(part, offset=0.):
@@ -239,7 +244,8 @@ def build_lithography(part, opts, info_holder):
         initialize_lithography(info_holder, opts, fillShells=True)
         info_holder.litho_setup_done = True
 
-    # ~ logging.debug('save fcstd after init %s', None is FreeCAD.ActiveDocument.saveAs('tmp_after_init.fcstd'))
+    if DBG_OUT:
+        FreeCAD.ActiveDocument.saveAs('tmp_after_init.fcstd')
     layerNum = part.layer_num
     returnObjs = []
     for objID in info_holder.lithoDict['layers'][layerNum]['objIDs']:
@@ -247,7 +253,9 @@ def build_lithography(part, opts, info_holder):
             returnObjs.append(gen_G(info_holder, opts, layerNum, objID))
 
     logging.debug([o.Name for o in returnObjs])
-    return genUnion(returnObjs, consumeInputs=True)
+    return genUnion(returnObjs, consumeInputs=True
+                                if not DBG_OUT else False)
+
 
 
 ################################################################################
@@ -347,7 +355,8 @@ def buildAlShell(sketch, zBottom, width, verts, thickness,
         zMax = coatingBB[5]
         depoVol = extrudeBetween(depoZone, zMin, zMax)
         etchedCoatingUnionClone = intersect(
-            [depoVol, coatingUnionClone], consumeInputs=True)
+            [depoVol, coatingUnionClone], consumeInputs=True
+                                          if not DBG_OUT else False)
         return etchedCoatingUnionClone
     else:  # etchZone instead
         coatingBB = getBB(coatingUnionClone)
@@ -355,7 +364,8 @@ def buildAlShell(sketch, zBottom, width, verts, thickness,
         zMax = coatingBB[5]
         etchVol = extrudeBetween(etchZone, zMin, zMax)
         etchedCoatingUnionClone = subtract(
-            coatingUnionClone, etchVol, consumeInputs=True)
+            coatingUnionClone, etchVol, consumeInputs=True
+                                        if not DBG_OUT else False)
         return etchedCoatingUnionClone
 
 
@@ -399,7 +409,8 @@ def makeSAG(sketch, zBot, zMid, zTop, tIn, tOut, offset=0.):
         delete(midSketch)
         delete(botSketch)
         returnParts += [capPart, rectPart]
-    returnPart = genUnion(returnParts, consumeInputs=True)
+        returnPart = genUnion(returnParts, consumeInputs=True
+                                           if not DBG_OUT else False)
     return returnPart
 
 
@@ -739,7 +750,9 @@ def gen_G(info, opts, layerNum, objID):
         if () not in layerobj['HDict']:
             layerobj['HDict'][()] = H_offset(info, opts, layerNum, objID)
 
-        # ~ logging.debug('save fcstd %s', None is FreeCAD.ActiveDocument.saveAs('tmp_after_H_offset.fcstd'))
+
+        if DBG_OUT:
+            FreeCAD.ActiveDocument.saveAs('tmp_after_H_offset.fcstd')
         # TODO: reuse new function
         # This block fixes multifuses for wireshells with too big offsets,
         # by forcing all participating object shells into a new solid.
@@ -770,8 +783,7 @@ def gen_G(info, opts, layerNum, objID):
         # ~ layerobj['HDict'][()] = solid_hlist
         # ~ logging.debug('new HDict: %s', [o.Name + ' (' + o.Label + ')' for o in layerobj['HDict'][()]])
 
-        H = genUnion(layerobj['HDict'][()],
-                     consumeInputs=False)
+        H = genUnion(layerobj['HDict'][()], consumeInputs=False)
         info.trash.append(H)
         if info.fillShells:
             G = copy_move(H)
