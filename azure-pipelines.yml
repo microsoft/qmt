@@ -13,11 +13,16 @@ steps:
 - script: |
     docker build -t qmt_test:$(build.buildId) -f Dockerfile .
     docker run --name qmt_test_27 qmt_test:$(build.buildId) /usr/local/envs/py27/bin/pytest --verbose --capture=no /app/qmt/tests/py2.7 --junit-xml=/app/tests2.7.xml
+    test2_success=$?
     docker cp qmt_test_27:/app/tests2.7.xml $(System.DefaultWorkingDirectory)/TEST-2.7.xml
     docker run --name qmt_test_3 -v /var/run/docker.sock:/var/run/docker.sock --network host qmt_test:$(build.buildId) /usr/local/envs/py36/bin/pytest --verbose --capture=no /app/qmt/tests/py3 --junit-xml=tests3.xml
+    test3_success=$?
     docker cp qmt_test_3:/app/tests3.xml $(System.DefaultWorkingDirectory)/TEST-3.xml
+    # mark step as failed if either test run had errors
+    [ $test2_success -eq 0 ] && [ $test3_success -eq 0 ] || (exit 1)
 - task: PublishTestResults@2
   inputs:
     testResultsFiles: 'TEST-*.xml'
-    testRunTitle: 'Publish test results for docker'
+    testRunTitle: 'Publish test results'
+  condition: succeededOrFailed()  # publish results whether the tests had errors or not
 
