@@ -11,15 +11,19 @@ from qmt.data import store_serial, load_serial
 
 
 class Fem3DData(object):
-    def __init__(self, coordinates=None, potential=None, charge=None, units = None,
-                 surface_charge_integrals=None, volume_charge_integrals=None, fenics_3d_data=None):
+    def __init__(self, coordinates=None, potential=None, charge=None,
+                 surface_charge_integrals=None, volume_charge_integrals=None, fenics_3d_data=None,
+                 vunit='V', lunit='um', eunit='eV', qunit='coulomb'):
         self.coordinates = coordinates
         self.potential = potential
         self.charge = charge
-        self.units = units
         self.surface_charge_integrals = surface_charge_integrals
         self.volume_charge_integrals = volume_charge_integrals
         self.fenics_3d_data = fenics_3d_data
+        self.vunit=vunit
+        self.lunit=lunit
+        self.eunit=eunit
+        self.qcunit=qunit
 
     def get_data(self, data):
         if data == 'function':
