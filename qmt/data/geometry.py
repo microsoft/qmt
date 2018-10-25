@@ -221,7 +221,6 @@ class Geo3DData(object):
         """
         Get data from stored serial format.
         :param str data_name:  "fcdoc" freeCAD document.
-        :param mesh:
         :param scratch_dir:    Optional existing temporary (fast) storage location.
         :return data:          The freeCAD document or fenics object that was stored.
         """
@@ -246,57 +245,6 @@ class Geo3DData(object):
             file_path = '_'.join([item[0:4].replace(' ', '_') for item in self.build_order]) + '.fcstd'
         write_deserialised(self.serial_fcdoc, file_path)
         return file_path
-
-    # TODO: Redundant? self.fenics_ids appears to be identical to the mapping returned here
-    def get_names_to_region_ids(self):
-        mapping = {name: i + 2 for i, name in enumerate(self.build_order)}
-        mapping[Geo3DData.EXTERIOR_BC_NAME] = 1
-        return mapping
-
-    def get_region_ids(self):
-        return self.get_region_ids_to_names().keys()
-
-    def get_region_ids_to_names(self):
-        return {id: name for name, id in self.get_names_to_region_ids().items()}
-
-    def get_names_to_default_ns(self):
-        return {name: part.ns for name, part in self.parts.items() if part.ns is not None}
-
-    def get_names_to_default_phi_nl(self):
-        return {name: part.ds for name, part in self.parts.items() if part.ds is not None}
-
-    def get_names_to_default_phi_nl_and_ds(self):
-        result = {}
-        for name in self.parts:
-            if self.parts[name].phi_nl is not None:
-                result[name] = {}
-                result[name]["phi_nl"] = self.parts[name].phi_nl
-
-            if self.parts[name].ds is not None:
-                if name not in result:
-                    raise ValueError("both phi_nl and ds must be specified together")
-                result[name]["ds"] = self.parts[name].ds
-            else:
-                if name in result:
-                    raise ValueError("both phi_nl and ds must be specified together")
-
-        return result
-
-    def get_names_to_default_ds(self):
-        return {name: part.phi_nl for name, part in self.parts.items() if part.phi_nl is not None}
-
-    def get_names_to_default_bcs(self):
-        return {name: part.boundary_condition for name, part in self.parts.items() if
-                part.boundary_condition is not None}
-
-    def get_names_to_default_dirichlet_bcs(self):
-        return {name: part.boundary_condition["voltage"] for name, part in self.parts.items() if
-                part.boundary_condition is not None and "dirichlet" in part.boundary_condition}
-
-    def get_names_to_default_neumann_bcs(self):
-        return {name: part.boundary_condition["neumann"] for name, part in self.parts.items() if
-                part.boundary_condition is not None and "neumann" in part.boundary_condition}
-
 
 class Part3DData(object):
     def __init__(
