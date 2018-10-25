@@ -48,7 +48,7 @@ templates_path = ['_templates']
 # You can specify multiple suffix as a list of string:
 #
 source_suffix = ['.rst', '.md']
-#source_suffix = '.rst'
+# source_suffix = '.rst'
 
 # The master toctree document.
 master_doc = 'index'
@@ -90,7 +90,7 @@ todo_include_todos = False
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-#~ html_theme = 'alabaster'
+# ~ html_theme = 'alabaster'
 html_theme = 'sphinx_rtd_theme'
 
 # Theme options are theme-specific and customize the look and feel of a theme
@@ -184,15 +184,14 @@ texinfo_documents = [
 ]
 
 
-
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'https://docs.python.org/': None}
 
 # Create package and class graphs
 import subprocess
 try:
-    subprocess.check_call(['pyreverse3','-o','png','../qmt'])
+    subprocess.check_call(['pyreverse3', '-o', 'png', '../qmt'])
 except:
-    subprocess.check_call(['pyreverse','-o','png','../qmt'])
+    subprocess.check_call(['pyreverse', '-o', 'png', '../qmt'])
 os.rename('packages.png', 'source/packages.png')
 os.rename('classes.png', 'source/classes.png')

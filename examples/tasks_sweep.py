@@ -9,11 +9,11 @@ from qmt.tasks import Task
 
 class GeometryTaskExample(Task):
 
-    def __init__(self,options=None,name='geometry_task'):
+    def __init__(self, options=None, name='geometry_task'):
         super(GeometryTaskExample, self).__init__([], options, name)
-        self.input_task_list = [] # no input tasks here
+        self.input_task_list = []  # no input tasks here
 
-    def _solve_instance(self,input_result_list,current_options):
+    def _solve_instance(self, input_result_list, current_options):
         time.sleep(1.)
         return current_options
 
@@ -35,6 +35,7 @@ class PoissonTaskExample(Task):
             output += ', voltage: ' + str(current_options[part]['voltage'])
         return output
 
+
 tag1 = qtf.SweepTag('s1')
 tag2 = qtf.SweepTag('v1')   
 
@@ -43,7 +44,7 @@ geo_task = GeometryTaskExample(options=geo_dict)
 
 mat_dict = {'part1': {'material': 'InAs'}, 'part2': {'material': 'InP'}}
 
-poisson_dict = {'part1':{'voltage':tag2},'part2':{'voltage': 1.}}
+poisson_dict = {'part1': {'voltage': tag2}, 'part2': {'voltage': 1.}}
 poisson_task = PoissonTaskExample(geo_task, options=poisson_dict)
 
 sweeps = [{tag1: 1., tag2: 10.}, {tag1: 2., tag2: 10.}, {tag1: 1., tag2: 5.}, {tag1: 4., tag2: 3.}]
@@ -51,10 +52,10 @@ sweeps = [{tag1: 1., tag2: 10.}, {tag1: 2., tag2: 10.}, {tag1: 1., tag2: 5.}, {t
 sweep_man = qtf.SweepManager(sweeps)
 
 result = sweep_man.run(poisson_task)
-#print(poisson_task.reduce())
+# print(poisson_task.reduce())
 
-#print(geo_task.reduce())
+# print(geo_task.reduce())
 
 print(result.result())
 
-#print(map(dask.result,result.futures))
+# print(map(dask.result,result.futures))
