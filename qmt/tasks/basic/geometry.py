@@ -64,6 +64,6 @@ def geometry_3d(pyenv,input_file,input_parts,params):
     from qmt.geometry.freecad_wrapper import fcwrapper
     geo = fcwrapper(pyenv,
                     'build3d',
-                    {'current_options': options_dict},
-                    debug=False)
+                    {'current_options': options_dict}
+                    )
     return geo
