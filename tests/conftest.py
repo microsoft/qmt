@@ -168,65 +168,46 @@ def fix_task_env():
     """
     Set up a testing environment for tasks.
     """
-    from qmt.tasks import Task
     import numpy as np
 
-    class InputTaskExample(Task):
+    def input_task_example(parts_dict):
         """Simple example task. This is the first task in the chain.
 
-        :param dict options: Dictionary specifying the input parts. It should be of the form
+        :param dict parts_dict: Dictionary specifying the input parts. It should be of the form
         {"part":list_of_points}.
-        :param str name: Name of the task.
         """
-        def __init__(self, options=None, name='input_task'):
-            super(InputTaskExample, self).__init__([], options, name)
+        for key_val in parts_dict:
+            print(str(key_val) + ' ' + str(parts_dict[key_val]))
+        return parts_dict
 
-        @staticmethod
-        def _solve_instance(input_result_list, current_options):
-            for key_val in input_result_list:
-                print(key_val) + ' ' + str(input_result_list[key_val])
-            return current_options
-
-    class GatheredTaskExample(Task):
+    def gathered_task_example(input_data_list,num_points):
         """Takes the example task and does some work on it. This is a gathered task, which means
         that all the previous work is gathered up and worked on together.
 
-        :param dict options: Dictionary specifying the desired number of grid points. It should
-        be of the form {"numpoints":int}.
-        :param str name: Name of the task.
+        :param list input_data_list: List of dictionaries from several input tasks.
+        :param list num_points: List of ints specifying the number of grid points for a given
+        geometry.
         """
-        def __init__(self, input_task, options=None, name='gathered_task', gather=True):
-            super(GatheredTaskExample, self).__init__([input_task], options, name, gather=gather)
+        return_list = []
+        for i, geom in enumerate(input_data_list):
+            geometry_obj = input_data_list[i]
+            mesh = {}
+            for part in geometry_obj:
+                mesh[part] = np.linspace(0.0, 1.0,num_points[i])
+            return_list += [mesh]
+        return return_list
 
-        @staticmethod
-        def _solve_gathered(list_of_input_result_lists, list_of_options, result_sweep):
-            for sweep_holder_index, tag_values in enumerate(result_sweep.tagged_value_list):
-                geometry_obj = list_of_input_result_lists[sweep_holder_index][0]
-                mesh = {}
-                for part in geometry_obj:
-                    mesh[part] = np.linspace(0.0, 1.0,
-                                             list_of_options[sweep_holder_index]['numpoints'])
-                result_sweep.add(mesh, sweep_holder_index)
-            return result_sweep
-
-    class PostProcessingTaskExample(Task):
+    def post_processing_task_example(input_data,gathered_data,prefactor):
         """Takes input from the gathered task and does some more work in parallel.
 
-        :param dict options: Dictionary specifying the desired number of grid points. It should
-        be of the form {"prefactor":float}.
-        :param str name: Name of the task.
+        :param dict input_data: An input geometry.
+        :param dict gathered_data: One of the meshes produced from gathered_task_example.
+        :param float prefactor: Prefactor used to scale the output
         """
-        def __init__(self, input_task, gathered_task, options=None, name='post_proc_task'):
-            super(PostProcessingTaskExample, self).__init__([input_task, gathered_task], options, name)
+        result = 0.0
+        for part in input_data:
+            result += prefactor*np.sum(input_data[part])*np.sum(gathered_data[part])
+        return result
 
-        @staticmethod
-        def _solve_instance(input_result_list, current_options):
-            input_task_result = input_result_list[0]
-            gathered_task_result = input_result_list[1]
-            result = 0.0
-            for part in input_task_result:
-                result += (current_options['prefactor'] * np.sum(input_task_result[part]) *
-                           np.sum(gathered_task_result[part]))
-            return result
 
-    return InputTaskExample, GatheredTaskExample, PostProcessingTaskExample
+    return input_task_example, gathered_task_example, post_processing_task_example
