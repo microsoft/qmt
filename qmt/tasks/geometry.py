@@ -7,7 +7,8 @@ from shapely.geometry import Polygon, LineString
 
 from qmt.data import Geo2DData, Geo3DData, serialised_file
 
-def geometry_2d(parts,edges,lunit='nm',build_order=None):
+
+def geometry_2d(parts, edges, lunit='nm', build_order=None):
     """
     Build a geometry in 2D.
     :param dict parts: Dictionary for holding the 2D parts, of the form
@@ -35,13 +36,13 @@ def geometry_2d(parts,edges,lunit='nm',build_order=None):
         elif object_name in edges:
             geo_2d.add_edge(object_name, LineString(edges[object_name]))
         else:
-            raise ValueError("Object of name "+object_name+" was found neither in edges nor "
-                                                           "parts.")
+            raise ValueError("Object of name " + object_name + " was found neither in edges nor "
+                                                               "parts.")
     geo_2d.lunit = lunit
     return geo_2d
 
 
-def geometry_3d(pyenv,input_file,input_parts,params):
+def geometry_3d(pyenv, input_file, input_parts, params):
     """
     Build a geometry in 3D.
     :param str pyenv: path or callable name of the Python 2 executable.
@@ -59,7 +60,7 @@ def geometry_3d(pyenv,input_file,input_parts,params):
     if 'params' in options_dict:
         options_dict['params'] = {
             k: float(v) for k, v in options_dict['params'].items()
-        }
+            }
     # Send off the instructions
     from qmt.geometry.freecad_wrapper import fcwrapper
     geo = fcwrapper(pyenv,

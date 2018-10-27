@@ -15,19 +15,19 @@ def test_band_offsets():
     mat2 = matlib.find('InAs', eunit='eV')
     mat3 = matlib.find('GaAs', eunit='eV')
     assert matlib.conduction_band_minimum(mat1) - mat1['directBandGap'] == \
-        approx(matlib.valence_band_maximum(mat1))
+           approx(matlib.valence_band_maximum(mat1))
     assert matlib.conduction_band_minimum(mat1) - matlib.conduction_band_minimum(
         mat2) == approx(materials.conduction_band_offset(mat1, mat2))
     assert matlib.valence_band_maximum(mat1) + mat1['directBandGap'] == \
-        approx(matlib.conduction_band_minimum(mat1))
+           approx(matlib.conduction_band_minimum(mat1))
     assert matlib.valence_band_maximum(mat1) - matlib.valence_band_maximum(
         mat2) == approx(materials.valence_band_offset(mat1, mat2))
     assert materials.conduction_band_offset(mat1, mat2) + \
-        materials.conduction_band_offset(mat2, mat3) == \
-        approx(materials.conduction_band_offset(mat1, mat3))
+           materials.conduction_band_offset(mat2, mat3) == \
+           approx(materials.conduction_band_offset(mat1, mat3))
     assert materials.valence_band_offset(mat1, mat2) + \
-        materials.valence_band_offset(mat2, mat3) == \
-        approx(materials.valence_band_offset(mat1, mat3))
+           materials.valence_band_offset(mat2, mat3) == \
+           approx(materials.valence_band_offset(mat1, mat3))
 
 
 def test_bowing_parameters():
@@ -49,9 +49,9 @@ def test_bowing_parameters():
     # check interpolation with bowing parameters
     x = 0.2
     gap = (1 - x) * inas['directBandGap'] + x * insb['directBandGap'] \
-        - x * (1 - x) * bow['directBandGap']
+          - x * (1 - x) * bow['directBandGap']
     mass = (1 - x) * inas['electronMass'] + x * insb['electronMass'] \
-        - x * (1 - x) * bow['electronMass']
+           - x * (1 - x) * bow['electronMass']
     assert alloy['directBandGap'] == approx(gap)
     assert alloy['electronMass'] == approx(mass)
     # parameters for which we don't have bowing parameters should be linearly
@@ -80,11 +80,11 @@ def test_band_offsets_fallback():
     assert matlib.valence_band_maximum(mat1) - matlib.valence_band_maximum(
         mat2) == approx(materials.valence_band_offset(mat1, mat2))
     assert materials.conduction_band_offset(mat1, mat2) + \
-        materials.conduction_band_offset(mat2, mat3) == \
-        approx(materials.conduction_band_offset(mat1, mat3))
+           materials.conduction_band_offset(mat2, mat3) == \
+           approx(materials.conduction_band_offset(mat1, mat3))
     assert materials.valence_band_offset(mat1, mat2) + \
-        materials.valence_band_offset(mat2, mat3) == \
-        approx(materials.valence_band_offset(mat1, mat3))
+           materials.valence_band_offset(mat2, mat3) == \
+           approx(materials.valence_band_offset(mat1, mat3))
 
 
 def test_effective_mass():

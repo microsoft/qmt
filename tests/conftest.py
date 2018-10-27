@@ -3,7 +3,6 @@
 
 """Fixtures for QMT unit tests."""
 
-
 import os
 import sys
 import pytest
@@ -39,7 +38,7 @@ def fix_host_settings(fix_testDir):
     '''Host specific settings.'''
     schema = {
         'py2env': '/usr/local/envs/py27/bin/python'
-    }
+        }
 
     import yaml
     settings_file = os.path.join(fix_testDir, 'host_settings.yml')
@@ -153,7 +152,8 @@ def fix_hexagon_sketch():
         vec = FreeCAD.Vector
         doc = FreeCAD.ActiveDocument
         sketch = doc.addObject('Sketcher::SketchObject', 'HexSketch')
-        ProfileLib.RegularPolygon.makeRegularPolygon('HexSketch', 6, vec(1, 1, 0), vec(1+r, 1, 0), False)
+        ProfileLib.RegularPolygon.makeRegularPolygon('HexSketch', 6, vec(1, 1, 0), vec(1 + r, 1, 0),
+                                                     False)
         doc.recompute()
         return sketch
 
@@ -180,7 +180,7 @@ def fix_task_env():
             print(str(key_val) + ' ' + str(parts_dict[key_val]))
         return parts_dict
 
-    def gathered_task_example(input_data_list,num_points):
+    def gathered_task_example(input_data_list, num_points):
         """Takes the example task and does some work on it. This is a gathered task, which means
         that all the previous work is gathered up and worked on together.
 
@@ -193,11 +193,11 @@ def fix_task_env():
             geometry_obj = input_data_list[i]
             mesh = {}
             for part in geometry_obj:
-                mesh[part] = np.linspace(0.0, 1.0,num_points[i])
+                mesh[part] = np.linspace(0.0, 1.0, num_points[i])
             return_list += [mesh]
         return return_list
 
-    def post_processing_task_example(input_data,gathered_data,prefactor):
+    def post_processing_task_example(input_data, gathered_data, prefactor):
         """Takes input from the gathered task and does some more work in parallel.
 
         :param dict input_data: An input geometry.
@@ -206,8 +206,7 @@ def fix_task_env():
         """
         result = 0.0
         for part in input_data:
-            result += prefactor*np.sum(input_data[part])*np.sum(gathered_data[part])
+            result += prefactor * np.sum(input_data[part]) * np.sum(gathered_data[part])
         return result
-
 
     return input_task_example, gathered_task_example, post_processing_task_example

@@ -3,7 +3,6 @@
 
 """Testing QMT geometry util functions."""
 
-
 from __future__ import division
 
 from qmt.geometry.freecad.geomUtils import *
@@ -24,11 +23,13 @@ def test_extrude(fix_FCDoc, fix_two_cycle_sketch):
 def test_copy_move(fix_FCDoc, fix_hexagon_sketch):
     '''Test copy.'''
     # TODO: warning.
-    # ~ sketch = aux_two_cycle_sketch() # WARNING: multi-cycle sketches don't get moved correctly -> need sanitation
+    # ~ sketch = aux_two_cycle_sketch() # WARNING: multi-cycle sketches don't get moved correctly
+    #  -> need sanitation
     sketch = fix_hexagon_sketch()
-    sketch2 = copy_move(sketch, vec(0,0,20), copy=True)
+    sketch2 = copy_move(sketch, vec(0, 0, 20), copy=True)
     fix_FCDoc.recompute()
-    assert sketch.Shape.Edges[0].Vertexes[0].Point[2] + 20 == sketch2.Shape.Edges[0].Vertexes[0].Point[2]
+    assert sketch.Shape.Edges[0].Vertexes[0].Point[2] + 20 == \
+           sketch2.Shape.Edges[0].Vertexes[0].Point[2]
 
 
 def test_makeHexFace(fix_FCDoc):
@@ -82,7 +83,7 @@ def test_subtract(fix_FCDoc):
     box2.Placement = FreeCAD.Placement(vec(5, 0, 0), FreeCAD.Rotation(vec(0, 0, 1), 0))
     fix_FCDoc.recompute()
     cut = subtract(box1, box2, consumeInputs=True)
-    assert np.isclose(cut.Shape.Volume, 10**3 * 0.5)
+    assert np.isclose(cut.Shape.Volume, 10 ** 3 * 0.5)
 
 
 def test_subtractParts(fix_FCDoc):
@@ -105,7 +106,7 @@ def test_intersect(fix_FCDoc):
     box2.Placement = FreeCAD.Placement(vec(7, 0, 0), FreeCAD.Rotation(vec(0, 0, 1), 0))
     fix_FCDoc.recompute()
     cut = intersect((box1, box2), consumeInputs=True)
-    assert np.isclose(cut.Shape.Volume, 10**3 * 0.3)
+    assert np.isclose(cut.Shape.Volume, 10 ** 3 * 0.3)
 
 
 def test_checkOverlap(fix_FCDoc):
