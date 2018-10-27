@@ -12,7 +12,7 @@ def test_geo_task(fix_py2env, fix_testDir):
     from qmt.data import Part3DData
     import numpy as np
     import os
-    import shutil
+    import tempfile
 
     block1 = Part3DData('Parametrised block', 'Sketch', 'extrude', 'dielectric',
                         material='air', thickness=5.0, z0=-2.5)
@@ -42,12 +42,8 @@ def test_geo_task(fix_py2env, fix_testDir):
         results += [built_geo]
 
     # Investigate results
-    if not os.path.exists('tmp'):
-        os.makedirs('tmp')
-
-    for i, result in enumerate(results):
-        file_name = 'tmp/' + str(i) + '.fcstd'
-        result.write_fcstd(file_name)
-        # TODO: should find a meaningful test here
-
-    shutil.rmtree('tmp')
+    with tempfile.TemporaryDirectory() as temp_dir_path:
+        for i,result in enumerate(results):
+            file_name = os.path.join(temp_dir_path, str(i) + '.fcstd')
+            result.write_fcstd(file_name)
+            # TODO: should find a meaningful test here
