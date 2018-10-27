@@ -86,49 +86,48 @@ def test_sweep(fix_task_env):
                 results += [post_processing_task_example(input_data, output, tag3)]
 
     assert len(results) == 630 and results[3] == 0.0
-#
-#
-# def test_docker_sweep(fix_task_env, fix_setup_docker):
-#     import subprocess
-#     from dask.distributed import Client
-#     from qmt.tasks import SweepManager, SweepTag
-#     import numpy as np
-#
-#     # First, set up the docker + dask cluster, which for now is just one scheduler and one worker
-#     scheduler_command = ['dask-scheduler',
-#                          '--port', '8781',
-#                          '--bokeh-port', '8780']
-#     worker_command = ['dask-worker',
-#                       '--nthreads', '1',
-#                       '--nprocs', '1',
-#                       'localhost:8781']
-#     docker_command = ['docker', 'run', '-d', '--network', 'host', 'qmt:master']
-#     containers = []
-#     try:
-#         containers.append(subprocess.check_output(docker_command+scheduler_command).splitlines()[0])
-#         containers.append(subprocess.check_output(docker_command+worker_command).splitlines()[0])
-#         client = Client('localhost:8781')
-#
-#         # Next, perform the same sweep as before:
-#         InputTaskExample, GatheredTaskExample, PostProcessingTaskExample = fix_task_env
-#         tag1 = SweepTag('tag1')
-#         tag2 = SweepTag('tag2')
-#         tag3 = SweepTag('tag3')
-#         input_opts = {'a': [tag1, 1., 2.], 'b': [-3., 10., 2.], 'c': [20.]}
-#         gather_opts = {'numpoints': tag2}
-#         post_proc_opts = {'prefactor': tag3}
-#         input_task = InputTaskExample(options=input_opts)
-#         gathered_task = GatheredTaskExample(input_task, options=gather_opts)
-#         post_proc_task = PostProcessingTaskExample(input_task, gathered_task, options=post_proc_opts)
-#
-#         sm = SweepManager.construct_cartesian_product({tag1: np.linspace(0., 10., 3),
-#                                                        tag2: range(1, 3),
-#                                                        tag3: np.linspace(-1.0, 1., 4)
-#                                                        }, dask_client=client)
-#         sm.run(post_proc_task)
-#         results = post_proc_task.computed_result.calculate_completed_results()
-#         assert len(results) == 24 and results.get_result(3) == 0.0
-#     finally:
-#         # Clean up the docker containers
-#         for c in containers:
-#             subprocess.check_output(['docker', 'kill', c])
+
+def test_docker_sweep(fix_task_env, fix_setup_docker):
+    import subprocess
+    from dask import delayed as dl
+    from dask.distributed import Client
+    import numpy as np
+
+    # First, set up the docker + dask cluster, which for now is just one scheduler and one worker
+    scheduler_command = ['dask-scheduler',
+                         '--port', '8781',
+                         '--bokeh-port', '8780']
+    worker_command = ['dask-worker',
+                      '--nthreads', '1',
+                      '--nprocs', '1',
+                      'localhost:8781']
+    docker_command = ['docker', 'run', '-d', '--network', 'host', 'qmt:master']
+    containers = []
+    try:
+        containers.append(subprocess.check_output(docker_command+scheduler_command).splitlines()[0])
+        containers.append(subprocess.check_output(docker_command+worker_command).splitlines()[0])
+        client = Client('localhost:8781')
+
+        # Next, perform the same sweep as before:
+        input_task_example, gathered_task_example, post_processing_task_example = fix_task_env
+
+        delayeds = []
+        collected_inputs = []
+        for tag1 in np.linspace(0., 10., 3):
+            parts = {'a': [tag1, 1., 2.], 'b': [-3., 10., 2.], 'c': [20.]}
+            collected_inputs += [dl(input_task_example)(parts)]
+        for tag2 in range(1, 3):
+            num_grid_vec = tag2 * np.ones((len(collected_inputs),), dtype=np.int)
+            collected_outputs = dl(gathered_task_example,nout=3)(collected_inputs, num_grid_vec)
+            for i, output in enumerate(collected_outputs):
+                input_data = collected_inputs[i]
+                for tag3 in np.linspace(-1.0, 1., 4):
+                    delayeds += [dl(post_processing_task_example)(input_data, output, tag3)]
+        results = []
+        for obj in delayeds:
+            results += [client.compute(obj).result()]
+        assert len(results) == 24 and results[3] == 0.0
+    finally:
+        # Clean up the docker containers
+        for c in containers:
+            subprocess.check_output(['docker', 'kill', c])
