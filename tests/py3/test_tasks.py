@@ -5,99 +5,93 @@
 
 
 def test_task_init(fix_task_env):
-    InputTaskExample, GatheredTaskExample, PostProcessingTaskExample = fix_task_env
-    input_opts = {'a': [0., 1., 2.], 'b': [-3., 10., 2.], 'c': [20.]}
-    input_task = InputTaskExample(options=input_opts)
-    assert len(input_task.previous_tasks) == 0
-    assert len(input_task.options) == 3
+    input_task_example, gathered_task_example, post_processing_task_example = fix_task_env
+    parts = {'a': [0., 1., 2.], 'b': [-3., 10., 2.], 'c': [20.]}
+    input_data = input_task_example(parts)
+    assert input_data == parts
 
 
-def test_run_daskless(fix_task_env):
+def test_run_task_chain(fix_task_env):
     import numpy as np
+    input_task_example, gathered_task_example, post_processing_task_example = fix_task_env
+    parts = {'a': [0., 1., 2.], 'b': [-3., 10., 2.], 'c': [20.]}
+    numpoints = 20
+    prefactor = 0.1
+    input_data = input_task_example(parts)
+    gathered_data = gathered_task_example([input_data], [numpoints])[0]
+    post_proc_data = post_processing_task_example(input_data, gathered_data, prefactor)
 
-    InputTaskExample, GatheredTaskExample, PostProcessingTaskExample = fix_task_env
-    input_opts = {'a': [0., 1., 2.], 'b': [-3., 10., 2.], 'c': [20.]}
-    gather_opts = {'numpoints': 20}
-    post_proc_opts = {'prefactor': 0.1}
-    input_task = InputTaskExample(options=input_opts)
-    gathered_task = GatheredTaskExample(input_task, options=gather_opts)
-    post_proc_task = PostProcessingTaskExample(input_task, gathered_task, options=post_proc_opts)
-    post_proc_task.run_daskless()
-
-    assert input_task.daskless_result == input_opts
+    assert input_data == parts
     gather_results = {}
-    for part in input_opts:
-        gather_results[part] = np.linspace(0.0, 1.0, gather_opts['numpoints'])
+    for part in parts:
+        gather_results[part] = np.linspace(0.0, 1.0, numpoints)
     for part in gather_results:
-        assert np.all(gathered_task.daskless_result[part] == gather_results[part])
+        assert np.all(gathered_data[part] == gather_results[part])
     post_proc_results = 0.0
-    for part in input_opts:
-        post_proc_results += post_proc_opts['prefactor']*np.sum(input_opts[part])*\
-                               np.sum(gather_results[part])
-    assert(post_proc_task.daskless_result == post_proc_results)
+    for part in parts:
+        post_proc_results += prefactor * np.sum(input_data[part]) * \
+                             np.sum(gather_results[part])
+    assert (post_proc_data == post_proc_results)
 
 
 def test_run_dask(fix_task_env):
     import numpy as np
-    from qmt.tasks import SweepManager
+    from dask import delayed as dl
+    from dask.distributed import Client
+    dc = Client(processes=False)
 
-    InputTaskExample, GatheredTaskExample, PostProcessingTaskExample = fix_task_env
-    input_opts = {'a': [0., 1., 2.], 'b': [-3., 10., 2.], 'c': [20.]}
-    gather_opts = {'numpoints': 20}
-    post_proc_opts = {'prefactor': 0.1}
-    input_task = InputTaskExample(options=input_opts)
-    gathered_task = GatheredTaskExample(input_task, options=gather_opts)
-    post_proc_task = PostProcessingTaskExample(input_task, gathered_task, options=post_proc_opts)
-    sm = SweepManager.create_empty_sweep()
-    sm.run(post_proc_task)
+    input_task_example, gathered_task_example, post_processing_task_example = fix_task_env
+    parts = {'a': [0., 1., 2.], 'b': [-3., 10., 2.], 'c': [20.]}
+    numpoints = 20
+    prefactor = 0.1
 
-    dask_results_inputs = input_task.computed_result.get_completed_result(0)
-    dask_results_gathered = gathered_task.computed_result.result().get_result(0)
-    dask_results_post = post_proc_task.computed_result.get_completed_result(0)
+    input_delayed = dl(input_task_example)(parts)
+    gathered_delayed = dl(gathered_task_example, nout=1)([input_delayed], [numpoints])[0]
+    post_proc_delayed = dl(post_processing_task_example)(input_delayed, gathered_delayed, prefactor)
+    input_future = dc.compute(input_delayed)
+    gathered_future = dc.compute(gathered_delayed)
+    post_proc_future = dc.compute(post_proc_delayed)
+    input_data = input_future.result()
+    gathered_data = gathered_future.result()
+    post_proc_data = post_proc_future.result()
 
-    assert dask_results_inputs == input_opts
+    assert input_data == parts
     gather_results = {}
-    for part in input_opts:
-        gather_results[part] = np.linspace(0.0, 1.0, gather_opts['numpoints'])
+    for part in parts:
+        gather_results[part] = np.linspace(0.0, 1.0, numpoints)
     for part in gather_results:
-        assert np.all(dask_results_gathered[part] == gather_results[part])
+        assert np.all(gathered_data[part] == gather_results[part])
     post_proc_results = 0.0
-    for part in input_opts:
-        post_proc_results += post_proc_opts['prefactor']*np.sum(input_opts[part])*\
-                               np.sum(gather_results[part])
-    assert(dask_results_post == post_proc_results)
+    for part in parts:
+        post_proc_results += prefactor * np.sum(input_data[part]) * \
+                             np.sum(gather_results[part])
+    assert (post_proc_data == post_proc_results)
 
 
 def test_sweep(fix_task_env):
     import numpy as np
-    from qmt.tasks import SweepTag, SweepManager
+    input_task_example, gathered_task_example, post_processing_task_example = fix_task_env
 
-    InputTaskExample, GatheredTaskExample, PostProcessingTaskExample = fix_task_env
+    results = []
+    collected_inputs = []
+    for tag1 in np.linspace(0., 10., 5):
+        parts = {'a': [tag1, 1., 2.], 'b': [-3., 10., 2.], 'c': [20.]}
+        collected_inputs += [input_task_example(parts)]
+    for tag2 in range(2, 20):
+        num_grid_vec = tag2 * np.ones((len(collected_inputs),), dtype=np.int)
+        collected_outputs = gathered_task_example(collected_inputs, num_grid_vec)
+        for i, output in enumerate(collected_outputs):
+            input_data = collected_inputs[i]
+            for tag3 in np.linspace(-1.0, 1., 7):
+                results += [post_processing_task_example(input_data, output, tag3)]
 
-    tag1 = SweepTag('tag1')
-    tag2 = SweepTag('tag2')
-    tag3 = SweepTag('tag3')
-
-    input_opts = {'a': [tag1, 1., 2.], 'b': [-3., 10., 2.], 'c': [20.]}
-    gather_opts = {'numpoints': tag2}
-    post_proc_opts = {'prefactor': tag3}
-    input_task = InputTaskExample(options=input_opts)
-    gathered_task = GatheredTaskExample(input_task, options=gather_opts)
-    post_proc_task = PostProcessingTaskExample(input_task, gathered_task, options=post_proc_opts)
-
-    sm = SweepManager.construct_cartesian_product({tag1: np.linspace(0., 10., 5),
-                                                   tag2: range(2, 20),
-                                                   tag3: np.linspace(-1.0, 1., 7)
-                                                   })
-    sm.run(post_proc_task)
-    results = post_proc_task.computed_result.calculate_completed_results()
-    assert len(results) == 630 and results.get_result(3) == 0.0
+    assert len(results) == 630 and results[3] == 0.0
 
 
 def test_docker_sweep(fix_task_env, fix_setup_docker):
     import subprocess
+    from dask import delayed as dl
     from dask.distributed import Client
-    from qmt.tasks import SweepManager, SweepTag
     import numpy as np
 
     # First, set up the docker + dask cluster, which for now is just one scheduler and one worker
@@ -111,29 +105,30 @@ def test_docker_sweep(fix_task_env, fix_setup_docker):
     docker_command = ['docker', 'run', '-d', '--network', 'host', 'qmt:master']
     containers = []
     try:
-        containers.append(subprocess.check_output(docker_command+scheduler_command).splitlines()[0])
-        containers.append(subprocess.check_output(docker_command+worker_command).splitlines()[0])
+        containers.append(
+            subprocess.check_output(docker_command + scheduler_command).splitlines()[0])
+        containers.append(subprocess.check_output(docker_command + worker_command).splitlines()[0])
         client = Client('localhost:8781')
 
         # Next, perform the same sweep as before:
-        InputTaskExample, GatheredTaskExample, PostProcessingTaskExample = fix_task_env
-        tag1 = SweepTag('tag1')
-        tag2 = SweepTag('tag2')
-        tag3 = SweepTag('tag3')
-        input_opts = {'a': [tag1, 1., 2.], 'b': [-3., 10., 2.], 'c': [20.]}
-        gather_opts = {'numpoints': tag2}
-        post_proc_opts = {'prefactor': tag3}
-        input_task = InputTaskExample(options=input_opts)
-        gathered_task = GatheredTaskExample(input_task, options=gather_opts)
-        post_proc_task = PostProcessingTaskExample(input_task, gathered_task, options=post_proc_opts)
+        input_task_example, gathered_task_example, post_processing_task_example = fix_task_env
 
-        sm = SweepManager.construct_cartesian_product({tag1: np.linspace(0., 10., 3),
-                                                       tag2: range(1, 3),
-                                                       tag3: np.linspace(-1.0, 1., 4)
-                                                       }, dask_client=client)
-        sm.run(post_proc_task)
-        results = post_proc_task.computed_result.calculate_completed_results()
-        assert len(results) == 24 and results.get_result(3) == 0.0
+        delayeds = []
+        collected_inputs = []
+        for tag1 in np.linspace(0., 10., 3):
+            parts = {'a': [tag1, 1., 2.], 'b': [-3., 10., 2.], 'c': [20.]}
+            collected_inputs += [dl(input_task_example)(parts)]
+        for tag2 in range(1, 3):
+            num_grid_vec = tag2 * np.ones((len(collected_inputs),), dtype=np.int)
+            collected_outputs = dl(gathered_task_example, nout=3)(collected_inputs, num_grid_vec)
+            for i, output in enumerate(collected_outputs):
+                input_data = collected_inputs[i]
+                for tag3 in np.linspace(-1.0, 1., 4):
+                    delayeds += [dl(post_processing_task_example)(input_data, output, tag3)]
+        results = []
+        for obj in delayeds:
+            results += [client.compute(obj).result()]
+        assert len(results) == 24 and results[3] == 0.0
     finally:
         # Clean up the docker containers
         for c in containers:

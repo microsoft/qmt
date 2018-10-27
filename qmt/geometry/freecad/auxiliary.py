@@ -50,8 +50,8 @@ def silent_stdout():
     stored_py = sys.stdout
     stored_fileno = os.dup(sys.stdout.fileno())
     with open(os.devnull, 'w') as devnull:
-        sys.stdout = devnull              # for python stdout.write
-        os.dup2(devnull.fileno(), 1)      # for library write to fileno 1
+        sys.stdout = devnull  # for python stdout.write
+        os.dup2(devnull.fileno(), 1)  # for library write to fileno 1
         try:
             yield
         finally:
@@ -92,8 +92,8 @@ def make_objects_visible(zipfname):  # pragma: no cover
         for elem in viewp.getiterator(tag='Properties'):
             for prop in elem.getiterator(tag='Property'):
                 if prop.attrib.get('name') == 'Visibility':
-                   for state in prop.getiterator(tag='Bool'):
-                       state.set('value', 'true')
+                    for state in prop.getiterator(tag='Bool'):
+                        state.set('value', 'true')
 
     gui_xml = ElementTree.tostring(guitree).decode()
     _replace_in_zip_fstr(zipfname, 'GuiDocument.xml', gui_xml)
