@@ -8,7 +8,7 @@ from shapely.geometry import Polygon, LineString
 from qmt.data import Geo2DData, Geo3DData, serialised_file
 
 
-def geometry_2d(parts, edges, lunit='nm', build_order=None):
+def build_2d_geometry(parts, edges, lunit='nm', build_order=None):
     """
     Build a geometry in 2D.
     :param dict parts: Dictionary for holding the 2D parts, of the form
@@ -42,7 +42,7 @@ def geometry_2d(parts, edges, lunit='nm', build_order=None):
     return geo_2d
 
 
-def geometry_3d(pyenv, input_file, input_parts, params):
+def build_3d_geometry(pyenv, input_file, input_parts, params):
     """
     Build a geometry in 3D.
     :param str pyenv: path or callable name of the Python 2 executable.
