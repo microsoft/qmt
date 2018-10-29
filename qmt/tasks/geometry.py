@@ -65,6 +65,8 @@ def build_3d_geometry(pyenv, input_parts, input_file = None,
         serial_fcdoc = serialize_file(input_file)
     else:
         serial_fcdoc = serialized_input_file
+    if params is None:
+        params = {}
     options_dict = {}
     options_dict['serial_fcdoc'] = serial_fcdoc
     options_dict['input_parts'] = input_parts
