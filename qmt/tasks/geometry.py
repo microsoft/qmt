@@ -50,7 +50,7 @@ def build_3d_geometry(pyenv, input_parts, input_file = None,
     :param list input_parts: ordered list of input parts, leftmost items get built first
     :param str input_file: path to FreeCAD template file. Either this or serialized_input_file
     must be set (but not both).
-    :param bytes input_file: FreeCAD template file that has been serialized using
+    :param bytes serialized_input_file: FreeCAD template file that has been serialized using
     qmt.data.serialize_file. This is useful for passing a file into a docker container or other
     environment that doesn't have access to a shared drive. Either this or serialized_input_file
     must be set (but not both).
