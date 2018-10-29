@@ -9,9 +9,12 @@ class ReduceDim3D(Task):
         """
         Reduces a 3D geometry to a 2D geometry for use with 2D solvers.
         :param Geometry3D geo_3d: The input 3D geometry task
-        :param dict options: Dictionary of the form {"axis":tup,"position":pos,"parts":[part1,part2,...]}, where axis
-        is a 3-tuple defining the slice axis, position is the coordinate on the axis to take the cross-section, and
-        parts is an optional list of parts. If it is included, only the part names listed will be included.
+        :param dict options: Dictionary of the form {"axis":tup,"position":pos,"parts":[part1,
+        part2,...]}, where axis
+        is a 3-tuple defining the slice axis, position is the coordinate on the axis to take the
+        cross-section, and
+        parts is an optional list of parts. If it is included, only the part names listed will be
+        included.
         :param str name: The name of this task.
         """
         super(ReduceDim3D, self).__init__([geo_3d], options, name)
@@ -39,9 +42,12 @@ class ReduceDim2D(Task):
         """
         Reduces a 2D geometry to a 1D geometry for use with 1D solvers.
         :param Geometry2D geo_2d: The input 2D geometry task
-        :param dict options: Dictionary of the form {"axis":tup,"position":pos,"parts":[part1,part2,...]}, where axis
-        is a 2-tuple defining the slice axis, position is the coordinate on the axis to take the cut, and
-        parts is an optional list of parts. If it is included, only the part names listed will be included.
+        :param dict options: Dictionary of the form {"axis":tup,"position":pos,"parts":[part1,
+        part2,...]}, where axis
+        is a 2-tuple defining the slice axis, position is the coordinate on the axis to take the
+        cut, and
+        parts is an optional list of parts. If it is included, only the part names listed will be
+        included.
         :param str name: The name of this task.
         """
         super(ReduceDim2D, self).__init__([geo_2d], options, name)

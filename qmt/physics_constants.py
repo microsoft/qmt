@@ -26,7 +26,6 @@ except ImportError:
         def __eq__(self, other):
             return self.__dict__ == other.__dict__
 
-
 units = SimpleNamespace(
     nm=spu.nm,
     um=spu.um,
@@ -49,7 +48,7 @@ units = SimpleNamespace(
     mK=spu.K / 1e3,
     amp=spu.coulomb / spu.s,
     nA=1e-9 * spu.coulomb / spu.s,
-)
+    )
 
 
 def parse_unit(s):
@@ -69,15 +68,15 @@ def parse_unit(s):
 constants = SimpleNamespace(
     hbar=spu.hbar,
     k_B=sc.physical_constants['Boltzmann constant in eV/K'][0] *
-    units.eV / units.K,
+        units.eV / units.K,
     m_e=sc.physical_constants["electron mass"][0] * spu.kg,
     q_e=sc.physical_constants["elementary charge"][0] * units.coulomb,
     mu_b=sc.physical_constants["Bohr magneton in eV/T"][0] *
-    units.eV / units.tesla,
+         units.eV / units.tesla,
     epsilon0=sc.epsilon_0 * spu.farad / spu.m,
     c=sc.physical_constants["speed of light in vacuum"][0] * spu.m / spu.s,
     pi=sc.pi
-)
+    )
 
 # Unify unit conversion between old and new units module
 if "convert_to" in dir(spu):
@@ -106,7 +105,7 @@ matrices = SimpleNamespace(
     s_x=msigma(1),
     s_y=msigma(2),
     s_z=msigma(3),
-)
+    )
 
 matrices.tau_00 = kron(matrices.s_0, matrices.s_0)
 matrices.tau_0x = kron(matrices.s_0, matrices.s_x)

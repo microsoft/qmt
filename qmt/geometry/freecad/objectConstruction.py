@@ -12,15 +12,20 @@ import logging
 import FreeCAD
 import Draft
 
-from .auxiliary import *
-from .fileIO import exportCAD
-from .geomUtils import (extrude, copy_move, genUnion,# make_solid,
-                        getBB, makeBB, makeHexFace,
-                        extrudeBetween, draftOffset, intersect,
-                        checkOverlap, subtract,
-                        crossSection)
-from .sketchUtils import (findSegments, splitSketch, extendSketch,
-                          findEdgeCycles)
+# TODO: use namespace in code
+from qmt.geometry.freecad.auxiliary import *
+from qmt.geometry.freecad.fileIO import exportCAD
+from qmt.geometry.freecad.geomUtils import (
+    extrude, copy_move, genUnion,  # make_solid,
+    getBB, makeBB, makeHexFace,
+    extrudeBetween, draftOffset, intersect,
+    checkOverlap, subtract,
+    crossSection
+    )
+from qmt.geometry.freecad.sketchUtils import (
+    findSegments, splitSketch, extendSketch,
+    findEdgeCycles
+    )
 
 from qmt.data.geometry import Geo3DData, store_serial
 
@@ -345,7 +350,8 @@ def buildAlShell(sketch, zBottom, width, verts, thickness,
         coatingUnionClone = shellList[0]
     else:
         raise NameError(
-            'Trying to build an empty Al shell. If no shell is desired, omit the AlVerts key from the json.')
+            'Trying to build an empty Al shell. If no shell is desired, omit the AlVerts key from '
+            'the json.')
     if (depoZone is None) and (etchZone is None):
         return coatingUnionClone
 
@@ -489,7 +495,7 @@ def initialize_lithography(info, opts, fillShells=True):
     bottom = min(bases)
     totalThickness = sum(thicknesses)
     assert len(info.lithoDict['substrate'][
-        ()]) > 0  # Otherwise, we don't have a reference for the lateral BB
+                   ()]) > 0  # Otherwise, we don't have a reference for the lateral BB
     substrateUnion = genUnion(info.lithoDict['substrate'][()],
                               consumeInputs=False)  # total substrate
     BB = list(getBB(substrateUnion))  # bounding box
@@ -590,7 +596,8 @@ def screened_H_union_list(info, opts, obj, m, j, offsetTuple, checkOffsetTuple):
     # offset, while other indices indicate an offset by summing the thicknesses
     # from corresponding layers.
     if checkOffsetTuple not in HDict:  # If we haven't computed this yet
-        HDict[checkOffsetTuple] = H_offset(info, opts, m, j, tList=list(checkOffsetTuple))  # list of H parts
+        HDict[checkOffsetTuple] = H_offset(info, opts, m, j,
+                                           tList=list(checkOffsetTuple))  # list of H parts
         info.trash += HDict[checkOffsetTuple]
     if offsetTuple not in HDict:  # If we haven't computed this yet
         HDict[offsetTuple] = H_offset(info, opts, m, j, tList=list(offsetTuple))  # list of H parts
@@ -657,7 +664,8 @@ def H_offset(info, opts, layerNum, objID, tList=[]):
     in order to form the full H.
     """
 
-    logging.debug('>>> partname %s', info.lithoDict['layers'][layerNum]['objIDs'][objID]['partName'])
+    logging.debug('>>> partname %s',
+                  info.lithoDict['layers'][layerNum]['objIDs'][objID]['partName'])
 
     # This is a tuple that encodes the check offset t:
     checkOffsetTuple = tuple(sorted(tList))
@@ -666,7 +674,7 @@ def H_offset(info, opts, layerNum, objID, tList=[]):
     # First, check if we have to do anything:
     layers = info.lithoDict['layers']
     if checkOffsetTuple in layers[layerNum]['objIDs'][
-            objID]['HDict']:
+        objID]['HDict']:
         return layers[layerNum]['objIDs'][objID][
             'HDict'][checkOffsetTuple]
     # First, compute t:
@@ -725,7 +733,7 @@ def gen_U(info, layerNum, objID):
         if m < layerNum:  # then this is a lower layer
             for j in layers[m].keys():
                 if 'G' not in layers[layerNum][
-                        'objIDs'][objID]:
+                    'objIDs'][objID]:
                     gen_G(info, m, j)
                 G = layers[layerNum]['objIDs'][objID]['G']
                 if checkOverlap([B, G]):
@@ -744,12 +752,12 @@ def gen_G(info, opts, layerNum, objID):
 
     layerobj = info.lithoDict['layers'][layerNum]['objIDs'][objID]
     logging.debug('>>> layer %d obj %d (part:%s B:%s C:%s sketch:%s)', layerNum, objID,
-                  layerobj['partName'], layerobj['B'].Name, layerobj['C'].Name, layerobj['sketch'].Name)
+                  layerobj['partName'], layerobj['B'].Name, layerobj['C'].Name,
+                  layerobj['sketch'].Name)
 
     if 'G' not in layerobj:
         if () not in layerobj['HDict']:
             layerobj['HDict'][()] = H_offset(info, opts, layerNum, objID)
-
 
         if DBG_OUT:
             FreeCAD.ActiveDocument.saveAs('tmp_after_H_offset.fcstd')
@@ -783,7 +791,8 @@ def gen_G(info, opts, layerNum, objID):
         # ~ layerobj['HDict'][()] = solid_hlist
         # ~ logging.debug('new HDict: %s', [o.Name + ' (' + o.Label + ')' for o in layerobj['HDict'][()]])
 
-        H = genUnion(layerobj['HDict'][()], consumeInputs=False)
+        H = genUnion(layerobj['HDict'][()],
+                     consumeInputs=False)
         info.trash.append(H)
         if info.fillShells:
             G = copy_move(H)

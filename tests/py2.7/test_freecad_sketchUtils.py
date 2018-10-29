@@ -3,7 +3,6 @@
 
 """Testing QMT sketch util functions."""
 
-
 from __future__ import division
 
 import pytest
@@ -58,7 +57,7 @@ def test_nextSegment(fix_FCDoc, fix_two_cycle_sketch):
     assert 'Multiple possible paths found' in str(err.value)
 
     # Open cycles
-    segArr = np.array([ [[0,0,0],[1,0,0]] , [[1,0,0],[2,0,0]] ])
+    segArr = np.array([[[0, 0, 0], [1, 0, 0]], [[1, 0, 0], [2, 0, 0]]])
     with pytest.raises(ValueError) as err:
         nextSegment(segArr, 1)
     assert 'No paths found' in str(err.value)
@@ -69,7 +68,7 @@ def test_findCycle(fix_FCDoc, fix_two_cycle_sketch):
     sketch = fix_two_cycle_sketch()
     segArr = findSegments(sketch)
     ref1 = [0, 1, 2, 3]  # square cycle indices
-    ref2 = [4, 5, 6]     # triangular cycle indices
+    ref2 = [4, 5, 6]  # triangular cycle indices
     for i in range(4):
         c = findCycle(segArr, i, range(segArr.shape[0]))  # update starting point
         assert c == ref1[i:] + ref1[:i]  # advancing rotation
@@ -98,7 +97,7 @@ def test_addCycleSketch(fix_FCDoc, fix_two_cycle_sketch):
 def test_addPolyLineSketch(fix_FCDoc):
     '''Test if polylines are correctly added.'''
     pass
-    #TODO
+    # TODO
 
 
 def test_findEdgeCycles(fix_FCDoc, fix_two_cycle_sketch):
@@ -144,20 +143,20 @@ def test_extendSketch(fix_FCDoc):
     '''Test unconnected sketch extension, all cases.'''
     sketch = fix_FCDoc.addObject('Sketcher::SketchObject', 'Sketch')
     geoList = []
-    geoList.append(Part.LineSegment(vec(0,0,0),vec(0,2,0)))
-    geoList.append(Part.LineSegment(vec(0,2,0),vec(-2,2,0)))
+    geoList.append(Part.LineSegment(vec(0, 0, 0), vec(0, 2, 0)))
+    geoList.append(Part.LineSegment(vec(0, 2, 0), vec(-2, 2, 0)))
     sketch.addGeometry(geoList, False)
     fix_FCDoc.recompute()
     ext = extendSketch(sketch, 1)
-    assert ext.Shape.Vertexes[0].Point == vec(0,-1,0)
-    assert ext.Shape.Vertexes[2].Point == vec(-3,2,0)
+    assert ext.Shape.Vertexes[0].Point == vec(0, -1, 0)
+    assert ext.Shape.Vertexes[2].Point == vec(-3, 2, 0)
 
     deepRemove(sketch)
     deepRemove(ext)
     sketch = fix_FCDoc.addObject('Sketcher::SketchObject', 'Sketch')
     geoList = []
-    geoList.append(Part.LineSegment(vec(0,0,0),vec(2,0,0)))
-    geoList.append(Part.LineSegment(vec(2,0,0),vec(2,-2,0)))
+    geoList.append(Part.LineSegment(vec(0, 0, 0), vec(2, 0, 0)))
+    geoList.append(Part.LineSegment(vec(2, 0, 0), vec(2, -2, 0)))
     sketch.addGeometry(geoList, False)
     fix_FCDoc.recompute()
     ext = extendSketch(sketch, 1)
@@ -165,5 +164,5 @@ def test_extendSketch(fix_FCDoc):
 
 
 def test_makeIntoSketch(fix_FCDoc):
-    #TODO
+    # TODO
     pass

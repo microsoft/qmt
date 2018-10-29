@@ -3,7 +3,6 @@
 
 """Utilities to work with general geometries."""
 
-
 import numpy as np
 
 import FreeCAD
@@ -58,8 +57,8 @@ def make_solid(obj, consumeInputs=False):
     doc = FreeCAD.ActiveDocument
     shell = obj.Shape.Faces
     shell = Part.Solid(Part.Shell(shell))
-    solid = doc.addObject("Part::Feature",obj.Label+"_solid")
-    solid.Label = obj.Label+"_solid"
+    solid = doc.addObject("Part::Feature", obj.Label + "_solid")
+    solid.Label = obj.Label + "_solid"
     solid.Shape = shell
     doc.recompute()
     del shell, solid
@@ -260,7 +259,7 @@ def liftObject(obj, d, consumeInputs=False):
     return returnObj
 
 
-def draftOffset(inputSketch,t):
+def draftOffset(inputSketch, t):
     ''' Attempt to offset the draft figure by a thickness t. Positive t is an
     inflation, while negative t is a deflation.
     '''
@@ -269,16 +268,16 @@ def draftOffset(inputSketch,t):
     if t == 0.:
         return copy_move(inputSketch)
     deltaT = np.abs(t)
-    offsetVec1 = vec(-deltaT,-deltaT,0.)
-    offsetVec2 = vec(deltaT,deltaT,0.)
-    
-    offset0 = copy_move(inputSketch)
-    offset1 = Draft.offset(inputSketch,offsetVec1,copy=True)
-    offset2 = Draft.offset(inputSketch,offsetVec2,copy=True)
+    offsetVec1 = vec(-deltaT, -deltaT, 0.)
+    offsetVec2 = vec(deltaT, deltaT, 0.)
 
-    solid0 = extrude(offset0,10.0)
-    solid1 = extrude(offset1,10.0)
-    solid2 = extrude(offset2,10.0)
+    offset0 = copy_move(inputSketch)
+    offset1 = Draft.offset(inputSketch, offsetVec1, copy=True)
+    offset2 = Draft.offset(inputSketch, offsetVec2, copy=True)
+
+    solid0 = extrude(offset0, 10.0)
+    solid1 = extrude(offset1, 10.0)
+    solid2 = extrude(offset2, 10.0)
 
     # Compute the volumes of these solids:
     V0 = solid0.Shape.Volume
@@ -293,32 +292,40 @@ def draftOffset(inputSketch,t):
 
     # If everything worked properly, these should either be ordered as
     # V1<V0<V2 or V2<V0<V1:
-    if V2>V0 and V0>V1:
-        bigSketch = offset2; littleSketch = offset1
-    elif V1>V0 and V0>V2:
-        bigSketch = offset1; littleSketch = offset2
-    elif V2>V1 and V1>V0:
-        bigSketch = offset2; littleSketch = None
+    if V2 > V0 and V0 > V1:
+        bigSketch = offset2;
+        littleSketch = offset1
+    elif V1 > V0 and V0 > V2:
+        bigSketch = offset1;
+        littleSketch = offset2
+    elif V2 > V1 and V1 > V0:
+        bigSketch = offset2;
+        littleSketch = None
     # If we aren't in correct case, we still might be able to salvage things
     # for certain values of t:
-    elif V1>V2 and V2>V0:
-        bigSketch = offset1; littleSketch = None
-    elif V2<V1 and V1<V0:
-        bigSketch = None; littleSketch = offset2
-    elif V1<V2 and V2<V0:
-        bigSketch = None; littleSketch = offset1
+    elif V1 > V2 and V2 > V0:
+        bigSketch = offset1;
+        littleSketch = None
+    elif V2 < V1 and V1 < V0:
+        bigSketch = None;
+        littleSketch = offset2
+    elif V1 < V2 and V2 < V0:
+        bigSketch = None;
+        littleSketch = offset1
     else:
-        bigSketch = None; littleSketch = None
+        bigSketch = None;
+        littleSketch = None
     delete(solid0)
     delete(solid1)
     delete(solid2)
-    if t<0 and littleSketch is not None:
+    if t < 0 and littleSketch is not None:
         returnSketch = copy_move(littleSketch)
-    elif t>0 and bigSketch is not None:
+    elif t > 0 and bigSketch is not None:
         returnSketch = copy_move(bigSketch)
     else:
-        raise ValueError('Failed to offset the sketch '+str(inputSketch.Name)+' by amount '+str(t))
-    
+        raise ValueError(
+            'Failed to offset the sketch ' + str(inputSketch.Name) + ' by amount ' + str(t))
+
     # # now that we have the three solids, we need to figure out which is bigger
     # # and which is smaller.
     # diff10 = subtract(solid1,solid0)

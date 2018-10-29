@@ -4,22 +4,26 @@
 from collections import namedtuple
 
 try:
-    import kwant # kwant import to stop fenics from segfaulting
+    import kwant  # kwant import to stop fenics from segfaulting
 except:
     pass
 from qmt.data import store_serial, load_serial
 
 
 class Fem3DData(object):
-    def __init__(self, coordinates=None, potential=None, charge=None, units = None,
-                 surface_charge_integrals=None, volume_charge_integrals=None, fenics_3d_data=None):
+    def __init__(self, coordinates=None, potential=None, charge=None,
+                 surface_charge_integrals=None, volume_charge_integrals=None, fenics_3d_data=None,
+                 vunit='V', lunit='um', eunit='eV', qunit='coulomb'):
         self.coordinates = coordinates
         self.potential = potential
         self.charge = charge
-        self.units = units
         self.surface_charge_integrals = surface_charge_integrals
         self.volume_charge_integrals = volume_charge_integrals
         self.fenics_3d_data = fenics_3d_data
+        self.vunit = vunit
+        self.lunit = lunit
+        self.eunit = eunit
+        self.qcunit = qunit
 
     def get_data(self, data):
         if data == 'function':
@@ -50,9 +54,11 @@ def deserialize_fenics_function(serial_function_data, element_type='P', element_
     serial_fenics_function = serial_function_data.serial_function
     import fenics as fn
     mesh = load_serial(serial_mesh, fn.Mesh, ext_format='xml')
+
     def _load_fenics_function(path):
         V = fn.FunctionSpace(mesh, element_type, element_degree)
         return fn.Function(V, path)
+
     potential = load_serial(serial_fenics_function, _load_fenics_function, ext_format='xml')
     return potential
 

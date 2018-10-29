@@ -14,4 +14,4 @@ print "Generating the mapping from labels to FreeCAD names:"
 for selObj in selObjs:
     objLabel = selObj.Label
     objName = selObj.Name
-    print objLabel+" "+objName
+    print objLabel + " " + objName

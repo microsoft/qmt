@@ -1,5 +1,3 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
-from .task import Task
-from .sweep import ReducedSweep, ReducedSweepFutures, ReducedSweepDelayed, ReducedSweepResults, SweepManager, SweepTag
-from .basic.geometry import Geometry2D, Geometry3D
+from .geometry import build_2d_geometry, build_3d_geometry

@@ -76,7 +76,7 @@ class MaterialPropertyMap(PropertyMap):
                 elif prop_name == 'heavyHoleMass':
                     self.partProps[p] = mat.hole_mass('heavy', 'dos')
                 elif prop_name == 'dosHoleMass':
-                    self.partProps[p] = mat.hole_mass('dos','dos')
+                    self.partProps[p] = mat.hole_mass('dos', 'dos')
                 else:
                     self.partProps[p] = mat[prop_name]
             except KeyError:

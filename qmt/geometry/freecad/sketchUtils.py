@@ -3,7 +3,6 @@
 
 """Sketch manipulation."""
 
-
 from copy import deepcopy
 
 import FreeCAD
@@ -80,14 +79,14 @@ def findCycle(lineSegments, startingIndex, availSegIDs):
 
 
 # ~ def findCycle2(sketch, lineSegments, idx):
-    # ~ '''Find a cycle in a collection of line segments given a starting index.
-    # ~ Return the list of indices in the cycle.
-    # ~ '''
-    # ~ # Find wire to which the indexed segment belongs
-    # ~ # return lineSegment indices of all edges in this wire
-    # ~ for wire in sketch.Shape.Wires:
-        # ~ for edge in wire.Edges:
-        # ~ if idx in wire
+# ~ '''Find a cycle in a collection of line segments given a starting index.
+# ~ Return the list of indices in the cycle.
+# ~ '''
+# ~ # Find wire to which the indexed segment belongs
+# ~ # return lineSegment indices of all edges in this wire
+# ~ for wire in sketch.Shape.Wires:
+# ~ for edge in wire.Edges:
+# ~ if idx in wire
 
 
 def addCycleSketch(name, wire):
@@ -97,21 +96,10 @@ def addCycleSketch(name, wire):
     doc = FreeCAD.ActiveDocument
     if (doc.getObject(name) is not None):
         raise ValueError("Error: sketch " + name + " already exists.")
-
-    # makeSketch() could handle constraints itself and does recompute() well,
-    # but sometimes we may have invalid wires, which it handles badly (fixsometime)
-    # ~ return Draft.makeSketch([wire], name=name, autoconstraints=True)
-
     sketch = doc.addObject('Sketcher::SketchObject', name)
-    for i,edge in enumerate(wire.Edges):
-        v0 = vec(tuple(edge.Vertexes[0].Point))
-        v1 = vec(tuple(edge.Vertexes[1].Point))
-        if i > 0:
-            if(v0 - old_v1).Length > 1e-5:  # fix invalid wire segments
-                v1 = vec(tuple(edge.Vertexes[0].Point))
-                v0 = vec(tuple(edge.Vertexes[1].Point))
-        old_v1 = v1
-        sketch.addGeometry(Part.LineSegment(v0, v1))
+    for i, edge in enumerate(wire.Edges):
+        sketch.addGeometry(Part.LineSegment(vec(tuple(edge.Vertexes[0].Point)),
+                                            vec(tuple(edge.Vertexes[1].Point))))
         if i > 0:
             sketch.addConstraint(Sketcher.Constraint('Coincident', i - 1, 2, i, 1))
     sketch.addConstraint(Sketcher.Constraint('Coincident', i, 2, 0, 1))
@@ -151,6 +139,7 @@ def findEdgeCycles(sketch):  # TODO: port objectConstruction crossection stuff
             availSegIDs = [item for item in availSegIDs if item not in newCycle]
     return lineSegments, cycles
 
+
 def findEdgeCycles2(sketch):
     """Find the list of edges in a sketch and separate them into cycles."""
     return sketch.Shape.Wires
@@ -162,7 +151,7 @@ def splitSketch(sketch):
     if not sketch.Shape.Wires:
         raise ValueError("No wires in sketch.")
     sketchList = []
-    for i,wire in enumerate(sketch.Shape.Wires):
+    for i, wire in enumerate(sketch.Shape.Wires):
         sketchList.append(addCycleSketch(sketch.Name + '_' + str(i), wire))
     return sketchList
 

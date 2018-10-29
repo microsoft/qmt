@@ -3,17 +3,17 @@
 
 """Testing the geometry task."""
 
-def test_geo_task(fix_py2env,fix_testDir):
+
+def test_geo_task(fix_py2env, fix_testDir):
     """
     Tests the build geometry task. For now, just verifies that the build doesn't encounter errors.
     """
-    from qmt.tasks import SweepTag, Geometry3D, SweepManager
+    from qmt.tasks import build_3d_geometry
     from qmt.data import Part3DData
     import numpy as np
     import os
-    import shutil
+    import tempfile
 
-    tag1 = SweepTag('d1 thickness')
     block1 = Part3DData('Parametrised block', 'Sketch', 'extrude', 'dielectric',
                         material='air', thickness=5.0, z0=-2.5)
     block2 = Part3DData('Two blocks', 'Sketch001', 'extrude', 'metal_gate',
@@ -32,29 +32,18 @@ def test_geo_task(fix_py2env,fix_testDir):
                       z0=0, layer_num=1, thickness=4, litho_base=[substrate])
     wrap2 = Part3DData('Second Layer', 'Sketch007', 'lithography', 'dielectric',
                        layer_num=2, thickness=1)
-    print(os.path.join(fix_testDir,'py3','data','geometry_test.fcstd'))
-    # serial_fc_doc = Geometry3D.serialize_fc_file(
+    print(os.path.join(fix_testDir, 'py3', 'data', 'geometry_test.fcstd'))
     input_file_path = os.path.join(fix_testDir, 'py3', 'data', 'geometry_test.fcstd')
-    freecad_dict = {
-        'pyenv': fix_py2env,
-        'input_file': input_file_path,
-        'params': {'d1': tag1},
-        'input_parts': [block1, block2, sag, wire, shell, block3, substrate, wrap, wrap2]
-    }
-    geo_task = Geometry3D(options=freecad_dict)
 
-    # Run sweeps
-    sweeps = [{tag1: val} for val in np.linspace(2, 7, 3)]
-    result = SweepManager(sweeps).run(geo_task)
+    build_order = [block1, block2, sag, wire, shell, block3, substrate, wrap, wrap2]
+    results = []
+    for d1 in np.linspace(2., 7., 3):
+        built_geo = build_3d_geometry(fix_py2env, input_file_path, build_order, {'d1': d1})
+        results += [built_geo]
 
     # Investigate results
-    if not os.path.exists('tmp'):
-        os.makedirs('tmp')
-
-    for i, future in enumerate(result.futures):
-        geo = future.result()
-        file_name = 'tmp/' + str(i) + '.fcstd'
-        geo.write_fcstd(file_name)
-        #TODO: should find a meaningful test here
-
-    shutil.rmtree('tmp')
+    with tempfile.TemporaryDirectory() as temp_dir_path:
+        for i,result in enumerate(results):
+            file_name = os.path.join(temp_dir_path, str(i) + '.fcstd')
+            result.write_fcstd(file_name)
+            # TODO: should find a meaningful test here

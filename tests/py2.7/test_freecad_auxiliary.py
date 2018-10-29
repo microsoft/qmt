@@ -3,7 +3,6 @@
 
 """Testing FreeCAD helper functions."""
 
-
 import pytest
 
 from qmt.geometry.freecad.auxiliary import *

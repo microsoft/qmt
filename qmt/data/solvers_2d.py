@@ -25,14 +25,19 @@ Bdg2dData = namedtuple('Bdg2dData', ['coordinates',
                                      ])
 
 
-#TODO: this needs to be pruned
+# TODO: this needs to be pruned
 class SchrodingerPoissonDatas:
-    def __init__(self, poisson_obj, density, density_per_subband, density_units, rho, rho_units, psis, energies, potential, potential_units, mesh, mesh_units, bands, temperature, band_charges, Dit, neutral_level, fixed_charge_sites, fixed_charge_site_perimeters):
+    def __init__(self, poisson_obj, density, density_per_subband, density_units, rho, rho_units,
+                 psis, energies, potential, potential_units, mesh, mesh_units, bands, temperature,
+                 band_charges, Dit, neutral_level, fixed_charge_sites,
+                 fixed_charge_site_perimeters):
         """
         Constructs Data object stores outputs of Thomas-Fermi Task.
 
-        :param poisson_obj: A qms.physics.Poisson object containing relevant boundary conditions, etc.
-        :param densities: list of numpy arrays, corresponding to the density in [conduction band, light holes, heavy holes]
+        :param poisson_obj: A qms.physics.Poisson object containing relevant boundary conditions,
+        etc.
+        :param densities: list of numpy arrays, corresponding to the density in [conduction band,
+        light holes, heavy holes]
         :param density_units: units of density
         :param mesh: numpy array with the 1d mesh
         :param mesh_units: units of mesh points

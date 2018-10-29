@@ -9,13 +9,14 @@ from qmt.tasks import Task
 
 class GeometryTaskExample(Task):
 
-    def __init__(self,options=None,name='geometry_task'):
+    def __init__(self, options=None, name='geometry_task'):
         super(GeometryTaskExample, self).__init__([], options, name)
-        self.input_task_list = [] # no input tasks here
+        self.input_task_list = []  # no input tasks here
 
-    def _solve_instance(self,input_result_list,current_options):
+    def _solve_instance(self, input_result_list, current_options):
         print('running geom')
         return current_options
+
 
 class MeshingTaskExample(Task):
     
@@ -38,6 +39,7 @@ class MeshingTaskExample(Task):
             new_delayed_result.add(output, sweep_holder_index)
         return new_delayed_result
 
+
 class PoissonTaskExample(Task):
 
     def __init__(self, mesh_task, options=None, name='poisson_task'):
@@ -55,6 +57,7 @@ class PoissonTaskExample(Task):
             output += ', voltage: ' + str(current_options[part]['voltage'])
         return output
 
+
 tag1 = qtf.SweepTag('s1')
 tag2 = qtf.SweepTag('m1')
 tag3 = qtf.SweepTag('v1')   
@@ -62,21 +65,21 @@ tag3 = qtf.SweepTag('v1')
 geo_dict = {'part1': {'side length': tag1}, 'part2': {'side length': 3.}}
 geo_task = GeometryTaskExample(options=geo_dict)
 
-mesh_dict = {'part1': {'min_size':1.}, 'part2': {'min_size':tag2}}
+mesh_dict = {'part1': {'min_size': 1.}, 'part2': {'min_size': tag2}}
 mesh_task = MeshingTaskExample(geo_task, options=mesh_dict)
 
-poisson_dict = {'part1':{'voltage':tag3},'part2':{'voltage': 1.}}
+poisson_dict = {'part1': {'voltage': tag3}, 'part2': {'voltage': 1.}}
 poisson_task = PoissonTaskExample(mesh_task, options=poisson_dict)
 
-sweeps = [{tag1: 1., tag2: 10., tag3 : 1.}, {tag1: 2., tag2: 10., tag3 : 1.}, {tag1: 1., tag2: 5., tag3 : 1.}, {tag1: 4., tag2: 3., tag3 : 2.}]
+sweeps = [{tag1: 1., tag2: 10., tag3: 1.}, {tag1: 2., tag2: 10., tag3: 1.}, {tag1: 1., tag2: 5., tag3: 1.}, {tag1: 4., tag2: 3., tag3: 2.}]
 
 sweep_man = qtf.SweepManager(sweeps)
-#result = sweep_man.run(mesh_task)
+# result = sweep_man.run(mesh_task)
 
-#print(mesh_task.reduce())
+# print(mesh_task.reduce())
 result = sweep_man.run(poisson_task)
 print(poisson_task.reduce())
 
-#print(geo_task.reduce())
+# print(geo_task.reduce())
 
-#print(map(dask.result,result.futures))
+# print(map(dask.result,result.futures))

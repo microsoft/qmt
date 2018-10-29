@@ -12,6 +12,7 @@ from .data_utils import load_serial, store_serial, write_deserialised
 
 class Geo2DData(object):
     """Class holding 2D geometry data."""
+
     def __init__(self, lunit='nm'):
         """
         Class for holding a 2D geometry specification. This class holds two main dicts:
@@ -201,6 +202,7 @@ class Geo3DData(object):
         if data_name == 'fcdoc':
             def _save_fct(doc, path):
                 doc.saveAs(path)
+
             self.serial_fcdoc = store_serial(data, _save_fct, 'fcstd', scratch_dir=scratch_dir)
 
         elif data_name == 'mesh' or data_name == 'rmf':
@@ -208,6 +210,7 @@ class Geo3DData(object):
 
             def _save_fct(data, path):
                 fn.File(path) << data
+
             if data_name == 'mesh':
                 self.serial_mesh = store_serial(data, _save_fct, 'xml', scratch_dir=scratch_dir)
             if data_name == 'rmf':
@@ -221,7 +224,6 @@ class Geo3DData(object):
         """
         Get data from stored serial format.
         :param str data_name:  "fcdoc" freeCAD document.
-        :param mesh:
         :param scratch_dir:    Optional existing temporary (fast) storage location.
         :return data:          The freeCAD document or fenics object that was stored.
         """
@@ -233,6 +235,7 @@ class Geo3DData(object):
                 FreeCAD.setActiveDocument('instance')
                 doc.load(path)
                 return doc
+
             return load_serial(self.serial_fcdoc, _load_fct, scratch_dir=scratch_dir)
         else:
             raise ValueError(str(data_name) + ' was not a valid data_name.')
@@ -243,59 +246,10 @@ class Geo3DData(object):
         Returns the fcstd file path.
         """
         if file_path is None:
-            file_path = '_'.join([item[0:4].replace(' ', '_') for item in self.build_order]) + '.fcstd'
+            file_path = '_'.join(
+                [item[0:4].replace(' ', '_') for item in self.build_order]) + '.fcstd'
         write_deserialised(self.serial_fcdoc, file_path)
         return file_path
-
-    # TODO: Redundant? self.fenics_ids appears to be identical to the mapping returned here
-    def get_names_to_region_ids(self):
-        mapping = {name: i + 2 for i, name in enumerate(self.build_order)}
-        mapping[Geo3DData.EXTERIOR_BC_NAME] = 1
-        return mapping
-
-    def get_region_ids(self):
-        return self.get_region_ids_to_names().keys()
-
-    def get_region_ids_to_names(self):
-        return {id: name for name, id in self.get_names_to_region_ids().items()}
-
-    def get_names_to_default_ns(self):
-        return {name: part.ns for name, part in self.parts.items() if part.ns is not None}
-
-    def get_names_to_default_phi_nl(self):
-        return {name: part.ds for name, part in self.parts.items() if part.ds is not None}
-
-    def get_names_to_default_phi_nl_and_ds(self):
-        result = {}
-        for name in self.parts:
-            if self.parts[name].phi_nl is not None:
-                result[name] = {}
-                result[name]["phi_nl"] = self.parts[name].phi_nl
-
-            if self.parts[name].ds is not None:
-                if name not in result:
-                    raise ValueError("both phi_nl and ds must be specified together")
-                result[name]["ds"] = self.parts[name].ds
-            else:
-                if name in result:
-                    raise ValueError("both phi_nl and ds must be specified together")
-
-        return result
-
-    def get_names_to_default_ds(self):
-        return {name: part.phi_nl for name, part in self.parts.items() if part.phi_nl is not None}
-
-    def get_names_to_default_bcs(self):
-        return {name: part.boundary_condition for name, part in self.parts.items() if
-                part.boundary_condition is not None}
-
-    def get_names_to_default_dirichlet_bcs(self):
-        return {name: part.boundary_condition["voltage"] for name, part in self.parts.items() if
-                part.boundary_condition is not None and "dirichlet" in part.boundary_condition}
-
-    def get_names_to_default_neumann_bcs(self):
-        return {name: part.boundary_condition["neumann"] for name, part in self.parts.items() if
-                part.boundary_condition is not None and "neumann" in part.boundary_condition}
 
 
 class Part3DData(object):
@@ -334,7 +288,8 @@ class Part3DData(object):
         this way?
         :param list shell_verts: Vertices to use when rendering the coating. Required
                                  for the shell directive.
-        :param str depo_mode:  'depo' or 'etch' defines the positive or negative mask for the deposition
+        :param str depo_mode:  'depo' or 'etch' defines the positive or negative mask for the
+        deposition
                                 of a wire coating.
         :param float z_middle: The location for the "flare out" of the SAG directive.
         :param float t_in: The lateral distance from the 2D profile to the edge of the top bevel
@@ -352,12 +307,15 @@ class Part3DData(object):
         :param tuple mesh_scale_vector: 3D list with scaling factors for the mesh in
                                         x, y, z direction.
         :param dict boundary_condition: One or more boundary conditions, if applicable, of
-                                        the form of a type -> value mapping. For example, this could be {'voltage':1.0} or,
-                                        more explicitly, {'voltage': {'type': 'dirichlet', 'value': 1.0,'unit': 'V'}}.
+                                        the form of a type -> value mapping. For example,
+                                        this could be {'voltage':1.0} or,
+                                        more explicitly, {'voltage': {'type': 'dirichlet',
+                                        'value': 1.0,'unit': 'V'}}.
                                         Assumed by FEniCS solvers to be in the form {"voltage":1.0},
                                         and the value given is taken to be in meV.
         :param list subtract_list: A list of partNames that should be subtracted from the current
-                                   part when forming the final 3D objects. This subtraction is carried out when boundary
+                                   part when forming the final 3D objects. This subtraction is
+                                   carried out when boundary
                                    conditions are set.
         :param float ns: Volume charge density of a part, applicable to semiconductor and
                          dielectric parts. The units for this are 1/cm^3.
