@@ -38,7 +38,8 @@ def test_geo_task(fix_py2env, fix_testDir):
     build_order = [block1, block2, sag, wire, shell, block3, substrate, wrap, wrap2]
     results = []
     for d1 in np.linspace(2., 7., 3):
-        built_geo = build_3d_geometry(fix_py2env, input_file_path, build_order, {'d1': d1})
+        built_geo = build_3d_geometry(fix_py2env,input_parts=build_order,input_file=input_file_path,
+                                      params={'d1': d1})
         results += [built_geo]
 
     # Investigate results

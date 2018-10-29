@@ -12,7 +12,7 @@ import dask
 import dask.delayed
 
 
-def serialised_file(path):
+def serialize_file(path):
     '''Return a serialised blob of the contents of a given file path.'''
     with open(path, 'rb') as f:
         serial_data = codecs.encode(f.read(), 'base64').decode()
@@ -37,7 +37,7 @@ def store_serial(obj, save_fct, ext_format, scratch_dir=None):
         scratch_dir = os.curdir
     tmp_path = os.path.join(scratch_dir, uuid.uuid4().hex + '.' + ext_format)
     save_fct(obj, tmp_path)
-    serial_data = serialised_file(tmp_path)
+    serial_data = serialize_file(tmp_path)
     os.remove(tmp_path)
     return serial_data
 
