@@ -58,6 +58,10 @@ class Material(collections.Mapping):
             self.energyUnit = units.meV
         else:
             self.energyUnit = toFloat(units.meV / parseUnit(eunit))
+        # Tuple of key values that have energy units:
+        self.energy_quantities = ('workFunction', 'fermiEnergy', 'electronAffinity',
+                                  'directBandGap','valenceBandOffset', 'chargeNeutralityLevel',
+                                  'interbandMatrixElement', 'spinOrbitSplitting')
 
     def __getitem__(self, key):
         try:
@@ -65,12 +69,16 @@ class Material(collections.Mapping):
         except KeyError:
             raise KeyError(
                 "KeyError: material '{}' has no '{}'".format(self.name, key))
-        if key in (
-                'workFunction', 'fermiEnergy', 'electronAffinity', 'directBandGap',
-                'valenceBandOffset', 'chargeNeutralityLevel',
-                'interbandMatrixElement', 'spinOrbitSplitting'):
+        if key in self.energy_quantities:
             value *= self.energyUnit
         return value
+
+    def __setitem__(self,key,value):
+        if key in self.energy_quantities:
+            scaled_value = toFloat(value/self.energyUnit) # if is an energy quantity, scale it
+        else:
+            scaled_value = value # otherwise just pass
+        self.properties[key] = scaled_value
 
     def __iter__(self):
         return iter(self.properties)
@@ -236,6 +244,10 @@ class Materials(collections.Mapping):
 
     def __getitem__(self, key):
         return self.find(key)
+
+    def __setitem__(self,key,val):
+        # This assumes that val is a Material object
+        self.matDict[key] = val.properties
 
     def find(self, name, eunit=None):
         """Retrieve a named material from the database.

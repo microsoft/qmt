@@ -96,10 +96,21 @@ def addCycleSketch(name, wire):
     doc = FreeCAD.ActiveDocument
     if (doc.getObject(name) is not None):
         raise ValueError("Error: sketch " + name + " already exists.")
+
+    # makeSketch() could handle constraints itself and does recompute() well,
+    # but sometimes we may have invalid wires, which it handles badly (fixsometime)
+    # ~ return Draft.makeSketch([wire], name=name, autoconstraints=True)
+
     sketch = doc.addObject('Sketcher::SketchObject', name)
-    for i, edge in enumerate(wire.Edges):
-        sketch.addGeometry(Part.LineSegment(vec(tuple(edge.Vertexes[0].Point)),
-                                            vec(tuple(edge.Vertexes[1].Point))))
+    for i,edge in enumerate(wire.Edges):
+        v0 = vec(tuple(edge.Vertexes[0].Point))
+        v1 = vec(tuple(edge.Vertexes[1].Point))
+        if i > 0:
+            if(v0 - old_v1).Length > 1e-5:  # fix invalid wire segments
+                v1 = vec(tuple(edge.Vertexes[0].Point))
+                v0 = vec(tuple(edge.Vertexes[1].Point))
+        old_v1 = v1
+        sketch.addGeometry(Part.LineSegment(v0, v1))
         if i > 0:
             sketch.addConstraint(Sketcher.Constraint('Coincident', i - 1, 2, i, 1))
     sketch.addConstraint(Sketcher.Constraint('Coincident', i, 2, 0, 1))
