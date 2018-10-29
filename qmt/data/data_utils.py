@@ -12,7 +12,7 @@ import dask
 import dask.delayed
 
 
-def serialised_file(path):
+def serialize_file(path):
     '''Return a serialised blob of the contents of a given file path.'''
     with open(path, 'rb') as f:
         serial_data = codecs.encode(f.read(), 'base64').decode()

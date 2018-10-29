@@ -5,7 +5,7 @@
 
 from shapely.geometry import Polygon, LineString
 
-from qmt.data import Geo2DData, Geo3DData, serialised_file
+from qmt.data import Geo2DData, Geo3DData, serialize_file
 
 
 def build_2d_geometry(parts, edges, lunit='nm', build_order=None):
@@ -42,16 +42,29 @@ def build_2d_geometry(parts, edges, lunit='nm', build_order=None):
     return geo_2d
 
 
-def build_3d_geometry(pyenv, input_file, input_parts, params):
+def build_3d_geometry(pyenv, input_parts, input_file = None,
+                      serialized_input_file = None,params=None):
     """
     Build a geometry in 3D.
     :param str pyenv: path or callable name of the Python 2 executable.
-    :param str input_file: path to FreeCAD template file.
     :param list input_parts: ordered list of input parts, leftmost items get built first
+    :param str input_file: path to FreeCAD template file. Either this or serialized_input_file
+    must be set (but not both).
+    :param bytes input_file: FreeCAD template file that has been serialized using
+    qmt.data.serialize_file. This is useful for passing a file into a docker container or other
+    environment that doesn't have access to a shared drive. Either this or serialized_input_file
+    must be set (but not both).
     :param dict params: dictionary of parameters to use in the freeCAD
-    :return:
+    :return Geo3DData:
     """
-    serial_fcdoc = serialised_file(input_file)
+    if input_file is None and serialized_input_file is None:
+        raise ValueError("One of input_file or serialized_input_file must be non-none.")
+    elif input_file is not None and serialized_input_file is not None:
+        raise ValueError("Both input_file and serialized_input_file were non-none.")
+    elif input_file is not None:
+        serial_fcdoc = serialize_file(input_file)
+    else:
+        serial_fcdoc = serialized_input_file
     options_dict = {}
     options_dict['serial_fcdoc'] = serial_fcdoc
     options_dict['input_parts'] = input_parts
