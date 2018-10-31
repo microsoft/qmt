@@ -5,13 +5,12 @@
 
 import os
 import numpy as np
+import dask
 
 from qmt.data import Part3DData
-from tasks.geometry import Geometry3D
-from qmt.tasks.sweep import SweepTag, SweepManager
+from qmt.tasks import build_3d_geometry
 
 # Set up geometry task
-tag1 = SweepTag('d1 thickness')
 block1 = Part3DData('Parametrised block', 'Sketch', 'extrude', 'dielectric',
                 material='air', thickness=5.0, z0=-2.5)
 block2 = Part3DData('Two blocks', 'Sketch001', 'extrude', 'metal_gate',
@@ -30,29 +29,29 @@ wrap = Part3DData('First Layer', 'Sketch006', 'lithography', 'dielectric',
                 z0=0, layer_num=1, thickness=0.4, litho_base=[substrate, wire, shell])
 wrap2 = Part3DData('Second Layer', 'Sketch007', 'lithography', 'dielectric',
                 layer_num=2, thickness=0.1)
+virt = Part3DData('Virtual Domain', 'Sketch008', 'extrude', 'virtual',
+                thickness=5.5)
 
-freecad_dict = {
-    'pyenv': 'python2',
-    'input_file': 'geometry_sweep_showcase.fcstd',
-    'input_parts': [block1, block2, sag, wire, shell, block3, substrate, wrap, wrap2],
-    'params': {'d1': tag1}
-}
-geo_task = Geometry3D(options=freecad_dict)
+build_order = [block1, block2, sag, virt, wire, shell, block3, substrate, wrap, wrap2]
+input_file = 'geometry_sweep_showcase.fcstd'
 
-# Run sweeps
-sweeps = [{tag1: val} for val in np.linspace(2, 7, 3)]
-result = SweepManager(sweeps).run(geo_task)
+# Parallel computation of parametrised geometries using dask
+futures = []
+for d1 in np.linspace(2., 7., 3):
+    futures.append(dask.delayed(build_3d_geometry)(
+        'python2', input_file, build_order, {'d1': d1}
+    ))
+geometries = dask.compute(*futures)
 
-# Investigate results
+# Create a local temporary directory to investigate results
 if not os.path.exists('tmp'):
     os.makedirs('tmp')
 print("Writing in directory tmp:")
 
-for i, future in enumerate(result.futures):
-    geo = future.result()
-    print('Writing instance ' + str(i) + ' to FreeCAD file.')
-    geo.write_fcstd('tmp/' + str(i) + '.fcstd')
+for i, geo in enumerate(geometries):
+    print('Writing parametrised instance ' + str(i) + ' to FreeCAD file.')
+    geo.write_fcstd(os.path.join('tmp', str(i) + '.fcstd'))
     for label, part in geo.parts.items():
-        print(str(i) + ': ' + label +
-              ' (' + part.fc_name + ' -> ' + part.built_fc_name + ') to STEP file.')
-        part.write_stp('tmp/' + label + str(i) + '.stp')
+        print(str(i) + ': "' + label +
+              '" (' + part.fc_name + ' -> ' + part.built_fc_name + ') to STEP file.')
+        part.write_stp(os.path.join('tmp', str(i) + '_' + label + '.stp'))
