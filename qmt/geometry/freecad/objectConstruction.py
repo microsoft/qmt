@@ -133,8 +133,12 @@ def build(opts):
         doc.recompute()
 
     # Subtraction (removes the need for subtractlists)
-    for i, part in enumerate(built_parts):
-        for other_part in built_parts[0:i]:
+    for i, (input_part, part) in enumerate(zip(opts['input_parts'], built_parts)):
+        if input_part.domain_type == 'virtual':
+            continue
+        for other_input_part, other_part in zip(opts['input_parts'][0:i], built_parts[0:i]):
+            if other_input_part.domain_type == 'virtual':
+                continue
             if checkOverlap([part, other_part]):
                 cut = subtract(part, copy_move(other_part), consumeInputs=True
                                                             if not DBG_OUT else False)
