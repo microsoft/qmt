@@ -158,7 +158,6 @@
 
 <span class="sd">&quot;&quot;&quot;Sketch manipulation.&quot;&quot;&quot;</span>
 
-
 <span class="kn">from</span> <span class="nn">copy</span> <span class="k">import</span> <span class="n">deepcopy</span>
 
 <span class="kn">import</span> <span class="nn">FreeCAD</span>
@@ -235,14 +234,14 @@
 
 
 <span class="c1"># ~ def findCycle2(sketch, lineSegments, idx):</span>
-    <span class="c1"># ~ &#39;&#39;&#39;Find a cycle in a collection of line segments given a starting index.</span>
-    <span class="c1"># ~ Return the list of indices in the cycle.</span>
-    <span class="c1"># ~ &#39;&#39;&#39;</span>
-    <span class="c1"># ~ # Find wire to which the indexed segment belongs</span>
-    <span class="c1"># ~ # return lineSegment indices of all edges in this wire</span>
-    <span class="c1"># ~ for wire in sketch.Shape.Wires:</span>
-        <span class="c1"># ~ for edge in wire.Edges:</span>
-        <span class="c1"># ~ if idx in wire</span>
+<span class="c1"># ~ &#39;&#39;&#39;Find a cycle in a collection of line segments given a starting index.</span>
+<span class="c1"># ~ Return the list of indices in the cycle.</span>
+<span class="c1"># ~ &#39;&#39;&#39;</span>
+<span class="c1"># ~ # Find wire to which the indexed segment belongs</span>
+<span class="c1"># ~ # return lineSegment indices of all edges in this wire</span>
+<span class="c1"># ~ for wire in sketch.Shape.Wires:</span>
+<span class="c1"># ~ for edge in wire.Edges:</span>
+<span class="c1"># ~ if idx in wire</span>
 
 
 <div class="viewcode-block" id="addCycleSketch"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.sketchUtils.addCycleSketch">[docs]</a><span class="k">def</span> <span class="nf">addCycleSketch</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">wire</span><span class="p">):</span>
@@ -252,10 +251,21 @@
     <span class="n">doc</span> <span class="o">=</span> <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">getObject</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Error: sketch &quot;</span> <span class="o">+</span> <span class="n">name</span> <span class="o">+</span> <span class="s2">&quot; already exists.&quot;</span><span class="p">)</span>
+
+    <span class="c1"># makeSketch() could handle constraints itself and does recompute() well,</span>
+    <span class="c1"># but sometimes we may have invalid wires, which it handles badly (fixsometime)</span>
+    <span class="c1"># ~ return Draft.makeSketch([wire], name=name, autoconstraints=True)</span>
+
     <span class="n">sketch</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">addObject</span><span class="p">(</span><span class="s1">&#39;Sketcher::SketchObject&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">edge</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">wire</span><span class="o">.</span><span class="n">Edges</span><span class="p">):</span>
-        <span class="n">sketch</span><span class="o">.</span><span class="n">addGeometry</span><span class="p">(</span><span class="n">Part</span><span class="o">.</span><span class="n">LineSegment</span><span class="p">(</span><span class="n">vec</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">Vertexes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">Point</span><span class="p">)),</span>
-                                            <span class="n">vec</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">Vertexes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">Point</span><span class="p">))))</span>
+        <span class="n">v0</span> <span class="o">=</span> <span class="n">vec</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">Vertexes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">Point</span><span class="p">))</span>
+        <span class="n">v1</span> <span class="o">=</span> <span class="n">vec</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">Vertexes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">Point</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span><span class="p">(</span><span class="n">v0</span> <span class="o">-</span> <span class="n">old_v1</span><span class="p">)</span><span class="o">.</span><span class="n">Length</span> <span class="o">&gt;</span> <span class="mf">1e-5</span><span class="p">:</span>  <span class="c1"># fix invalid wire segments</span>
+                <span class="n">v1</span> <span class="o">=</span> <span class="n">vec</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">Vertexes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">Point</span><span class="p">))</span>
+                <span class="n">v0</span> <span class="o">=</span> <span class="n">vec</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">edge</span><span class="o">.</span><span class="n">Vertexes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">Point</span><span class="p">))</span>
+        <span class="n">old_v1</span> <span class="o">=</span> <span class="n">v1</span>
+        <span class="n">sketch</span><span class="o">.</span><span class="n">addGeometry</span><span class="p">(</span><span class="n">Part</span><span class="o">.</span><span class="n">LineSegment</span><span class="p">(</span><span class="n">v0</span><span class="p">,</span> <span class="n">v1</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">sketch</span><span class="o">.</span><span class="n">addConstraint</span><span class="p">(</span><span class="n">Sketcher</span><span class="o">.</span><span class="n">Constraint</span><span class="p">(</span><span class="s1">&#39;Coincident&#39;</span><span class="p">,</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
     <span class="n">sketch</span><span class="o">.</span><span class="n">addConstraint</span><span class="p">(</span><span class="n">Sketcher</span><span class="o">.</span><span class="n">Constraint</span><span class="p">(</span><span class="s1">&#39;Coincident&#39;</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
@@ -295,6 +305,7 @@
             <span class="n">availSegIDs</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">availSegIDs</span> <span class="k">if</span> <span class="n">item</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">newCycle</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">lineSegments</span><span class="p">,</span> <span class="n">cycles</span></div>
 
+
 <div class="viewcode-block" id="findEdgeCycles2"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.sketchUtils.findEdgeCycles2">[docs]</a><span class="k">def</span> <span class="nf">findEdgeCycles2</span><span class="p">(</span><span class="n">sketch</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Find the list of edges in a sketch and separate them into cycles.&quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">sketch</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">Wires</span></div>
@@ -306,7 +317,7 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">sketch</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">Wires</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No wires in sketch.&quot;</span><span class="p">)</span>
     <span class="n">sketchList</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">wire</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sketch</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">Wires</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">wire</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sketch</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">Wires</span><span class="p">):</span>
         <span class="n">sketchList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">addCycleSketch</span><span class="p">(</span><span class="n">sketch</span><span class="o">.</span><span class="n">Name</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">wire</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">sketchList</span></div>
 

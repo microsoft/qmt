@@ -167,6 +167,7 @@
 
 <div class="viewcode-block" id="Geo2DData"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geometry.Geo2DData">[docs]</a><span class="k">class</span> <span class="nc">Geo2DData</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Class holding 2D geometry data.&quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lunit</span><span class="o">=</span><span class="s1">&#39;nm&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Class for holding a 2D geometry specification. This class holds two main dicts:</span>
@@ -356,6 +357,7 @@
         <span class="k">if</span> <span class="n">data_name</span> <span class="o">==</span> <span class="s1">&#39;fcdoc&#39;</span><span class="p">:</span>
             <span class="k">def</span> <span class="nf">_save_fct</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
                 <span class="n">doc</span><span class="o">.</span><span class="n">saveAs</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
             <span class="bp">self</span><span class="o">.</span><span class="n">serial_fcdoc</span> <span class="o">=</span> <span class="n">store_serial</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">_save_fct</span><span class="p">,</span> <span class="s1">&#39;fcstd&#39;</span><span class="p">,</span> <span class="n">scratch_dir</span><span class="o">=</span><span class="n">scratch_dir</span><span class="p">)</span>
 
         <span class="k">elif</span> <span class="n">data_name</span> <span class="o">==</span> <span class="s1">&#39;mesh&#39;</span> <span class="ow">or</span> <span class="n">data_name</span> <span class="o">==</span> <span class="s1">&#39;rmf&#39;</span><span class="p">:</span>
@@ -363,6 +365,7 @@
 
             <span class="k">def</span> <span class="nf">_save_fct</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
                 <span class="n">fn</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="o">&lt;&lt;</span> <span class="n">data</span>
+
             <span class="k">if</span> <span class="n">data_name</span> <span class="o">==</span> <span class="s1">&#39;mesh&#39;</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">serial_mesh</span> <span class="o">=</span> <span class="n">store_serial</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">_save_fct</span><span class="p">,</span> <span class="s1">&#39;xml&#39;</span><span class="p">,</span> <span class="n">scratch_dir</span><span class="o">=</span><span class="n">scratch_dir</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">data_name</span> <span class="o">==</span> <span class="s1">&#39;rmf&#39;</span><span class="p">:</span>
@@ -376,7 +379,6 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get data from stored serial format.</span>
 <span class="sd">        :param str data_name:  &quot;fcdoc&quot; freeCAD document.</span>
-<span class="sd">        :param mesh:</span>
 <span class="sd">        :param scratch_dir:    Optional existing temporary (fast) storage location.</span>
 <span class="sd">        :return data:          The freeCAD document or fenics object that was stored.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -388,6 +390,7 @@
                 <span class="n">FreeCAD</span><span class="o">.</span><span class="n">setActiveDocument</span><span class="p">(</span><span class="s1">&#39;instance&#39;</span><span class="p">)</span>
                 <span class="n">doc</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">doc</span>
+
             <span class="k">return</span> <span class="n">load_serial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serial_fcdoc</span><span class="p">,</span> <span class="n">_load_fct</span><span class="p">,</span> <span class="n">scratch_dir</span><span class="o">=</span><span class="n">scratch_dir</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">data_name</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; was not a valid data_name.&#39;</span><span class="p">)</span></div>
@@ -398,59 +401,10 @@
 <span class="sd">        Returns the fcstd file path.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">file_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">file_path</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_order</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;.fcstd&#39;</span>
+            <span class="n">file_path</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_order</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;.fcstd&#39;</span>
         <span class="n">write_deserialised</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">serial_fcdoc</span><span class="p">,</span> <span class="n">file_path</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">file_path</span></div>
-
-    <span class="c1"># TODO: Redundant? self.fenics_ids appears to be identical to the mapping returned here</span>
-<div class="viewcode-block" id="Geo3DData.get_names_to_region_ids"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geometry.Geo3DData.get_names_to_region_ids">[docs]</a>    <span class="k">def</span> <span class="nf">get_names_to_region_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">2</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">build_order</span><span class="p">)}</span>
-        <span class="n">mapping</span><span class="p">[</span><span class="n">Geo3DData</span><span class="o">.</span><span class="n">EXTERIOR_BC_NAME</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
-        <span class="k">return</span> <span class="n">mapping</span></div>
-
-<div class="viewcode-block" id="Geo3DData.get_region_ids"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geometry.Geo3DData.get_region_ids">[docs]</a>    <span class="k">def</span> <span class="nf">get_region_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_region_ids_to_names</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span></div>
-
-<div class="viewcode-block" id="Geo3DData.get_region_ids_to_names"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geometry.Geo3DData.get_region_ids_to_names">[docs]</a>    <span class="k">def</span> <span class="nf">get_region_ids_to_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">{</span><span class="nb">id</span><span class="p">:</span> <span class="n">name</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="nb">id</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_names_to_region_ids</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span></div>
-
-<div class="viewcode-block" id="Geo3DData.get_names_to_default_ns"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geometry.Geo3DData.get_names_to_default_ns">[docs]</a>    <span class="k">def</span> <span class="nf">get_names_to_default_ns</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">part</span><span class="o">.</span><span class="n">ns</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">part</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">part</span><span class="o">.</span><span class="n">ns</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span></div>
-
-<div class="viewcode-block" id="Geo3DData.get_names_to_default_phi_nl"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geometry.Geo3DData.get_names_to_default_phi_nl">[docs]</a>    <span class="k">def</span> <span class="nf">get_names_to_default_phi_nl</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">part</span><span class="o">.</span><span class="n">ds</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">part</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">part</span><span class="o">.</span><span class="n">ds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span></div>
-
-<div class="viewcode-block" id="Geo3DData.get_names_to_default_phi_nl_and_ds"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geometry.Geo3DData.get_names_to_default_phi_nl_and_ds">[docs]</a>    <span class="k">def</span> <span class="nf">get_names_to_default_phi_nl_and_ds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">:</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">phi_nl</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">result</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-                <span class="n">result</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;phi_nl&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">phi_nl</span>
-
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">ds</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;both phi_nl and ds must be specified together&quot;</span><span class="p">)</span>
-                <span class="n">result</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s2">&quot;ds&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">ds</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;both phi_nl and ds must be specified together&quot;</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">result</span></div>
-
-<div class="viewcode-block" id="Geo3DData.get_names_to_default_ds"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geometry.Geo3DData.get_names_to_default_ds">[docs]</a>    <span class="k">def</span> <span class="nf">get_names_to_default_ds</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">part</span><span class="o">.</span><span class="n">phi_nl</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">part</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">part</span><span class="o">.</span><span class="n">phi_nl</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span></div>
-
-<div class="viewcode-block" id="Geo3DData.get_names_to_default_bcs"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geometry.Geo3DData.get_names_to_default_bcs">[docs]</a>    <span class="k">def</span> <span class="nf">get_names_to_default_bcs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">part</span><span class="o">.</span><span class="n">boundary_condition</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">part</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span>
-                <span class="n">part</span><span class="o">.</span><span class="n">boundary_condition</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span></div>
-
-<div class="viewcode-block" id="Geo3DData.get_names_to_default_dirichlet_bcs"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geometry.Geo3DData.get_names_to_default_dirichlet_bcs">[docs]</a>    <span class="k">def</span> <span class="nf">get_names_to_default_dirichlet_bcs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">part</span><span class="o">.</span><span class="n">boundary_condition</span><span class="p">[</span><span class="s2">&quot;voltage&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">part</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span>
-                <span class="n">part</span><span class="o">.</span><span class="n">boundary_condition</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s2">&quot;dirichlet&quot;</span> <span class="ow">in</span> <span class="n">part</span><span class="o">.</span><span class="n">boundary_condition</span><span class="p">}</span></div>
-
-<div class="viewcode-block" id="Geo3DData.get_names_to_default_neumann_bcs"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geometry.Geo3DData.get_names_to_default_neumann_bcs">[docs]</a>    <span class="k">def</span> <span class="nf">get_names_to_default_neumann_bcs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">part</span><span class="o">.</span><span class="n">boundary_condition</span><span class="p">[</span><span class="s2">&quot;neumann&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">part</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span>
-                <span class="n">part</span><span class="o">.</span><span class="n">boundary_condition</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s2">&quot;neumann&quot;</span> <span class="ow">in</span> <span class="n">part</span><span class="o">.</span><span class="n">boundary_condition</span><span class="p">}</span></div></div>
+        <span class="k">return</span> <span class="n">file_path</span></div></div>
 
 
 <div class="viewcode-block" id="Part3DData"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geometry.Part3DData">[docs]</a><span class="k">class</span> <span class="nc">Part3DData</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -489,7 +443,8 @@
 <span class="sd">        this way?</span>
 <span class="sd">        :param list shell_verts: Vertices to use when rendering the coating. Required</span>
 <span class="sd">                                 for the shell directive.</span>
-<span class="sd">        :param str depo_mode:  &#39;depo&#39; or &#39;etch&#39; defines the positive or negative mask for the deposition</span>
+<span class="sd">        :param str depo_mode:  &#39;depo&#39; or &#39;etch&#39; defines the positive or negative mask for the</span>
+<span class="sd">        deposition</span>
 <span class="sd">                                of a wire coating.</span>
 <span class="sd">        :param float z_middle: The location for the &quot;flare out&quot; of the SAG directive.</span>
 <span class="sd">        :param float t_in: The lateral distance from the 2D profile to the edge of the top bevel</span>
@@ -507,12 +462,15 @@
 <span class="sd">        :param tuple mesh_scale_vector: 3D list with scaling factors for the mesh in</span>
 <span class="sd">                                        x, y, z direction.</span>
 <span class="sd">        :param dict boundary_condition: One or more boundary conditions, if applicable, of</span>
-<span class="sd">                                        the form of a type -&gt; value mapping. For example, this could be {&#39;voltage&#39;:1.0} or,</span>
-<span class="sd">                                        more explicitly, {&#39;voltage&#39;: {&#39;type&#39;: &#39;dirichlet&#39;, &#39;value&#39;: 1.0,&#39;unit&#39;: &#39;V&#39;}}.</span>
+<span class="sd">                                        the form of a type -&gt; value mapping. For example,</span>
+<span class="sd">                                        this could be {&#39;voltage&#39;:1.0} or,</span>
+<span class="sd">                                        more explicitly, {&#39;voltage&#39;: {&#39;type&#39;: &#39;dirichlet&#39;,</span>
+<span class="sd">                                        &#39;value&#39;: 1.0,&#39;unit&#39;: &#39;V&#39;}}.</span>
 <span class="sd">                                        Assumed by FEniCS solvers to be in the form {&quot;voltage&quot;:1.0},</span>
 <span class="sd">                                        and the value given is taken to be in meV.</span>
 <span class="sd">        :param list subtract_list: A list of partNames that should be subtracted from the current</span>
-<span class="sd">                                   part when forming the final 3D objects. This subtraction is carried out when boundary</span>
+<span class="sd">                                   part when forming the final 3D objects. This subtraction is</span>
+<span class="sd">                                   carried out when boundary</span>
 <span class="sd">                                   conditions are set.</span>
 <span class="sd">        :param float ns: Volume charge density of a part, applicable to semiconductor and</span>
 <span class="sd">                         dielectric parts. The units for this are 1/cm^3.</span>

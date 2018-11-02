@@ -42,8 +42,8 @@ def build_2d_geometry(parts, edges, lunit='nm', build_order=None):
     return geo_2d
 
 
-def build_3d_geometry(pyenv, input_parts, input_file = None,
-                      serialized_input_file = None,params=None):
+def build_3d_geometry(pyenv, input_parts, input_file=None,
+                      serialized_input_file=None, params=None):
     """
     Build a geometry in 3D.
     :param str pyenv: path or callable name of the Python 2 executable.
@@ -75,11 +75,12 @@ def build_3d_geometry(pyenv, input_parts, input_file = None,
     if 'params' in options_dict:
         options_dict['params'] = {
             k: float(v) for k, v in options_dict['params'].items()
-            }
+        }
     # Send off the instructions
     from qmt.geometry.freecad_wrapper import fcwrapper
-    geo = fcwrapper(pyenv,
-                    'build3d',
-                    {'current_options': options_dict}
-                    )
+    geo = fcwrapper(
+        pyenv,
+        'build3d',
+        {'current_options': options_dict}
+    )
     return geo

@@ -158,25 +158,34 @@
 
 <span class="sd">&quot;&quot;&quot;Functions that perform composite executions.&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">sys</span> <span class="c1">#####################################################################</span>
-<span class="kn">import</span> <span class="nn">FreeCAD</span>
-
-<span class="kn">import</span> <span class="nn">Draft</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">six</span> <span class="k">import</span> <span class="n">iteritems</span><span class="p">,</span> <span class="n">text_type</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="c1"># ~ logging.getLogger().setLevel(logging.DEBUG)  # toggle debug logging for this file</span>
+
+<span class="kn">import</span> <span class="nn">FreeCAD</span>
+<span class="kn">import</span> <span class="nn">Draft</span>
 
 <span class="c1"># TODO: use namespace in code</span>
 <span class="kn">from</span> <span class="nn">qmt.geometry.freecad.auxiliary</span> <span class="k">import</span> <span class="o">*</span>
 <span class="kn">from</span> <span class="nn">qmt.geometry.freecad.fileIO</span> <span class="k">import</span> <span class="n">exportCAD</span>
-<span class="kn">from</span> <span class="nn">qmt.geometry.freecad.geomUtils</span> <span class="k">import</span> <span class="p">(</span><span class="n">extrude</span><span class="p">,</span> <span class="n">copy_move</span><span class="p">,</span> <span class="n">genUnion</span><span class="p">,</span><span class="c1"># make_solid,</span>
-                                            <span class="n">getBB</span><span class="p">,</span> <span class="n">makeBB</span><span class="p">,</span> <span class="n">makeHexFace</span><span class="p">,</span>
-                                            <span class="n">extrudeBetween</span><span class="p">,</span> <span class="n">draftOffset</span><span class="p">,</span> <span class="n">intersect</span><span class="p">,</span>
-                                            <span class="n">checkOverlap</span><span class="p">,</span> <span class="n">subtract</span><span class="p">,</span>
-                                            <span class="n">crossSection</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">qmt.geometry.freecad.sketchUtils</span> <span class="k">import</span> <span class="p">(</span><span class="n">findSegments</span><span class="p">,</span> <span class="n">splitSketch</span><span class="p">,</span> <span class="n">extendSketch</span><span class="p">,</span>
-                                              <span class="n">findEdgeCycles</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">qmt.geometry.freecad.geomUtils</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">extrude</span><span class="p">,</span> <span class="n">copy_move</span><span class="p">,</span> <span class="n">genUnion</span><span class="p">,</span>  <span class="c1"># make_solid,</span>
+    <span class="n">getBB</span><span class="p">,</span> <span class="n">makeBB</span><span class="p">,</span> <span class="n">makeHexFace</span><span class="p">,</span>
+    <span class="n">extrudeBetween</span><span class="p">,</span> <span class="n">draftOffset</span><span class="p">,</span> <span class="n">intersect</span><span class="p">,</span>
+    <span class="n">checkOverlap</span><span class="p">,</span> <span class="n">subtract</span><span class="p">,</span>
+    <span class="n">crossSection</span>
+    <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">qmt.geometry.freecad.sketchUtils</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">findSegments</span><span class="p">,</span> <span class="n">splitSketch</span><span class="p">,</span> <span class="n">extendSketch</span><span class="p">,</span>
+    <span class="n">findEdgeCycles</span>
+    <span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">qmt.data.geometry</span> <span class="k">import</span> <span class="n">Geo3DData</span><span class="p">,</span> <span class="n">store_serial</span>
+
+
+<span class="n">DBG_OUT</span> <span class="o">=</span> <span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span><span class="o">.</span><span class="n">level</span> <span class="o">&lt;=</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="set_params"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.set_params">[docs]</a><span class="k">def</span> <span class="nf">set_params</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">paramDict</span><span class="p">):</span>
@@ -272,16 +281,22 @@
         <span class="n">opts</span><span class="p">[</span><span class="s1">&#39;built_part_names&#39;</span><span class="p">][</span><span class="n">input_part</span><span class="o">.</span><span class="n">label</span><span class="p">]</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">Name</span>  <span class="c1"># needed for litho steps</span>
 
     <span class="c1"># Cleanup</span>
-    <span class="n">collect_garbage</span><span class="p">(</span><span class="n">info_holder</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">blacklist</span><span class="p">:</span>
-        <span class="n">delete</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
-    <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">DBG_OUT</span><span class="p">:</span>
+        <span class="n">collect_garbage</span><span class="p">(</span><span class="n">info_holder</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">blacklist</span><span class="p">:</span>
+            <span class="n">delete</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
 
     <span class="c1"># Subtraction (removes the need for subtractlists)</span>
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">part</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">built_parts</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">other_part</span> <span class="ow">in</span> <span class="n">built_parts</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">i</span><span class="p">]:</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">input_part</span><span class="p">,</span> <span class="n">part</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">opts</span><span class="p">[</span><span class="s1">&#39;input_parts&#39;</span><span class="p">],</span> <span class="n">built_parts</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">input_part</span><span class="o">.</span><span class="n">domain_type</span> <span class="o">==</span> <span class="s1">&#39;virtual&#39;</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">for</span> <span class="n">other_input_part</span><span class="p">,</span> <span class="n">other_part</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">opts</span><span class="p">[</span><span class="s1">&#39;input_parts&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">:</span><span class="n">i</span><span class="p">],</span> <span class="n">built_parts</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">i</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="n">other_input_part</span><span class="o">.</span><span class="n">domain_type</span> <span class="o">==</span> <span class="s1">&#39;virtual&#39;</span><span class="p">:</span>
+                <span class="k">continue</span>
             <span class="k">if</span> <span class="n">checkOverlap</span><span class="p">([</span><span class="n">part</span><span class="p">,</span> <span class="n">other_part</span><span class="p">]):</span>
-                <span class="n">cut</span> <span class="o">=</span> <span class="n">subtract</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">other_part</span><span class="p">),</span> <span class="n">consumeInputs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">cut</span> <span class="o">=</span> <span class="n">subtract</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">other_part</span><span class="p">),</span> <span class="n">consumeInputs</span><span class="o">=</span><span class="kc">True</span>
+                                                            <span class="k">if</span> <span class="ow">not</span> <span class="n">DBG_OUT</span> <span class="k">else</span> <span class="kc">False</span><span class="p">)</span>
                 <span class="n">simple_copy</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">addObject</span><span class="p">(</span><span class="s1">&#39;Part::Feature&#39;</span><span class="p">,</span> <span class="s2">&quot;simple_copy&quot;</span><span class="p">)</span>
                 <span class="n">simple_copy</span><span class="o">.</span><span class="n">Shape</span> <span class="o">=</span> <span class="n">cut</span><span class="o">.</span><span class="n">Shape</span>  <span class="c1"># no solid, just its shape (can be disjoint)</span>
                 <span class="n">delete</span><span class="p">(</span><span class="n">cut</span><span class="p">)</span>
@@ -322,7 +337,8 @@
         <span class="n">extParts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">extrudeBetween</span><span class="p">(</span><span class="n">sketch</span><span class="p">,</span> <span class="n">z0</span><span class="p">,</span> <span class="n">z0</span> <span class="o">+</span> <span class="n">deltaz</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">part</span><span class="o">.</span><span class="n">label</span><span class="p">))</span>
         <span class="n">delete</span><span class="p">(</span><span class="n">sketch</span><span class="p">)</span>
     <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">genUnion</span><span class="p">(</span><span class="n">extParts</span><span class="p">,</span> <span class="n">consumeInputs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">genUnion</span><span class="p">(</span><span class="n">extParts</span><span class="p">,</span> <span class="n">consumeInputs</span><span class="o">=</span><span class="kc">True</span>
+                              <span class="k">if</span> <span class="ow">not</span> <span class="n">DBG_OUT</span> <span class="k">else</span> <span class="kc">False</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="build_sag"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.build_sag">[docs]</a><span class="k">def</span> <span class="nf">build_sag</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="mf">0.</span><span class="p">):</span>
@@ -370,7 +386,7 @@
         <span class="n">depoZone</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">etchZone</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">getObject</span><span class="p">(</span><span class="n">part</span><span class="o">.</span><span class="n">fc_name</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown depo_mode &#39;</span> <span class="o">+</span> <span class="n">depo_mode</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown depo_mode &#39;</span> <span class="o">+</span> <span class="n">part</span><span class="o">.</span><span class="n">depo_mode</span><span class="p">)</span>
 
     <span class="n">shell</span> <span class="o">=</span> <span class="n">buildAlShell</span><span class="p">(</span>
         <span class="n">wireSketch</span><span class="p">,</span>
@@ -388,17 +404,22 @@
 <div class="viewcode-block" id="build_lithography"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.build_lithography">[docs]</a><span class="k">def</span> <span class="nf">build_lithography</span><span class="p">(</span><span class="n">part</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">info_holder</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Build a lithography part.&quot;&quot;&quot;</span>
     <span class="k">assert</span> <span class="n">part</span><span class="o">.</span><span class="n">directive</span> <span class="o">==</span> <span class="s1">&#39;lithography&#39;</span>
-    <span class="c1"># ~ part.litho_base = [obj for obj in part.litho_base if obj.directive != &#39;wire_shell&#39; ] # filter implicitly considered shells</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">info_holder</span><span class="o">.</span><span class="n">litho_setup_done</span><span class="p">:</span>
         <span class="n">initialize_lithography</span><span class="p">(</span><span class="n">info_holder</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">fillShells</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">info_holder</span><span class="o">.</span><span class="n">litho_setup_done</span> <span class="o">=</span> <span class="kc">True</span>
 
+    <span class="k">if</span> <span class="n">DBG_OUT</span><span class="p">:</span>
+        <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span><span class="o">.</span><span class="n">saveAs</span><span class="p">(</span><span class="s1">&#39;tmp_after_init.fcstd&#39;</span><span class="p">)</span>
     <span class="n">layerNum</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">layer_num</span>
     <span class="n">returnObjs</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">objID</span> <span class="ow">in</span> <span class="n">info_holder</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">]:</span>
         <span class="k">if</span> <span class="n">part</span><span class="o">.</span><span class="n">fc_name</span> <span class="o">==</span> <span class="n">info_holder</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;partName&#39;</span><span class="p">]:</span>
             <span class="n">returnObjs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">gen_G</span><span class="p">(</span><span class="n">info_holder</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">layerNum</span><span class="p">,</span> <span class="n">objID</span><span class="p">))</span>
-    <span class="k">return</span> <span class="n">genUnion</span><span class="p">(</span><span class="n">returnObjs</span><span class="p">,</span> <span class="n">consumeInputs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">([</span><span class="n">o</span><span class="o">.</span><span class="n">Name</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">returnObjs</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">genUnion</span><span class="p">(</span><span class="n">returnObjs</span><span class="p">,</span> <span class="n">consumeInputs</span><span class="o">=</span><span class="kc">True</span>
+                                <span class="k">if</span> <span class="ow">not</span> <span class="n">DBG_OUT</span> <span class="k">else</span> <span class="kc">False</span><span class="p">)</span></div>
+
 
 
 <span class="c1">################################################################################</span>
@@ -488,7 +509,8 @@
         <span class="n">coatingUnionClone</span> <span class="o">=</span> <span class="n">shellList</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span>
-            <span class="s1">&#39;Trying to build an empty Al shell. If no shell is desired, omit the AlVerts key from the json.&#39;</span><span class="p">)</span>
+            <span class="s1">&#39;Trying to build an empty Al shell. If no shell is desired, omit the AlVerts key from &#39;</span>
+            <span class="s1">&#39;the json.&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="p">(</span><span class="n">depoZone</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">etchZone</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">coatingUnionClone</span>
 
@@ -498,7 +520,8 @@
         <span class="n">zMax</span> <span class="o">=</span> <span class="n">coatingBB</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
         <span class="n">depoVol</span> <span class="o">=</span> <span class="n">extrudeBetween</span><span class="p">(</span><span class="n">depoZone</span><span class="p">,</span> <span class="n">zMin</span><span class="p">,</span> <span class="n">zMax</span><span class="p">)</span>
         <span class="n">etchedCoatingUnionClone</span> <span class="o">=</span> <span class="n">intersect</span><span class="p">(</span>
-            <span class="p">[</span><span class="n">depoVol</span><span class="p">,</span> <span class="n">coatingUnionClone</span><span class="p">],</span> <span class="n">consumeInputs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="p">[</span><span class="n">depoVol</span><span class="p">,</span> <span class="n">coatingUnionClone</span><span class="p">],</span> <span class="n">consumeInputs</span><span class="o">=</span><span class="kc">True</span>
+                                          <span class="k">if</span> <span class="ow">not</span> <span class="n">DBG_OUT</span> <span class="k">else</span> <span class="kc">False</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">etchedCoatingUnionClone</span>
     <span class="k">else</span><span class="p">:</span>  <span class="c1"># etchZone instead</span>
         <span class="n">coatingBB</span> <span class="o">=</span> <span class="n">getBB</span><span class="p">(</span><span class="n">coatingUnionClone</span><span class="p">)</span>
@@ -506,7 +529,8 @@
         <span class="n">zMax</span> <span class="o">=</span> <span class="n">coatingBB</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
         <span class="n">etchVol</span> <span class="o">=</span> <span class="n">extrudeBetween</span><span class="p">(</span><span class="n">etchZone</span><span class="p">,</span> <span class="n">zMin</span><span class="p">,</span> <span class="n">zMax</span><span class="p">)</span>
         <span class="n">etchedCoatingUnionClone</span> <span class="o">=</span> <span class="n">subtract</span><span class="p">(</span>
-            <span class="n">coatingUnionClone</span><span class="p">,</span> <span class="n">etchVol</span><span class="p">,</span> <span class="n">consumeInputs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">coatingUnionClone</span><span class="p">,</span> <span class="n">etchVol</span><span class="p">,</span> <span class="n">consumeInputs</span><span class="o">=</span><span class="kc">True</span>
+                                        <span class="k">if</span> <span class="ow">not</span> <span class="n">DBG_OUT</span> <span class="k">else</span> <span class="kc">False</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">etchedCoatingUnionClone</span></div>
 
 
@@ -550,7 +574,8 @@
         <span class="n">delete</span><span class="p">(</span><span class="n">midSketch</span><span class="p">)</span>
         <span class="n">delete</span><span class="p">(</span><span class="n">botSketch</span><span class="p">)</span>
         <span class="n">returnParts</span> <span class="o">+=</span> <span class="p">[</span><span class="n">capPart</span><span class="p">,</span> <span class="n">rectPart</span><span class="p">]</span>
-    <span class="n">returnPart</span> <span class="o">=</span> <span class="n">genUnion</span><span class="p">(</span><span class="n">returnParts</span><span class="p">,</span> <span class="n">consumeInputs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">returnPart</span> <span class="o">=</span> <span class="n">genUnion</span><span class="p">(</span><span class="n">returnParts</span><span class="p">,</span> <span class="n">consumeInputs</span><span class="o">=</span><span class="kc">True</span>
+                                           <span class="k">if</span> <span class="ow">not</span> <span class="n">DBG_OUT</span> <span class="k">else</span> <span class="kc">False</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">returnPart</span></div>
 
 
@@ -629,7 +654,7 @@
     <span class="n">bottom</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">bases</span><span class="p">)</span>
     <span class="n">totalThickness</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">thicknesses</span><span class="p">)</span>
     <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">][</span>
-        <span class="p">()])</span> <span class="o">&gt;</span> <span class="mi">0</span>  <span class="c1"># Otherwise, we don&#39;t have a reference for the lateral BB</span>
+                   <span class="p">()])</span> <span class="o">&gt;</span> <span class="mi">0</span>  <span class="c1"># Otherwise, we don&#39;t have a reference for the lateral BB</span>
     <span class="n">substrateUnion</span> <span class="o">=</span> <span class="n">genUnion</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">][()],</span>
                               <span class="n">consumeInputs</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>  <span class="c1"># total substrate</span>
     <span class="n">BB</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">getBB</span><span class="p">(</span><span class="n">substrateUnion</span><span class="p">))</span>  <span class="c1"># bounding box</span>
@@ -667,20 +692,17 @@
 
 <div class="viewcode-block" id="gen_offset"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.gen_offset">[docs]</a><span class="k">def</span> <span class="nf">gen_offset</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">offsetVal</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Generates an offset non-destructively.&quot;&quot;&quot;</span>
-
-
-<span class="c1"># generate an offset around obj, depending on which input_part obj belongs to</span>
-
     <span class="n">doc</span> <span class="o">=</span> <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span>
     <span class="c1"># First, we need to check if the object needs special treatment:</span>
     <span class="n">treatment</span> <span class="o">=</span> <span class="s1">&#39;standard&#39;</span>
-    <span class="n">cur_part</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">for</span> <span class="n">input_part</span> <span class="ow">in</span> <span class="n">opts</span><span class="p">[</span><span class="s1">&#39;input_parts&#39;</span><span class="p">]:</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span>  <span class="o">+</span> <span class="s1">&#39; ? &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">input_part</span><span class="o">.</span><span class="n">fc_name</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">Name</span> <span class="o">==</span> <span class="n">input_part</span><span class="o">.</span><span class="n">fc_name</span><span class="p">:</span>
-            <span class="n">treatment</span> <span class="o">=</span> <span class="n">input_part</span><span class="o">.</span><span class="n">directive</span>
-            <span class="n">cur_part</span> <span class="o">=</span> <span class="n">input_part</span>
-            <span class="k">break</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">partname</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">label</span> <span class="k">for</span> <span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">built_name</span><span class="p">)</span> <span class="ow">in</span>
+                        <span class="n">opts</span><span class="p">[</span><span class="s1">&#39;built_part_names&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iteritems</span><span class="p">()</span> <span class="k">if</span> <span class="n">built_name</span> <span class="o">==</span> <span class="n">obj</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span>
+        <span class="n">input_part</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">input_part</span> <span class="k">for</span> <span class="n">input_part</span> <span class="ow">in</span>
+                          <span class="n">opts</span><span class="p">[</span><span class="s1">&#39;input_parts&#39;</span><span class="p">]</span> <span class="k">if</span> <span class="n">input_part</span><span class="o">.</span><span class="n">label</span> <span class="o">==</span> <span class="n">partname</span><span class="p">)</span>
+        <span class="n">treatment</span> <span class="o">=</span> <span class="n">input_part</span><span class="o">.</span><span class="n">directive</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
 
     <span class="k">if</span> <span class="n">treatment</span> <span class="o">==</span> <span class="s1">&#39;extrude&#39;</span> <span class="ow">or</span> <span class="n">treatment</span> <span class="o">==</span> <span class="s1">&#39;lithography&#39;</span><span class="p">:</span>
         <span class="n">treatment</span> <span class="o">=</span> <span class="s1">&#39;standard&#39;</span>
@@ -700,27 +722,31 @@
             <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
             <span class="n">delete</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">treatment</span> <span class="o">==</span> <span class="s1">&#39;wire&#39;</span><span class="p">:</span>
-        <span class="n">offsetDupe</span> <span class="o">=</span> <span class="n">build_wire</span><span class="p">(</span><span class="n">cur_part</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offsetVal</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">treatment</span> <span class="o">==</span> <span class="s1">&#39;wireShell&#39;</span><span class="p">:</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt; WIRE SHELL IN GEN OFFSET &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="n">offsetDupe</span> <span class="o">=</span> <span class="n">build_wire_shell</span><span class="p">(</span><span class="n">cur_part</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offsetVal</span><span class="p">)</span>
+        <span class="n">offsetDupe</span> <span class="o">=</span> <span class="n">build_wire</span><span class="p">(</span><span class="n">input_part</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offsetVal</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">treatment</span> <span class="o">==</span> <span class="s1">&#39;wire_shell&#39;</span><span class="p">:</span>
+        <span class="n">offsetDupe</span> <span class="o">=</span> <span class="n">build_wire_shell</span><span class="p">(</span><span class="n">input_part</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offsetVal</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">treatment</span> <span class="o">==</span> <span class="s1">&#39;SAG&#39;</span><span class="p">:</span>
-        <span class="n">offsetDupe</span> <span class="o">=</span> <span class="n">build_sag</span><span class="p">(</span><span class="n">cur_part</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offsetVal</span><span class="p">)</span>
+        <span class="n">offsetDupe</span> <span class="o">=</span> <span class="n">build_sag</span><span class="p">(</span><span class="n">input_part</span><span class="p">,</span> <span class="n">offset</span><span class="o">=</span><span class="n">offsetVal</span><span class="p">)</span>
     <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
 
-    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt; generated offset &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; -&gt; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">offsetDupe</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span> <span class="o">+</span>
-                     <span class="s1">&#39; from &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">cur_part</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> (</span><span class="si">%s</span><span class="s2">) -&gt; </span><span class="si">%s</span><span class="s2"> (</span><span class="si">%s</span><span class="s2">) [from </span><span class="si">%s</span><span class="s2">]&quot;</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">Name</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">Label</span><span class="p">,</span>
+                      <span class="n">offsetDupe</span><span class="o">.</span><span class="n">Name</span><span class="p">,</span> <span class="n">offsetDupe</span><span class="o">.</span><span class="n">Label</span><span class="p">,</span> <span class="n">input_part</span><span class="o">.</span><span class="n">label</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> (</span><span class="si">%s</span><span class="s2">) -&gt; </span><span class="si">%s</span><span class="s2"> (</span><span class="si">%s</span><span class="s2">)&quot;</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">Name</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">Label</span><span class="p">,</span>
+                      <span class="n">offsetDupe</span><span class="o">.</span><span class="n">Name</span><span class="p">,</span> <span class="n">offsetDupe</span><span class="o">.</span><span class="n">Label</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">offsetDupe</span></div>
 
 
 <div class="viewcode-block" id="screened_H_union_list"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.screened_H_union_list">[docs]</a><span class="k">def</span> <span class="nf">screened_H_union_list</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">offsetTuple</span><span class="p">,</span> <span class="n">checkOffsetTuple</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Foremd the &quot;screened union list&quot; of obj with the layer m, objID j H object that has</span>
+    <span class="sd">&quot;&quot;&quot;Form the screened union list of obj with the layer m, objID j H object that has</span>
 <span class="sd">    been offset according to offsetTuple. The screened union list is defined by checking</span>
 <span class="sd">    first whether the object intersects with the components of the checkOffset version</span>
 <span class="sd">    of the H object. Then, for each component that would intersect, we return the a list</span>
 <span class="sd">    of the offsetTuple version of the object.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt; </span><span class="si">%s</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">Name</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">Label</span><span class="p">)</span>
     <span class="c1"># First, we need to check to see if we need to compute either of the</span>
     <span class="c1"># underlying H obj lists:</span>
     <span class="n">HDict</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">m</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">j</span><span class="p">][</span><span class="s1">&#39;HDict&#39;</span><span class="p">]</span>
@@ -729,25 +755,36 @@
     <span class="c1"># offset, while other indices indicate an offset by summing the thicknesses</span>
     <span class="c1"># from corresponding layers.</span>
     <span class="k">if</span> <span class="n">checkOffsetTuple</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">HDict</span><span class="p">:</span>  <span class="c1"># If we haven&#39;t computed this yet</span>
-        <span class="n">HDict</span><span class="p">[</span><span class="n">checkOffsetTuple</span><span class="p">]</span> <span class="o">=</span> <span class="n">H_offset</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">tList</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">checkOffsetTuple</span><span class="p">))</span>  <span class="c1"># list of H parts</span>
+        <span class="n">HDict</span><span class="p">[</span><span class="n">checkOffsetTuple</span><span class="p">]</span> <span class="o">=</span> <span class="n">H_offset</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span>
+                                           <span class="n">tList</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">checkOffsetTuple</span><span class="p">))</span>  <span class="c1"># list of H parts</span>
         <span class="n">info</span><span class="o">.</span><span class="n">trash</span> <span class="o">+=</span> <span class="n">HDict</span><span class="p">[</span><span class="n">checkOffsetTuple</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">offsetTuple</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">HDict</span><span class="p">:</span>  <span class="c1"># If we haven&#39;t computed this yet</span>
         <span class="n">HDict</span><span class="p">[</span><span class="n">offsetTuple</span><span class="p">]</span> <span class="o">=</span> <span class="n">H_offset</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">tList</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">offsetTuple</span><span class="p">))</span>  <span class="c1"># list of H parts</span>
         <span class="n">info</span><span class="o">.</span><span class="n">trash</span> <span class="o">+=</span> <span class="n">HDict</span><span class="p">[</span><span class="n">offsetTuple</span><span class="p">]</span>
     <span class="n">HObjCheckList</span> <span class="o">=</span> <span class="n">HDict</span><span class="p">[</span><span class="n">checkOffsetTuple</span><span class="p">]</span>
     <span class="n">HObjList</span> <span class="o">=</span> <span class="n">HDict</span><span class="p">[</span><span class="n">offsetTuple</span><span class="p">]</span>
+
     <span class="n">returnList</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">HObjPart</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">HObjCheckList</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">checkOverlap</span><span class="p">(</span>
                 <span class="p">[</span><span class="n">obj</span><span class="p">,</span> <span class="n">HObjPart</span><span class="p">]):</span>  <span class="c1"># if we need to include an overlap</span>
             <span class="n">returnList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">HObjList</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="c1"># fix for multilayer intersections: make sure we really check all overlaps</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">HObjPart</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">HObjList</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">checkOverlap</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">obj</span><span class="p">,</span> <span class="n">HObjPart</span><span class="p">]):</span>  <span class="c1"># if we need to include an overlap</span>
+            <span class="n">returnList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">HObjList</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;&lt;&lt;&lt; </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">o</span><span class="o">.</span><span class="n">Name</span> <span class="o">+</span> <span class="s1">&#39; (&#39;</span> <span class="o">+</span> <span class="n">o</span><span class="o">.</span><span class="n">Label</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">returnList</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">returnList</span></div>
 
 
 <div class="viewcode-block" id="screened_A_UnionList"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.screened_A_UnionList">[docs]</a><span class="k">def</span> <span class="nf">screened_A_UnionList</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">ti</span><span class="p">,</span> <span class="n">offsetTuple</span><span class="p">,</span> <span class="n">checkOffsetTuple</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Form the &quot;screened union list&quot; of obj with the substrate A that has</span>
+    <span class="sd">&quot;&quot;&quot;Form the screened union list of obj with the substrate A that has</span>
 <span class="sd">    been offset according to offsetTuple.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt; </span><span class="si">%s</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">Name</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">Label</span><span class="p">)</span>
     <span class="c1"># First, we need to see if we have built the objects before:</span>
     <span class="k">if</span> <span class="n">checkOffsetTuple</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">]:</span>
         <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">][</span><span class="n">checkOffsetTuple</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
@@ -767,6 +804,8 @@
             <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">][</span><span class="n">checkOffsetTuple</span><span class="p">]):</span>
         <span class="k">if</span> <span class="n">checkOverlap</span><span class="p">([</span><span class="n">obj</span><span class="p">,</span> <span class="n">ACheck</span><span class="p">]):</span>
             <span class="n">returnList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;substrate&#39;</span><span class="p">][</span><span class="n">offsetTuple</span><span class="p">][</span><span class="n">i</span><span class="p">])</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;&lt;&lt;&lt; </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">o</span><span class="o">.</span><span class="n">Name</span> <span class="o">+</span> <span class="s1">&#39; (&#39;</span> <span class="o">+</span> <span class="n">o</span><span class="o">.</span><span class="n">Label</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">returnList</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">returnList</span></div>
 
 
@@ -783,6 +822,10 @@
 <span class="sd">    Note: this object is returned as a list of objects that need to be unioned together</span>
 <span class="sd">    in order to form the full H.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt; partname </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span>
+                  <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;partName&#39;</span><span class="p">])</span>
+
     <span class="c1"># This is a tuple that encodes the check offset t:</span>
     <span class="n">checkOffsetTuple</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">tList</span><span class="p">))</span>
     <span class="c1"># This is a tuple that encodes the total offset t_i+t:</span>
@@ -790,7 +833,7 @@
     <span class="c1"># First, check if we have to do anything:</span>
     <span class="n">layers</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">checkOffsetTuple</span> <span class="ow">in</span> <span class="n">layers</span><span class="p">[</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span>
-            <span class="n">objID</span><span class="p">][</span><span class="s1">&#39;HDict&#39;</span><span class="p">]:</span>
+        <span class="n">objID</span><span class="p">][</span><span class="s1">&#39;HDict&#39;</span><span class="p">]:</span>
         <span class="k">return</span> <span class="n">layers</span><span class="p">[</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span>
             <span class="s1">&#39;HDict&#39;</span><span class="p">][</span><span class="n">checkOffsetTuple</span><span class="p">]</span>
     <span class="c1"># First, compute t:</span>
@@ -800,10 +843,8 @@
     <span class="c1"># thickness of this layer</span>
     <span class="n">ti</span> <span class="o">=</span> <span class="n">layers</span><span class="p">[</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;thickness&#39;</span><span class="p">]</span>
     <span class="c1"># Set the aux. thickness t:</span>
-    <span class="n">B</span> <span class="o">=</span> <span class="n">layers</span><span class="p">[</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span>
-        <span class="s1">&#39;B&#39;</span><span class="p">]</span>  <span class="c1"># B prism for this layer &amp; objID</span>
-    <span class="n">C</span> <span class="o">=</span> <span class="n">layers</span><span class="p">[</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span>
-        <span class="s1">&#39;C&#39;</span><span class="p">]</span>  <span class="c1"># C prism for this layer &amp; ObjID</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="n">layers</span><span class="p">[</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;B&#39;</span><span class="p">]</span>  <span class="c1"># B prism for this layer &amp; objID</span>
+    <span class="n">C</span> <span class="o">=</span> <span class="n">layers</span><span class="p">[</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;C&#39;</span><span class="p">]</span>  <span class="c1"># C prism for this layer &amp; ObjID</span>
     <span class="n">B_t</span> <span class="o">=</span> <span class="n">gen_offset</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>  <span class="c1"># offset the B prism</span>
     <span class="n">C_t</span> <span class="o">=</span> <span class="n">gen_offset</span><span class="p">(</span><span class="n">opts</span><span class="p">,</span> <span class="n">C</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>  <span class="c1"># offset the C prism</span>
     <span class="n">info</span><span class="o">.</span><span class="n">trash</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">B_t</span><span class="p">)</span>
@@ -816,10 +857,10 @@
             <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">layers</span><span class="p">[</span><span class="n">m</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="n">HOffsetList</span> <span class="o">+=</span> <span class="n">screened_H_union_list</span><span class="p">(</span>
                     <span class="n">info</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">C_t</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="n">offsetTuple</span><span class="p">,</span> <span class="n">checkOffsetTuple</span><span class="p">)</span>
-                <span class="c1"># Next, build up the original substrate list:</span>
+    <span class="c1"># Next, build up the original substrate list:</span>
     <span class="n">AOffsetList</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">AOffsetList</span> <span class="o">+=</span> <span class="n">screened_A_UnionList</span><span class="p">(</span>
-        <span class="n">info</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">C_t</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">ti</span><span class="p">,</span> <span class="n">offsetTuple</span><span class="p">,</span> <span class="n">checkOffsetTuple</span><span class="p">)</span>
+    <span class="n">AOffsetList</span> <span class="o">+=</span> <span class="n">screened_A_UnionList</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">C_t</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">ti</span><span class="p">,</span>
+                                        <span class="n">offsetTuple</span><span class="p">,</span> <span class="n">checkOffsetTuple</span><span class="p">)</span>
     <span class="n">unionList</span> <span class="o">=</span> <span class="n">HOffsetList</span> <span class="o">+</span> <span class="n">AOffsetList</span>
     <span class="n">returnList</span> <span class="o">=</span> <span class="p">[</span><span class="n">B_t</span><span class="p">]</span>
 
@@ -827,10 +868,11 @@
         <span class="n">intObj</span> <span class="o">=</span> <span class="n">intersect</span><span class="p">([</span><span class="n">C_t</span><span class="p">,</span> <span class="n">obj</span><span class="p">])</span>
         <span class="n">info</span><span class="o">.</span><span class="n">trash</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">intObj</span><span class="p">)</span>
         <span class="n">returnList</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">intObj</span><span class="p">)</span>
-    <span class="n">layers</span><span class="p">[</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;HDict&#39;</span><span class="p">][</span>
-        <span class="n">checkOffsetTuple</span><span class="p">]</span> <span class="o">=</span> <span class="n">returnList</span>
-    <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt; H_offset returns obj &#39;</span> <span class="o">+</span> <span class="n">obj</span><span class="o">.</span><span class="n">Name</span> <span class="o">+</span>
-                     <span class="s1">&#39; with names &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">([</span><span class="n">o</span><span class="o">.</span><span class="n">Name</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">returnList</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">) -&gt; </span><span class="si">%s</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">Name</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">Label</span><span class="p">,</span> <span class="n">intObj</span><span class="o">.</span><span class="n">Name</span><span class="p">,</span> <span class="n">intObj</span><span class="o">.</span><span class="n">Label</span><span class="p">)</span>
+
+    <span class="n">layers</span><span class="p">[</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;HDict&#39;</span><span class="p">][</span><span class="n">checkOffsetTuple</span><span class="p">]</span> <span class="o">=</span> <span class="n">returnList</span>
+
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;&lt;&lt;&lt; </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="p">[</span><span class="n">o</span><span class="o">.</span><span class="n">Name</span> <span class="o">+</span> <span class="s1">&#39; (&#39;</span> <span class="o">+</span> <span class="n">o</span><span class="o">.</span><span class="n">Label</span> <span class="o">+</span> <span class="s1">&#39;)&#39;</span> <span class="k">for</span> <span class="n">o</span> <span class="ow">in</span> <span class="n">returnList</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">returnList</span></div>
 
 
@@ -850,7 +892,7 @@
         <span class="k">if</span> <span class="n">m</span> <span class="o">&lt;</span> <span class="n">layerNum</span><span class="p">:</span>  <span class="c1"># then this is a lower layer</span>
             <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">layers</span><span class="p">[</span><span class="n">m</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="k">if</span> <span class="s1">&#39;G&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">layers</span><span class="p">[</span><span class="n">layerNum</span><span class="p">][</span>
-                        <span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">]:</span>
+                    <span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">]:</span>
                     <span class="n">gen_G</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
                 <span class="n">G</span> <span class="o">=</span> <span class="n">layers</span><span class="p">[</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;G&#39;</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">checkOverlap</span><span class="p">([</span><span class="n">B</span><span class="p">,</span> <span class="n">G</span><span class="p">]):</span>
@@ -866,39 +908,49 @@
 
 <div class="viewcode-block" id="gen_G"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.objectConstruction.gen_G">[docs]</a><span class="k">def</span> <span class="nf">gen_G</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">layerNum</span><span class="p">,</span> <span class="n">objID</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Generate the gate deposition for a given layerNum and objID.&quot;&quot;&quot;</span>
-    <span class="n">layer</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">]</span>
-    <span class="k">if</span> <span class="s1">&#39;G&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">]:</span>
-        <span class="k">if</span> <span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;HDict&#39;</span><span class="p">]:</span>
-            <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span>
-                <span class="s1">&#39;HDict&#39;</span><span class="p">][()]</span> <span class="o">=</span> <span class="n">H_offset</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">layerNum</span><span class="p">,</span> <span class="n">objID</span><span class="p">)</span>
 
-        <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt; --------------------    </span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">layerobj</span> <span class="o">=</span> <span class="n">info</span><span class="o">.</span><span class="n">lithoDict</span><span class="p">[</span><span class="s1">&#39;layers&#39;</span><span class="p">][</span><span class="n">layerNum</span><span class="p">][</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">]</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt; layer </span><span class="si">%d</span><span class="s1"> obj </span><span class="si">%d</span><span class="s1"> (part:</span><span class="si">%s</span><span class="s1"> B:</span><span class="si">%s</span><span class="s1"> C:</span><span class="si">%s</span><span class="s1"> sketch:</span><span class="si">%s</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="n">layerNum</span><span class="p">,</span> <span class="n">objID</span><span class="p">,</span>
+                  <span class="n">layerobj</span><span class="p">[</span><span class="s1">&#39;partName&#39;</span><span class="p">],</span> <span class="n">layerobj</span><span class="p">[</span><span class="s1">&#39;B&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">Name</span><span class="p">,</span> <span class="n">layerobj</span><span class="p">[</span><span class="s1">&#39;C&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">Name</span><span class="p">,</span>
+                  <span class="n">layerobj</span><span class="p">[</span><span class="s1">&#39;sketch&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="s1">&#39;G&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">layerobj</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">layerobj</span><span class="p">[</span><span class="s1">&#39;HDict&#39;</span><span class="p">]:</span>
+            <span class="n">layerobj</span><span class="p">[</span><span class="s1">&#39;HDict&#39;</span><span class="p">][()]</span> <span class="o">=</span> <span class="n">H_offset</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">layerNum</span><span class="p">,</span> <span class="n">objID</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">DBG_OUT</span><span class="p">:</span>
+            <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span><span class="o">.</span><span class="n">saveAs</span><span class="p">(</span><span class="s1">&#39;tmp_after_H_offset.fcstd&#39;</span><span class="p">)</span>
         <span class="c1"># TODO: reuse new function</span>
         <span class="c1"># This block fixes multifuses for wireshells with too big offsets,</span>
         <span class="c1"># by forcing all participating object shells into a new solid.</span>
-        <span class="n">solid_hlist</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="kn">import</span> <span class="nn">Part</span>
-        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;HDict&#39;</span><span class="p">][()]:</span>
-            <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-            <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span><span class="o">.</span><span class="n">saveAs</span><span class="p">(</span><span class="s1">&#39;tmp_prefail_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.fcstd&#39;</span><span class="p">)</span>
-            <span class="n">__s__</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">Faces</span>
-            <span class="n">__s__</span> <span class="o">=</span> <span class="n">Part</span><span class="o">.</span><span class="n">Solid</span><span class="p">(</span><span class="n">Part</span><span class="o">.</span><span class="n">Shell</span><span class="p">(</span><span class="n">__s__</span><span class="p">))</span>
-            <span class="n">__o__</span> <span class="o">=</span> <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span><span class="o">.</span><span class="n">addObject</span><span class="p">(</span><span class="s2">&quot;Part::Feature&quot;</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">Label</span> <span class="o">+</span> <span class="s2">&quot;_solid&quot;</span><span class="p">)</span>
-            <span class="n">__o__</span><span class="o">.</span><span class="n">Label</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">Label</span> <span class="o">+</span> <span class="s2">&quot;_solid&quot;</span>
-            <span class="n">__o__</span><span class="o">.</span><span class="n">Shape</span> <span class="o">=</span> <span class="n">__s__</span>
-            <span class="n">solid_hlist</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">__o__</span><span class="p">)</span>
-            <span class="n">info</span><span class="o">.</span><span class="n">trash</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
-            <span class="n">info</span><span class="o">.</span><span class="n">trash</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">__o__</span><span class="p">)</span>
-            <span class="n">info</span><span class="o">.</span><span class="n">trash</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">__s__</span><span class="p">)</span>
-            <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
-            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;&gt;&gt;&gt; &#39;</span> <span class="o">+</span> <span class="s1">&#39; - &#39;</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-            <span class="c1"># ~ if obj.Name == &#39;Part__MultiCommon002&#39;:</span>
-                <span class="c1"># ~ break</span>
+        <span class="c1"># It still needs to be coerced into handling disjoint &quot;solids&quot;.</span>
+        <span class="c1"># ~ solid_hlist = []</span>
+        <span class="c1"># ~ import Part</span>
+        <span class="c1"># ~ for obj in layerobj[&#39;HDict&#39;][()]:</span>
+            <span class="c1"># ~ obj.Shape.Solids</span>
+            <span class="c1"># ~ try:</span>
 
-        <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;HDict&#39;</span><span class="p">][()]</span> <span class="o">=</span> <span class="n">solid_hlist</span>
+                <span class="c1"># ~ __s__ = obj.Shape.Faces</span>
+                <span class="c1"># ~ __s__ = Part.Solid(Part.Shell(__s__))</span>
+                <span class="c1"># ~ __o__ = FreeCAD.ActiveDocument.addObject(&quot;Part::Feature&quot;, obj.Name + &quot;_solid&quot;)</span>
+                <span class="c1"># ~ __o__.Label = obj.Label + &quot;_solid&quot;</span>
+                <span class="c1"># ~ __o__.Shape = __s__</span>
 
-        <span class="n">H</span> <span class="o">=</span> <span class="n">genUnion</span><span class="p">(</span><span class="n">layer</span><span class="p">[</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;HDict&#39;</span><span class="p">][()],</span>
+            <span class="c1"># ~ except Part.OCCError:</span>
+                <span class="c1">#Draft.downgrade(obj,delete=True)  # doesn&#39;t work without GUI</span>
+                <span class="c1"># ~ for solid in obj.Shape.Solids:</span>
+                    <span class="c1"># ~ for shell in solid.Shells:</span>
+                        <span class="c1"># ~ pass</span>
+
+            <span class="c1"># ~ solid_hlist.append(__o__)</span>
+            <span class="c1"># ~ info.trash.append(obj)</span>
+            <span class="c1"># ~ info.trash.append(__o__)</span>
+            <span class="c1"># ~ info.trash.append(__s__)</span>
+
+        <span class="c1"># ~ layerobj[&#39;HDict&#39;][()] = solid_hlist</span>
+        <span class="c1"># ~ logging.debug(&#39;new HDict: %s&#39;, [o.Name + &#39; (&#39; + o.Label + &#39;)&#39; for o in layerobj[&#39;HDict&#39;][()]])</span>
+
+        <span class="n">H</span> <span class="o">=</span> <span class="n">genUnion</span><span class="p">(</span><span class="n">layerobj</span><span class="p">[</span><span class="s1">&#39;HDict&#39;</span><span class="p">][()],</span>
                      <span class="n">consumeInputs</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">info</span><span class="o">.</span><span class="n">trash</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">H</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">info</span><span class="o">.</span><span class="n">fillShells</span><span class="p">:</span>
@@ -907,10 +959,12 @@
             <span class="n">U</span> <span class="o">=</span> <span class="n">gen_U</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">layerNum</span><span class="p">,</span> <span class="n">objID</span><span class="p">)</span>
             <span class="n">G</span> <span class="o">=</span> <span class="n">subtract</span><span class="p">(</span><span class="n">H</span><span class="p">,</span> <span class="n">U</span><span class="p">)</span>
             <span class="n">delete</span><span class="p">(</span><span class="n">U</span><span class="p">)</span>
-        <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;G&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">G</span>
-    <span class="n">G</span> <span class="o">=</span> <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;G&#39;</span><span class="p">]</span>
-    <span class="n">partName</span> <span class="o">=</span> <span class="n">layer</span><span class="p">[</span><span class="s1">&#39;objIDs&#39;</span><span class="p">][</span><span class="n">objID</span><span class="p">][</span><span class="s1">&#39;partName&#39;</span><span class="p">]</span>
+        <span class="n">layerobj</span><span class="p">[</span><span class="s1">&#39;G&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">G</span>
+
+    <span class="n">G</span> <span class="o">=</span> <span class="n">layerobj</span><span class="p">[</span><span class="s1">&#39;G&#39;</span><span class="p">]</span>
+    <span class="n">partName</span> <span class="o">=</span> <span class="n">layerobj</span><span class="p">[</span><span class="s1">&#39;partName&#39;</span><span class="p">]</span>
     <span class="n">G</span><span class="o">.</span><span class="n">Label</span> <span class="o">=</span> <span class="n">partName</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;&lt;&lt;&lt; G from H: </span><span class="si">%s</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="n">G</span><span class="o">.</span><span class="n">Name</span><span class="p">,</span> <span class="n">G</span><span class="o">.</span><span class="n">Label</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">G</span></div>
 
 

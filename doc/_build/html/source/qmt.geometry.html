@@ -200,10 +200,10 @@
 </div>
 <div class="section" id="module-qmt.geometry.freecad_wrapper">
 <span id="qmt-geometry-freecad-wrapper-module"></span><h2>qmt.geometry.freecad_wrapper module<a class="headerlink" href="#module-qmt.geometry.freecad_wrapper" title="Permalink to this headline">¶</a></h2>
-<p>Wrapping FreeCAD calls within a Python 3 environment.</p>
+<p>Wrapping FreeCAD Python 2.7 calls within a Python 3 environment.</p>
 <dl class="function">
 <dt id="qmt.geometry.freecad_wrapper.fcwrapper">
-<code class="descclassname">qmt.geometry.freecad_wrapper.</code><code class="descname">fcwrapper</code><span class="sig-paren">(</span><em>pyenv='python2'</em>, <em>instruction=None</em>, <em>data=None</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad_wrapper.html#fcwrapper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad_wrapper.fcwrapper" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">qmt.geometry.freecad_wrapper.</code><code class="descname">fcwrapper</code><span class="sig-paren">(</span><em>pyenv='python2'</em>, <em>instruction=None</em>, <em>data=None</em>, <em>reprint_output=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/geometry/freecad_wrapper.html#fcwrapper"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.geometry.freecad_wrapper.fcwrapper" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wrapper to isolate FreeCAD Python 2.7 calls from the Python 3 code base.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -213,6 +213,7 @@
 <li><strong>pyenv</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Python interpreter, defaults to ‘python2’.</li>
 <li><strong>instruction</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – A registered instruction for the QMT FreeCAD module.</li>
 <li><strong>data</strong> – Any data type serialisable through pickle.</li>
+<li><strong>reprint_output</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Reprint suppressed output of wrapped call.</li>
 </ul>
 </td>
 </tr>

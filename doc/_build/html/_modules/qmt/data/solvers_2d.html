@@ -180,14 +180,19 @@
                                      <span class="p">])</span>
 
 
-<span class="c1">#TODO: this needs to be pruned</span>
+<span class="c1"># TODO: this needs to be pruned</span>
 <div class="viewcode-block" id="SchrodingerPoissonDatas"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.solvers_2d.SchrodingerPoissonDatas">[docs]</a><span class="k">class</span> <span class="nc">SchrodingerPoissonDatas</span><span class="p">:</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">poisson_obj</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">density_per_subband</span><span class="p">,</span> <span class="n">density_units</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">rho_units</span><span class="p">,</span> <span class="n">psis</span><span class="p">,</span> <span class="n">energies</span><span class="p">,</span> <span class="n">potential</span><span class="p">,</span> <span class="n">potential_units</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">mesh_units</span><span class="p">,</span> <span class="n">bands</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span> <span class="n">band_charges</span><span class="p">,</span> <span class="n">Dit</span><span class="p">,</span> <span class="n">neutral_level</span><span class="p">,</span> <span class="n">fixed_charge_sites</span><span class="p">,</span> <span class="n">fixed_charge_site_perimeters</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">poisson_obj</span><span class="p">,</span> <span class="n">density</span><span class="p">,</span> <span class="n">density_per_subband</span><span class="p">,</span> <span class="n">density_units</span><span class="p">,</span> <span class="n">rho</span><span class="p">,</span> <span class="n">rho_units</span><span class="p">,</span>
+                 <span class="n">psis</span><span class="p">,</span> <span class="n">energies</span><span class="p">,</span> <span class="n">potential</span><span class="p">,</span> <span class="n">potential_units</span><span class="p">,</span> <span class="n">mesh</span><span class="p">,</span> <span class="n">mesh_units</span><span class="p">,</span> <span class="n">bands</span><span class="p">,</span> <span class="n">temperature</span><span class="p">,</span>
+                 <span class="n">band_charges</span><span class="p">,</span> <span class="n">Dit</span><span class="p">,</span> <span class="n">neutral_level</span><span class="p">,</span> <span class="n">fixed_charge_sites</span><span class="p">,</span>
+                 <span class="n">fixed_charge_site_perimeters</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Constructs Data object stores outputs of Thomas-Fermi Task.</span>
 
-<span class="sd">        :param poisson_obj: A qms.physics.Poisson object containing relevant boundary conditions, etc.</span>
-<span class="sd">        :param densities: list of numpy arrays, corresponding to the density in [conduction band, light holes, heavy holes]</span>
+<span class="sd">        :param poisson_obj: A qms.physics.Poisson object containing relevant boundary conditions,</span>
+<span class="sd">        etc.</span>
+<span class="sd">        :param densities: list of numpy arrays, corresponding to the density in [conduction band,</span>
+<span class="sd">        light holes, heavy holes]</span>
 <span class="sd">        :param density_units: units of density</span>
 <span class="sd">        :param mesh: numpy array with the 1d mesh</span>
 <span class="sd">        :param mesh_units: units of mesh points</span>

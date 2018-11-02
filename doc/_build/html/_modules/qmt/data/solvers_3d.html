@@ -159,23 +159,26 @@
 <span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">namedtuple</span>
 
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">kwant</span> <span class="c1"># kwant import to stop fenics from segfaulting</span>
+    <span class="kn">import</span> <span class="nn">kwant</span>  <span class="c1"># kwant import to stop fenics from segfaulting</span>
 <span class="k">except</span><span class="p">:</span>
     <span class="k">pass</span>
 <span class="kn">from</span> <span class="nn">qmt.data</span> <span class="k">import</span> <span class="n">store_serial</span><span class="p">,</span> <span class="n">load_serial</span>
 
 
 <div class="viewcode-block" id="Fem3DData"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.solvers_3d.Fem3DData">[docs]</a><span class="k">class</span> <span class="nc">Fem3DData</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">coordinate_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">potential</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">potential_units</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                 <span class="n">charge</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">surface_charge_integrals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">volume_charge_integrals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fenics_3d_data</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">coordinates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">potential</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">charge</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">surface_charge_integrals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">volume_charge_integrals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fenics_3d_data</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">vunit</span><span class="o">=</span><span class="s1">&#39;V&#39;</span><span class="p">,</span> <span class="n">lunit</span><span class="o">=</span><span class="s1">&#39;um&#39;</span><span class="p">,</span> <span class="n">eunit</span><span class="o">=</span><span class="s1">&#39;eV&#39;</span><span class="p">,</span> <span class="n">qunit</span><span class="o">=</span><span class="s1">&#39;coulomb&#39;</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="n">coordinates</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">coordinate_units</span> <span class="o">=</span> <span class="n">coordinate_units</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">potential</span> <span class="o">=</span> <span class="n">potential</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">potential_units</span> <span class="o">=</span> <span class="n">potential_units</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">charge</span> <span class="o">=</span> <span class="n">charge</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">surface_charge_integrals</span> <span class="o">=</span> <span class="n">surface_charge_integrals</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">volume_charge_integrals</span> <span class="o">=</span> <span class="n">volume_charge_integrals</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fenics_3d_data</span> <span class="o">=</span> <span class="n">fenics_3d_data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vunit</span> <span class="o">=</span> <span class="n">vunit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lunit</span> <span class="o">=</span> <span class="n">lunit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eunit</span> <span class="o">=</span> <span class="n">eunit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">qcunit</span> <span class="o">=</span> <span class="n">qunit</span>
 
 <div class="viewcode-block" id="Fem3DData.get_data"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.solvers_3d.Fem3DData.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">data</span> <span class="o">==</span> <span class="s1">&#39;function&#39;</span><span class="p">:</span>
@@ -201,14 +204,16 @@
     <span class="k">return</span> <span class="n">SerialFenicsFunctionData</span><span class="p">(</span><span class="n">serial_mesh</span><span class="p">,</span> <span class="n">serial_function</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="deserialize_fenics_function"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.solvers_3d.deserialize_fenics_function">[docs]</a><span class="k">def</span> <span class="nf">deserialize_fenics_function</span><span class="p">(</span><span class="n">serial_function_data</span><span class="p">,</span> <span class="n">element_type</span><span class="o">=</span><span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="n">element_degree</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+<div class="viewcode-block" id="deserialize_fenics_function"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.solvers_3d.deserialize_fenics_function">[docs]</a><span class="k">def</span> <span class="nf">deserialize_fenics_function</span><span class="p">(</span><span class="n">serial_function_data</span><span class="p">,</span> <span class="n">element_type</span><span class="o">=</span><span class="s1">&#39;P&#39;</span><span class="p">,</span> <span class="n">element_degree</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
     <span class="n">serial_mesh</span> <span class="o">=</span> <span class="n">serial_function_data</span><span class="o">.</span><span class="n">serial_mesh</span>
     <span class="n">serial_fenics_function</span> <span class="o">=</span> <span class="n">serial_function_data</span><span class="o">.</span><span class="n">serial_function</span>
     <span class="kn">import</span> <span class="nn">fenics</span> <span class="k">as</span> <span class="nn">fn</span>
     <span class="n">mesh</span> <span class="o">=</span> <span class="n">load_serial</span><span class="p">(</span><span class="n">serial_mesh</span><span class="p">,</span> <span class="n">fn</span><span class="o">.</span><span class="n">Mesh</span><span class="p">,</span> <span class="n">ext_format</span><span class="o">=</span><span class="s1">&#39;xml&#39;</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">_load_fenics_function</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
         <span class="n">V</span> <span class="o">=</span> <span class="n">fn</span><span class="o">.</span><span class="n">FunctionSpace</span><span class="p">(</span><span class="n">mesh</span><span class="p">,</span> <span class="n">element_type</span><span class="p">,</span> <span class="n">element_degree</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">fn</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">V</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+
     <span class="n">potential</span> <span class="o">=</span> <span class="n">load_serial</span><span class="p">(</span><span class="n">serial_fenics_function</span><span class="p">,</span> <span class="n">_load_fenics_function</span><span class="p">,</span> <span class="n">ext_format</span><span class="o">=</span><span class="s1">&#39;xml&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">potential</span></div>
 

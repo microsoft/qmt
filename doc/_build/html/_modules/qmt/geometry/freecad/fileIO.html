@@ -159,7 +159,6 @@
 
 <span class="sd">&quot;&quot;&quot;Functions that deal with file i/o.&quot;&quot;&quot;</span>
 
-
 <span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">import</span> <span class="nn">FreeCAD</span>
@@ -175,7 +174,8 @@
     <span class="c1"># These previous methods use more complicated routines (netgen or mefisto)</span>
     <span class="c1"># that produce more controllable meshes but sometimes fail.</span>
     <span class="c1"># meshedObj = FreeCAD.ActiveDocument.addObject(&quot;Mesh::Feature&quot;,obj.Name+&quot;_mesh&quot;)</span>
-    <span class="c1"># meshedObj.Mesh=MeshPart.meshFromShape(Shape=obj.Shape,Fineness=0,SecondOrder=0,Optimize=0,AllowQuad=0)</span>
+    <span class="c1"># meshedObj.Mesh=MeshPart.meshFromShape(Shape=obj.Shape,Fineness=0,SecondOrder=0,Optimize=0,</span>
+    <span class="c1"># AllowQuad=0)</span>
     <span class="c1"># meshedObj.Mesh=Mesh.Mesh(obj.Shape.tessellate(0.01))</span>
     <span class="c1"># meshedObj.Mesh.write(fileName,&quot;STL&quot;,meshedObj.Name)</span>
     <span class="n">meshedObj</span> <span class="o">=</span> <span class="n">Mesh</span><span class="o">.</span><span class="n">export</span><span class="p">([</span><span class="n">obj</span><span class="p">],</span> <span class="n">fileName</span><span class="p">)</span>

@@ -161,18 +161,17 @@
 <p>Welcome to our qubit modeling tools (qmt)! This package is designed to automate
 the setup of complex geometries appropriate to physical qubit simulations. This
 package is licensed with an MIT open source license.</p>
-<p>To set up your Python environment, see the <code class="docutils literal"><span class="pre">environment.yml</span></code> file. If you use
-<code class="docutils literal"><span class="pre">conda</span></code>, simply run</p>
-<div class="highlight-guess"><div class="highlight"><pre><span></span>conda env create -f environment.yml
+<blockquote>
+<div>For python package configuration, see the yml files in qmt/deployment. Note that qmt uses python
+3.6, but to perform computational lithography you will also need the python 2.7 environment:</div></blockquote>
+<div class="highlight-guess"><div class="highlight"><pre><span></span>conda env create -f qmt/deployment/environment_27.yml
+conda env create -f qmt/deployment/environment_36.yml
 </pre></div>
 </div>
-<p>or only install <code class="docutils literal"><span class="pre">pyside</span></code> in your current environment with <code class="docutils literal"><span class="pre">conda</span> <span class="pre">install</span> <span class="pre">pyside</span></code></p>
-<p>and then use <code class="docutils literal"><span class="pre">pip</span></code> inside this repository</p>
-<div class="highlight-guess"><div class="highlight"><pre><span></span>pip install .
-</pre></div>
-</div>
-<p>Optionally per user (not system wide) and in development mode (symlinks)</p>
-<div class="highlight-guess"><div class="highlight"><pre><span></span>pip install --user -e .
+<p>Another option is to run the using Docker. To use the latest
+image, from the root qmt directory, run</p>
+<div class="highlight-guess"><div class="highlight"><pre><span></span>docker build --no-cache -t qmt:master .
+docker run --network host -it qmt:master
 </pre></div>
 </div>
 <p>A significant part of the repository consists of Python functions and macros to

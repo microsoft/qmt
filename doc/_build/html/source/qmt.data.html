@@ -184,8 +184,8 @@
 <span id="qmt-data-data-utils-module"></span><h2>qmt.data.data_utils module<a class="headerlink" href="#module-qmt.data.data_utils" title="Permalink to this headline">¶</a></h2>
 <p>Utility functions for dealing with data.</p>
 <dl class="function">
-<dt id="qmt.data.data_utils.serialised_file">
-<code class="descclassname">qmt.data.data_utils.</code><code class="descname">serialised_file</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/data_utils.html#serialised_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.data_utils.serialised_file" title="Permalink to this definition">¶</a></dt>
+<dt id="qmt.data.data_utils.serialize_file">
+<code class="descclassname">qmt.data.data_utils.</code><code class="descname">serialize_file</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/data_utils.html#serialize_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.data_utils.serialize_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a serialised blob of the contents of a given file path.</p>
 </dd></dl>
 
@@ -380,7 +380,6 @@ is not found?</p>
 <code class="descname">get_data</code><span class="sig-paren">(</span><em>data_name</em>, <em>mesh=None</em>, <em>scratch_dir=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.get_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get data from stored serial format.
 :param str data_name:  “fcdoc” freeCAD document.
-:param mesh:
 :param scratch_dir:    Optional existing temporary (fast) storage location.
 :return data:          The freeCAD document or fenics object that was stored.</p>
 </dd></dl>
@@ -391,56 +390,6 @@ is not found?</p>
 <dd><p>Write geometry to a fcstd file.</p>
 <p>Returns the fcstd file path.</p>
 </dd></dl>
-
-<dl class="method">
-<dt id="qmt.data.geometry.Geo3DData.get_names_to_region_ids">
-<code class="descname">get_names_to_region_ids</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.get_names_to_region_ids"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.get_names_to_region_ids" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="qmt.data.geometry.Geo3DData.get_region_ids">
-<code class="descname">get_region_ids</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.get_region_ids"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.get_region_ids" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="qmt.data.geometry.Geo3DData.get_region_ids_to_names">
-<code class="descname">get_region_ids_to_names</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.get_region_ids_to_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.get_region_ids_to_names" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="qmt.data.geometry.Geo3DData.get_names_to_default_ns">
-<code class="descname">get_names_to_default_ns</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.get_names_to_default_ns"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.get_names_to_default_ns" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="qmt.data.geometry.Geo3DData.get_names_to_default_phi_nl">
-<code class="descname">get_names_to_default_phi_nl</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.get_names_to_default_phi_nl"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.get_names_to_default_phi_nl" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="qmt.data.geometry.Geo3DData.get_names_to_default_phi_nl_and_ds">
-<code class="descname">get_names_to_default_phi_nl_and_ds</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.get_names_to_default_phi_nl_and_ds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.get_names_to_default_phi_nl_and_ds" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="qmt.data.geometry.Geo3DData.get_names_to_default_ds">
-<code class="descname">get_names_to_default_ds</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.get_names_to_default_ds"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.get_names_to_default_ds" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="qmt.data.geometry.Geo3DData.get_names_to_default_bcs">
-<code class="descname">get_names_to_default_bcs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.get_names_to_default_bcs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.get_names_to_default_bcs" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="qmt.data.geometry.Geo3DData.get_names_to_default_dirichlet_bcs">
-<code class="descname">get_names_to_default_dirichlet_bcs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.get_names_to_default_dirichlet_bcs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.get_names_to_default_dirichlet_bcs" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="qmt.data.geometry.Geo3DData.get_names_to_default_neumann_bcs">
-<code class="descname">get_names_to_default_neumann_bcs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.get_names_to_default_neumann_bcs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.get_names_to_default_neumann_bcs" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
 
 </dd></dl>
 
@@ -602,7 +551,7 @@ is not found?</p>
 <span id="qmt-data-solvers-3d-module"></span><h2>qmt.data.solvers_3d module<a class="headerlink" href="#module-qmt.data.solvers_3d" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
 <dt id="qmt.data.solvers_3d.Fem3DData">
-<em class="property">class </em><code class="descclassname">qmt.data.solvers_3d.</code><code class="descname">Fem3DData</code><span class="sig-paren">(</span><em>coordinates=None</em>, <em>coordinate_units=None</em>, <em>potential=None</em>, <em>potential_units=None</em>, <em>charge=None</em>, <em>surface_charge_integrals=None</em>, <em>volume_charge_integrals=None</em>, <em>fenics_3d_data=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/solvers_3d.html#Fem3DData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.solvers_3d.Fem3DData" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="descclassname">qmt.data.solvers_3d.</code><code class="descname">Fem3DData</code><span class="sig-paren">(</span><em>coordinates=None</em>, <em>potential=None</em>, <em>charge=None</em>, <em>surface_charge_integrals=None</em>, <em>volume_charge_integrals=None</em>, <em>fenics_3d_data=None</em>, <em>vunit='V'</em>, <em>lunit='um'</em>, <em>eunit='eV'</em>, <em>qunit='coulomb'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/solvers_3d.html#Fem3DData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.solvers_3d.Fem3DData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
 <dl class="method">
 <dt id="qmt.data.solvers_3d.Fem3DData.get_data">
@@ -624,7 +573,7 @@ is not found?</p>
 
 <dl class="function">
 <dt id="qmt.data.solvers_3d.deserialize_fenics_function">
-<code class="descclassname">qmt.data.solvers_3d.</code><code class="descname">deserialize_fenics_function</code><span class="sig-paren">(</span><em>serial_function_data</em>, <em>element_type='P'</em>, <em>element_degree=1</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/solvers_3d.html#deserialize_fenics_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.solvers_3d.deserialize_fenics_function" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">qmt.data.solvers_3d.</code><code class="descname">deserialize_fenics_function</code><span class="sig-paren">(</span><em>serial_function_data</em>, <em>element_type='P'</em>, <em>element_degree=2</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/solvers_3d.html#deserialize_fenics_function"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.solvers_3d.deserialize_fenics_function" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="class">

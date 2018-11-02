@@ -16,8 +16,7 @@ block1 = Part3DData('Parametrised block', 'Sketch', 'extrude', 'dielectric',
 block2 = Part3DData('Two blocks', 'Sketch001', 'extrude', 'metal_gate',
                 material='Au', thickness=0.5)
 sag = Part3DData('Garage', 'Sketch002', 'SAG', 'metal_gate',
-                material='Au', z0=0, z_middle=5, thickness=6,
-                t_in=2.5, t_out=0.5)
+                material='Au', z0=0, z_middle=5, thickness=6, t_in=2.5, t_out=0.5)
 wire = Part3DData('Nanowire', 'Sketch003', 'wire', 'semiconductor',
                 z0=0, thickness=0.5)
 shell = Part3DData('Wire cover', 'Sketch004', 'wire_shell', 'metal_gate',
@@ -29,17 +28,18 @@ wrap = Part3DData('First Layer', 'Sketch006', 'lithography', 'dielectric',
                 z0=0, layer_num=1, thickness=0.4, litho_base=[substrate, wire, shell])
 wrap2 = Part3DData('Second Layer', 'Sketch007', 'lithography', 'dielectric',
                 layer_num=2, thickness=0.1)
-virt = Part3DData('Virtual Domain', 'Sketch008', 'extrude', 'virtual',
-                thickness=5.5)
+virt = Part3DData('Virtual Domain', 'Sketch008', 'extrude', 'virtual', thickness=5.5)
 
+# Parameters for geometry building
+py2env = 'python2'
+input_file = 'geometry_sweep_showcase.fcstd'  # contains a model parameter 'd1'
 build_order = [block1, block2, sag, virt, wire, shell, block3, substrate, wrap, wrap2]
-input_file = 'geometry_sweep_showcase.fcstd'
 
-# Parallel computation of parametrised geometries using dask
+# Compute parametrised geometries in parallel with dask
 futures = []
 for d1 in np.linspace(2., 7., 3):
     futures.append(dask.delayed(build_3d_geometry)(
-        'python2', input_file, build_order, {'d1': d1}
+        py2env, input_file, build_order, {'d1': d1}
     ))
 geometries = dask.compute(*futures)
 

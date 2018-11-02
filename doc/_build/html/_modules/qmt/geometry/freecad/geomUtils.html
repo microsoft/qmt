@@ -158,7 +158,6 @@
 
 <span class="sd">&quot;&quot;&quot;Utilities to work with general geometries.&quot;&quot;&quot;</span>
 
-
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">import</span> <span class="nn">FreeCAD</span>
@@ -213,8 +212,8 @@
     <span class="n">doc</span> <span class="o">=</span> <span class="n">FreeCAD</span><span class="o">.</span><span class="n">ActiveDocument</span>
     <span class="n">shell</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">Faces</span>
     <span class="n">shell</span> <span class="o">=</span> <span class="n">Part</span><span class="o">.</span><span class="n">Solid</span><span class="p">(</span><span class="n">Part</span><span class="o">.</span><span class="n">Shell</span><span class="p">(</span><span class="n">shell</span><span class="p">))</span>
-    <span class="n">solid</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">addObject</span><span class="p">(</span><span class="s2">&quot;Part::Feature&quot;</span><span class="p">,</span><span class="n">obj</span><span class="o">.</span><span class="n">Label</span><span class="o">+</span><span class="s2">&quot;_solid&quot;</span><span class="p">)</span>
-    <span class="n">solid</span><span class="o">.</span><span class="n">Label</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">Label</span><span class="o">+</span><span class="s2">&quot;_solid&quot;</span>
+    <span class="n">solid</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">addObject</span><span class="p">(</span><span class="s2">&quot;Part::Feature&quot;</span><span class="p">,</span> <span class="n">obj</span><span class="o">.</span><span class="n">Label</span> <span class="o">+</span> <span class="s2">&quot;_solid&quot;</span><span class="p">)</span>
+    <span class="n">solid</span><span class="o">.</span><span class="n">Label</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">Label</span> <span class="o">+</span> <span class="s2">&quot;_solid&quot;</span>
     <span class="n">solid</span><span class="o">.</span><span class="n">Shape</span> <span class="o">=</span> <span class="n">shell</span>
     <span class="n">doc</span><span class="o">.</span><span class="n">recompute</span><span class="p">()</span>
     <span class="k">del</span> <span class="n">shell</span><span class="p">,</span> <span class="n">solid</span>
@@ -415,7 +414,7 @@
     <span class="k">return</span> <span class="n">returnObj</span></div>
 
 
-<div class="viewcode-block" id="draftOffset"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.draftOffset">[docs]</a><span class="k">def</span> <span class="nf">draftOffset</span><span class="p">(</span><span class="n">inputSketch</span><span class="p">,</span><span class="n">t</span><span class="p">):</span>
+<div class="viewcode-block" id="draftOffset"><a class="viewcode-back" href="../../../../source/qmt.geometry.freecad.html#qmt.geometry.freecad.geomUtils.draftOffset">[docs]</a><span class="k">def</span> <span class="nf">draftOffset</span><span class="p">(</span><span class="n">inputSketch</span><span class="p">,</span> <span class="n">t</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39; Attempt to offset the draft figure by a thickness t. Positive t is an</span>
 <span class="sd">    inflation, while negative t is a deflation.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
@@ -424,16 +423,16 @@
     <span class="k">if</span> <span class="n">t</span> <span class="o">==</span> <span class="mf">0.</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">inputSketch</span><span class="p">)</span>
     <span class="n">deltaT</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
-    <span class="n">offsetVec1</span> <span class="o">=</span> <span class="n">vec</span><span class="p">(</span><span class="o">-</span><span class="n">deltaT</span><span class="p">,</span><span class="o">-</span><span class="n">deltaT</span><span class="p">,</span><span class="mf">0.</span><span class="p">)</span>
-    <span class="n">offsetVec2</span> <span class="o">=</span> <span class="n">vec</span><span class="p">(</span><span class="n">deltaT</span><span class="p">,</span><span class="n">deltaT</span><span class="p">,</span><span class="mf">0.</span><span class="p">)</span>
-    
-    <span class="n">offset0</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">inputSketch</span><span class="p">)</span>
-    <span class="n">offset1</span> <span class="o">=</span> <span class="n">Draft</span><span class="o">.</span><span class="n">offset</span><span class="p">(</span><span class="n">inputSketch</span><span class="p">,</span><span class="n">offsetVec1</span><span class="p">,</span><span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">offset2</span> <span class="o">=</span> <span class="n">Draft</span><span class="o">.</span><span class="n">offset</span><span class="p">(</span><span class="n">inputSketch</span><span class="p">,</span><span class="n">offsetVec2</span><span class="p">,</span><span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">offsetVec1</span> <span class="o">=</span> <span class="n">vec</span><span class="p">(</span><span class="o">-</span><span class="n">deltaT</span><span class="p">,</span> <span class="o">-</span><span class="n">deltaT</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
+    <span class="n">offsetVec2</span> <span class="o">=</span> <span class="n">vec</span><span class="p">(</span><span class="n">deltaT</span><span class="p">,</span> <span class="n">deltaT</span><span class="p">,</span> <span class="mf">0.</span><span class="p">)</span>
 
-    <span class="n">solid0</span> <span class="o">=</span> <span class="n">extrude</span><span class="p">(</span><span class="n">offset0</span><span class="p">,</span><span class="mf">10.0</span><span class="p">)</span>
-    <span class="n">solid1</span> <span class="o">=</span> <span class="n">extrude</span><span class="p">(</span><span class="n">offset1</span><span class="p">,</span><span class="mf">10.0</span><span class="p">)</span>
-    <span class="n">solid2</span> <span class="o">=</span> <span class="n">extrude</span><span class="p">(</span><span class="n">offset2</span><span class="p">,</span><span class="mf">10.0</span><span class="p">)</span>
+    <span class="n">offset0</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">inputSketch</span><span class="p">)</span>
+    <span class="n">offset1</span> <span class="o">=</span> <span class="n">Draft</span><span class="o">.</span><span class="n">offset</span><span class="p">(</span><span class="n">inputSketch</span><span class="p">,</span> <span class="n">offsetVec1</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">offset2</span> <span class="o">=</span> <span class="n">Draft</span><span class="o">.</span><span class="n">offset</span><span class="p">(</span><span class="n">inputSketch</span><span class="p">,</span> <span class="n">offsetVec2</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">solid0</span> <span class="o">=</span> <span class="n">extrude</span><span class="p">(</span><span class="n">offset0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">)</span>
+    <span class="n">solid1</span> <span class="o">=</span> <span class="n">extrude</span><span class="p">(</span><span class="n">offset1</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">)</span>
+    <span class="n">solid2</span> <span class="o">=</span> <span class="n">extrude</span><span class="p">(</span><span class="n">offset2</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">)</span>
 
     <span class="c1"># Compute the volumes of these solids:</span>
     <span class="n">V0</span> <span class="o">=</span> <span class="n">solid0</span><span class="o">.</span><span class="n">Shape</span><span class="o">.</span><span class="n">Volume</span>
@@ -448,32 +447,40 @@
 
     <span class="c1"># If everything worked properly, these should either be ordered as</span>
     <span class="c1"># V1&lt;V0&lt;V2 or V2&lt;V0&lt;V1:</span>
-    <span class="k">if</span> <span class="n">V2</span><span class="o">&gt;</span><span class="n">V0</span> <span class="ow">and</span> <span class="n">V0</span><span class="o">&gt;</span><span class="n">V1</span><span class="p">:</span>
-        <span class="n">bigSketch</span> <span class="o">=</span> <span class="n">offset2</span><span class="p">;</span> <span class="n">littleSketch</span> <span class="o">=</span> <span class="n">offset1</span>
-    <span class="k">elif</span> <span class="n">V1</span><span class="o">&gt;</span><span class="n">V0</span> <span class="ow">and</span> <span class="n">V0</span><span class="o">&gt;</span><span class="n">V2</span><span class="p">:</span>
-        <span class="n">bigSketch</span> <span class="o">=</span> <span class="n">offset1</span><span class="p">;</span> <span class="n">littleSketch</span> <span class="o">=</span> <span class="n">offset2</span>
-    <span class="k">elif</span> <span class="n">V2</span><span class="o">&gt;</span><span class="n">V1</span> <span class="ow">and</span> <span class="n">V1</span><span class="o">&gt;</span><span class="n">V0</span><span class="p">:</span>
-        <span class="n">bigSketch</span> <span class="o">=</span> <span class="n">offset2</span><span class="p">;</span> <span class="n">littleSketch</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">V2</span> <span class="o">&gt;</span> <span class="n">V0</span> <span class="ow">and</span> <span class="n">V0</span> <span class="o">&gt;</span> <span class="n">V1</span><span class="p">:</span>
+        <span class="n">bigSketch</span> <span class="o">=</span> <span class="n">offset2</span><span class="p">;</span>
+        <span class="n">littleSketch</span> <span class="o">=</span> <span class="n">offset1</span>
+    <span class="k">elif</span> <span class="n">V1</span> <span class="o">&gt;</span> <span class="n">V0</span> <span class="ow">and</span> <span class="n">V0</span> <span class="o">&gt;</span> <span class="n">V2</span><span class="p">:</span>
+        <span class="n">bigSketch</span> <span class="o">=</span> <span class="n">offset1</span><span class="p">;</span>
+        <span class="n">littleSketch</span> <span class="o">=</span> <span class="n">offset2</span>
+    <span class="k">elif</span> <span class="n">V2</span> <span class="o">&gt;</span> <span class="n">V1</span> <span class="ow">and</span> <span class="n">V1</span> <span class="o">&gt;</span> <span class="n">V0</span><span class="p">:</span>
+        <span class="n">bigSketch</span> <span class="o">=</span> <span class="n">offset2</span><span class="p">;</span>
+        <span class="n">littleSketch</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="c1"># If we aren&#39;t in correct case, we still might be able to salvage things</span>
     <span class="c1"># for certain values of t:</span>
-    <span class="k">elif</span> <span class="n">V1</span><span class="o">&gt;</span><span class="n">V2</span> <span class="ow">and</span> <span class="n">V2</span><span class="o">&gt;</span><span class="n">V0</span><span class="p">:</span>
-        <span class="n">bigSketch</span> <span class="o">=</span> <span class="n">offset1</span><span class="p">;</span> <span class="n">littleSketch</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="k">elif</span> <span class="n">V2</span><span class="o">&lt;</span><span class="n">V1</span> <span class="ow">and</span> <span class="n">V1</span><span class="o">&lt;</span><span class="n">V0</span><span class="p">:</span>
-        <span class="n">bigSketch</span> <span class="o">=</span> <span class="kc">None</span><span class="p">;</span> <span class="n">littleSketch</span> <span class="o">=</span> <span class="n">offset2</span>
-    <span class="k">elif</span> <span class="n">V1</span><span class="o">&lt;</span><span class="n">V2</span> <span class="ow">and</span> <span class="n">V2</span><span class="o">&lt;</span><span class="n">V0</span><span class="p">:</span>
-        <span class="n">bigSketch</span> <span class="o">=</span> <span class="kc">None</span><span class="p">;</span> <span class="n">littleSketch</span> <span class="o">=</span> <span class="n">offset1</span>
+    <span class="k">elif</span> <span class="n">V1</span> <span class="o">&gt;</span> <span class="n">V2</span> <span class="ow">and</span> <span class="n">V2</span> <span class="o">&gt;</span> <span class="n">V0</span><span class="p">:</span>
+        <span class="n">bigSketch</span> <span class="o">=</span> <span class="n">offset1</span><span class="p">;</span>
+        <span class="n">littleSketch</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">elif</span> <span class="n">V2</span> <span class="o">&lt;</span> <span class="n">V1</span> <span class="ow">and</span> <span class="n">V1</span> <span class="o">&lt;</span> <span class="n">V0</span><span class="p">:</span>
+        <span class="n">bigSketch</span> <span class="o">=</span> <span class="kc">None</span><span class="p">;</span>
+        <span class="n">littleSketch</span> <span class="o">=</span> <span class="n">offset2</span>
+    <span class="k">elif</span> <span class="n">V1</span> <span class="o">&lt;</span> <span class="n">V2</span> <span class="ow">and</span> <span class="n">V2</span> <span class="o">&lt;</span> <span class="n">V0</span><span class="p">:</span>
+        <span class="n">bigSketch</span> <span class="o">=</span> <span class="kc">None</span><span class="p">;</span>
+        <span class="n">littleSketch</span> <span class="o">=</span> <span class="n">offset1</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">bigSketch</span> <span class="o">=</span> <span class="kc">None</span><span class="p">;</span> <span class="n">littleSketch</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">bigSketch</span> <span class="o">=</span> <span class="kc">None</span><span class="p">;</span>
+        <span class="n">littleSketch</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">delete</span><span class="p">(</span><span class="n">solid0</span><span class="p">)</span>
     <span class="n">delete</span><span class="p">(</span><span class="n">solid1</span><span class="p">)</span>
     <span class="n">delete</span><span class="p">(</span><span class="n">solid2</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">t</span><span class="o">&lt;</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">littleSketch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">t</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">littleSketch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">returnSketch</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">littleSketch</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">t</span><span class="o">&gt;</span><span class="mi">0</span> <span class="ow">and</span> <span class="n">bigSketch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">t</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">bigSketch</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">returnSketch</span> <span class="o">=</span> <span class="n">copy_move</span><span class="p">(</span><span class="n">bigSketch</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Failed to offset the sketch &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">inputSketch</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39; by amount &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
-    
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s1">&#39;Failed to offset the sketch &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">inputSketch</span><span class="o">.</span><span class="n">Name</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; by amount &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">t</span><span class="p">))</span>
+
     <span class="c1"># # now that we have the three solids, we need to figure out which is bigger</span>
     <span class="c1"># # and which is smaller.</span>
     <span class="c1"># diff10 = subtract(solid1,solid0)</span>

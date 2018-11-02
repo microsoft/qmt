@@ -213,6 +213,10 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">energyUnit</span> <span class="o">=</span> <span class="n">units</span><span class="o">.</span><span class="n">meV</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">energyUnit</span> <span class="o">=</span> <span class="n">toFloat</span><span class="p">(</span><span class="n">units</span><span class="o">.</span><span class="n">meV</span> <span class="o">/</span> <span class="n">parseUnit</span><span class="p">(</span><span class="n">eunit</span><span class="p">))</span>
+        <span class="c1"># Tuple of key values that have energy units:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">energy_quantities</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;workFunction&#39;</span><span class="p">,</span> <span class="s1">&#39;fermiEnergy&#39;</span><span class="p">,</span> <span class="s1">&#39;electronAffinity&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;directBandGap&#39;</span><span class="p">,</span><span class="s1">&#39;valenceBandOffset&#39;</span><span class="p">,</span> <span class="s1">&#39;chargeNeutralityLevel&#39;</span><span class="p">,</span>
+                                  <span class="s1">&#39;interbandMatrixElement&#39;</span><span class="p">,</span> <span class="s1">&#39;spinOrbitSplitting&#39;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="k">try</span><span class="p">:</span>
@@ -220,12 +224,16 @@
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
                 <span class="s2">&quot;KeyError: material &#39;</span><span class="si">{}</span><span class="s2">&#39; has no &#39;</span><span class="si">{}</span><span class="s2">&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">key</span><span class="p">))</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span>
-            <span class="s1">&#39;workFunction&#39;</span><span class="p">,</span> <span class="s1">&#39;fermiEnergy&#39;</span><span class="p">,</span> <span class="s1">&#39;electronAffinity&#39;</span><span class="p">,</span> <span class="s1">&#39;directBandGap&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;valenceBandOffset&#39;</span><span class="p">,</span> <span class="s1">&#39;chargeNeutralityLevel&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;interbandMatrixElement&#39;</span><span class="p">,</span> <span class="s1">&#39;spinOrbitSplitting&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_quantities</span><span class="p">:</span>
             <span class="n">value</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">energyUnit</span>
         <span class="k">return</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">key</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">energy_quantities</span><span class="p">:</span>
+            <span class="n">scaled_value</span> <span class="o">=</span> <span class="n">toFloat</span><span class="p">(</span><span class="n">value</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">energyUnit</span><span class="p">)</span> <span class="c1"># if is an energy quantity, scale it</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">scaled_value</span> <span class="o">=</span> <span class="n">value</span> <span class="c1"># otherwise just pass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">scaled_value</span>
 
     <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">)</span>
@@ -274,12 +282,12 @@
         <span class="c1">#  &amp; Fornari (2016).]</span>
         <span class="k">if</span> <span class="n">direction</span> <span class="o">==</span> <span class="s1">&#39;dos&#39;</span><span class="p">:</span>
             <span class="c1"># light-to-heavy hole splitting</span>
-            <span class="n">gamma_bar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">gamma2</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">gamma3</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+            <span class="n">gamma_bar</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">gamma2</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">gamma3</span> <span class="o">**</span> <span class="mi">2</span><span class="p">))</span>
             <span class="c1"># anisotropy factor for heavy or light hole</span>
-            <span class="n">gamma_hl</span> <span class="o">=</span> <span class="o">-</span><span class="n">sign</span> <span class="o">*</span> <span class="mi">6</span> <span class="o">*</span> <span class="p">(</span><span class="n">gamma3</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">gamma2</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> \
-                <span class="p">(</span><span class="n">gamma_bar</span> <span class="o">*</span> <span class="p">(</span><span class="n">gamma1</span> <span class="o">+</span> <span class="n">sign</span> <span class="o">*</span> <span class="n">gamma_bar</span><span class="p">))</span>
+            <span class="n">gamma_hl</span> <span class="o">=</span> <span class="o">-</span><span class="n">sign</span> <span class="o">*</span> <span class="mi">6</span> <span class="o">*</span> <span class="p">(</span><span class="n">gamma3</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">-</span> <span class="n">gamma2</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> \
+                       <span class="p">(</span><span class="n">gamma_bar</span> <span class="o">*</span> <span class="p">(</span><span class="n">gamma1</span> <span class="o">+</span> <span class="n">sign</span> <span class="o">*</span> <span class="n">gamma_bar</span><span class="p">))</span>
             <span class="k">return</span> <span class="mf">1.</span> <span class="o">/</span> <span class="p">(</span><span class="n">gamma1</span> <span class="o">+</span> <span class="n">sign</span> <span class="o">*</span> <span class="n">gamma_bar</span><span class="p">)</span> <span class="o">*</span> \
-                <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">0.05</span> <span class="o">*</span> <span class="n">gamma_hl</span> <span class="o">+</span> <span class="mf">0.0164</span> <span class="o">*</span> <span class="n">gamma_hl</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mi">2</span> <span class="o">/</span> <span class="mf">3.</span><span class="p">)</span>
+                   <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mf">0.05</span> <span class="o">*</span> <span class="n">gamma_hl</span> <span class="o">+</span> <span class="mf">0.0164</span> <span class="o">*</span> <span class="n">gamma_hl</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mi">2</span> <span class="o">/</span> <span class="mf">3.</span><span class="p">)</span>
             <span class="c1"># The following expression would hold if the band was circularly symmetric in xy-plane</span>
             <span class="c1"># return (self.holeMass(band, &#39;001&#39;) * self.holeMass(band,</span>
             <span class="c1"># &#39;110&#39;)**2)**(1 / 3.)</span>
@@ -381,7 +389,8 @@
             <span class="c1"># Unused so far</span>
             <span class="c1"># set_property(&#39;holeMass&#39;)  # Hole mass [in units of bare electron mass]</span>
             <span class="c1"># set_property(&#39;valence_band_maximum&#39;)  # Position of valence band maximum [in meV]</span>
-            <span class="c1"># set_property(&#39;conduction_band_minimum&#39;)  # Position of conduction band minimum [in meV]</span>
+            <span class="c1"># set_property(&#39;conduction_band_minimum&#39;)  # Position of conduction band minimum [in</span>
+            <span class="c1"># meV]</span>
             <span class="c1"># set_property(&#39;bulkDoping&#39;)  # Bulk doping [unit?]</span>
 
         <span class="k">if</span> <span class="n">kwargs</span><span class="p">:</span>
@@ -390,6 +399,10 @@
 
     <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">key</span><span class="p">,</span><span class="n">val</span><span class="p">):</span>
+        <span class="c1"># This assumes that val is a Material object</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">matDict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">properties</span>
 
 <div class="viewcode-block" id="Materials.find"><a class="viewcode-back" href="../../source/qmt.html#qmt.materials.Materials.find">[docs]</a>    <span class="k">def</span> <span class="nf">find</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">eunit</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Retrieve a named material from the database.</span>
@@ -409,9 +422,11 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># print(&quot;parsing&quot;, name)</span>
             <span class="c1"># A_y B_x C</span>
-            <span class="n">bin_pattern1</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;([A-Z][a-z]*)(\d+\.?\d*|\.\d+)([A-Z][a-z]*)(\d+\.?\d*|\.\d+)([A-Z][a-z]*)&quot;</span>
+            <span class="n">bin_pattern1</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;([A-Z][a-z]*)(\d+\.?\d*|\.\d+)([A-Z][a-z]*)(\d+\.?\d*|\.\d+)([A-Z][&quot;</span> \
+                           <span class="sa">r</span><span class="s2">&quot;a-z]*)&quot;</span>
             <span class="c1"># A B_y C_x</span>
-            <span class="n">bin_pattern2</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;([A-Z][a-z]*)([A-Z][a-z]*)(\d+\.?\d*|\.\d+)([A-Z][a-z]*)(\d+\.?\d*|\.\d+)&quot;</span>
+            <span class="n">bin_pattern2</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;([A-Z][a-z]*)([A-Z][a-z]*)(\d+\.?\d*|\.\d+)([A-Z][a-z]*)(&quot;</span> \
+                           <span class="sa">r</span><span class="s2">&quot;\d+\.?\d*|\.\d+)&quot;</span>
             <span class="c1"># (A)_y (B)_x</span>
             <span class="n">bin_pattern3</span> <span class="o">=</span> <span class="sa">r</span><span class="s2">&quot;\((.+)\)(\d+\.?\d*|\.\d+)\((.+)\)(\d+\.?\d*|\.\d+)&quot;</span>
             <span class="n">match1</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">bin_pattern1</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
@@ -504,7 +519,6 @@
             <span class="n">generate_file</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">matPath</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">load</span><span class="p">()</span></div>
 
-
 <div class="viewcode-block" id="Materials.conduction_band_minimum"><a class="viewcode-back" href="../../source/qmt.html#qmt.materials.Materials.conduction_band_minimum">[docs]</a>    <span class="k">def</span> <span class="nf">conduction_band_minimum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mat</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Calculate the energy of the conduction band minimum $E_c$ of a semiconductor material.</span>
 
@@ -534,7 +548,7 @@
         <span class="k">if</span> <span class="n">mat</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;metal&#39;</span><span class="p">:</span>
             <span class="k">return</span> <span class="o">-</span><span class="n">mat</span><span class="p">[</span><span class="s1">&#39;workFunction&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">mat</span><span class="p">[</span><span class="s1">&#39;fermiEnergy&#39;</span><span class="p">]</span>
         <span class="k">elif</span> <span class="n">mat</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;dielectric&#39;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="mf">0.</span><span class="o">*</span><span class="n">mat</span><span class="o">.</span><span class="n">energyUnit</span> <span class="c1">#vacuum energy</span>
+            <span class="k">return</span> <span class="mf">0.</span> <span class="o">*</span> <span class="n">mat</span><span class="o">.</span><span class="n">energyUnit</span>  <span class="c1"># vacuum energy</span>
         <span class="k">assert</span> <span class="n">mat</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;semi&#39;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">cbo</span> <span class="o">=</span> <span class="n">mat</span><span class="p">[</span><span class="s1">&#39;valenceBandOffset&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">mat</span><span class="p">[</span><span class="s1">&#39;directBandGap&#39;</span><span class="p">]</span>
@@ -576,9 +590,9 @@
 <span class="sd">          `self.valence_band_maximum(mat1) - self.valence_band_maximum(mat2)`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">mat</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;metal&#39;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="o">-</span><span class="mf">10.e3</span><span class="o">*</span><span class="n">mat</span><span class="o">.</span><span class="n">energyUnit</span> <span class="c1">#very low</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mf">10.e3</span> <span class="o">*</span> <span class="n">mat</span><span class="o">.</span><span class="n">energyUnit</span>  <span class="c1"># very low</span>
         <span class="k">elif</span> <span class="n">mat</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;dielectric&#39;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="o">-</span><span class="mf">10.e3</span><span class="o">*</span><span class="n">mat</span><span class="o">.</span><span class="n">energyUnit</span> <span class="c1">#very low</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mf">10.e3</span> <span class="o">*</span> <span class="n">mat</span><span class="o">.</span><span class="n">energyUnit</span>  <span class="c1"># very low</span>
         <span class="k">assert</span> <span class="n">mat</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;semi&#39;</span>
         <span class="n">ref_name</span> <span class="o">=</span> <span class="s1">&#39;InSb&#39;</span>
         <span class="k">try</span><span class="p">:</span>
@@ -601,7 +615,7 @@
             <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
             <span class="k">return</span> <span class="o">-</span><span class="p">(</span><span class="n">mat</span><span class="p">[</span><span class="s1">&#39;electronAffinity&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">mat</span><span class="p">[</span><span class="s1">&#39;directBandGap&#39;</span><span class="p">])</span></div>
 
-    <span class="c1">#TODO: make this user-configurable and shift all energy properties reported by materials</span>
+    <span class="c1"># TODO: make this user-configurable and shift all energy properties reported by materials</span>
 <div class="viewcode-block" id="Materials.reference_level"><a class="viewcode-back" href="../../source/qmt.html#qmt.materials.Materials.reference_level">[docs]</a>    <span class="k">def</span> <span class="nf">reference_level</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eunit</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">eunit</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">eunit</span> <span class="o">=</span> <span class="n">units</span><span class="o">.</span><span class="n">meV</span>
@@ -638,7 +652,6 @@
         <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
         <span class="n">chi</span> <span class="o">=</span> <span class="n">mat</span><span class="p">[</span><span class="s1">&#39;electronAffinity&#39;</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">ref_mat</span><span class="p">[</span><span class="s1">&#39;electronAffinity&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">chi</span></div>
-
 
 
 <div class="viewcode-block" id="valence_band_offset"><a class="viewcode-back" href="../../source/qmt.html#qmt.materials.valence_band_offset">[docs]</a><span class="k">def</span> <span class="nf">valence_band_offset</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">ref_mat</span><span class="p">):</span>
@@ -716,7 +729,8 @@
 <span class="s2">        Sources:</span>
 <span class="s2">        * Robertson, EPJAP 28, 265 (2004): High dielectric constant oxides,</span>
 <span class="s2">          https://doi.org/10.1051/epjap:2004206</span>
-<span class="s2">        * Biercuk et al., APL 83, 2405 (2003), Low-temperature atomic-layer-deposition lift-off method</span>
+<span class="s2">        * Biercuk et al., APL 83, 2405 (2003), Low-temperature atomic-layer-deposition lift-off </span>
+<span class="s2">        method</span>
 <span class="s2">          for microelectronic and nanoelectronic applications, https://doi.org/10.1063/1.1612904</span>
 <span class="s2">        * Yota et al.,  JVSTA 31, 01A134 (2013), Characterization of atomic layer deposition HfO2,</span>
 <span class="s2">          Al2O3, and plasma-enhanced chemical vapor deposition Si3N4 as metal-insulator-metal</span>
@@ -817,20 +831,20 @@
                            <span class="c1"># source? Wikipedia and others quote 4.06 - 4.26 eV</span>
                            <span class="c1"># depending on face.</span>
                            <span class="n">workFunction</span><span class="o">=</span><span class="mf">4280.</span><span class="p">,</span>
-                           <span class="c1">#Ashcroft and Mermin:</span>
+                           <span class="c1"># Ashcroft and Mermin:</span>
                            <span class="n">fermiEnergy</span><span class="o">=</span><span class="mf">11700.</span><span class="p">)</span>
     <span class="n">materials</span><span class="o">.</span><span class="n">add_material</span><span class="p">(</span><span class="s1">&#39;Au&#39;</span><span class="p">,</span> <span class="s1">&#39;metal&#39;</span><span class="p">,</span> <span class="n">relativePermittivity</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
                            <span class="c1"># source- Wikipedia quotes it as 5.1-5.47; this is the</span>
                            <span class="c1"># average.</span>
                            <span class="n">workFunction</span><span class="o">=</span><span class="mf">5285.</span><span class="p">,</span>
-                           <span class="c1">#Ashcroft and Mermin:</span>
+                           <span class="c1"># Ashcroft and Mermin:</span>
                            <span class="n">fermiEnergy</span><span class="o">=</span><span class="mf">5530.</span><span class="p">)</span>
     <span class="n">materials</span><span class="o">.</span><span class="n">add_material</span><span class="p">(</span><span class="s1">&#39;degenDopedSi&#39;</span><span class="p">,</span> <span class="s1">&#39;metal&#39;</span><span class="p">,</span> <span class="n">relativePermittivity</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
                            <span class="c1"># source - Ioffe Institute,</span>
                            <span class="c1"># http://www.ioffe.ru/SVA/NSM/Semicond/Si/basic.html</span>
                            <span class="n">workFunction</span><span class="o">=</span><span class="mf">4050.</span><span class="p">,</span>
-                           <span class="c1">#unknown / probably depends on doping density; setting</span>
-                           <span class="c1">#it to Au for now.</span>
+                           <span class="c1"># unknown / probably depends on doping density; setting</span>
+                           <span class="c1"># it to Au for now.</span>
                            <span class="n">fermiEnergy</span><span class="o">=</span><span class="mf">5530.</span><span class="p">)</span>
     <span class="n">materials</span><span class="o">.</span><span class="n">add_material</span><span class="p">(</span><span class="s1">&#39;NbTiN&#39;</span><span class="p">,</span> <span class="s1">&#39;metal&#39;</span><span class="p">,</span> <span class="n">relativePermittivity</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
                            <span class="c1"># Unknown; just setting it to Al for now.</span>
@@ -965,7 +979,7 @@
                            <span class="c1"># 300 K,</span>
                            <span class="c1"># http://www.ioffe.ru/SVA/NSM/Semicond/Si/basic.html</span>
                            <span class="n">relativePermittivity</span><span class="o">=</span><span class="mf">11.7</span><span class="p">,</span> <span class="n">electronAffinity</span><span class="o">=</span><span class="mf">4050.</span><span class="p">,</span>
-                           <span class="n">electronMass</span><span class="o">=</span><span class="p">(</span><span class="mf">0.98</span> <span class="o">+</span> <span class="mf">0.19</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span> <span class="o">/</span> <span class="mf">3.</span><span class="p">),</span>  <span class="c1"># DOS mass</span>
+                           <span class="n">electronMass</span><span class="o">=</span><span class="p">(</span><span class="mf">0.98</span> <span class="o">+</span> <span class="mf">0.19</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="mf">1.</span> <span class="o">/</span> <span class="mf">3.</span><span class="p">),</span>  <span class="c1"># DOS mass</span>
                            <span class="c1"># Yu &amp; Cardona</span>
                            <span class="n">directBandGap</span><span class="o">=</span><span class="mf">3480.</span><span class="p">,</span>
                            <span class="n">luttingerGamma1</span><span class="o">=</span><span class="mf">4.28</span><span class="p">,</span> <span class="n">luttingerGamma2</span><span class="o">=</span><span class="mf">0.339</span><span class="p">,</span> <span class="n">luttingerGamma3</span><span class="o">=</span><span class="mf">1.446</span><span class="p">,</span>

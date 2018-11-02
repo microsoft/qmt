@@ -6,7 +6,8 @@ Geometry Sweep
 
 This example showcases geometry building. It is directly executable as `examples/geometry_sweep.py`.
 
-A FreeCAD template document is located at `examples/geometry_sweep_showcase.fcstd`.
+The FreeCAD template document required by this example is located at
+`examples/geometry_sweep_showcase.fcstd`.
 It contains sketches with FreeCAD-internal names, which are visible when selecting an object
 (not to be confused with the human-readable labels in the model tree view).
 
@@ -15,20 +16,21 @@ It contains sketches with FreeCAD-internal names, which are visible when selecti
     :start-after: """Example geometry sweeping."""
     :end-before: # Set up geometry task
 
-First we use the internal names to generate :py:mod:`qmt.data.part_data.Part3DData`.
+First we use the internal names to generate :py:mod:`qmt.data.geometry.Part3DData` objects.
 
 .. literalinclude:: ../../examples/geometry_sweep.py
     :language: python
-    :start-after: tag1
-    :end-before: freecad_dict
+    :start-after: # Set up geometry task
+    :end-before: # Parameters
 
-Then we package these 3D parts into a specific dict scheme, feed them to a :code:`Geometry3D` task and run it.
+Then we package these 3D parts into a build order list and feed them, along with other parameters
+to a :py:mod:`qmt.tasks.geometry.build_3d_geometry` task.
 The :code:`pyenv` path must correspond to a callable Python 2 interpreter.
 
 .. literalinclude:: ../../examples/geometry_sweep.py
     :language: python
-    :start-after: layer_num=2, thickness=1)
-    :end-before: # Investigate results
+    :start-after: # Parameters
+    :end-before: # Create a local temporary
 
 The result should contain three instances of the built geometry. They differ in the length of
 the 'Parametrised Block', which was set up to correspond to the parameter :code:`d1` in the template document.
@@ -37,7 +39,7 @@ Finally we write these documents to a temporary directory for visual inspection,
 
 .. literalinclude:: ../../examples/geometry_sweep.py
     :language: python
-    :start-after: # Investigate results
+    :start-after: # Create a local temporary
 
 
 Hello World Task

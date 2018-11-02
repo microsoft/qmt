@@ -1,29 +1,21 @@
 qmt\.tasks package
 ==================
 
-Subpackages
------------
-
-.. toctree::
-
-    qmt.tasks.basic
-    qmt.tasks.ms
-
 Submodules
 ----------
 
-qmt\.tasks\.sweep module
-------------------------
+qmt\.tasks\.geometry module
+---------------------------
 
-.. automodule:: qmt.tasks.sweep
+.. automodule:: qmt.tasks.geometry
     :members:
     :undoc-members:
     :show-inheritance:
 
-qmt\.tasks\.task module
------------------------
+qmt\.tasks\.reduce\_dim module
+------------------------------
 
-.. automodule:: qmt.tasks.task
+.. automodule:: qmt.tasks.reduce_dim
     :members:
     :undoc-members:
     :show-inheritance:
