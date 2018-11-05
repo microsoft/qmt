@@ -166,16 +166,16 @@
 
 
 <div class="viewcode-block" id="Geo2DData"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geometry.Geo2DData">[docs]</a><span class="k">class</span> <span class="nc">Geo2DData</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Class holding 2D geometry data.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for holding a 2D geometry specification. This class holds two main dicts:</span>
+<span class="sd">        - parts is a dictionary of shapely Polygon objects</span>
+<span class="sd">        - edges is a dictionary of shapely LineString objects</span>
+
+<span class="sd">    Parts are intended to be 2D domains, while edges are used for setting boundary</span>
+<span class="sd">    conditions and surface conditions.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lunit</span><span class="o">=</span><span class="s1">&#39;nm&#39;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Class for holding a 2D geometry specification. This class holds two main dicts:</span>
-<span class="sd">            - parts is a dictionary of shapely Polygon objects</span>
-<span class="sd">            - edges is a dictionary of shapely LineString objects</span>
-<span class="sd">        Parts are intended to be 2D domains, while edges are used for setting boundary conditions</span>
-<span class="sd">        and surface conditions.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parts</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">edges</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">build_order</span> <span class="o">=</span> <span class="p">[]</span>
@@ -184,6 +184,7 @@
 <div class="viewcode-block" id="Geo2DData.add_part"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geometry.Geo2DData.add_part">[docs]</a>    <span class="k">def</span> <span class="nf">add_part</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part_name</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a part to this geometry.</span>
+
 <span class="sd">        :param str part_name: Name of the part to create</span>
 <span class="sd">        :param Polygon part: Polygon object from shapely.geometry. This must be a valid Polygon.</span>
 <span class="sd">        :param bool overwrite: Should we allow this to overwrite?</span>
@@ -199,9 +200,10 @@
 <div class="viewcode-block" id="Geo2DData.remove_part"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geometry.Geo2DData.remove_part">[docs]</a>    <span class="k">def</span> <span class="nf">remove_part</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part_name</span><span class="p">,</span> <span class="n">ignore_if_absent</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Remove a part from this geometry.</span>
+
 <span class="sd">        :param str part_name: Name of part to remove</span>
 <span class="sd">        :param bool ignore_if_absent: Should we ignore an attempted removal if the part name</span>
-<span class="sd">        is not found?</span>
+<span class="sd">                                      is not found?</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">part_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">:</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="n">part_name</span><span class="p">]</span>
@@ -216,6 +218,7 @@
 <div class="viewcode-block" id="Geo2DData.add_edge"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geometry.Geo2DData.add_edge">[docs]</a>    <span class="k">def</span> <span class="nf">add_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge_name</span><span class="p">,</span> <span class="n">edge</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add an edge to this geometry.</span>
+
 <span class="sd">        :param str edge_name: Name of the edge to create</span>
 <span class="sd">        :param LineString edge: LineString object from shapely.geometry.</span>
 <span class="sd">        :param bool overwrite: Should we allow this to overwrite?</span>
@@ -229,9 +232,10 @@
 <div class="viewcode-block" id="Geo2DData.remove_edge"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geometry.Geo2DData.remove_edge">[docs]</a>    <span class="k">def</span> <span class="nf">remove_edge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge_name</span><span class="p">,</span> <span class="n">ignore_if_absent</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Remove an edge from this geometry.</span>
+
 <span class="sd">        :param str edge_name: Name of part to remove</span>
 <span class="sd">        :param bool ignore_if_absent: Should we ignore an attempted removal if the part name</span>
-<span class="sd">        is not found?</span>
+<span class="sd">                                      is not found?</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">edge_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">:</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="n">edge_name</span><span class="p">]</span>
@@ -246,6 +250,7 @@
 <div class="viewcode-block" id="Geo2DData.compute_bb"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geometry.Geo2DData.compute_bb">[docs]</a>    <span class="k">def</span> <span class="nf">compute_bb</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Computes the bounding box of all of the parts and edges in the geometry.</span>
+
 <span class="sd">        :return bb_list: List of [min_x,max_x,min_y,max_y]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">all_shapes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">edges</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
@@ -259,6 +264,7 @@
 <div class="viewcode-block" id="Geo2DData.part_build_order"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geometry.Geo2DData.part_build_order">[docs]</a>    <span class="k">def</span> <span class="nf">part_build_order</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the build order restricted to parts.</span>
+
 <span class="sd">        :return build_order: build order restricted to parts.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">priority</span> <span class="o">=</span> <span class="p">[]</span>
@@ -270,6 +276,7 @@
 <div class="viewcode-block" id="Geo2DData.part_coord_list"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geometry.Geo2DData.part_coord_list">[docs]</a>    <span class="k">def</span> <span class="nf">part_coord_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part_name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the list of vertex coordinates for a part</span>
+
 <span class="sd">        :param str part_name: Name of the part</span>
 <span class="sd">        :return list coord_list: List of coordinates of the vertices of the part.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -280,6 +287,7 @@
 <div class="viewcode-block" id="Geo2DData.edge_coord_list"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geometry.Geo2DData.edge_coord_list">[docs]</a>    <span class="k">def</span> <span class="nf">edge_coord_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">edge_name</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the list of vertex coordinates for an edge.</span>
+
 <span class="sd">        :param str edge_name: Name of the edge.</span>
 <span class="sd">        :return list coord_list: List of the coordinates of the edge.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -288,15 +296,14 @@
 
 
 <div class="viewcode-block" id="Geo3DData"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geometry.Geo3DData">[docs]</a><span class="k">class</span> <span class="nc">Geo3DData</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Class holding 3D geometry data.&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class for a 3D geometry specification. It holds:</span>
+<span class="sd">        - parts is a dict of Part3D objects, keyed by the label of each Part3D object.</span>
+<span class="sd">        - build_order is a list of strings indicating the construction order.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">EXTERIOR_BC_NAME</span> <span class="o">=</span> <span class="s2">&quot;exterior&quot;</span>
 
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Class for a 3D geometry specification. It holds:</span>
-<span class="sd">            - parts is a dict of Part3D objects, keyed by the label of each Part3D object.</span>
-<span class="sd">            - build_order is a list of strings indicating the construction order.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">build_order</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parts</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># dict of parts in this geometry</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">serial_fcdoc</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># serialized FreeCAD document for this geometry</span>
@@ -312,6 +319,7 @@
 <div class="viewcode-block" id="Geo3DData.get_material_mapping"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geometry.Geo3DData.get_material_mapping">[docs]</a>    <span class="k">def</span> <span class="nf">get_material_mapping</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get mapping of part names to materials.</span>
+
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_material</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span></div>
@@ -319,6 +327,7 @@
 <div class="viewcode-block" id="Geo3DData.add_part"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geometry.Geo3DData.add_part">[docs]</a>    <span class="k">def</span> <span class="nf">add_part</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part_name</span><span class="p">,</span> <span class="n">part</span><span class="p">,</span> <span class="n">overwrite</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Add a part to this geometry.</span>
+
 <span class="sd">        :param str part_name: Name of the part to create</span>
 <span class="sd">        :param Part3D part: Part3D object.</span>
 <span class="sd">        :param bool overwrite: Should we allow this to overwrite?</span>
@@ -332,9 +341,10 @@
 <div class="viewcode-block" id="Geo3DData.remove_part"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geometry.Geo3DData.remove_part">[docs]</a>    <span class="k">def</span> <span class="nf">remove_part</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">part_name</span><span class="p">,</span> <span class="n">ignore_if_absent</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Remove a part from this geometry.</span>
+
 <span class="sd">        :param str part_name: Name of part to remove</span>
 <span class="sd">        :param bool ignore_if_absent: Should we ignore an attempted removal if the part name</span>
-<span class="sd">        is not found?</span>
+<span class="sd">                                      is not found?</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">part_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">:</span>
             <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">parts</span><span class="p">[</span><span class="n">part_name</span><span class="p">]</span>
@@ -348,6 +358,7 @@
 <div class="viewcode-block" id="Geo3DData.set_data"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geometry.Geo3DData.set_data">[docs]</a>    <span class="k">def</span> <span class="nf">set_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_name</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">scratch_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Set data to a serial format that is easily portable.</span>
+
 <span class="sd">        :param str data_name:  &quot;fcdoc&quot; freeCAD document \</span>
 <span class="sd">                               &quot;mesh&quot;  fenics mesh \</span>
 <span class="sd">                               &quot;rmf&quot;   fenics region marker function</span>
@@ -378,6 +389,7 @@
 <div class="viewcode-block" id="Geo3DData.get_data"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geometry.Geo3DData.get_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_name</span><span class="p">,</span> <span class="n">mesh</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scratch_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get data from stored serial format.</span>
+
 <span class="sd">        :param str data_name:  &quot;fcdoc&quot; freeCAD document.</span>
 <span class="sd">        :param scratch_dir:    Optional existing temporary (fast) storage location.</span>
 <span class="sd">        :return data:          The freeCAD document or fenics object that was stored.</span>
@@ -408,76 +420,77 @@
 
 
 <div class="viewcode-block" id="Part3DData"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.geometry.Part3DData">[docs]</a><span class="k">class</span> <span class="nc">Part3DData</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create a 3D geometric part.</span>
+
+<span class="sd">    :param str label: The descriptive name of this new part.</span>
+<span class="sd">    :param str fc_name: The name of the 2D/3D freeCAD object that this is built from.</span>
+<span class="sd">    :param str directive: The freeCAD directive is used to construct this part.</span>
+<span class="sd">        Valid options for this are:</span>
+
+<span class="sd">        - extrude -- simple extrusion</span>
+<span class="sd">        - wire -- hexagonal nanowire about a polyline</span>
+<span class="sd">        - wire_shell -- shell coating a specified nanowire</span>
+<span class="sd">        - sag -- SAG structure</span>
+<span class="sd">        - lithography -- masked layer deposited on top</span>
+<span class="sd">        - 3d_shape -- just take the 3D shape directly</span>
+<span class="sd">    :param str domain_type: The type of domain this part represents. Valid options are:</span>
+
+<span class="sd">        - semiconductor -- region permitted to self-consistently accumulate</span>
+<span class="sd">        - metal_gate -- an electrode</span>
+<span class="sd">        - virtual -- a part just used for selection (ignores material)</span>
+<span class="sd">        - dielectric -- no charge accumulation allowed</span>
+<span class="sd">    :param str material: The material of the resulting part.</span>
+<span class="sd">    :param float z0: The starting z coordinate. Required for extrude, wire,</span>
+<span class="sd">        SAG, and lithography directives.</span>
+<span class="sd">    :param float thickness: The total thickness. Required for all directives.</span>
+<span class="sd">        On wireShell, this is interpreted as the layer thickness.</span>
+<span class="sd">    :param Part3DData target_wire: Target wire directive for a coating directive.</span>
+<span class="sd">    :param list shell_verts: Vertices to use when rendering the coating. Required</span>
+<span class="sd">        for the shell directive.</span>
+<span class="sd">    :param str depo_mode: &#39;depo&#39; or &#39;etch&#39; defines the positive or negative mask for the</span>
+<span class="sd">        deposition of a wire coating.</span>
+<span class="sd">    :param float z_middle: The location for the &quot;flare out&quot; of the SAG directive.</span>
+<span class="sd">    :param float t_in: The lateral distance from the 2D profile to the edge of the top bevel</span>
+<span class="sd">        for the SAG directive.</span>
+<span class="sd">    :param float t_out: The lateral distance from the 2D profile to the furthest &quot;flare out&quot;</span>
+<span class="sd">        location for the SAG directive.</span>
+<span class="sd">    :param int layer_num: The layer number used by the lithography directive. Lower numbers</span>
+<span class="sd">        go down first, with higher numbers deposited last.</span>
+<span class="sd">    :param list litho_base: The base partNames to use for the lithography directive.</span>
+<span class="sd">        For multi-step lithography, the bases are just all merged,</span>
+<span class="sd">        so there is no need to list this more than once.</span>
+<span class="sd">    :param float mesh_max_size: The maximum allowable mesh size for this part, in microns.</span>
+<span class="sd">    :param float mesh_min_size: The minimum allowable mesh size for this part, in microns.</span>
+<span class="sd">    :param float mesh_growth_rate: The maximum allowable mesh growth rate for this part.</span>
+<span class="sd">    :param tuple mesh_scale_vector: 3D list with scaling factors for the mesh in</span>
+<span class="sd">        x, y, z direction.</span>
+<span class="sd">    :param dict boundary_condition: One or more boundary conditions, if applicable, of</span>
+<span class="sd">        the form of a type -&gt; value mapping. For example, this could be {&#39;voltage&#39;:1.0} or,</span>
+<span class="sd">        more explicitly, {&#39;voltage&#39;: {&#39;type&#39;: &#39;dirichlet&#39;, &#39;value&#39;: 1.0,&#39;unit&#39;: &#39;V&#39;}}.</span>
+<span class="sd">        Assumed by FEniCS solvers to be in the form {&quot;voltage&quot;:1.0},</span>
+<span class="sd">        and the value given is taken to be in meV.</span>
+<span class="sd">    :param list subtract_list: A list of partNames that should be subtracted from the current</span>
+<span class="sd">        part when forming the final 3D objects. This subtraction is</span>
+<span class="sd">        carried out when boundary</span>
+<span class="sd">        conditions are set.</span>
+<span class="sd">    :param float ns: Volume charge density of a part, applicable to semiconductor and</span>
+<span class="sd">        dielectric parts. The units for this are 1/cm^3.</span>
+<span class="sd">    :param float phi_nl: The neutral level for interface traps, measured in units of eV above</span>
+<span class="sd">        the valence band maximum (semiconductor only).</span>
+<span class="sd">    :param float ds: Density of interface traps; units are 1/(cm^2*eV).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">fc_name</span><span class="p">,</span> <span class="n">directive</span><span class="p">,</span> <span class="n">domain_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">material</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">z0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">target_wire</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shell_verts</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">depo_mode</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">z_middle</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">t_in</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">t_out</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">layer_num</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">litho_base</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">mesh_max_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mesh_min_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mesh_growth_rate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">mesh_scale_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">boundary_condition</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-            <span class="n">ns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">phi_nl</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ds</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Add a geometric part to the model.</span>
-<span class="sd">        :param str label: The descriptive name of this new part.</span>
-<span class="sd">        :param str fc_name: The name of the 2D/3D freeCAD object that this is built from.</span>
-<span class="sd">        :param str directive: The freeCAD directive is used to construct this part. Valid</span>
-<span class="sd">                              options for this are:</span>
-<span class="sd">                              extrude -- simple extrusion</span>
-<span class="sd">                              wire -- hexagonal nanowire about a polyline</span>
-<span class="sd">                              wire_shell -- shell coating a specified nanowire</span>
-<span class="sd">                              sag -- SAG structure</span>
-<span class="sd">                              lithography -- masked layer deposited on top</span>
-<span class="sd">                              3d_shape -- just take the 3D shapre directly.</span>
-<span class="sd">        :param str domain_type: The type of domain this part represents. Valid options are:</span>
-<span class="sd">                                semiconductor -- region permitted to self-consistently accumulate</span>
-<span class="sd">                                metal_gate -- an electrode</span>
-<span class="sd">                                virtual -- a part just used for selection (ignores material)</span>
-<span class="sd">                                dielectric -- no charge accumulation allowed</span>
-<span class="sd">        :param str material: The material of the resulting part.</span>
-<span class="sd">        :param float z0: The starting z coordinate. Required for extrude, wire,</span>
-<span class="sd">                         SAG, and lithography directives.</span>
-<span class="sd">        :param float thickness: The total thickness. Required for all directives.</span>
-<span class="sd">                                On wireShell, this is interpreted as the layer thickness.</span>
-<span class="sd">        :param Part3DData target_wire: Target wire directive for a coating directive. TODO: This</span>
-<span class="sd">        is currently set to use a Part3DData object rather than a str. Should it really behave</span>
-<span class="sd">        this way?</span>
-<span class="sd">        :param list shell_verts: Vertices to use when rendering the coating. Required</span>
-<span class="sd">                                 for the shell directive.</span>
-<span class="sd">        :param str depo_mode:  &#39;depo&#39; or &#39;etch&#39; defines the positive or negative mask for the</span>
-<span class="sd">        deposition</span>
-<span class="sd">                                of a wire coating.</span>
-<span class="sd">        :param float z_middle: The location for the &quot;flare out&quot; of the SAG directive.</span>
-<span class="sd">        :param float t_in: The lateral distance from the 2D profile to the edge of the top bevel</span>
-<span class="sd">                           for the SAG directive.</span>
-<span class="sd">        :param float t_out: The lateral distance from the 2D profile to the furthest &quot;flare out&quot;</span>
-<span class="sd">                            location for the SAG directive.</span>
-<span class="sd">        :param int layer_num: The layer number used by the lithography directive. Lower numbers</span>
-<span class="sd">                              go down first, with higher numbers deposited last.</span>
-<span class="sd">        :param list litho_base: The base partNames to use for the lithography directive.</span>
-<span class="sd">                                For multi-step lithography, the bases are just all merged,</span>
-<span class="sd">                                so there is no need to list this more than once.</span>
-<span class="sd">        :param float mesh_max_size: The maximum allowable mesh size for this part, in microns.</span>
-<span class="sd">        :param float mesh_min_size: The minimum allowable mesh size for this part, in microns.</span>
-<span class="sd">        :param float mesh_growth_rate: The maximum allowable mesh growth rate for this part.</span>
-<span class="sd">        :param tuple mesh_scale_vector: 3D list with scaling factors for the mesh in</span>
-<span class="sd">                                        x, y, z direction.</span>
-<span class="sd">        :param dict boundary_condition: One or more boundary conditions, if applicable, of</span>
-<span class="sd">                                        the form of a type -&gt; value mapping. For example,</span>
-<span class="sd">                                        this could be {&#39;voltage&#39;:1.0} or,</span>
-<span class="sd">                                        more explicitly, {&#39;voltage&#39;: {&#39;type&#39;: &#39;dirichlet&#39;,</span>
-<span class="sd">                                        &#39;value&#39;: 1.0,&#39;unit&#39;: &#39;V&#39;}}.</span>
-<span class="sd">                                        Assumed by FEniCS solvers to be in the form {&quot;voltage&quot;:1.0},</span>
-<span class="sd">                                        and the value given is taken to be in meV.</span>
-<span class="sd">        :param list subtract_list: A list of partNames that should be subtracted from the current</span>
-<span class="sd">                                   part when forming the final 3D objects. This subtraction is</span>
-<span class="sd">                                   carried out when boundary</span>
-<span class="sd">                                   conditions are set.</span>
-<span class="sd">        :param float ns: Volume charge density of a part, applicable to semiconductor and</span>
-<span class="sd">                         dielectric parts. The units for this are 1/cm^3.</span>
-<span class="sd">        :param float phi_nl: The neutral level for interface traps, measured in units of eV above</span>
-<span class="sd">                             the valence band maximum (semiconductor only).</span>
-<span class="sd">        :param float ds: Density of interface traps; units are 1/(cm^2*eV).</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">,</span> <span class="n">fc_name</span><span class="p">,</span> <span class="n">directive</span><span class="p">,</span> <span class="n">domain_type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">material</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">z0</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">thickness</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">target_wire</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">shell_verts</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">depo_mode</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">z_middle</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">t_in</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">t_out</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">layer_num</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">litho_base</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">mesh_max_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mesh_min_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mesh_growth_rate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">mesh_scale_vector</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">boundary_condition</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">ns</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">phi_nl</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ds</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">):</span>
+
         <span class="c1"># Input validation</span>
         <span class="k">if</span> <span class="n">directive</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;extrude&#39;</span><span class="p">,</span> <span class="s1">&#39;wire&#39;</span><span class="p">,</span> <span class="s1">&#39;wire_shell&#39;</span><span class="p">,</span> <span class="s1">&#39;SAG&#39;</span><span class="p">,</span> <span class="s1">&#39;lithography&#39;</span><span class="p">,</span> <span class="s1">&#39;3d_shape&#39;</span><span class="p">]:</span>
             <span class="k">raise</span> <span class="ne">NameError</span><span class="p">(</span><span class="s1">&#39;Error - directive &#39;</span> <span class="o">+</span> <span class="n">directive</span> <span class="o">+</span> <span class="s1">&#39; is not a valid directive!&#39;</span><span class="p">)</span>

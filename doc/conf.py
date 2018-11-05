@@ -30,13 +30,15 @@ sys.path.insert(0, os.path.abspath('..'))
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.autodoc',
+extensions = [
+    'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
     'sphinx.ext.githubpages',
-    'm2r']
+    'm2r'
+]
 
 autodoc_member_order = "bysource"
 
@@ -183,6 +185,7 @@ texinfo_documents = [
      'Miscellaneous'),
 ]
 
+# -- Custom options -------------------------------------------------------
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'https://docs.python.org/': None}
@@ -195,3 +198,13 @@ except:
     subprocess.check_call(['pyreverse', '-o', 'png', '../qmt'])
 os.rename('packages.png', 'source/packages.png')
 os.rename('classes.png', 'source/classes.png')
+
+# Ensure __init__ doesn't get skipped by sphinx-apidoc autodocumentation
+# Fix: don't document __init__, but the class itself.
+#def skip(app, what, name, obj, skip, options):
+#    if name == "__init__":
+#        return False
+#    return skip
+#
+#def setup(app):
+#    app.connect("autodoc-skip-member", skip)

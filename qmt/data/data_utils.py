@@ -29,9 +29,8 @@ def write_deserialised(serial_obj, path):
 def store_serial(obj, save_fct, ext_format, scratch_dir=None):
     '''
     Return a serialised representation of
-    save_fct(obj, scratch_dir/temporary_file.ext_format).
-    The temporary file has a unique name.
-    The parameter ext_format can be used for format distinction in some save_fct.
+    `save_fct(obj, scratch_dir/temporary_file.ext_format)`.
+    The parameter `ext_format` can be used for format distinction in some `save_fct`.
     '''
     if not scratch_dir:
         scratch_dir = os.curdir
@@ -44,8 +43,8 @@ def store_serial(obj, save_fct, ext_format, scratch_dir=None):
 
 def load_serial(serial_obj, load_fct, ext_format=None, scratch_dir=None):
     '''
-    Return the original object stored with store_serial.
-    The load_fct must be a correct complement of the previously used store_fct.
+    Return the original object stored with `store_serial`.
+    The `load_fct` must be a correct complement of the previously used `store_fct`.
     '''
     if not ext_format:
         ext_format = 'tmpdata'
@@ -61,15 +60,16 @@ def load_serial(serial_obj, load_fct, ext_format=None, scratch_dir=None):
 def reduce_data(reduce_function, task, dask_client):
     """
     Given a task that has or will be been run, apply a reduce function to all of its outputs in
-    dask. By specifying a custom reduce_function, the user is returning exactly what they want from
+    dask. By specifying a custom `reduce_function`, the user is returning exactly what they want from
     a given run.
+
     :param function reduce_function: A function that takes the output data type of the supplied
-    task and returns a dictionary of objects that can be stored in hdf5.
+                                     task and returns a dictionary of objects that can be stored in hdf5.
     :param Task task: The task that we would like to work on. Note that this function doesn't run
-    the task, but this can be set up either before or after running.
+                      the task, but this can be set up either before or after running.
     :param dask_client: The client we are using for the calculation
     :return sweep_vals,extracted_data: Returns a list of the sweep tags and a list of the futures
-    corresponding to the data objects.
+                                       corresponding to the data objects.
     """
     sweep_holder = task.computed_result  # List of futures that resolve to the data
     sweep_vals = task.computed_result.sweep.sweep_list  # List of the tag values
@@ -84,6 +84,7 @@ def reduce_data(reduce_function, task, dask_client):
 def retrieve_data(extracted_data, dask_client):
     """
     Retrieves all of the data stored in a list of futures.
+
     :param extracted_data: List of futures we ant to retrieve.
     :param dask_client: Dask client we are using for the calculation.
     :return retrieved_data: The retrieved data in a list.
@@ -98,11 +99,12 @@ def stream_data_to_file(extracted_data, filename, dask_client, sweep_vals=None):
     complete. The data are stored in an hdf5 file with a single level. Data entries are given by
     kesy of the form "index_paramval", where index is the numerical index of the result in the
     extracted_data list and paramval is the descriptive key for the datum of interest.
+
     :param extracted_data: List of futures we ant to retrieve.
     :param filename: File name for the local data store.
     :param dask_client: The client we are using for the calculation
     :param sweep_vals: Sweep point values to store along with the data. If None, then just uses
-    an integer list.
+                       an integer list.
     """
     from tqdm import tqdm
     if sweep_vals is None:

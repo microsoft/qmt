@@ -212,7 +212,7 @@
 <li class="toctree-l1"><a class="reference internal" href="qmt.tasks.html">qmt.tasks package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="qmt.tasks.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="qmt.tasks.html#module-qmt.tasks.geometry">qmt.tasks.geometry module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="qmt.tasks.html#qmt-tasks-reduce-dim-module">qmt.tasks.reduce_dim module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="qmt.tasks.html#module-qmt.tasks.reduce_dim">qmt.tasks.reduce_dim module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="qmt.tasks.html#module-qmt.tasks">Module contents</a></li>
 </ul>
 </li>
@@ -231,17 +231,22 @@
 <p>Wrapper for an entry in the materials database.</p>
 <p>Allows for the retrieval of a material’s properties. Adds units awareness on top of a plain
 dict containing the properties.</p>
-<dl class="docutils">
-<dt>name: str</dt>
-<dd>Material name.</dd>
-<dt>properties: dict</dt>
-<dd>Collection of material properties.</dd>
-<dt>eunit: str, default None</dt>
-<dd>Unit of energy. If specified, all queries for band parameters
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Material name.</li>
+<li><strong>properties</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – Collection of material properties.</li>
+<li><strong>eunit</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Unit of energy. If specified, all queries for band parameters
 that have the dimension of an energy return floats with respect
 to this energy unit. With the default (None), such queries
-return sympy quantities that have the dimension of an energy.</dd>
-</dl>
+return sympy quantities that have the dimension of an energy.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="qmt.materials.Material.hole_mass">
 <code class="descname">hole_mass</code><span class="sig-paren">(</span><em>band</em>, <em>direction</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/materials.html#Material.hole_mass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.materials.Material.hole_mass" title="Permalink to this definition">¶</a></dt>
@@ -280,15 +285,20 @@ contains information about materials.</p>
 <p>The default constructor (matPath=None, matDict=None) sets matPath to the module’s
 materials.json and loads it. If both matPath and matDict are specified, the Materials
 database is initialized from the given path and then updated with the supplied dict.</p>
-<dl class="docutils">
-<dt>matPath <span class="classifier-delimiter">:</span> <span class="classifier">str, default None</span></dt>
-<dd>Path to the mat json file. If initialized with None, should be set
-manually before loading/saving.</dd>
-<dt>matDict <span class="classifier-delimiter">:</span> <span class="classifier">dict, default None</span></dt>
-<dd>Dictionary of materials to fill the database.</dd>
-<dt>load <span class="classifier-delimiter">:</span> <span class="classifier">Bool</span></dt>
-<dd>Load the json file. Needs to be False when creating a new materials.json file.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>matPath</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Path to the mat json file. If initialized with None, should be set
+manually before loading/saving.</li>
+<li><strong>matDict</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – Dictionary of materials to fill the database.</li>
+<li><strong>load</strong> (<em>Bool</em>) – Load the json file. Needs to be False when creating a new materials.json file.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="qmt.materials.Materials.add_material">
 <code class="descname">add_material</code><span class="sig-paren">(</span><em>name</em>, <em>mat_type</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/materials.html#Materials.add_material"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.materials.Materials.add_material" title="Permalink to this definition">¶</a></dt>
@@ -308,10 +318,14 @@ affinity of a single material as reference point and try to align all other mate
 according to the respective band offsets.
 If the material’s valenceBandOffset is not known, we return <cite>-mat[electronAffinity]</cite>,
 effectively falling back on Anderson’s rule.</p>
-<dl class="docutils">
-<dt>mat: Material</dt>
-<dd>Material whose conduction band position is to be determined.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>mat</strong> (<a class="reference internal" href="#qmt.materials.Material" title="qmt.materials.Material"><em>Material</em></a>) – Material whose conduction band position is to be determined.</td>
+</tr>
+</tbody>
+</table>
 <ul class="simple">
 <li>valence_band_maximum(mat) is equivalent to
 <cite>self.conduction_band_minimum(mat) - mat[‘directBandGap’]</cite></li>
@@ -331,12 +345,18 @@ effectively falling back on Anderson’s rule.</p>
 <dd><p>Retrieve a named material from the database.</p>
 <p>If the material is not found directly, an attempt is made to construct
 it by mixing two known materials. If that also fails, a KeyError is raised.</p>
-<dl class="docutils">
-<dt>name: str</dt>
-<dd>Name of the desired material.</dd>
-<dt>eunit: str</dt>
-<dd>Unit of energy. This is passed on to the Material constructor.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Name of the desired material.</li>
+<li><strong>eunit</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Unit of energy. This is passed on to the Material constructor.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -373,10 +393,14 @@ it by mixing two known materials. If that also fails, a KeyError is raised.</p>
 <dd><p>Calculate the energy of the valence band maximum $E_v$ of a semiconductor material.</p>
 <p>The reference energy E=0 is fixed to the vacuum level, as defined by the electron affinity
 of InSb. See conduction_band_minimum for additional details.</p>
-<dl class="docutils">
-<dt>mat: Material</dt>
-<dd>Material whose valence band position is to be determined.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>mat</strong> (<a class="reference internal" href="#qmt.materials.Material" title="qmt.materials.Material"><em>Material</em></a>) – Material whose valence band position is to be determined.</td>
+</tr>
+</tbody>
+</table>
 <ul class="simple">
 <li>conduction_band_minimum(mat) is equivalent to
 <cite>self.valence_band_maximum(mat) + mat[‘directBandGap’]</cite></li>
@@ -391,24 +415,36 @@ of InSb. See conduction_band_minimum for additional details.</p>
 <dt id="qmt.materials.conduction_band_offset">
 <code class="descclassname">qmt.materials.</code><code class="descname">conduction_band_offset</code><span class="sig-paren">(</span><em>mat</em>, <em>ref_mat</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/materials.html#conduction_band_offset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.materials.conduction_band_offset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the conduction band offset $E_c - E_{c,ref}$ between two semiconductor materials.</p>
-<dl class="docutils">
-<dt>mat: Material</dt>
-<dd>Material whose conduction band position is to be determined.</dd>
-<dt>ref_mat: Material</dt>
-<dd>Material whose conduction band minimum is used as reference energy.</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>mat</strong> (<a class="reference internal" href="#qmt.materials.Material" title="qmt.materials.Material"><em>Material</em></a>) – Material whose conduction band position is to be determined.</li>
+<li><strong>ref_mat</strong> (<a class="reference internal" href="#qmt.materials.Material" title="qmt.materials.Material"><em>Material</em></a>) – Material whose conduction band minimum is used as reference energy.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="qmt.materials.valence_band_offset">
 <code class="descclassname">qmt.materials.</code><code class="descname">valence_band_offset</code><span class="sig-paren">(</span><em>mat</em>, <em>ref_mat</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/materials.html#valence_band_offset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.materials.valence_band_offset" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate the valence band offset $E_v - E_{v,ref}$ between two semiconductor materials.</p>
-<dl class="docutils">
-<dt>mat: Material</dt>
-<dd>Material whose valence band position is to be determined.</dd>
-<dt>ref_mat: Material</dt>
-<dd>Material whose valence band maximum is used as reference energy</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>mat</strong> (<a class="reference internal" href="#qmt.materials.Material" title="qmt.materials.Material"><em>Material</em></a>) – Material whose conduction band position is to be determined.</li>
+<li><strong>ref_mat</strong> (<a class="reference internal" href="#qmt.materials.Material" title="qmt.materials.Material"><em>Material</em></a>) – Material whose conduction band minimum is used as reference energy.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>

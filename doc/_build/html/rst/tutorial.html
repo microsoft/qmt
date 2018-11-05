@@ -203,7 +203,7 @@ It contains sketches with FreeCAD-internal names, which are visible when selecti
 </div>
 <p>Then we package these 3D parts into a build order list and feed them, along with other parameters
 to a <a class="reference internal" href="../source/qmt.tasks.html#qmt.tasks.geometry.build_3d_geometry" title="qmt.tasks.geometry.build_3d_geometry"><code class="xref py py-mod docutils literal"><span class="pre">qmt.tasks.geometry.build_3d_geometry</span></code></a> task.
-The <code class="code docutils literal"><span class="pre">pyenv</span></code> path must correspond to a callable Python 2 interpreter.</p>
+The <code class="code docutils literal"><span class="pre">py2env</span></code> path must correspond to a callable Python 2 interpreter.</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">py2env</span> <span class="o">=</span> <span class="s1">&#39;python2&#39;</span>
 <span class="n">input_file</span> <span class="o">=</span> <span class="s1">&#39;geometry_sweep_showcase.fcstd&#39;</span>  <span class="c1"># contains a model parameter &#39;d1&#39;</span>
 <span class="n">build_order</span> <span class="o">=</span> <span class="p">[</span><span class="n">block1</span><span class="p">,</span> <span class="n">block2</span><span class="p">,</span> <span class="n">sag</span><span class="p">,</span> <span class="n">virt</span><span class="p">,</span> <span class="n">wire</span><span class="p">,</span> <span class="n">shell</span><span class="p">,</span> <span class="n">block3</span><span class="p">,</span> <span class="n">substrate</span><span class="p">,</span> <span class="n">wrap</span><span class="p">,</span> <span class="n">wrap2</span><span class="p">]</span>

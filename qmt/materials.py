@@ -38,13 +38,9 @@ class Material(collections.Mapping):
     Allows for the retrieval of a material's properties. Adds units awareness on top of a plain
     dict containing the properties.
 
-    Parameters
-    ----------
-    name: str
-        Material name.
-    properties: dict
-        Collection of material properties.
-    eunit: str, default None
+    :param str name: Material name.
+    :param dict properties: Collection of material properties.
+    :param str eunit:
         Unit of energy. If specified, all queries for band parameters
         that have the dimension of an energy return floats with respect
         to this energy unit. With the default (None), such queries
@@ -60,7 +56,7 @@ class Material(collections.Mapping):
             self.energyUnit = toFloat(units.meV / parseUnit(eunit))
         # Tuple of key values that have energy units:
         self.energy_quantities = ('workFunction', 'fermiEnergy', 'electronAffinity',
-                                  'directBandGap','valenceBandOffset', 'chargeNeutralityLevel',
+                                  'directBandGap', 'valenceBandOffset', 'chargeNeutralityLevel',
                                   'interbandMatrixElement', 'spinOrbitSplitting')
 
     def __getitem__(self, key):
@@ -73,11 +69,11 @@ class Material(collections.Mapping):
             value *= self.energyUnit
         return value
 
-    def __setitem__(self,key,value):
+    def __setitem__(self, key, value):
         if key in self.energy_quantities:
-            scaled_value = toFloat(value/self.energyUnit) # if is an energy quantity, scale it
+            scaled_value = toFloat(value / self.energyUnit)  # if is an energy quantity, scale it
         else:
-            scaled_value = value # otherwise just pass
+            scaled_value = value  # otherwise just pass
         self.properties[key] = scaled_value
 
     def __iter__(self):
@@ -157,14 +153,12 @@ class Materials(collections.Mapping):
     materials.json and loads it. If both matPath and matDict are specified, the Materials
     database is initialized from the given path and then updated with the supplied dict.
 
-    Parameters
-    ----------
-    matPath : str, default None
+    :param str matPath:
         Path to the mat json file. If initialized with None, should be set
         manually before loading/saving.
-    matDict : dict, default None
+    :param dict matDict:
         Dictionary of materials to fill the database.
-    load : Bool
+    :param Bool load:
         Load the json file. Needs to be False when creating a new materials.json file.
     """
 
@@ -245,7 +239,7 @@ class Materials(collections.Mapping):
     def __getitem__(self, key):
         return self.find(key)
 
-    def __setitem__(self,key,val):
+    def __setitem__(self, key, val):
         # This assumes that val is a Material object
         self.matDict[key] = val.properties
 
@@ -255,11 +249,9 @@ class Materials(collections.Mapping):
         If the material is not found directly, an attempt is made to construct
         it by mixing two known materials. If that also fails, a KeyError is raised.
 
-        Parameters
-        ----------
-        name: str
+        :param str name:
             Name of the desired material.
-        eunit: str
+        :param str eunit:
             Unit of energy. This is passed on to the Material constructor.
         """
         if name in self.matDict:
@@ -377,9 +369,7 @@ class Materials(collections.Mapping):
         If the material's valenceBandOffset is not known, we return `-mat[electronAffinity]`,
         effectively falling back on Anderson's rule.
 
-        Parameters
-        ----------
-        mat: Material
+        :param Material mat:
             Material whose conduction band position is to be determined.
 
         See also
@@ -422,9 +412,7 @@ class Materials(collections.Mapping):
         The reference energy E=0 is fixed to the vacuum level, as defined by the electron affinity
         of InSb. See conduction_band_minimum for additional details.
 
-        Parameters
-        ----------
-        mat: Material
+        :param Material mat:
             Material whose valence band position is to be determined.
 
         See also
@@ -473,11 +461,9 @@ def conduction_band_offset(mat, ref_mat):
     """
     Calculate the conduction band offset $E_c - E_{c,ref}$ between two semiconductor materials.
 
-    Parameters
-    ----------
-    mat: Material
+    :param Material mat:
         Material whose conduction band position is to be determined.
-    ref_mat: Material
+    :param Material ref_mat:
         Material whose conduction band minimum is used as reference energy.
     """
     assert mat.energyUnit == ref_mat.energyUnit
@@ -503,12 +489,10 @@ def valence_band_offset(mat, ref_mat):
     """
     Calculate the valence band offset $E_v - E_{v,ref}$ between two semiconductor materials.
 
-    Parameters
-    ----------
-    mat: Material
-        Material whose valence band position is to be determined.
-    ref_mat: Material
-        Material whose valence band maximum is used as reference energy
+    :param Material mat:
+        Material whose conduction band position is to be determined.
+    :param Material ref_mat:
+        Material whose conduction band minimum is used as reference energy.
     """
     assert mat.energyUnit == ref_mat.energyUnit
     try:
@@ -532,12 +516,8 @@ def write_database_to_markdown(out_file, mat_lib):
     """
     Write all materials parameters in mat_lib to a nicely formatted markdown file.
 
-    Parameters
-    ----------
-    out_file: stream
-        Output file handle.
-    mat_lib: Materials
-        Materials database to be written.
+    :param stream out_file: Output file handle.
+    :param Materials mat_lib: Materials database to be written.
     """
     import pytablewriter
     print('# Materials database', file=out_file)
@@ -574,7 +554,7 @@ def write_database_to_markdown(out_file, mat_lib):
         Sources:
         * Robertson, EPJAP 28, 265 (2004): High dielectric constant oxides,
           https://doi.org/10.1051/epjap:2004206
-        * Biercuk et al., APL 83, 2405 (2003), Low-temperature atomic-layer-deposition lift-off 
+        * Biercuk et al., APL 83, 2405 (2003), Low-temperature atomic-layer-deposition lift-off
         method
           for microelectronic and nanoelectronic applications, https://doi.org/10.1063/1.1612904
         * Yota et al.,  JVSTA 31, 01A134 (2013), Characterization of atomic layer deposition HfO2,

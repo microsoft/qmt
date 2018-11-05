@@ -199,40 +199,65 @@
 <dt id="qmt.data.data_utils.store_serial">
 <code class="descclassname">qmt.data.data_utils.</code><code class="descname">store_serial</code><span class="sig-paren">(</span><em>obj</em>, <em>save_fct</em>, <em>ext_format</em>, <em>scratch_dir=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/data_utils.html#store_serial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.data_utils.store_serial" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return a serialised representation of
-save_fct(obj, scratch_dir/temporary_file.ext_format).
-The temporary file has a unique name.
-The parameter ext_format can be used for format distinction in some save_fct.</p>
+<cite>save_fct(obj, scratch_dir/temporary_file.ext_format)</cite>.
+The parameter <cite>ext_format</cite> can be used for format distinction in some <cite>save_fct</cite>.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="qmt.data.data_utils.load_serial">
 <code class="descclassname">qmt.data.data_utils.</code><code class="descname">load_serial</code><span class="sig-paren">(</span><em>serial_obj</em>, <em>load_fct</em>, <em>ext_format=None</em>, <em>scratch_dir=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/data_utils.html#load_serial"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.data_utils.load_serial" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return the original object stored with store_serial.
-The load_fct must be a correct complement of the previously used store_fct.</p>
+<dd><p>Return the original object stored with <cite>store_serial</cite>.
+The <cite>load_fct</cite> must be a correct complement of the previously used <cite>store_fct</cite>.</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="qmt.data.data_utils.reduce_data">
 <code class="descclassname">qmt.data.data_utils.</code><code class="descname">reduce_data</code><span class="sig-paren">(</span><em>reduce_function</em>, <em>task</em>, <em>dask_client</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/data_utils.html#reduce_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.data_utils.reduce_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Given a task that has or will be been run, apply a reduce function to all of its outputs in
-dask. By specifying a custom reduce_function, the user is returning exactly what they want from
-a given run.
-:param function reduce_function: A function that takes the output data type of the supplied
-task and returns a dictionary of objects that can be stored in hdf5.
-:param Task task: The task that we would like to work on. Note that this function doesn’t run
-the task, but this can be set up either before or after running.
-:param dask_client: The client we are using for the calculation
-:return sweep_vals,extracted_data: Returns a list of the sweep tags and a list of the futures
+dask. By specifying a custom <cite>reduce_function</cite>, the user is returning exactly what they want from
+a given run.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>reduce_function</strong> (<em>function</em>) – A function that takes the output data type of the supplied
+task and returns a dictionary of objects that can be stored in hdf5.</li>
+<li><strong>task</strong> (<em>Task</em>) – The task that we would like to work on. Note that this function doesn’t run
+the task, but this can be set up either before or after running.</li>
+<li><strong>dask_client</strong> – The client we are using for the calculation</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return sweep_vals,extracted_data:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">Returns a list of the sweep tags and a list of the futures
 corresponding to the data objects.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="qmt.data.data_utils.retrieve_data">
 <code class="descclassname">qmt.data.data_utils.</code><code class="descname">retrieve_data</code><span class="sig-paren">(</span><em>extracted_data</em>, <em>dask_client</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/data_utils.html#retrieve_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.data_utils.retrieve_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Retrieves all of the data stored in a list of futures.
-:param extracted_data: List of futures we ant to retrieve.
-:param dask_client: Dask client we are using for the calculation.
-:return retrieved_data: The retrieved data in a list.</p>
+<dd><p>Retrieves all of the data stored in a list of futures.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>extracted_data</strong> – List of futures we ant to retrieve.</li>
+<li><strong>dask_client</strong> – Dask client we are using for the calculation.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return retrieved_data:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">The retrieved data in a list.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
@@ -241,12 +266,22 @@ corresponding to the data objects.</p>
 <dd><p>Instead of simply retrieving all the data, we can stream it to a file on disk as the runs
 complete. The data are stored in an hdf5 file with a single level. Data entries are given by
 kesy of the form “index_paramval”, where index is the numerical index of the result in the
-extracted_data list and paramval is the descriptive key for the datum of interest.
-:param extracted_data: List of futures we ant to retrieve.
-:param filename: File name for the local data store.
-:param dask_client: The client we are using for the calculation
-:param sweep_vals: Sweep point values to store along with the data. If None, then just uses
-an integer list.</p>
+extracted_data list and paramval is the descriptive key for the datum of interest.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>extracted_data</strong> – List of futures we ant to retrieve.</li>
+<li><strong>filename</strong> – File name for the local data store.</li>
+<li><strong>dask_client</strong> – The client we are using for the calculation</li>
+<li><strong>sweep_vals</strong> – Sweep point values to store along with the data. If None, then just uses
+an integer list.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
@@ -257,71 +292,153 @@ an integer list.</p>
 <dt id="qmt.data.geometry.Geo2DData">
 <em class="property">class </em><code class="descclassname">qmt.data.geometry.</code><code class="descname">Geo2DData</code><span class="sig-paren">(</span><em>lunit='nm'</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo2DData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo2DData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
-<p>Class holding 2D geometry data.</p>
+<dl class="docutils">
+<dt>Class for holding a 2D geometry specification. This class holds two main dicts:</dt>
+<dd><ul class="first last simple">
+<li>parts is a dictionary of shapely Polygon objects</li>
+<li>edges is a dictionary of shapely LineString objects</li>
+</ul>
+</dd>
+</dl>
+<p>Parts are intended to be 2D domains, while edges are used for setting boundary
+conditions and surface conditions.</p>
 <dl class="method">
 <dt id="qmt.data.geometry.Geo2DData.add_part">
 <code class="descname">add_part</code><span class="sig-paren">(</span><em>part_name</em>, <em>part</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo2DData.add_part"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo2DData.add_part" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add a part to this geometry.
-:param str part_name: Name of the part to create
-:param Polygon part: Polygon object from shapely.geometry. This must be a valid Polygon.
-:param bool overwrite: Should we allow this to overwrite?</p>
+<dd><p>Add a part to this geometry.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>part_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Name of the part to create</li>
+<li><strong>part</strong> (<em>Polygon</em>) – Polygon object from shapely.geometry. This must be a valid Polygon.</li>
+<li><strong>overwrite</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Should we allow this to overwrite?</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="qmt.data.geometry.Geo2DData.remove_part">
 <code class="descname">remove_part</code><span class="sig-paren">(</span><em>part_name</em>, <em>ignore_if_absent=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo2DData.remove_part"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo2DData.remove_part" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove a part from this geometry.
-:param str part_name: Name of part to remove
-:param bool ignore_if_absent: Should we ignore an attempted removal if the part name
-is not found?</p>
+<dd><p>Remove a part from this geometry.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>part_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Name of part to remove</li>
+<li><strong>ignore_if_absent</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Should we ignore an attempted removal if the part name
+is not found?</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="qmt.data.geometry.Geo2DData.add_edge">
 <code class="descname">add_edge</code><span class="sig-paren">(</span><em>edge_name</em>, <em>edge</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo2DData.add_edge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo2DData.add_edge" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add an edge to this geometry.
-:param str edge_name: Name of the edge to create
-:param LineString edge: LineString object from shapely.geometry.
-:param bool overwrite: Should we allow this to overwrite?</p>
+<dd><p>Add an edge to this geometry.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>edge_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Name of the edge to create</li>
+<li><strong>edge</strong> (<em>LineString</em>) – LineString object from shapely.geometry.</li>
+<li><strong>overwrite</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Should we allow this to overwrite?</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="qmt.data.geometry.Geo2DData.remove_edge">
 <code class="descname">remove_edge</code><span class="sig-paren">(</span><em>edge_name</em>, <em>ignore_if_absent=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo2DData.remove_edge"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo2DData.remove_edge" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove an edge from this geometry.
-:param str edge_name: Name of part to remove
-:param bool ignore_if_absent: Should we ignore an attempted removal if the part name
-is not found?</p>
+<dd><p>Remove an edge from this geometry.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>edge_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Name of part to remove</li>
+<li><strong>ignore_if_absent</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Should we ignore an attempted removal if the part name
+is not found?</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="qmt.data.geometry.Geo2DData.compute_bb">
 <code class="descname">compute_bb</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo2DData.compute_bb"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo2DData.compute_bb" title="Permalink to this definition">¶</a></dt>
-<dd><p>Computes the bounding box of all of the parts and edges in the geometry.
-:return bb_list: List of [min_x,max_x,min_y,max_y]</p>
+<dd><p>Computes the bounding box of all of the parts and edges in the geometry.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Return bb_list:</th><td class="field-body">List of [min_x,max_x,min_y,max_y]</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="qmt.data.geometry.Geo2DData.part_build_order">
 <code class="descname">part_build_order</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo2DData.part_build_order"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo2DData.part_build_order" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns the build order restricted to parts.
-:return build_order: build order restricted to parts.</p>
+<dd><p>Returns the build order restricted to parts.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name" colspan="2">Return build_order:</th></tr>
+<tr class="field-odd field"><td>&#160;</td><td class="field-body">build order restricted to parts.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="qmt.data.geometry.Geo2DData.part_coord_list">
 <code class="descname">part_coord_list</code><span class="sig-paren">(</span><em>part_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo2DData.part_coord_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo2DData.part_coord_list" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the list of vertex coordinates for a part
-:param str part_name: Name of the part
-:return list coord_list: List of coordinates of the vertices of the part.</p>
+<dd><p>Get the list of vertex coordinates for a part</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>part_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Name of the part</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return list coord_list:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">List of coordinates of the vertices of the part.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="qmt.data.geometry.Geo2DData.edge_coord_list">
 <code class="descname">edge_coord_list</code><span class="sig-paren">(</span><em>edge_name</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo2DData.edge_coord_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo2DData.edge_coord_list" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get the list of vertex coordinates for an edge.
-:param str edge_name: Name of the edge.
-:return list coord_list: List of the coordinates of the edge.</p>
+<dd><p>Get the list of vertex coordinates for an edge.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>edge_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Name of the edge.</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return list coord_list:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body">List of the coordinates of the edge.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
@@ -330,7 +447,14 @@ is not found?</p>
 <dt id="qmt.data.geometry.Geo3DData">
 <em class="property">class </em><code class="descclassname">qmt.data.geometry.</code><code class="descname">Geo3DData</code><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
-<p>Class holding 3D geometry data.</p>
+<dl class="docutils">
+<dt>Class for a 3D geometry specification. It holds:</dt>
+<dd><ul class="first last simple">
+<li>parts is a dict of Part3D objects, keyed by the label of each Part3D object.</li>
+<li>build_order is a list of strings indicating the construction order.</li>
+</ul>
+</dd>
+</dl>
 <dl class="attribute">
 <dt id="qmt.data.geometry.Geo3DData.EXTERIOR_BC_NAME">
 <code class="descname">EXTERIOR_BC_NAME</code><em class="property"> = 'exterior'</em><a class="headerlink" href="#qmt.data.geometry.Geo3DData.EXTERIOR_BC_NAME" title="Permalink to this definition">¶</a></dt>
@@ -344,44 +468,93 @@ is not found?</p>
 <dl class="method">
 <dt id="qmt.data.geometry.Geo3DData.get_material_mapping">
 <code class="descname">get_material_mapping</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.get_material_mapping"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.get_material_mapping" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get mapping of part names to materials.
-:return:</p>
+<dd><p>Get mapping of part names to materials.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"></td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="qmt.data.geometry.Geo3DData.add_part">
 <code class="descname">add_part</code><span class="sig-paren">(</span><em>part_name</em>, <em>part</em>, <em>overwrite=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.add_part"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.add_part" title="Permalink to this definition">¶</a></dt>
-<dd><p>Add a part to this geometry.
-:param str part_name: Name of the part to create
-:param Part3D part: Part3D object.
-:param bool overwrite: Should we allow this to overwrite?</p>
+<dd><p>Add a part to this geometry.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>part_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Name of the part to create</li>
+<li><strong>part</strong> (<em>Part3D</em>) – Part3D object.</li>
+<li><strong>overwrite</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Should we allow this to overwrite?</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="qmt.data.geometry.Geo3DData.remove_part">
 <code class="descname">remove_part</code><span class="sig-paren">(</span><em>part_name</em>, <em>ignore_if_absent=False</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.remove_part"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.remove_part" title="Permalink to this definition">¶</a></dt>
-<dd><p>Remove a part from this geometry.
-:param str part_name: Name of part to remove
-:param bool ignore_if_absent: Should we ignore an attempted removal if the part name
-is not found?</p>
+<dd><p>Remove a part from this geometry.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>part_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Name of part to remove</li>
+<li><strong>ignore_if_absent</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.7)"><em>bool</em></a>) – Should we ignore an attempted removal if the part name
+is not found?</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="qmt.data.geometry.Geo3DData.set_data">
 <code class="descname">set_data</code><span class="sig-paren">(</span><em>data_name</em>, <em>data</em>, <em>scratch_dir=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.set_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.set_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Set data to a serial format that is easily portable.
-:param str data_name:  “fcdoc” freeCAD document                                “mesh”  fenics mesh                                “rmf”   fenics region marker function
-:param data:           The corresponding data that we would like to set.
-:param scratch_dir:    Optional existing temporary (fast) storage location.</p>
+<dd><p>Set data to a serial format that is easily portable.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>data_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – “fcdoc” freeCAD document                                “mesh”  fenics mesh                                “rmf”   fenics region marker function</li>
+<li><strong>data</strong> – The corresponding data that we would like to set.</li>
+<li><strong>scratch_dir</strong> – Optional existing temporary (fast) storage location.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
 <dt id="qmt.data.geometry.Geo3DData.get_data">
 <code class="descname">get_data</code><span class="sig-paren">(</span><em>data_name</em>, <em>mesh=None</em>, <em>scratch_dir=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Geo3DData.get_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Geo3DData.get_data" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get data from stored serial format.
-:param str data_name:  “fcdoc” freeCAD document.
-:param scratch_dir:    Optional existing temporary (fast) storage location.
-:return data:          The freeCAD document or fenics object that was stored.</p>
+<dd><p>Get data from stored serial format.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>data_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – “fcdoc” freeCAD document.</li>
+<li><strong>scratch_dir</strong> – Optional existing temporary (fast) storage location.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return data:</th><td class="field-body"><p class="first last">The freeCAD document or fenics object that was stored.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="method">
@@ -397,6 +570,77 @@ is not found?</p>
 <dt id="qmt.data.geometry.Part3DData">
 <em class="property">class </em><code class="descclassname">qmt.data.geometry.</code><code class="descname">Part3DData</code><span class="sig-paren">(</span><em>label</em>, <em>fc_name</em>, <em>directive</em>, <em>domain_type=None</em>, <em>material=None</em>, <em>z0=0</em>, <em>thickness=None</em>, <em>target_wire=None</em>, <em>shell_verts=None</em>, <em>depo_mode=None</em>, <em>z_middle=None</em>, <em>t_in=None</em>, <em>t_out=None</em>, <em>layer_num=None</em>, <em>litho_base=None</em>, <em>mesh_max_size=None</em>, <em>mesh_min_size=None</em>, <em>mesh_growth_rate=None</em>, <em>mesh_scale_vector=None</em>, <em>boundary_condition=None</em>, <em>ns=None</em>, <em>phi_nl=None</em>, <em>ds=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Part3DData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Part3DData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Create a 3D geometric part.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>label</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The descriptive name of this new part.</li>
+<li><strong>fc_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The name of the 2D/3D freeCAD object that this is built from.</li>
+<li><strong>directive</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – <p>The freeCAD directive is used to construct this part.
+Valid options for this are:</p>
+<ul>
+<li>extrude – simple extrusion</li>
+<li>wire – hexagonal nanowire about a polyline</li>
+<li>wire_shell – shell coating a specified nanowire</li>
+<li>sag – SAG structure</li>
+<li>lithography – masked layer deposited on top</li>
+<li>3d_shape – just take the 3D shape directly</li>
+</ul>
+</li>
+<li><strong>domain_type</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – <p>The type of domain this part represents. Valid options are:</p>
+<ul>
+<li>semiconductor – region permitted to self-consistently accumulate</li>
+<li>metal_gate – an electrode</li>
+<li>virtual – a part just used for selection (ignores material)</li>
+<li>dielectric – no charge accumulation allowed</li>
+</ul>
+</li>
+<li><strong>material</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – The material of the resulting part.</li>
+<li><strong>z0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – The starting z coordinate. Required for extrude, wire,
+SAG, and lithography directives.</li>
+<li><strong>thickness</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – The total thickness. Required for all directives.
+On wireShell, this is interpreted as the layer thickness.</li>
+<li><strong>target_wire</strong> (<a class="reference internal" href="#qmt.data.geometry.Part3DData" title="qmt.data.geometry.Part3DData"><em>Part3DData</em></a>) – Target wire directive for a coating directive.</li>
+<li><strong>shell_verts</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – Vertices to use when rendering the coating. Required
+for the shell directive.</li>
+<li><strong>depo_mode</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – ‘depo’ or ‘etch’ defines the positive or negative mask for the
+deposition of a wire coating.</li>
+<li><strong>z_middle</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – The location for the “flare out” of the SAG directive.</li>
+<li><strong>t_in</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – The lateral distance from the 2D profile to the edge of the top bevel
+for the SAG directive.</li>
+<li><strong>t_out</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – The lateral distance from the 2D profile to the furthest “flare out”
+location for the SAG directive.</li>
+<li><strong>layer_num</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.7)"><em>int</em></a>) – The layer number used by the lithography directive. Lower numbers
+go down first, with higher numbers deposited last.</li>
+<li><strong>litho_base</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – The base partNames to use for the lithography directive.
+For multi-step lithography, the bases are just all merged,
+so there is no need to list this more than once.</li>
+<li><strong>mesh_max_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – The maximum allowable mesh size for this part, in microns.</li>
+<li><strong>mesh_min_size</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – The minimum allowable mesh size for this part, in microns.</li>
+<li><strong>mesh_growth_rate</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – The maximum allowable mesh growth rate for this part.</li>
+<li><strong>mesh_scale_vector</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.7)"><em>tuple</em></a>) – 3D list with scaling factors for the mesh in
+x, y, z direction.</li>
+<li><strong>boundary_condition</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – One or more boundary conditions, if applicable, of
+the form of a type -&gt; value mapping. For example, this could be {‘voltage’:1.0} or,
+more explicitly, {‘voltage’: {‘type’: ‘dirichlet’, ‘value’: 1.0,’unit’: ‘V’}}.
+Assumed by FEniCS solvers to be in the form {“voltage”:1.0},
+and the value given is taken to be in meV.</li>
+<li><strong>subtract_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – A list of partNames that should be subtracted from the current
+part when forming the final 3D objects. This subtraction is
+carried out when boundary
+conditions are set.</li>
+<li><strong>ns</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Volume charge density of a part, applicable to semiconductor and
+dielectric parts. The units for this are 1/cm^3.</li>
+<li><strong>phi_nl</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – The neutral level for interface traps, measured in units of eV above
+the valence band maximum (semiconductor only).</li>
+<li><strong>ds</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.7)"><em>float</em></a>) – Density of interface traps; units are 1/(cm^2*eV).</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="method">
 <dt id="qmt.data.geometry.Part3DData.write_stp">
 <code class="descname">write_stp</code><span class="sig-paren">(</span><em>file_path=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/data/geometry.html#Part3DData.write_stp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.data.geometry.Part3DData.write_stp" title="Permalink to this definition">¶</a></dt>

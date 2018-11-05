@@ -25,7 +25,7 @@ First we use the internal names to generate :py:mod:`qmt.data.geometry.Part3DDat
 
 Then we package these 3D parts into a build order list and feed them, along with other parameters
 to a :py:mod:`qmt.tasks.geometry.build_3d_geometry` task.
-The :code:`pyenv` path must correspond to a callable Python 2 interpreter.
+The :code:`py2env` path must correspond to a callable Python 2 interpreter.
 
 .. literalinclude:: ../../examples/geometry_sweep.py
     :language: python

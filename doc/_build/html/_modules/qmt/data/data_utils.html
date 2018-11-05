@@ -184,9 +184,8 @@
 <div class="viewcode-block" id="store_serial"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.data_utils.store_serial">[docs]</a><span class="k">def</span> <span class="nf">store_serial</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">save_fct</span><span class="p">,</span> <span class="n">ext_format</span><span class="p">,</span> <span class="n">scratch_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
 <span class="sd">    Return a serialised representation of</span>
-<span class="sd">    save_fct(obj, scratch_dir/temporary_file.ext_format).</span>
-<span class="sd">    The temporary file has a unique name.</span>
-<span class="sd">    The parameter ext_format can be used for format distinction in some save_fct.</span>
+<span class="sd">    `save_fct(obj, scratch_dir/temporary_file.ext_format)`.</span>
+<span class="sd">    The parameter `ext_format` can be used for format distinction in some `save_fct`.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">scratch_dir</span><span class="p">:</span>
         <span class="n">scratch_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">curdir</span>
@@ -199,8 +198,8 @@
 
 <div class="viewcode-block" id="load_serial"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.data_utils.load_serial">[docs]</a><span class="k">def</span> <span class="nf">load_serial</span><span class="p">(</span><span class="n">serial_obj</span><span class="p">,</span> <span class="n">load_fct</span><span class="p">,</span> <span class="n">ext_format</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">scratch_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&#39;&#39;&#39;</span>
-<span class="sd">    Return the original object stored with store_serial.</span>
-<span class="sd">    The load_fct must be a correct complement of the previously used store_fct.</span>
+<span class="sd">    Return the original object stored with `store_serial`.</span>
+<span class="sd">    The `load_fct` must be a correct complement of the previously used `store_fct`.</span>
 <span class="sd">    &#39;&#39;&#39;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">ext_format</span><span class="p">:</span>
         <span class="n">ext_format</span> <span class="o">=</span> <span class="s1">&#39;tmpdata&#39;</span>
@@ -216,15 +215,16 @@
 <div class="viewcode-block" id="reduce_data"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.data_utils.reduce_data">[docs]</a><span class="k">def</span> <span class="nf">reduce_data</span><span class="p">(</span><span class="n">reduce_function</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">dask_client</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Given a task that has or will be been run, apply a reduce function to all of its outputs in</span>
-<span class="sd">    dask. By specifying a custom reduce_function, the user is returning exactly what they want from</span>
+<span class="sd">    dask. By specifying a custom `reduce_function`, the user is returning exactly what they want from</span>
 <span class="sd">    a given run.</span>
+
 <span class="sd">    :param function reduce_function: A function that takes the output data type of the supplied</span>
-<span class="sd">    task and returns a dictionary of objects that can be stored in hdf5.</span>
+<span class="sd">                                     task and returns a dictionary of objects that can be stored in hdf5.</span>
 <span class="sd">    :param Task task: The task that we would like to work on. Note that this function doesn&#39;t run</span>
-<span class="sd">    the task, but this can be set up either before or after running.</span>
+<span class="sd">                      the task, but this can be set up either before or after running.</span>
 <span class="sd">    :param dask_client: The client we are using for the calculation</span>
 <span class="sd">    :return sweep_vals,extracted_data: Returns a list of the sweep tags and a list of the futures</span>
-<span class="sd">    corresponding to the data objects.</span>
+<span class="sd">                                       corresponding to the data objects.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">sweep_holder</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">computed_result</span>  <span class="c1"># List of futures that resolve to the data</span>
     <span class="n">sweep_vals</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">computed_result</span><span class="o">.</span><span class="n">sweep</span><span class="o">.</span><span class="n">sweep_list</span>  <span class="c1"># List of the tag values</span>
@@ -239,6 +239,7 @@
 <div class="viewcode-block" id="retrieve_data"><a class="viewcode-back" href="../../../source/qmt.data.html#qmt.data.data_utils.retrieve_data">[docs]</a><span class="k">def</span> <span class="nf">retrieve_data</span><span class="p">(</span><span class="n">extracted_data</span><span class="p">,</span> <span class="n">dask_client</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Retrieves all of the data stored in a list of futures.</span>
+
 <span class="sd">    :param extracted_data: List of futures we ant to retrieve.</span>
 <span class="sd">    :param dask_client: Dask client we are using for the calculation.</span>
 <span class="sd">    :return retrieved_data: The retrieved data in a list.</span>
@@ -253,11 +254,12 @@
 <span class="sd">    complete. The data are stored in an hdf5 file with a single level. Data entries are given by</span>
 <span class="sd">    kesy of the form &quot;index_paramval&quot;, where index is the numerical index of the result in the</span>
 <span class="sd">    extracted_data list and paramval is the descriptive key for the datum of interest.</span>
+
 <span class="sd">    :param extracted_data: List of futures we ant to retrieve.</span>
 <span class="sd">    :param filename: File name for the local data store.</span>
 <span class="sd">    :param dask_client: The client we are using for the calculation</span>
 <span class="sd">    :param sweep_vals: Sweep point values to store along with the data. If None, then just uses</span>
-<span class="sd">    an integer list.</span>
+<span class="sd">                       an integer list.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">tqdm</span> <span class="k">import</span> <span class="n">tqdm</span>
     <span class="k">if</span> <span class="n">sweep_vals</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>

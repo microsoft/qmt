@@ -185,36 +185,61 @@
 <dl class="function">
 <dt id="qmt.tasks.geometry.build_2d_geometry">
 <code class="descclassname">qmt.tasks.geometry.</code><code class="descname">build_2d_geometry</code><span class="sig-paren">(</span><em>parts</em>, <em>edges</em>, <em>lunit='nm'</em>, <em>build_order=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/geometry.html#build_2d_geometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.geometry.build_2d_geometry" title="Permalink to this definition">¶</a></dt>
-<dd><p>Build a geometry in 2D.
-:param dict parts: Dictionary for holding the 2D parts, of the form
-{‘part_name’:list of 2d points}.
-:param dict edges: Dictionary of 2D edges, of the form:
-{‘edge_name’:list of 2d points}.
-:param str lunit: length_unit (nm).
-:param list build_order: None or a list of all parts, determining the build order. Items on
-the left are highest priority and items on the right are lowest. If None is given (default),
-then build order is determined just taken to be the order of the parts and edges.</p>
+<dd><p>Build a geometry in 2D.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>parts</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – Dictionary for holding the 2D parts, of the form
+{‘part_name’:list of 2d points}.</li>
+<li><strong>edges</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – Dictionary of 2D edges, of the form:
+{‘edge_name’:list of 2d points}.</li>
+<li><strong>lunit</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – length_unit (nm).</li>
+<li><strong>build_order</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – None or a list of all parts, determining the build order. Items on
+the left are highest priority and items on the right are lowest.
+If None is given (default), then build order is determined just
+taken to be the order of the parts and edges.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="function">
 <dt id="qmt.tasks.geometry.build_3d_geometry">
 <code class="descclassname">qmt.tasks.geometry.</code><code class="descname">build_3d_geometry</code><span class="sig-paren">(</span><em>pyenv</em>, <em>input_parts</em>, <em>input_file=None</em>, <em>serialized_input_file=None</em>, <em>params=None</em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/qmt/tasks/geometry.html#build_3d_geometry"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#qmt.tasks.geometry.build_3d_geometry" title="Permalink to this definition">¶</a></dt>
-<dd><p>Build a geometry in 3D.
-:param str pyenv: path or callable name of the Python 2 executable.
-:param list input_parts: ordered list of input parts, leftmost items get built first
-:param str input_file: path to FreeCAD template file. Either this or serialized_input_file
-must be set (but not both).
-:param bytes serialized_input_file: FreeCAD template file that has been serialized using
-qmt.data.serialize_file. This is useful for passing a file into a docker container or other
-environment that doesn’t have access to a shared drive. Either this or serialized_input_file
-must be set (but not both).
-:param dict params: dictionary of parameters to use in the freeCAD
-:return Geo3DData:</p>
+<dd><p>Build a geometry in 3D.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>pyenv</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Path or callable name of the Python 2 executable.</li>
+<li><strong>input_parts</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.7)"><em>list</em></a>) – Ordered list of input parts, leftmost items get built first</li>
+<li><strong>input_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Path to FreeCAD template file. Either this or serialized_input_file
+must be set (but not both).</li>
+<li><strong>serialized_input_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#bytes" title="(in Python v3.7)"><em>bytes</em></a>) – FreeCAD template file that has been serialized using
+qmt.data.serialize_file. This is useful for passing a
+file into a docker container or other environment that
+doesn’t have access to a shared drive. Either this or
+serialized_input_file must be set (but not both).</li>
+<li><strong>params</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – Dictionary of parameters to use in FreeCAD.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name" colspan="2">Return Geo3DData:</th></tr>
+<tr class="field-even field"><td>&#160;</td><td class="field-body"><p class="first last">A built geometry.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
-<div class="section" id="qmt-tasks-reduce-dim-module">
-<h2>qmt.tasks.reduce_dim module<a class="headerlink" href="#qmt-tasks-reduce-dim-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-qmt.tasks.reduce_dim">
+<span id="qmt-tasks-reduce-dim-module"></span><h2>qmt.tasks.reduce_dim module<a class="headerlink" href="#module-qmt.tasks.reduce_dim" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-qmt.tasks">
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-qmt.tasks" title="Permalink to this headline">¶</a></h2>

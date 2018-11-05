@@ -11,16 +11,16 @@ from .data_utils import load_serial, store_serial, write_deserialised
 
 
 class Geo2DData(object):
-    """Class holding 2D geometry data."""
+    """
+    Class for holding a 2D geometry specification. This class holds two main dicts:
+        - parts is a dictionary of shapely Polygon objects
+        - edges is a dictionary of shapely LineString objects
+
+    Parts are intended to be 2D domains, while edges are used for setting boundary
+    conditions and surface conditions.
+    """
 
     def __init__(self, lunit='nm'):
-        """
-        Class for holding a 2D geometry specification. This class holds two main dicts:
-            - parts is a dictionary of shapely Polygon objects
-            - edges is a dictionary of shapely LineString objects
-        Parts are intended to be 2D domains, while edges are used for setting boundary conditions
-        and surface conditions.
-        """
         self.parts = {}
         self.edges = {}
         self.build_order = []
@@ -29,6 +29,7 @@ class Geo2DData(object):
     def add_part(self, part_name, part, overwrite=False):
         """
         Add a part to this geometry.
+
         :param str part_name: Name of the part to create
         :param Polygon part: Polygon object from shapely.geometry. This must be a valid Polygon.
         :param bool overwrite: Should we allow this to overwrite?
@@ -44,9 +45,10 @@ class Geo2DData(object):
     def remove_part(self, part_name, ignore_if_absent=False):
         """
         Remove a part from this geometry.
+
         :param str part_name: Name of part to remove
         :param bool ignore_if_absent: Should we ignore an attempted removal if the part name
-        is not found?
+                                      is not found?
         """
         if part_name in self.parts:
             del self.parts[part_name]
@@ -61,6 +63,7 @@ class Geo2DData(object):
     def add_edge(self, edge_name, edge, overwrite=False):
         """
         Add an edge to this geometry.
+
         :param str edge_name: Name of the edge to create
         :param LineString edge: LineString object from shapely.geometry.
         :param bool overwrite: Should we allow this to overwrite?
@@ -74,9 +77,10 @@ class Geo2DData(object):
     def remove_edge(self, edge_name, ignore_if_absent=False):
         """
         Remove an edge from this geometry.
+
         :param str edge_name: Name of part to remove
         :param bool ignore_if_absent: Should we ignore an attempted removal if the part name
-        is not found?
+                                      is not found?
         """
         if edge_name in self.edges:
             del self.edges[edge_name]
@@ -91,6 +95,7 @@ class Geo2DData(object):
     def compute_bb(self):
         """
         Computes the bounding box of all of the parts and edges in the geometry.
+
         :return bb_list: List of [min_x,max_x,min_y,max_y]
         """
         all_shapes = list(self.parts.values()) + list(self.edges.values())
@@ -104,6 +109,7 @@ class Geo2DData(object):
     def part_build_order(self):
         """
         Returns the build order restricted to parts.
+
         :return build_order: build order restricted to parts.
         """
         priority = []
@@ -115,6 +121,7 @@ class Geo2DData(object):
     def part_coord_list(self, part_name):
         """
         Get the list of vertex coordinates for a part
+
         :param str part_name: Name of the part
         :return list coord_list: List of coordinates of the vertices of the part.
         """
@@ -125,6 +132,7 @@ class Geo2DData(object):
     def edge_coord_list(self, edge_name):
         """
         Get the list of vertex coordinates for an edge.
+
         :param str edge_name: Name of the edge.
         :return list coord_list: List of the coordinates of the edge.
         """
@@ -133,15 +141,14 @@ class Geo2DData(object):
 
 
 class Geo3DData(object):
-    """Class holding 3D geometry data."""
+    """
+    Class for a 3D geometry specification. It holds:
+        - parts is a dict of Part3D objects, keyed by the label of each Part3D object.
+        - build_order is a list of strings indicating the construction order.
+    """
     EXTERIOR_BC_NAME = "exterior"
 
     def __init__(self):
-        """
-        Class for a 3D geometry specification. It holds:
-            - parts is a dict of Part3D objects, keyed by the label of each Part3D object.
-            - build_order is a list of strings indicating the construction order.
-        """
         self.build_order = []
         self.parts = {}  # dict of parts in this geometry
         self.serial_fcdoc = None  # serialized FreeCAD document for this geometry
@@ -157,6 +164,7 @@ class Geo3DData(object):
     def get_material_mapping(self):
         """
         Get mapping of part names to materials.
+
         :return:
         """
         return {name: self.get_material(name) for name in self.parts.keys()}
@@ -164,6 +172,7 @@ class Geo3DData(object):
     def add_part(self, part_name, part, overwrite=False):
         """
         Add a part to this geometry.
+
         :param str part_name: Name of the part to create
         :param Part3D part: Part3D object.
         :param bool overwrite: Should we allow this to overwrite?
@@ -177,9 +186,10 @@ class Geo3DData(object):
     def remove_part(self, part_name, ignore_if_absent=False):
         """
         Remove a part from this geometry.
+
         :param str part_name: Name of part to remove
         :param bool ignore_if_absent: Should we ignore an attempted removal if the part name
-        is not found?
+                                      is not found?
         """
         if part_name in self.parts:
             del self.parts[part_name]
@@ -193,6 +203,7 @@ class Geo3DData(object):
     def set_data(self, data_name, data, scratch_dir=None):
         """
         Set data to a serial format that is easily portable.
+
         :param str data_name:  "fcdoc" freeCAD document \
                                "mesh"  fenics mesh \
                                "rmf"   fenics region marker function
@@ -223,6 +234,7 @@ class Geo3DData(object):
     def get_data(self, data_name, mesh=None, scratch_dir=None):
         """
         Get data from stored serial format.
+
         :param str data_name:  "fcdoc" freeCAD document.
         :param scratch_dir:    Optional existing temporary (fast) storage location.
         :return data:          The freeCAD document or fenics object that was stored.
@@ -253,76 +265,77 @@ class Geo3DData(object):
 
 
 class Part3DData(object):
+    """
+    Create a 3D geometric part.
+
+    :param str label: The descriptive name of this new part.
+    :param str fc_name: The name of the 2D/3D freeCAD object that this is built from.
+    :param str directive: The freeCAD directive is used to construct this part.
+        Valid options for this are:
+
+        - extrude -- simple extrusion
+        - wire -- hexagonal nanowire about a polyline
+        - wire_shell -- shell coating a specified nanowire
+        - sag -- SAG structure
+        - lithography -- masked layer deposited on top
+        - 3d_shape -- just take the 3D shape directly
+    :param str domain_type: The type of domain this part represents. Valid options are:
+
+        - semiconductor -- region permitted to self-consistently accumulate
+        - metal_gate -- an electrode
+        - virtual -- a part just used for selection (ignores material)
+        - dielectric -- no charge accumulation allowed
+    :param str material: The material of the resulting part.
+    :param float z0: The starting z coordinate. Required for extrude, wire,
+        SAG, and lithography directives.
+    :param float thickness: The total thickness. Required for all directives.
+        On wireShell, this is interpreted as the layer thickness.
+    :param Part3DData target_wire: Target wire directive for a coating directive.
+    :param list shell_verts: Vertices to use when rendering the coating. Required
+        for the shell directive.
+    :param str depo_mode: 'depo' or 'etch' defines the positive or negative mask for the
+        deposition of a wire coating.
+    :param float z_middle: The location for the "flare out" of the SAG directive.
+    :param float t_in: The lateral distance from the 2D profile to the edge of the top bevel
+        for the SAG directive.
+    :param float t_out: The lateral distance from the 2D profile to the furthest "flare out"
+        location for the SAG directive.
+    :param int layer_num: The layer number used by the lithography directive. Lower numbers
+        go down first, with higher numbers deposited last.
+    :param list litho_base: The base partNames to use for the lithography directive.
+        For multi-step lithography, the bases are just all merged,
+        so there is no need to list this more than once.
+    :param float mesh_max_size: The maximum allowable mesh size for this part, in microns.
+    :param float mesh_min_size: The minimum allowable mesh size for this part, in microns.
+    :param float mesh_growth_rate: The maximum allowable mesh growth rate for this part.
+    :param tuple mesh_scale_vector: 3D list with scaling factors for the mesh in
+        x, y, z direction.
+    :param dict boundary_condition: One or more boundary conditions, if applicable, of
+        the form of a type -> value mapping. For example, this could be {'voltage':1.0} or,
+        more explicitly, {'voltage': {'type': 'dirichlet', 'value': 1.0,'unit': 'V'}}.
+        Assumed by FEniCS solvers to be in the form {"voltage":1.0},
+        and the value given is taken to be in meV.
+    :param list subtract_list: A list of partNames that should be subtracted from the current
+        part when forming the final 3D objects. This subtraction is
+        carried out when boundary
+        conditions are set.
+    :param float ns: Volume charge density of a part, applicable to semiconductor and
+        dielectric parts. The units for this are 1/cm^3.
+    :param float phi_nl: The neutral level for interface traps, measured in units of eV above
+        the valence band maximum (semiconductor only).
+    :param float ds: Density of interface traps; units are 1/(cm^2*eV).
+    """
+
     def __init__(
-            self, label, fc_name, directive, domain_type=None, material=None,
-            z0=0, thickness=None, target_wire=None, shell_verts=None,
-            depo_mode=None, z_middle=None, t_in=None, t_out=None,
-            layer_num=None, litho_base=None,
-            mesh_max_size=None, mesh_min_size=None, mesh_growth_rate=None,
-            mesh_scale_vector=None, boundary_condition=None,
-            ns=None, phi_nl=None, ds=None):
-        """
-        Add a geometric part to the model.
-        :param str label: The descriptive name of this new part.
-        :param str fc_name: The name of the 2D/3D freeCAD object that this is built from.
-        :param str directive: The freeCAD directive is used to construct this part. Valid
-                              options for this are:
-                              extrude -- simple extrusion
-                              wire -- hexagonal nanowire about a polyline
-                              wire_shell -- shell coating a specified nanowire
-                              sag -- SAG structure
-                              lithography -- masked layer deposited on top
-                              3d_shape -- just take the 3D shapre directly.
-        :param str domain_type: The type of domain this part represents. Valid options are:
-                                semiconductor -- region permitted to self-consistently accumulate
-                                metal_gate -- an electrode
-                                virtual -- a part just used for selection (ignores material)
-                                dielectric -- no charge accumulation allowed
-        :param str material: The material of the resulting part.
-        :param float z0: The starting z coordinate. Required for extrude, wire,
-                         SAG, and lithography directives.
-        :param float thickness: The total thickness. Required for all directives.
-                                On wireShell, this is interpreted as the layer thickness.
-        :param Part3DData target_wire: Target wire directive for a coating directive. TODO: This
-        is currently set to use a Part3DData object rather than a str. Should it really behave
-        this way?
-        :param list shell_verts: Vertices to use when rendering the coating. Required
-                                 for the shell directive.
-        :param str depo_mode:  'depo' or 'etch' defines the positive or negative mask for the
-        deposition
-                                of a wire coating.
-        :param float z_middle: The location for the "flare out" of the SAG directive.
-        :param float t_in: The lateral distance from the 2D profile to the edge of the top bevel
-                           for the SAG directive.
-        :param float t_out: The lateral distance from the 2D profile to the furthest "flare out"
-                            location for the SAG directive.
-        :param int layer_num: The layer number used by the lithography directive. Lower numbers
-                              go down first, with higher numbers deposited last.
-        :param list litho_base: The base partNames to use for the lithography directive.
-                                For multi-step lithography, the bases are just all merged,
-                                so there is no need to list this more than once.
-        :param float mesh_max_size: The maximum allowable mesh size for this part, in microns.
-        :param float mesh_min_size: The minimum allowable mesh size for this part, in microns.
-        :param float mesh_growth_rate: The maximum allowable mesh growth rate for this part.
-        :param tuple mesh_scale_vector: 3D list with scaling factors for the mesh in
-                                        x, y, z direction.
-        :param dict boundary_condition: One or more boundary conditions, if applicable, of
-                                        the form of a type -> value mapping. For example,
-                                        this could be {'voltage':1.0} or,
-                                        more explicitly, {'voltage': {'type': 'dirichlet',
-                                        'value': 1.0,'unit': 'V'}}.
-                                        Assumed by FEniCS solvers to be in the form {"voltage":1.0},
-                                        and the value given is taken to be in meV.
-        :param list subtract_list: A list of partNames that should be subtracted from the current
-                                   part when forming the final 3D objects. This subtraction is
-                                   carried out when boundary
-                                   conditions are set.
-        :param float ns: Volume charge density of a part, applicable to semiconductor and
-                         dielectric parts. The units for this are 1/cm^3.
-        :param float phi_nl: The neutral level for interface traps, measured in units of eV above
-                             the valence band maximum (semiconductor only).
-        :param float ds: Density of interface traps; units are 1/(cm^2*eV).
-        """
+        self, label, fc_name, directive, domain_type=None, material=None,
+        z0=0, thickness=None, target_wire=None, shell_verts=None,
+        depo_mode=None, z_middle=None, t_in=None, t_out=None,
+        layer_num=None, litho_base=None,
+        mesh_max_size=None, mesh_min_size=None, mesh_growth_rate=None,
+        mesh_scale_vector=None, boundary_condition=None,
+        ns=None, phi_nl=None, ds=None
+    ):
+
         # Input validation
         if directive not in ['extrude', 'wire', 'wire_shell', 'SAG', 'lithography', '3d_shape']:
             raise NameError('Error - directive ' + directive + ' is not a valid directive!')

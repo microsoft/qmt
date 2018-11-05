@@ -273,19 +273,21 @@ extent.</td>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>part_map</strong> (<em>PartMap</em>) – Function that takes a spatial location and maps it to a part</td>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>part_map</strong> (<em>PartMap</em>) – Function that takes a spatial location and maps it to a part
+identifier.</li>
+<li><strong>part_materials</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.7)"><em>dict</em></a>) – Dict mapping from part identifier to a material name.</li>
+<li><strong>mat_lib</strong> (<em>qmt.Materials</em>) – Materials library used to look up the material properties.</li>
+<li><strong>prop_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.7)"><em>str</em></a>) – Name of the material property to be retrieved for each part.</li>
+<li><strong>eunit</strong> – Energy unit, passed to <cite>mat_lib.find()</cite>.</li>
+<li><strong>fill_value</strong> – Value to be filled in places where there is no part or the part does not have
+a material or the material does not have the property <cite>prop_name</cite>. The default behavior
+<cite>fill_value=’raise’</cite> is to raise a KeyError in these cases.</li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
-<p>identifier.
-:param dict part_materials: Dict mapping from part identifier to a material name.
-:param qmt.Materials mat_lib: Materials library used to look up the material properties.
-:param str prop_name: Name of the material property to be retrieved for each part.
-:param eunit: Energy unit, passed to <cite>mat_lib.find()</cite>.
-:param fill_value: Value to be filled in places where there is no part or the part does not have</p>
-<blockquote>
-<div>a material or the material does not have the property <cite>prop_name</cite>. The default behavior
-<cite>fill_value=’raise’</cite> is to raise a KeyError in these cases.</div></blockquote>
 </dd></dl>
 
 </div>
