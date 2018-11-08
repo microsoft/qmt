@@ -2,6 +2,7 @@
 # Licensed under the MIT License.
 
 from collections import namedtuple
+import sympy.physics.units as spu
 
 try:
     import kwant  # kwant import to stop fenics from segfaulting
@@ -13,7 +14,7 @@ from qmt.data import store_serial, load_serial
 class Fem3DData(object):
     def __init__(self, coordinates=None, potential=None, charge=None,
                  surface_charge_integrals=None, volume_charge_integrals=None, fenics_3d_data=None,
-                 vunit='V', lunit='um', eunit='eV', qunit='coulomb'):
+                 vunit=spu.V, lunit=spu.um, eunit=spu.eV, qunit=spu.coulomb):
         self.coordinates = coordinates
         self.potential = potential
         self.charge = charge

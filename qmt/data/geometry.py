@@ -156,6 +156,7 @@ class Geo3DData(object):
         self.mesh_tets = None  # numpy array; each row contains the vertex indices in one tet
         self.mesh_regions = None  # 1D array; each entry is the region ID of the corresponding tet
         self.mesh_id_dict = None  # dictionary with part name keys mapping to region IDs
+        self.virtual_mesh_regions = None # Dict with 1D arrays; each entry specifies what tets belong to virtual region
         self.materials_database = Materials()
 
     def get_material(self, part_name):
