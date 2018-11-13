@@ -47,12 +47,6 @@ RUN  apt-add-repository -y ppa:freecad-maintainers/freecad-legacy \
        && apt-get install -y freecad-0.16 \
        && apt-get clean
 
-# install docker
-RUN curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add \
-       && add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" \
-       && apt-get update \
-       && apt-get install -y docker-ce    
-
 # set up python environments... this takes awhile:
 RUN conda config --set always_yes yes --set changeps1 no
 RUN conda update -q conda
