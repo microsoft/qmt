@@ -2,7 +2,7 @@
 # docker build -t qmt:master .
 # docker run -it qmt:master
 
-FROM johnkgamble/qmt_base
+FROM qmt_base
 
 WORKDIR /app
 COPY . /app/qmt
