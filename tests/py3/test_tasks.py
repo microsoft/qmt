@@ -88,7 +88,7 @@ def test_sweep(fix_task_env):
     assert len(results) == 630 and results[3] == 0.0
 
 
-def test_docker_sweep(fix_task_env, fix_setup_docker):
+def test_docker_sweep(fix_task_env):
     import subprocess
     from dask import delayed as dl
     from dask.distributed import Client
@@ -102,7 +102,7 @@ def test_docker_sweep(fix_task_env, fix_setup_docker):
                       '--nthreads', '1',
                       '--nprocs', '1',
                       'localhost:8781']
-    docker_command = ['docker', 'run', '-d', '--network', 'host', 'qmt:master']
+    docker_command = ['docker', 'run', '-d', '--network', 'host', 'qmt_base:8d10817583210a43dcff368a910494058423383b']
     containers = []
     try:
         containers.append(
