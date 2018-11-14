@@ -95,14 +95,14 @@ def test_docker_sweep(fix_task_env):
     import numpy as np
 
     # First, set up the docker + dask cluster, which for now is just one scheduler and one worker
-    scheduler_command = ['dask-scheduler',
+    scheduler_command = ['/usr/local/envs/py36/bin/dask-scheduler',
                          '--port', '8781',
                          '--bokeh-port', '8780']
-    worker_command = ['dask-worker',
+    worker_command = ['/usr/local/envs/py36/bin/dask-worker',
                       '--nthreads', '1',
                       '--nprocs', '1',
                       'localhost:8781']
-    docker_command = ['/usr/bin/docker', 'run', '-d', '--network', 'host', 'qmt_base:8d10817583210a43dcff368a910494058423383b']
+    docker_command = ['/usr/bin/docker', 'run', '-d', '--network', 'host', 'quantumdocker.azurecr.io/qmt_base:8d10817583210a43dcff368a910494058423383b']
     containers = []
     try:
         containers.append(
@@ -132,4 +132,4 @@ def test_docker_sweep(fix_task_env):
     finally:
         # Clean up the docker containers
         for c in containers:
-            subprocess.check_output(['docker', 'kill', c])
+            subprocess.check_output(['/usr/bin/docker', 'kill', c])
