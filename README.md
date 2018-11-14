@@ -1,5 +1,5 @@
 # Qubit Modeling Tools (QMT)
-[![Build Status](https://quarcsw.visualstudio.com/Modeling/_apis/build/status/Microsoft.qmt)](https://quarcsw.visualstudio.com/Modeling/_build/latest?definitionId=55)
+[![Build Status](https://dev.azure.com/ms-qmt/qmt/_apis/build/status/Microsoft.qmt)](https://dev.azure.com/ms-qmt/qmt/_build/latest?definitionId=1)
 
 Welcome to our qubit modeling tools (qmt)! This package is designed to automate
 the setup of complex geometries appropriate to physical qubit simulations. This 
