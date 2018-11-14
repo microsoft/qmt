@@ -102,7 +102,7 @@ def test_docker_sweep(fix_task_env):
                       '--nthreads', '1',
                       '--nprocs', '1',
                       'localhost:8781']
-    docker_command = ['docker', 'run', '-d', '--network', 'host', 'qmt_base:8d10817583210a43dcff368a910494058423383b']
+    docker_command = ['/usr/bin/docker', 'run', '-d', '--network', 'host', 'qmt_base:8d10817583210a43dcff368a910494058423383b']
     containers = []
     try:
         containers.append(
