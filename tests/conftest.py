@@ -67,15 +67,6 @@ def fix_py2env(fix_host_settings):
     return py2env
 
 
-@pytest.fixture(scope='function')
-def fix_setup_docker():
-    '''Build the docker image to run tests'''
-    import subprocess
-    subprocess.check_call(['docker', 'pull', 'johnkgamble/qmt_base'])
-    build_path = os.path.join(os.path.dirname(qmt.__file__), '..')
-    subprocess.check_call(['docker', 'build', '-t', 'qmt:master', '.'], cwd=build_path)
-
-
 ################################################################################
 # Sketches
 
