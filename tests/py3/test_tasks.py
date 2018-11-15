@@ -101,14 +101,12 @@ def test_docker_sweep(fix_task_env):
     worker_command = ['/usr/local/envs/py36/bin/dask-worker',
                       '--nthreads', '1',
                       '--nprocs', '1',
-                      'localhost:8781']
-    docker_command = ['/usr/bin/docker', 'run', '-d', '--network', 'host', 'quantumdocker.azurecr.io/qmt_base:8d10817583210a43dcff368a910494058423383b']
-    containers = []
+                      '0.0.0.0:8781']
+    processes = []
     try:
-        containers.append(
-            subprocess.check_output(docker_command + scheduler_command).splitlines()[0])
-        containers.append(subprocess.check_output(docker_command + worker_command).splitlines()[0])
-        client = Client('localhost:8781')
+        processes.append(subprocess.Popen(scheduler_command))
+        processes.append(subprocess.Popen(worker_command))
+        client = Client('0.0.0.0:8781')
 
         # Next, perform the same sweep as before:
         input_task_example, gathered_task_example, post_processing_task_example = fix_task_env
@@ -130,6 +128,6 @@ def test_docker_sweep(fix_task_env):
             results += [client.compute(obj).result()]
         assert len(results) == 24 and results[3] == 0.0
     finally:
-        # Clean up the docker containers
-        for c in containers:
-            subprocess.check_output(['/usr/bin/docker', 'kill', c])
+        # Clean up processes
+        for p in processes:
+            p.kill()
