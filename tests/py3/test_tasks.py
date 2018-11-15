@@ -99,7 +99,8 @@ def test_docker_sweep(fix_task_env):
     from dask.distributed import Client
     import numpy as np
 
-    # First, set up the docker + dask cluster, which for now is just one scheduler and one worker
+    # First, set up dask cluster, which for now is just one scheduler and one worker
+    # TODO: Make this run in series of docker containers (e.g. with docker-compose)
     scheduler_command = ['/usr/local/envs/py36/bin/dask-scheduler',
                          '--port', '8781', '--no-bokeh']
     worker_command = ['/usr/local/envs/py36/bin/dask-worker',
