@@ -857,33 +857,3 @@ def buildCrossSection(sliceInfo, passModel=None):
             sliceParts[name] = slicePart
 
     return sliceParts
-
-
-def build2DGeo(passModel=None):
-    """Construct the 2D geometry entities defined in the json file."""
-    # TODO: THIS FUNCTION NEEDS TO BE UPDATED AFTER modelRevision
-    # RESTRUCTURING!
-    myModel = getModel() if passModel is None else passModel
-    twoDObjs = {}
-    doc = FreeCAD.ActiveDocument
-    for fcName in myModel.modelDict['freeCADInfo']:
-        keys = myModel.modelDict['freeCADInfo'][fcName].keys()
-        if '2DObject' in keys:
-            objType = '2DObject'
-            objControlDict = myModel.modelDict['freeCADInfo'][fcName][objType]
-            returnDict = {}
-            returnDict.update(objControlDict['physicsProps'])
-            returnDict['type'] = objControlDict['type']
-            if objControlDict['type'] == 'boundary':
-                points = [tuple(v.Point)
-                          for v in doc.getObject(fcName).Shape.Vertexes]
-                twoDObjs[fcName] = (points, returnDict)
-            else:
-                lineSegments, cycles = findEdgeCycles(doc.getObject(fcName))
-                for i, cycle in enumerate(cycles):
-                    points = [tuple(lineSegments[idx, 0]) for idx in cycle]
-                    name = fcName
-                    if len(cycles) > 1:
-                        name = '{}_{}'.format(name, i)
-                    twoDObjs[name] = (points, returnDict)
-    return twoDObjs
