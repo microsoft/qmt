@@ -13,7 +13,8 @@ def test_build(fix_exampleDir, fix_FCDoc):
     opts = {
         'pyenv': 'python2',
         'file_path': os.path.join(fix_exampleDir, 'geometry_sweep_showcase.fcstd'),
-        'input_parts': [myPart]
+        'input_parts': [myPart],
+        'xsec_dict':{}
         }
     fix_FCDoc.load(opts['file_path'])
     build(opts)
