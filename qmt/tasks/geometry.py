@@ -44,7 +44,7 @@ def build_2d_geometry(parts, edges, lunit='nm', build_order=None):
     return geo_2d
 
 
-def build_3d_geometry(pyenv, input_parts, input_file=None,
+def build_3d_geometry(pyenv, input_parts, input_file=None, xsec_dict=None,
                       serialized_input_file=None, params=None):
     """
     Build a geometry in 3D.
@@ -53,6 +53,10 @@ def build_3d_geometry(pyenv, input_parts, input_file=None,
     :param list input_parts: Ordered list of input parts, leftmost items get built first
     :param str input_file: Path to FreeCAD template file. Either this or serialized_input_file
         must be set (but not both).
+    :param dict xsec_dict: Dictionary of cross-section specifications. It should be of the
+        form {'xsec_name':{'axis':(1,0,0),'distance':0.}}, where the axis parameter is a tuple
+        defining the axis that defines the normal of the cross section, and distance is
+        the length along the axis used to set the cross section.
     :param bytes serialized_input_file: FreeCAD template file that has been serialized using
         qmt.data.serialize_file. This is useful for passing a
         file into a docker container or other environment that
@@ -71,10 +75,13 @@ def build_3d_geometry(pyenv, input_parts, input_file=None,
         serial_fcdoc = serialized_input_file
     if params is None:
         params = {}
+    if xsec_dict is None:
+        xsec_dict = {}
     options_dict = {}
     options_dict['serial_fcdoc'] = serial_fcdoc
     options_dict['input_parts'] = input_parts
     options_dict['params'] = params
+    options_dict['xsec_dict'] = xsec_dict
     # Convert NumPy3 floats to something that Python2 can unpickle
     if 'params' in options_dict:
         options_dict['params'] = {

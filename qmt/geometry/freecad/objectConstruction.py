@@ -155,6 +155,16 @@ def build(opts):
         input_part.built_fc_name = built_part.Name
         geo.add_part(input_part.label, input_part)
 
+    # Build cross sections:
+    built_parts_dict = {}
+    for built_part in built_parts:
+        built_parts_dict[built_part.Label] = built_part
+    for xsec_name in opts['xsec_dict']:
+        axis = opts['xsec_dict'][xsec_name]['axis']
+        distance = opts['xsec_dict'][xsec_name]['distance']
+        polygons = buildCrossSection(xsec_name, axis, distance, built_parts_dict)
+        geo.add_xsec(xsec_name,axis=axis,distance=distance)
+
     # Store the FreeCAD document
     geo.set_data('fcdoc', doc)
 
@@ -822,38 +832,20 @@ def collect_garbage(info):
             pass
 
 
-def buildCrossSection(sliceInfo, passModel=None):
+def buildCrossSection(sliceName, axis, distance, built_parts_dict):
     """Render the 2D objects required for cross-sections."""
-    if passModel is None:
-        passModel = getModel()
-    doc = FreeCAD.ActiveDocument
-
-    sliceName = sliceInfo['sliceName']
-    axis, distance = sliceInfo['axis'], sliceInfo['distance']
-    sliceParts = {}
-    for name, part in iteritems(passModel.modelDict['3DParts']):
+    for part_name in built_parts_dict:
+        built_part = built_parts_dict[part_name]
         # loop over FreeCAD shapes corresponding to part
         polygons = {}
-        for shapeName in part['fileNames'].keys():
-            # slice the 3D part
-            fcName = shapeName + '_section_' + sliceName
-            partObj = doc.getObject(shapeName)
-            section = crossSection(partObj, axis=axis, d=distance, name=fcName)
-
-            # separate disjoint pieces
-            segments, cycles = findEdgeCycles(section)
-            for i, cycle in enumerate(cycles):
-                points = [tuple(segments[idx, 0]) for idx in cycle]
-                patchName = fcName
-                patchName = '{}_{}'.format(shapeName, i)
-                polygons[patchName] = points
-
-        # store sliced part
-        if polygons:
-            slicePart = part.copy()
-            slicePart['type'] = "domain"
-            slicePart['3DPart'] = name
-            slicePart['geometry'] = polygons
-            sliceParts[name] = slicePart
-
-    return sliceParts
+        # slice the 3D part
+        fcName = part_name + '_section_' + sliceName
+        section = crossSection(built_part, axis=axis, d=distance, name=fcName)
+        # separate disjoint pieces
+        segments, cycles = findEdgeCycles(section)
+        for i, cycle in enumerate(cycles):
+            points = [tuple(segments[idx, 0]) for idx in cycle]
+            patchName = fcName
+            patchName = '{}_{}'.format(part_name, i)
+            polygons[patchName] = points
+    return polygons
