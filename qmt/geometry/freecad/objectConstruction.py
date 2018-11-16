@@ -149,21 +149,20 @@ def build(opts):
                 built_parts[i] = simple_copy
 
     # Update names and store the built parts
+    built_parts_dict = {} # dict for cross sections
     for input_part, built_part in zip(opts['input_parts'], built_parts):
         built_part.Label = input_part.label  # here it's collision free
         input_part.serial_stp = store_serial([built_part], exportCAD, 'stp')
         input_part.built_fc_name = built_part.Name
         geo.add_part(input_part.label, input_part)
+        built_parts_dict[input_part.label] = built_part # dict for cross sections
 
     # Build cross sections:
-    built_parts_dict = {}
-    for built_part in built_parts:
-        built_parts_dict[built_part.Label] = built_part
     for xsec_name in opts['xsec_dict']:
         axis = opts['xsec_dict'][xsec_name]['axis']
         distance = opts['xsec_dict'][xsec_name]['distance']
         polygons = buildCrossSection(xsec_name, axis, distance, built_parts_dict)
-        geo.add_xsec(xsec_name,axis=axis,distance=distance)
+        geo.add_xsec(xsec_name,polygons,axis=axis,distance=distance)
 
     # Store the FreeCAD document
     geo.set_data('fcdoc', doc)
@@ -834,10 +833,10 @@ def collect_garbage(info):
 
 def buildCrossSection(sliceName, axis, distance, built_parts_dict):
     """Render the 2D objects required for cross-sections."""
+    polygons = {}
     for part_name in built_parts_dict:
         built_part = built_parts_dict[part_name]
         # loop over FreeCAD shapes corresponding to part
-        polygons = {}
         # slice the 3D part
         fcName = part_name + '_section_' + sliceName
         section = crossSection(built_part, axis=axis, d=distance, name=fcName)
@@ -847,5 +846,6 @@ def buildCrossSection(sliceName, axis, distance, built_parts_dict):
             points = [tuple(segments[idx, 0]) for idx in cycle]
             patchName = fcName
             patchName = '{}_{}'.format(part_name, i)
-            polygons[patchName] = points
+            # this mapping is necessary since numpy floats have a pickle error:
+            polygons[patchName] = [map(float,point) for point in points]
     return polygons

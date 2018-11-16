@@ -202,14 +202,15 @@ class Geo3DData(object):
             else:
                 pass
 
-    def add_xsec(self, xsec_name, axis=(1., 0.,0.), distance=0.):
+    def add_xsec(self, xsec_name, polygons, axis=(1., 0.,0.), distance=0.):
         """
         Make a cross-section of the geometry perpendicular to the axis at a given distance from the origin.
         :param str xsec_name: a strong giving the name for the cross section.
+        :param dict polygons: dict conrresponding to the cross-section polygons.
         :param tuple axis: Tuple defining the axis that defines the normal of the cross section.
         :param float distance: Distance along the axis used to set the cross section.
         """
-        self.xsecs[xsec_name] = {'axis':axis,'distance':distance}
+        self.xsecs[xsec_name] = {'axis':axis,'distance':distance,'polygons':polygons}
 
     def set_data(self, data_name, data, scratch_dir=None):
         """
