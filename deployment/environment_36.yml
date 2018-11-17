@@ -8,10 +8,10 @@ dependencies:
   - sphinx
   - mkl
   - mkl-service
-  - pip
-  - libgfortran-ng=7.2.0
   - petsc=3.8.4
   - kwant
+  - pip
+  - libgfortran-ng=7.2.0
   - pip:
     - numpy-stl
     - matplotlib
