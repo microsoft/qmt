@@ -5,6 +5,7 @@ dependencies:
   - python=3.6
   - numpy
   - scipy
+  - sympy=1.0
   - sphinx
   - mkl
   - mkl-service
@@ -24,7 +25,6 @@ dependencies:
     - holoviews
     - tqdm
     - fenics==2017.2.0
-    - sympy==1.0
     - dask
     - dask-jobqueue
     - jupyter
