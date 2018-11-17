@@ -10,6 +10,7 @@ dependencies:
   - mkl-service
   - petsc=3.8.4
   - kwant
+  - hpc05
   - pip
   - libgfortran-ng=7.2.0
   - pip:
@@ -28,4 +29,3 @@ dependencies:
     - dask-jobqueue
     - jupyter
     - adaptive
-    - hpc05
