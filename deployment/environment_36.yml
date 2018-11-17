@@ -12,7 +12,6 @@ dependencies:
   - petsc=3.8.4
   - kwant
   - hpc05
-  - pip
   - libgfortran-ng=7.2.0
   - pip:
     - numpy-stl

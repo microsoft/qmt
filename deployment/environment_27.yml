@@ -9,6 +9,7 @@ dependencies:
   - petsc=3.8.4
   - sympy=1.0
   - sphinx
+  - pyside
   - pip:
     - pytest
     - mpi4py
@@ -21,4 +22,3 @@ dependencies:
     - dask
     - dask-jobqueue
     - jupyter
-    - pyside
