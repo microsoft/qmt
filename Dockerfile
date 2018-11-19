@@ -70,4 +70,4 @@ WORKDIR /app
 # Copy QMS into the container and set up
 # TODO: Only copy code and not deployment/doc/examples
 COPY . qmt/
-RUN python qmt/setup.py develop && /usr/local/envs/py27/bin/python qmt/setup.py develop
+RUN cd qmt && python setup.py develop && /usr/local/envs/py27/bin/python setup.py develop
