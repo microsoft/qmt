@@ -1,31 +1,30 @@
 name: py36
 channels:
-    - conda-forge
+  - conda-forge
 dependencies:
   - python=3.6
   - numpy
   - scipy
-  - matplotlib
-  - pytest
-  - mpi4py
-  - shapely
-  - future
-  - h5py
-  - holoviews
-  - tqdm
-  - fenics=2017.2.0
-  - petsc=3.8.4
   - sympy=1.0
-  - dask
-  - dask-jobqueue  
   - sphinx
-  - jupyter
-  - kwant
   - mkl
   - mkl-service
-  - adaptive
+  - petsc=3.8.4
+  - kwant
   - hpc05
-  - pip
   - libgfortran-ng=7.2.0
   - pip:
     - numpy-stl
+    - matplotlib
+    - pytest
+    - mpi4py
+    - shapely
+    - h5py
+    - future
+    - holoviews
+    - tqdm
+    - fenics==2017.2.0
+    - dask
+    - dask-jobqueue
+    - jupyter
+    - adaptive
