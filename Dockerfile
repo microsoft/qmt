@@ -14,9 +14,7 @@ RUN apt-get -qq update && apt-get -qq -y install curl bzip2 \
 ENV PATH /opt/conda/bin:$PATH
 
 # Copy the current directory contents into the container at /app
-COPY environment_36.yml /install/
-COPY environment_27.yml /install/
-COPY dask_config.yaml /install/
+COPY deployment/ /install/
 
 # Run apt-gets:
 RUN apt-get update && apt-get install -y \ 
@@ -71,5 +69,5 @@ WORKDIR /app
 
 # Copy QMS into the container and set up
 # TODO: Only copy code and not deployment/doc/examples
-COPY ../ qmt/
+COPY . qmt/
 RUN python qmt/setup.py develop && /usr/local/envs/py27/bin/python qmt/setup.py develop
