@@ -151,6 +151,7 @@ class Geo3DData(object):
     def __init__(self):
         self.build_order = []
         self.parts = {}  # dict of parts in this geometry
+        self.xsecs = {} # dict of cross-sections in this geometry
         self.serial_fcdoc = None  # serialized FreeCAD document for this geometry
         self.mesh_verts = None  # numpy array corresponding to the mesh vertices
         self.mesh_tets = None  # numpy array; each row contains the vertex indices in one tet
@@ -200,6 +201,16 @@ class Geo3DData(object):
                     "Attempted to remove the part " + part_name + ", which doesn't exist.")
             else:
                 pass
+
+    def add_xsec(self, xsec_name, polygons, axis=(1., 0.,0.), distance=0.):
+        """
+        Make a cross-section of the geometry perpendicular to the axis at a given distance from the origin.
+        :param str xsec_name: a strong giving the name for the cross section.
+        :param dict polygons: dict conrresponding to the cross-section polygons.
+        :param tuple axis: Tuple defining the axis that defines the normal of the cross section.
+        :param float distance: Distance along the axis used to set the cross section.
+        """
+        self.xsecs[xsec_name] = {'axis':axis,'distance':distance,'polygons':polygons}
 
     def set_data(self, data_name, data, scratch_dir=None):
         """

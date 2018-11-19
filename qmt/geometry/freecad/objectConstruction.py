@@ -149,11 +149,20 @@ def build(opts):
                 built_parts[i] = simple_copy
 
     # Update names and store the built parts
+    built_parts_dict = {} # dict for cross sections
     for input_part, built_part in zip(opts['input_parts'], built_parts):
         built_part.Label = input_part.label  # here it's collision free
         input_part.serial_stp = store_serial([built_part], exportCAD, 'stp')
         input_part.built_fc_name = built_part.Name
         geo.add_part(input_part.label, input_part)
+        built_parts_dict[input_part.label] = built_part # dict for cross sections
+
+    # Build cross sections:
+    for xsec_name in opts['xsec_dict']:
+        axis = opts['xsec_dict'][xsec_name]['axis']
+        distance = opts['xsec_dict'][xsec_name]['distance']
+        polygons = buildCrossSection(xsec_name, axis, distance, built_parts_dict)
+        geo.add_xsec(xsec_name,polygons,axis=axis,distance=distance)
 
     # Store the FreeCAD document
     geo.set_data('fcdoc', doc)
@@ -822,68 +831,21 @@ def collect_garbage(info):
             pass
 
 
-def buildCrossSection(sliceInfo, passModel=None):
+def buildCrossSection(sliceName, axis, distance, built_parts_dict):
     """Render the 2D objects required for cross-sections."""
-    if passModel is None:
-        passModel = getModel()
-    doc = FreeCAD.ActiveDocument
-
-    sliceName = sliceInfo['sliceName']
-    axis, distance = sliceInfo['axis'], sliceInfo['distance']
-    sliceParts = {}
-    for name, part in iteritems(passModel.modelDict['3DParts']):
+    polygons = {}
+    for part_name in built_parts_dict:
+        built_part = built_parts_dict[part_name]
         # loop over FreeCAD shapes corresponding to part
-        polygons = {}
-        for shapeName in part['fileNames'].keys():
-            # slice the 3D part
-            fcName = shapeName + '_section_' + sliceName
-            partObj = doc.getObject(shapeName)
-            section = crossSection(partObj, axis=axis, d=distance, name=fcName)
-
-            # separate disjoint pieces
-            segments, cycles = findEdgeCycles(section)
-            for i, cycle in enumerate(cycles):
-                points = [tuple(segments[idx, 0]) for idx in cycle]
-                patchName = fcName
-                patchName = '{}_{}'.format(shapeName, i)
-                polygons[patchName] = points
-
-        # store sliced part
-        if polygons:
-            slicePart = part.copy()
-            slicePart['type'] = "domain"
-            slicePart['3DPart'] = name
-            slicePart['geometry'] = polygons
-            sliceParts[name] = slicePart
-
-    return sliceParts
-
-
-def build2DGeo(passModel=None):
-    """Construct the 2D geometry entities defined in the json file."""
-    # TODO: THIS FUNCTION NEEDS TO BE UPDATED AFTER modelRevision
-    # RESTRUCTURING!
-    myModel = getModel() if passModel is None else passModel
-    twoDObjs = {}
-    doc = FreeCAD.ActiveDocument
-    for fcName in myModel.modelDict['freeCADInfo']:
-        keys = myModel.modelDict['freeCADInfo'][fcName].keys()
-        if '2DObject' in keys:
-            objType = '2DObject'
-            objControlDict = myModel.modelDict['freeCADInfo'][fcName][objType]
-            returnDict = {}
-            returnDict.update(objControlDict['physicsProps'])
-            returnDict['type'] = objControlDict['type']
-            if objControlDict['type'] == 'boundary':
-                points = [tuple(v.Point)
-                          for v in doc.getObject(fcName).Shape.Vertexes]
-                twoDObjs[fcName] = (points, returnDict)
-            else:
-                lineSegments, cycles = findEdgeCycles(doc.getObject(fcName))
-                for i, cycle in enumerate(cycles):
-                    points = [tuple(lineSegments[idx, 0]) for idx in cycle]
-                    name = fcName
-                    if len(cycles) > 1:
-                        name = '{}_{}'.format(name, i)
-                    twoDObjs[name] = (points, returnDict)
-    return twoDObjs
+        # slice the 3D part
+        fcName = part_name + '_section_' + sliceName
+        section = crossSection(built_part, axis=axis, d=distance, name=fcName)
+        # separate disjoint pieces
+        segments, cycles = findEdgeCycles(section)
+        for i, cycle in enumerate(cycles):
+            points = [tuple(segments[idx, 0]) for idx in cycle]
+            patchName = fcName
+            patchName = '{}_{}'.format(part_name, i)
+            # this mapping is necessary since numpy floats have a pickle error:
+            polygons[patchName] = [map(float,point) for point in points]
+    return polygons
