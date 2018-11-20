@@ -82,7 +82,19 @@ def build(opts):
     geo = Geo3DData()
 
     # Schedule for deletion all objects not explicitly selected by the user
-    input_parts_names = [part.fc_name for part in opts['input_parts']]
+    input_parts_names = []
+    for part in opts['input_parts']:
+        if part.fc_name is None:
+            obj_list = doc.getObjectsByLabel(part.label)
+            assert len(obj_list) == 1
+            fc_name = obj_list[0].Name
+            part.fc_name = fc_name
+        else:
+            fc_name = part.fc_name
+        input_parts_names += [part]
+
+    # input_parts_names = [part.fc_name for part in opts['input_parts']]
+
     blacklist = []
     for obj in doc.Objects:
         if (obj.Name not in input_parts_names) and (obj.TypeId != 'Spreadsheet::Sheet'):

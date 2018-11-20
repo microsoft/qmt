@@ -281,7 +281,8 @@ class Part3DData(object):
     Create a 3D geometric part.
 
     :param str label: The descriptive name of this new part.
-    :param str fc_name: The name of the 2D/3D freeCAD object that this is built from.
+    :param str fc_name: The name of the 2D/3D freeCAD object that this is built from. Note that if the label used for
+        the 3D part is the same as the freeCAD label, and that label is unique, None may be used here as a shortcut.
     :param str directive: The freeCAD directive is used to construct this part.
         Valid options for this are:
 
