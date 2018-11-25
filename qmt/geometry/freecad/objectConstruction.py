@@ -91,9 +91,7 @@ def build(opts):
             part.fc_name = fc_name
         else:
             fc_name = part.fc_name
-        input_parts_names += [part]
-
-    # input_parts_names = [part.fc_name for part in opts['input_parts']]
+        input_parts_names += [fc_name]
 
     blacklist = []
     for obj in doc.Objects:

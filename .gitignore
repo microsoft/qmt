@@ -117,3 +117,7 @@ ENV/
 /qmt/freecadMacros/dxfLibrary.py
 /qmt/freecadMacros/dxfReader.py
 dask-worker-space
+qmt/geometry/freecad_macros/dxfColorMap.py
+qmt/geometry/freecad_macros/dxfImportObjects.py
+qmt/geometry/freecad_macros/dxfLibrary.py
+qmt/geometry/freecad_macros/dxfReader.py
