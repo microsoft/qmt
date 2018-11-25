@@ -12,10 +12,7 @@ package is licensed with an MIT open source license.
     conda env create -f qmt/deployment/environment_36.yml    
 
 Another option is to run the using Docker. To use the latest 
-image, from the root qmt directory, run 
-    
-    docker build --no-cache -t qmt:master .
-    docker run --network host -it qmt:master
+image, see qmt/deployment/docker_python.sh. 
 
 A significant part of the repository consists of Python functions and macros to
 be executed within FreeCAD, either interactively or in batch mode. These

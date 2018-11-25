@@ -1,6 +1,7 @@
 #!/bin/bash
 
-# ADAPT THE CONFIGURATION VARIABLES BELOW TO YOUR USE CASE!
+# ADAPT THE CONFIGURATION VARIABLES BELOW TO YOUR USE CASE! You will at least
+# need to change the absolute path to this script.
 
 # invoke as follows:
 # 1) For an interactive session, run:
@@ -20,14 +21,22 @@
 # jupyter notebook --port=$JUPYTER_PORT --ip=0.0.0.0 --no-browser
 
 ## -- BEGIN CONFIGURATION -- 
+
+# This is the absolute path to this script - you will need to change it! 
+# This could in principle be inferred, but that might be unsafe with symlinks.
+export DOCKER_PYTHON_SCRIPT=/Users/bauerb/docker_python.sh
+
+# These options can be left as they are if you just want to run the latest QMT.
+# The latest docker image:
 export DOCKER_IMAGE=johnkgamble/qmt_base:latest
+# The path (in the docker container) to the correct python distribution.:
 export CMD=/usr/local/envs/py36/bin/python
-# replace this with NETWORK_OPTS="--host" on Linux if you want
+# replace this with NETWORK_OPTS="--host" on Linux if you want all ports to be forwarded:
 export NETWORK_OPTS="-p 9000:9000"
 export JUPYTER_PORT=9000
-# This could in principle be inferred, but that might be unsafe with symlinks
-export DOCKER_PYTHON_SCRIPT=/Users/bauerb/docker_python.sh
+# The python environment:
 export PYENV=py36
+
 ## -- END CONFIGURATION -- 
 
 if [ -f /.dockerenv ]; then
