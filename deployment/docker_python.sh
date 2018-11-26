@@ -24,7 +24,7 @@
 
 # This is the absolute path to this script - you will need to change it! 
 # This could in principle be inferred, but that might be unsafe with symlinks.
-export DOCKER_PYTHON_SCRIPT=/Users/bauerb/docker_python.sh
+export DOCKER_PYTHON_SCRIPT=/Users/MYNAME/docker_python.sh
 
 # These options can be left as they are if you just want to run the latest QMT.
 # The latest docker image:
@@ -81,28 +81,28 @@ else
                 -e MKL_NUM_THREADS -e OMP_NUM_THREADS \
                 -e USERID -e USERNAME -e GRPID -e GRPNAME -e USRHOME -e ORIGCWD \
                 $NETWORK_OPTS -it \
-                $DOCKER_IMAGE /Users/bauerb/docker_python.sh --bash;
+                $DOCKER_IMAGE $DOCKER_PYTHON_SCRIPT --bash;
     elif [ "$1" == "--int" ]; then
         docker run \
             -v $HOME:$HOME \
             -e MKL_NUM_THREADS -e OMP_NUM_THREADS \
             -e USERID -e USERNAME -e GRPID -e GRPNAME -e USRHOME -e ORIGCWD \
             $NETWORK_OPTS -it \
-            $DOCKER_IMAGE /Users/bauerb/docker_python.sh --int;
+            $DOCKER_IMAGE $DOCKER_PYTHON_SCRIPT --int;
     elif [ "$1" == "--jupyter" ]; then
         docker run \
             -v $HOME:$HOME \
             -e MKL_NUM_THREADS -e OMP_NUM_THREADS \
             -e USERID -e USERNAME -e GRPID -e GRPNAME -e USRHOME -e ORIGCWD \
             $NETWORK_OPTS \
-            $DOCKER_IMAGE /Users/bauerb/docker_python.sh --jupyter;
+            $DOCKER_IMAGE $DOCKER_PYTHON_SCRIPT --jupyter;
     else
         docker run \
             -v $HOME:$HOME \
             -e MKL_NUM_THREADS -e OMP_NUM_THREADS \
             -e USERID -e USERNAME -e GRPID -e GRPNAME -e USRHOME -e ORIGCWD \
             $NETWORK_OPTS \
-            $DOCKER_IMAGE /Users/bauerb/docker_python.sh "$@";
+            $DOCKER_IMAGE $DOCKER_PYTHON_SCRIPT "$@";
     fi
 fi
 
