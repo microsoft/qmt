@@ -39,6 +39,7 @@ export PYENV=py36
 
 ## -- END CONFIGURATION -- 
 
+# TODO: move this to an entrypoint script
 if [ -f /.dockerenv ]; then
     cd $ORIGCWD
     if [ "$(whoami)" == $USERNAME ]; then

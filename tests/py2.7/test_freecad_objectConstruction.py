@@ -12,10 +12,10 @@ def test_build(fix_exampleDir, fix_FCDoc):
                         material='Au', thickness=10)
     opts = {
         'pyenv': 'python2',
-        'file_path': os.path.join(fix_exampleDir, 'geometry_sweep_showcase.fcstd'),
+        'file_path': os.path.join(fix_exampleDir, 'geometry_sweep', 'geometry_sweep_showcase.fcstd'),
         'input_parts': [myPart],
-        'xsec_dict':{}
-        }
+        'xsec_dict': {}
+    }
     fix_FCDoc.load(opts['file_path'])
     build(opts)
     # TODO
