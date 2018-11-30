@@ -66,7 +66,7 @@ RUN rm /usr/local/envs/py36/lib/libstdc++.so.6 \
 RUN conda clean -pt
 
 # Move the dask config file into place
-RUN mkdir /root/.dask && mv /install/dask_config.yaml /root/.dask/.
+RUN mkdir /root/.dask && mv qmt/deployment/dask_config.yaml /root/.dask/.
 
 # Install QMT
 RUN cd qmt && python setup.py develop && /usr/local/envs/py27/bin/python setup.py develop
