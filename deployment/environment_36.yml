@@ -3,28 +3,28 @@ channels:
   - conda-forge
 dependencies:
   - python=3.6
-  - numpy
-  - scipy
+  - numpy=1.15.*
+  - scipy=1.1.*
   - sympy=1.0
-  - sphinx
-  - mkl
-  - mkl-service
-  - petsc=3.8.4
-  - kwant
-  - hpc05
-  - libgfortran-ng=7.2.0
+  - sphinx=1.8.*
+  - mkl=2019.1
+  - mkl-service=1.1.*
+  - petsc=3.8.*
+  - kwant=1.3.*
+  - hpc05=v1.30
+  - libgfortran-ng=7.2.*
   - pip:
-    - numpy-stl
-    - matplotlib
-    - pytest
-    - mpi4py
-    - shapely
-    - h5py
-    - future
-    - holoviews
-    - tqdm
-    - fenics==2017.2.0
-    - dask
-    - dask-jobqueue
-    - jupyter
-    - adaptive
+    - numpy-stl==2.8.*
+    - matplotlib==3.0.*
+    - pytest==4.0.*
+    - mpi4py==3.0.*
+    - shapely==1.6.*
+    - h5py==2.8.*
+    - future==0.17.*
+    - holoviews==1.10.*
+    - tqdm==4.28.*
+    - fenics==2017.2.*
+    - dask==1.0.*
+    - dask-jobqueue==0.4.*
+    - jupyter==1.0.*
+    - adaptive==0.6.*
