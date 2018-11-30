@@ -10,7 +10,7 @@ dependencies:
   - sphinx=1.8.*
   - pyside=1.2.*
   - pip:
-    - matplotlib==3.0.*
+    - matplotlib==2.0.*
     - pytest==4.0.*
     - mpi4py==3.0.*
     - shapely==1.6.*
@@ -19,6 +19,6 @@ dependencies:
     - holoviews==1.10.*
     - tqdm==4.28.*
     - fenics==2017.2.*
-    - dask==1.0.*
+    - dask==0.20.*
     - dask-jobqueue==0.4.*
     - jupyter==1.0.*
