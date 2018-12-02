@@ -5,27 +5,28 @@ dependencies:
   - python=3.6
   - numpy=1.13.*
   - scipy=1.1.*
+  - matplotlib=3.0.*
+  - pytest=4.0.*
+  - mpi4py=3.0.*
+  - shapely=1.6.*
+  - future=0.17.*
+  - h5py=2.8.*
+  - holoviews=1.10.*
+  - tqdm=4.28.*
+  - fenics=2017.2.0
+  - petsc=3.8.4
   - sympy=1.0
+  - dask=1.0.*
+  - dask-jobqueue=0.4.*
   - sphinx=1.8.*
+  - jupyter=1.0.*
+  - kwant=1.3.*
   - mkl=2019.1
   - mkl-service=1.1.*
-  - petsc=3.8.*
-  - kwant=1.3.*
+  - adaptive=0.6.*
   - hpc05=v1.30
-  - libgfortran-ng=7.2.*
-  - fenics==2017.2.*
+  - pip
+  - libgfortran-ng=7.2.0
+  - future==0.17.*
   - pip:
-    - numpy-stl==2.8.*
-    - matplotlib==3.0.*
-    - pytest==4.0.*
-    - mpi4py==3.0.*
-    - shapely==1.6.*
-    - h5py==2.8.*
-    - future==0.17.*
-    - holoviews==1.10.*
-    - tqdm==4.28.*
-    - dask==1.0.*
-    - dask-jobqueue==0.4.*
-    - jupyter==1.0.*
-    - adaptive==0.6.*
-    - bokeh==1.0.*
+    - numpy-stl
