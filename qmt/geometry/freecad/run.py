@@ -5,22 +5,20 @@
 
 import pickle
 import sys
-
+import codecs
+sys.path.append('/home/kewl/anaconda3/pkgs/freecad-0.18b0-py36hb7589b7_4/lib')
 import FreeCAD  # DON'T TOUCH: this must come before the fenics import further below
 
 
-def main():
+def main(instruction, data):
     """Fetch input data and dispatch instructions."""
     # WARNING: you must use send_back() to return data to the parent process.
-
-    instruction = sys.argv[1]
-    data = pickle.loads(''.join(sys.stdin.readlines()))
 
     if instruction == 'build3d':
         from qmt.geometry.freecad.objectConstruction import build
         activate_doc_from(data['current_options'])
         geo_output = build(data['current_options'])
-        send_back(geo_output)
+        return geo_output
 
     elif instruction == 'writeFCfile':
         pass

@@ -48,7 +48,11 @@ def silent_stdout():
     '''Suppress standard output.'''
     sys.stdout.flush()
     stored_py = sys.stdout
-    stored_fileno = os.dup(sys.stdout.fileno())
+    stored_fileno = None
+    try:
+        stored_fileno = os.dup(sys.stdout.fileno())
+    except:
+        pass
     with open(os.devnull, 'w') as devnull:
         sys.stdout = devnull  # for python stdout.write
         os.dup2(devnull.fileno(), 1)  # for library write to fileno 1
@@ -56,7 +60,8 @@ def silent_stdout():
             yield
         finally:
             sys.stdout = stored_py
-            os.dup2(stored_fileno, 1)
+            if stored_fileno is not None:
+                os.dup2(stored_fileno, 1) 
 
 
 def _remove_from_zip(zipfname, *filenames):  # pragma: no cover
