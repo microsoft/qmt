@@ -6,10 +6,12 @@ RUN apt-get -qq update && apt-get -qq -y install curl bzip2 \
     && bash /tmp/miniconda.sh -bfp /usr/local \
     && rm -rf /tmp/miniconda.sh \
     && conda update -q conda \
+    && ln -s /usr/local/etc/profile.d/conda.sh /etc/profile.d/conda.sh \
+    && echo "conda activate" >> ~/.bashrc \
+    && conda clean -aq \
     && apt-get -qq -y autoremove \
     && apt-get autoclean \
     && rm -rf /var/lib/apt/lists/* /var/log/dpkg.log
-ENV PATH /opt/conda/bin:$PATH
 
 # Run apt-gets:
 RUN apt-get update && apt-get install -y \ 
@@ -28,17 +30,14 @@ COPY . qmt/
 # Set up python environments... this takes awhile:
 RUN conda config --set always_yes yes --set changeps1 no \
     && conda env create -v -q -n py36 -f qmt/environment.yml \
-    && conda activate py36
+    && conda clean -aq
 
 # Set the correct path for freeCAD and fix the link to limstdc++       
 RUN find /usr/local/pkgs/ -maxdepth 1 -type d -name freecad* | tail -n 1 | awk '{print $1"/lib"}' \
     > /usr/local/envs/py36/lib/python3.6/site-packages/freecad.pth
 
-# Clean up
-RUN conda clean -pt
-
 # Move the dask config file into place
 RUN mkdir /root/.dask && mv qmt/deployment/dask_config.yaml /root/.dask/.
 
 # Install QMT
-RUN conda develop /qmt
+RUN conda install -yq conda-build && conda develop -n py36 /qmt

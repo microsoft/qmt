@@ -44,12 +44,11 @@ def build_2d_geometry(parts, edges, lunit='nm', build_order=None):
     return geo_2d
 
 
-def build_3d_geometry(pyenv, input_parts, input_file=None, xsec_dict=None,
+def build_3d_geometry(input_parts, input_file=None, xsec_dict=None,
                       serialized_input_file=None, params=None):
     """
     Build a geometry in 3D.
 
-    :param str pyenv: Path or callable name of the Python 2 executable.
     :param list input_parts: Ordered list of input parts, leftmost items get built first
     :param str input_file: Path to FreeCAD template file. Either this or serialized_input_file
         must be set (but not both).
@@ -66,9 +65,11 @@ def build_3d_geometry(pyenv, input_parts, input_file=None, xsec_dict=None,
     :return Geo3DData: A built geometry.
     """
     if input_file is None and serialized_input_file is None:
-        raise ValueError("One of input_file or serialized_input_file must be non-none.")
+        raise ValueError(
+            "One of input_file or serialized_input_file must be non-none.")
     elif input_file is not None and serialized_input_file is not None:
-        raise ValueError("Both input_file and serialized_input_file were non-none.")
+        raise ValueError(
+            "Both input_file and serialized_input_file were non-none.")
     elif input_file is not None:
         serial_fcdoc = serialize_file(input_file)
     else:
@@ -88,9 +89,8 @@ def build_3d_geometry(pyenv, input_parts, input_file=None, xsec_dict=None,
             k: float(v) for k, v in options_dict['params'].items()
         }
     # Send off the instructions
-    from qmt.geometry.freecad_wrapper import fcwrapper
-    geo = fcwrapper(
-        pyenv,
+    from qmt.geometry.freecad import run
+    geo = run.main(
         'build3d',
         {'current_options': options_dict}
     )

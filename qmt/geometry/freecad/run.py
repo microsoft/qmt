@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Landing script for Python 2.7 calls to FreeCAD."""
+"""Landing script for calls to FreeCAD."""
 
 import pickle
 import sys
 import codecs
-sys.path.append('/home/kewl/anaconda3/pkgs/freecad-0.18b0-py36hb7589b7_4/lib')
 import FreeCAD  # DON'T TOUCH: this must come before the fenics import further below
 
 
@@ -48,7 +47,3 @@ def activate_doc_from(opts):
 def send_back(data):
     """Go away."""
     sys.stdout.write('MAGICQMTRANSFERBYTES' + pickle.dumps(data))
-
-
-if __name__ == '__main__':
-    main()

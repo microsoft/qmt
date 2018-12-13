@@ -121,3 +121,7 @@ qmt/geometry/freecad_macros/dxfColorMap.py
 qmt/geometry/freecad_macros/dxfImportObjects.py
 qmt/geometry/freecad_macros/dxfLibrary.py
 qmt/geometry/freecad_macros/dxfReader.py
+
+# Lock files
+*.lock
+*.dirlock
