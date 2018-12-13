@@ -7,7 +7,8 @@ RUN apt-get -qq update && apt-get -qq -y install curl bzip2 \
     && rm -rf /tmp/miniconda.sh \
     && conda update -q conda \
     && ln -s /usr/local/etc/profile.d/conda.sh /etc/profile.d/conda.sh \
-    && echo "conda activate" >> ~/.bashrc \
+    && . /etc/profile.d/conda.sh \
+    && conda activate \
     && conda clean -aq \
     && apt-get -qq -y autoremove \
     && apt-get autoclean \
@@ -30,9 +31,10 @@ COPY . qmt/
 # Set up python environments... this takes awhile:
 RUN conda config --set always_yes yes --set changeps1 no \
     && conda env create -v -q -n py36 -f qmt/environment.yml \
-    && conda clean -aq
+    && conda clean -aq \
+    && conda activate py36
 
-# Set the correct path for freeCAD and fix the link to limstdc++       
+# Set the correct path for freeCAD   
 RUN find /usr/local/pkgs/ -maxdepth 1 -type d -name freecad* | tail -n 1 | awk '{print $1"/lib"}' \
     > /usr/local/envs/py36/lib/python3.6/site-packages/freecad.pth
 

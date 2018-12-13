@@ -5,7 +5,6 @@
 
 import pickle
 import sys
-import codecs
 import FreeCAD  # DON'T TOUCH: this must come before the fenics import further below
 
 
