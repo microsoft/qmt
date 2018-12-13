@@ -29,7 +29,7 @@ COPY . qmt/
 # Set up python environments... this takes awhile:
 RUN conda config --set always_yes yes --set changeps1 no \
     && conda env create -v -q -n py36 -f qmt/environment.yml \
-    && conda clean -aq \
+    && conda clean -aq
 
 # Set the correct path for freeCAD   
 RUN find /usr/local/pkgs/ -maxdepth 1 -type d -name freecad* | tail -n 1 | awk '{print $1"/lib"}' \
