@@ -7,7 +7,7 @@ RUN apt-get -qq update && apt-get -qq -y install curl bzip2 \
     && rm -rf /tmp/miniconda.sh \
     && conda update -q conda \
     && ln -s /usr/local/etc/profile.d/conda.sh /etc/profile.d/conda.sh \
-    && . /etc/profile.d/conda.sh \
+    && . /usr/local/etc/profile.d/conda.sh \
     && conda activate \
     && conda clean -aq \
     && apt-get -qq -y autoremove \
