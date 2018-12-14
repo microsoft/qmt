@@ -3,15 +3,25 @@ FROM ubuntu:16.04
 # Install packages
 RUN apt-get -qq update && \
     apt-get install -qq -y \
-    wget \
+    apt-transport-https \
+    apt-utils \
     bzip2 \
     ca-certificates \
+    cmake \
     curl \
-    git \
     gcc \
-    vim \
+    gfortran \
+    git \
+    gnupg2 \
+    g++ \
+    hdf5-tools \
     libgl1-mesa-glx \
-    slurm-client && \
+    libopenmpi-dev \
+    make \
+    slurm-client \
+    software-properties-common \
+    vim \
+    wget && \
     apt-get -qq -y autoremove && \
     apt-get autoclean && \
     rm -rf /var/lib/apt/lists/* /var/log/dpkg.log 
@@ -28,20 +38,24 @@ RUN curl -sSL https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64
 # Set the working directory to /app
 WORKDIR /app
 
-# Copy QMS into the container and set up
+# Copy QMT into the container and set up
 # TODO: Only copy code and not deployment/doc/examples
 COPY . qmt/
 
-# Set up python environments... this takes awhile:
+# Set up python environment... this takes awhile:
 RUN conda config --set always_yes yes --set changeps1 no && \
     conda env create -v -q -n py36 -f qmt/environment.yml && \
     conda clean -aq && \
     echo "conda activate py36" >> ~/.bashrc
 ENV PATH /usr/local/envs/py36/bin:$PATH
 
-# Set the correct path for freeCAD   
-RUN find /usr/local/pkgs/ -maxdepth 1 -type d -name freecad* | tail -n 1 | awk '{print $1"/lib"}' \
-    > /usr/local/envs/py36/lib/python3.6/site-packages/freecad.pth
+# Set the correct path for freeCAD
+# and fix the link to libstdc++, which is currently a conda bug
+RUN find /usr/local/pkgs/ -maxdepth 1 -type d -name freecad* | \
+    tail -n 1 | awk '{print $1"/lib"}' > \
+    /usr/local/envs/py36/lib/python3.6/site-packages/freecad.pth && \
+    rm /usr/local/envs/py36/lib/libstdc++.so.6 && \
+    ln -s /usr/local/envs/py36/lib/libstdc++.so.6.0.24 /usr/local/envs/py36/lib/libstdc++.so.6
 
 # Move the dask config file into place
 RUN mkdir /root/.dask && mv qmt/deployment/dask_config.yaml /root/.dask/.
