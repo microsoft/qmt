@@ -4,9 +4,7 @@
 """Geometry task classes for 1D, 2D and 3D."""
 
 from shapely.geometry import Polygon, LineString
-
 from qmt.data import Geo2DData, Geo3DData, serialize_file
-
 
 def build_2d_geometry(parts, edges, lunit='nm', build_order=None):
     """
@@ -83,15 +81,9 @@ def build_3d_geometry(input_parts, input_file=None, xsec_dict=None,
     options_dict['input_parts'] = input_parts
     options_dict['params'] = params
     options_dict['xsec_dict'] = xsec_dict
-    # Convert NumPy3 floats to something that Python2 can unpickle
-    if 'params' in options_dict:
-        options_dict['params'] = {
-            k: float(v) for k, v in options_dict['params'].items()
-        }
-    # Send off the instructions
-    from qmt.geometry.freecad import run
-    geo = run.main(
-        'build3d',
-        {'current_options': options_dict}
-    )
-    return geo
+
+    data = Geo3DData()
+    data.serial_fcdoc = serial_fcdoc
+    data.get_data('fcdoc')
+    from qmt.geometry.freecad.objectConstruction import build
+    return build(options_dict)

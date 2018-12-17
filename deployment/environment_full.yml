@@ -1,7 +1,6 @@
 name: new
 channels:
   - conda-forge
-  - defaults
 dependencies:
   - adaptive=0.7.0=py36_1000
   - alabaster=0.7.12=py_0
