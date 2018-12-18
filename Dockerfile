@@ -49,6 +49,9 @@ RUN conda config --set always_yes yes --set changeps1 no && \
     echo "conda activate py36" >> ~/.bashrc
 ENV PATH /usr/local/envs/py36/bin:$PATH
 
+# Expose 8888 for jupyter notebook
+EXPOSE 8888
+
 # Set the correct path for freeCAD
 # and fix the link to libstdc++, which is currently a conda bug
 RUN find /usr/local/pkgs/ -maxdepth 1 -type d -name freecad* | \
