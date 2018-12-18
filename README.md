@@ -11,7 +11,7 @@ Another option is to run the using Docker. To use the latest image, see qmt/depl
 
 A significant part of the repository consists of Python functions and macros to be executed within FreeCAD, either interactively or in batch mode. These require the latest version of FreeCAD (0.18), which works with Python 3.
 
-Note that this initial release does not contain examples or introductory  documentation, which we plan to add in time. If you want to get started, feel  free to email John Gamble at john.gamble@microsoft.com.
+Note that this initial release does not contain examples or introductory documentation, which we plan to add in time. If you want to get started, feel  free to email John Gamble at john.gamble@microsoft.com.
 
 
 # Development notes
