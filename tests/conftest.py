@@ -33,40 +33,6 @@ def fix_FCDoc():
     FreeCAD.closeDocument('testDoc')
 
 
-@pytest.fixture(scope='session')
-def fix_host_settings(fix_testDir):
-    '''Host specific settings.'''
-    schema = {
-        'py2env': '/usr/local/envs/py27/bin/python'
-        }
-
-    import yaml
-    settings_file = os.path.join(fix_testDir, 'host_settings.yml')
-    if not os.path.exists(settings_file):
-        with open(settings_file, 'a') as f:
-            yaml.dump(schema, f, default_flow_style=False)
-    with open(settings_file) as f:
-        data = yaml.load(f)
-    data['settings_file'] = settings_file
-    return data
-
-
-@pytest.fixture(scope='session')
-def fix_py2env(fix_host_settings):
-    '''Host setting for python2.7 environment.'''
-    py2env = fix_host_settings['py2env']
-    try:
-        import subprocess
-        p = subprocess.Popen([py2env, '-c', 'import sys; print sys.version_info'],
-                             stdout=subprocess.PIPE)
-        assert 'sys.version_info(major=2, minor=7' in p.communicate()[0].decode()
-    except:
-        raise RuntimeError('Invalid path to Python 2.7 environment (' + str(py2env) +
-                           ') in ' + fix_host_settings['settings_file'] + '. ' +
-                           'Please edit this file.')
-    return py2env
-
-
 ################################################################################
 # Sketches
 

@@ -1,0 +1,36 @@
+# This files lists the minimum set of packages that we need for QMS/QMT
+# Version locking and explicit dependencies are kept to a minimum. If any they are explained,
+# and could potentially be removed in the future
+# This file is kept around so that if we want to upgrade version numbers, we can conda build
+# on this. If not please use environment_full.yml, which is much less likely to give you issues
+# due to packages versioning
+name: py36
+channels:
+  - conda-forge
+dependencies:
+  - adaptive
+  - dask
+  - dask-jobqueue
+  - fenics
+  - freecad
+  - future
+  - holoviews
+  - hpc05
+  - h5py
+  - jupyter
+  - kwant
+  - libgfortran-ng # need for fenics
+  - matplotlib
+  - mkl
+  - mkl-service
+  - mpi4py
+  - numpy
+  - numpy-stl
+  - petsc
+  - pytest
+  - scipy
+  - shapely
+  - sphinx
+  - sympy
+  - tqdm
+  - boost=1.66 # 1.67 (introduced by freecad) has issues
