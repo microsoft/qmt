@@ -31,6 +31,6 @@ dependencies:
   - scipy
   - shapely
   - sphinx
-  - sympy
+  - sympy=1.0.* # we're not forward compatible
   - tqdm
   - boost=1.66 # 1.67 (introduced by freecad) has issues
