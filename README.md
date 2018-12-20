@@ -1,5 +1,5 @@
 # Qubit Modeling Tools (QMT)
-[![Build Status](https://dev.azure.com/ms-qmt/qmt/_apis/build/status/QMT%20Master%20Build%20and%20Push)](https://dev.azure.com/ms-qmt/qmt/_build/latest?definitionId=4)
+[![Build Status](https://dev.azure.com/ms-qmt/qmt/_apis/build/status/Microsoft.qmt?branchName=master)](https://dev.azure.com/ms-qmt/qmt/_build/latest?definitionId=7?branchName=master)
 
 Welcome to our qubit modeling tools (qmt)! This package is designed to automate the setup of complex geometries appropriate to physical qubit simulations. This package is licensed with an MIT open source license.
 
