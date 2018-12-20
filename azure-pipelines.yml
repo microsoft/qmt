@@ -23,7 +23,7 @@ steps:
 - script: |
     docker build . -t $(imageName):$(Build.BuildId) -t $(imageName):latest
   displayName: Build QMT Image
-- script: docker run -v $(System.DefaultWorkingDirectory)/test_results:/test_results $(imageName) /bin/bash -c "/usr/local/envs/py36/bin/pytest --verbose --capture=no /app/qmt/tests/py2.7 --junit-xml=/app/qmt/test_results/TEST-2.7.xml && /usr/local/envs/py36/bin/pytest --verbose --capture=no /app/qmt/tests/py3 --junit-xml=/app/qmt/test_results/TEST-3.xml"
+- script: docker run -v $(System.DefaultWorkingDirectory)/test_results:/test_results $(imageName) /bin/bash -c "/usr/local/envs/py36/bin/pytest --verbose --capture=no /app/qmt/tests/py2.7 --junit-xml=/test_results/TEST-2.7.xml && /usr/local/envs/py36/bin/pytest --verbose --capture=no /app/qmt/tests/py3 --junit-xml=/test_results/TEST-3.xml"
   displayName: Run QMT Tests
 - task: PublishTestResults@2
   inputs:
