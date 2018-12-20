@@ -1,0 +1,33 @@
+# Docker image
+# Build a Docker image to deploy, run, or push to a container registry.
+# Add steps that use Docker Compose, tag images, push to a registry, run an image, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+pool:
+  vmImage: 'Ubuntu 16.04'
+
+variables:
+  quantumContainerRegistry: quantumdocker.azurecr.io
+  imageName: $(quantumContainerRegistry)/qmt_base
+
+trigger:
+- master
+
+steps:
+- task: Docker@1
+  displayName: Login to QuantumDocker
+  inputs:
+    azureSubscriptionEndpoint: 'Station Q Santa Barbara compute cluster (62c00194-7833-42a7-adad-d3ce957a8c45)'
+    azureContainerRegistry: $(quantumContainerRegistry)
+    command: login
+- script: |
+    docker build . -t $(imageName):$(Build.BuildId) -t $(imageName):latest
+  displayName: Build QMT Image
+- script: docker run -v $(System.DefaultWorkingDirectory)/test_results:/test_results $(imageName) /bin/bash -c "/usr/local/envs/py36/bin/pytest --verbose --capture=no /app/qmt/tests/py2.7 --junit-xml=/app/qmt/test_results/TEST-2.7.xml && /usr/local/envs/py36/bin/pytest --verbose --capture=no /app/qmt/tests/py3 --junit-xml=/app/qmt/test_results/TEST-3.xml"
+  displayName: Run QMT Tests
+- task: PublishTestResults@2
+  inputs:
+    testResultsFiles: '**/TEST-*.xml'
+- script: docker push $(imageName)
+  condition: eq(variables['build.sourceBranch'], 'refs/heads/master')
+  displayName: Push Image to ACR
