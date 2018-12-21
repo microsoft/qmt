@@ -21,7 +21,8 @@ Bdg2dData = namedtuple('Bdg2dData', ['coordinates',
                                      'energies',
                                      'wave_functions',
                                      'coordinate_units',
-                                     'energy_units'
+                                     'energy_units',
+                                     'hamiltonian',
                                      ])
 
 
