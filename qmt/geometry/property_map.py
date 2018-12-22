@@ -34,7 +34,7 @@ class PropertyMap(object):
         if np.isscalar(parts):
             return self.propMap(parts)
 
-        unique_parts = np.unique(parts)
+        unique_parts = set(np.asanyarray(parts).flat)
         unique_props = [self.propMap(p) for p in unique_parts]
         obj_type = type(unique_props[0])
         if obj_type is str:
