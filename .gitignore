@@ -125,3 +125,7 @@ qmt/geometry/freecad_macros/dxfReader.py
 # Lock files
 *.lock
 *.dirlock
+
+
+# Pytest
+.pytest_cache
