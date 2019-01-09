@@ -26,6 +26,11 @@ Bdg2dData = namedtuple('Bdg2dData', ['coordinates',
                                      ])
 
 
+Phase2dData = namedtuple('Phase2dData', ['coordinates',
+                                         'superconducting_phase',
+                                         'coordinate_units',
+                                        ])
+
 # TODO: this needs to be pruned
 class SchrodingerPoissonDatas:
     def __init__(self, poisson_obj, density, density_per_subband, density_units, rho, rho_units,
