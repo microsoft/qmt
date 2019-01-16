@@ -77,7 +77,7 @@ def build(opts):
     :param dict opts:   Options dict in the QMT Geometry3D.__init__ input format.
     :return geo:        Geo3DData object with the built objects.
     '''
-    doc=FreeCAD.ActiveDocument
+    doc = FreeCAD.ActiveDocument
     geo = Geo3DData()
 
     # Schedule for deletion all objects not explicitly selected by the user
