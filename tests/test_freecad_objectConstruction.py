@@ -17,7 +17,7 @@ def test_build(fix_exampleDir, fix_FCDoc):
         'xsec_dict': {}
     }
     fix_FCDoc.load(opts['file_path'])
-    build(opts)
+    build(fix_FCDoc, opts)
     # TODO
 
 
