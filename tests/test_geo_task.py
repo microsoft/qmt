@@ -32,8 +32,8 @@ def test_geo_task(fix_testDir):
                       z0=0, layer_num=1, thickness=4, litho_base=[substrate])
     wrap2 = Part3DData('Second Layer', 'Sketch007', 'lithography', 'dielectric',
                        layer_num=2, thickness=1)
-    print(os.path.join(fix_testDir, 'py3', 'data', 'geometry_test.fcstd'))
-    input_file_path = os.path.join(fix_testDir, 'py3', 'data', 'geometry_test.fcstd')
+    print(os.path.join(fix_testDir, 'data', 'geometry_test.fcstd'))
+    input_file_path = os.path.join(fix_testDir, 'data', 'geometry_test.fcstd')
 
     build_order = [block1, block2, sag, wire, shell, block3, substrate, wrap, wrap2]
     results = []
