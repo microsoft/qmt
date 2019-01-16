@@ -21,7 +21,7 @@ def test_build(fix_exampleDir, fix_FCDoc):
     # TODO
 
 
-def test_build_extrude(fix_FCDoc, fix_hexagon_sketch):
+def test_build_extrude(fix_hexagon_sketch):
     from qmt.data import Part3DData
     sketch = fix_hexagon_sketch()
     input_part = Part3DData('label', sketch.Name, 'extrude', 'metal_gate',
