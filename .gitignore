@@ -129,3 +129,6 @@ qmt/geometry/freecad_macros/dxfReader.py
 
 # Pytest
 .pytest_cache
+
+# Built geo file
+examples/simple_notebook/built_geo.fcstd
