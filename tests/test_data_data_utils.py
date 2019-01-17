@@ -27,3 +27,4 @@ def test_store_serial(fix_testDir, fix_FCDoc):
 
     assert doc.getObject('some_content') is not None
     os.remove(file_path)
+    FreeCAD.closeDocument('instance')

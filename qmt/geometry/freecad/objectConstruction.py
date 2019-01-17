@@ -74,7 +74,6 @@ class DummyInfo:
 
 def build(opts):
     '''Build the 3D geometry in FreeCAD.
-
     :param dict opts:   Options dict in the QMT Geometry3D.__init__ input format.
     :return geo:        Geo3DData object with the built objects.
     '''

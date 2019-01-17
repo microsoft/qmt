@@ -6,7 +6,6 @@
 import os
 import sys
 import pytest
-
 import qmt
 
 
@@ -163,7 +162,8 @@ def fix_task_env():
         """
         result = 0.0
         for part in input_data:
-            result += prefactor * np.sum(input_data[part]) * np.sum(gathered_data[part])
+            result += prefactor * \
+                np.sum(input_data[part]) * np.sum(gathered_data[part])
         return result
 
     return input_task_example, gathered_task_example, post_processing_task_example
