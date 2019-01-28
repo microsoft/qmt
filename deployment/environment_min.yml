@@ -8,6 +8,7 @@ name: py36
 channels:
   - conda-forge
 dependencies:
+  - python=3.6.5 # higher versions introduce fenics errors on Mac OS. Feel free to comment out if on linux
   - adaptive
   - dask
   - dask-jobqueue
