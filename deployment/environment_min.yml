@@ -2,12 +2,13 @@
 # Version locking and explicit dependencies are kept to a minimum. If any they are explained,
 # and could potentially be removed in the future
 # This file is kept around so that if we want to upgrade version numbers, we can conda build
-# on this. If not please use environment_full.yml, which is much less likely to give you issues
+# on this. If not please use environment_full_[platform].yml, which is much less likely to give you issues
 # due to packages versioning
 name: py36
 channels:
   - conda-forge
 dependencies:
+  - python=3.6.5 # higher versions introduce fenics errors on Mac OS. Feel free to comment out if on linux
   - adaptive
   - dask
   - dask-jobqueue

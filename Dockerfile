@@ -44,7 +44,7 @@ COPY . qmt/
 
 # Set up python environment... this takes awhile:
 RUN conda config --set always_yes yes --set changeps1 no && \
-    conda env create -v -q -n py36 -f qmt/deployment/environment_full.yml && \
+    conda env create -v -q -n py36 -f qmt/deployment/environment_full_linux.yml && \
     conda clean -aq && \
     echo "conda activate py36" >> ~/.bashrc
 ENV PATH /usr/local/envs/py36/bin:$PATH
