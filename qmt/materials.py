@@ -652,26 +652,26 @@ def generate_file(fname=None):
     materials = Materials(fname, load=False)
 
     # === Metals ===
-    materials.add_material('Al', 'metal', relativePermittivity=1000,
+    materials.add_material('Al', 'metal', relativePermittivity=1,
                            # source? Wikipedia and others quote 4.06 - 4.26 eV
                            # depending on face.
                            workFunction=4280.,
                            # Ashcroft and Mermin:
                            fermiEnergy=11700.)
-    materials.add_material('Au', 'metal', relativePermittivity=1000,
+    materials.add_material('Au', 'metal', relativePermittivity=1,
                            # source- Wikipedia quotes it as 5.1-5.47; this is the
                            # average.
                            workFunction=5285.,
                            # Ashcroft and Mermin:
                            fermiEnergy=5530.)
-    materials.add_material('degenDopedSi', 'metal', relativePermittivity=1000,
+    materials.add_material('degenDopedSi', 'metal', relativePermittivity=1,
                            # source - Ioffe Institute,
                            # http://www.ioffe.ru/SVA/NSM/Semicond/Si/basic.html
                            workFunction=4050.,
                            # unknown / probably depends on doping density; setting
                            # it to Au for now.
                            fermiEnergy=5530.)
-    materials.add_material('NbTiN', 'metal', relativePermittivity=1000,
+    materials.add_material('NbTiN', 'metal', relativePermittivity=1,
                            # Unknown; just setting it to Al for now.
                            workFunction=4280.,
                            # Unknown; just setting it to Au for now.
