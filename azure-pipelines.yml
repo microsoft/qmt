@@ -23,7 +23,7 @@ steps:
 - script: |
     docker build . -t $(imageName):$(Build.BuildId) -t $(imageName):latest
   displayName: Build QMT Image
-- script: docker run -v $(System.DefaultWorkingDirectory)/test_results:/test_results $(imageName) pytest -v -n auto --capture=no /app/qmt/tests --junit-xml=/test_results/TEST.xml
+- script: docker run -v $(System.DefaultWorkingDirectory)/test_results:/test_results $(imageName) pytest --verbose -n auto --capture=no /app/qmt/tests --junit-xml=/test_results/TEST.xml
   displayName: Run QMT Tests
 - task: PublishTestResults@2
   inputs:
