@@ -10,6 +10,8 @@ channels:
 dependencies:
   - python=3.6.5 # higher versions introduce fenics errors on Mac OS. Feel free to comment out if on linux
   - adaptive
+  - autopep8
+  - boost=1.66 # 1.67 (introduced by freecad) has issues
   - dask
   - dask-jobqueue
   - fenics
@@ -28,10 +30,12 @@ dependencies:
   - numpy
   - numpy-stl
   - petsc
+  - pylint
   - pytest
+  - pytest-datadir
+  - pytest-xdist
   - scipy
   - shapely
   - sphinx
   - sympy=1.0.* # we're not forward compatible
   - tqdm
-  - boost=1.66 # 1.67 (introduced by freecad) has issues
