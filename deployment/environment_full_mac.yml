@@ -4,10 +4,13 @@ channels:
 dependencies:
   - adaptive=0.7.2=py36_1000
   - alabaster=0.7.12=py_0
+  - apipkg=1.5=py_0
   - appnope=0.1.0=py36_1000
   - asn1crypto=0.24.0=py36_1003
+  - astroid=2.1.0=py36_1000
   - atomicwrites=1.2.1=py_0
   - attrs=18.2.0=py_0
+  - autopep8=1.4.3=py_0
   - babel=2.6.0=py_1
   - backcall=0.1.0=py_0
   - bcrypt=3.1.4=py36h470a237_0
@@ -38,6 +41,7 @@ dependencies:
   - docutils=0.14=py36_1001
   - eigen=3.3.7=h04f5b5a_1000
   - entrypoints=0.3=py36_1000
+  - execnet=1.5.0=py_0
   - expat=2.2.5=h0a44026_1002
   - fastcache=1.0.2=py36h1de35cc_1001
   - fenics=2017.2.0=np113py36_3
@@ -62,6 +66,7 @@ dependencies:
   - ipython=7.1.1=py36h24bf2e0_1000
   - ipython_genutils=0.2.0=py_1
   - ipywidgets=7.4.2=py_0
+  - isort=4.3.4=py36_1000
   - jedi=0.13.2=py36_1000
   - jinja2=2.10=py_1
   - jpeg=9c=h1de35cc_1001
@@ -74,6 +79,7 @@ dependencies:
   - kiwisolver=1.0.1=py36h04f5b5a_1002
   - krb5=1.16.3=h24a3359_1000
   - kwant=1.3.3=py36_blas_openblashd3ea46f_1
+  - lazy-object-proxy=1.3.1=py36h1de35cc_1000
   - libcurl=7.63.0=h76de61e_1000
   - libcxx=7.0.0=h2d50403_2
   - libedit=3.1.20170329=hcfe32e1_1001
@@ -97,6 +103,7 @@ dependencies:
   - lz4-c=1.8.3=h0a44026_1001
   - markupsafe=1.1.0=py36h1de35cc_1000
   - matplotlib=2.2.2=py36_1
+  - mccabe=0.6.1=py_1
   - metis=5.1.0=h0a44026_1003
   - mistune=0.8.4=py36h1de35cc_1000
   - mkl=2018.0.3=1
@@ -148,8 +155,10 @@ dependencies:
   - ptyprocess=0.6.0=py36_1000
   - py=1.7.0=py_0
   - pyasn1=0.4.4=py_1
+  - pycodestyle=2.5.0=py_0
   - pycparser=2.19=py_0
   - pygments=2.3.1=py_0
+  - pylint=2.2.2=py36_1000
   - pynacl=1.3.0=py36h1de35cc_1000
   - pyopenssl=18.0.0=py36_1000
   - pyparsing=2.3.1=py_0
@@ -158,6 +167,9 @@ dependencies:
   - pyside2=5.6.0a1=py36h98637d4_1004
   - pysocks=1.6.8=py36_1002
   - pytest=4.1.1=py36_1000
+  - pytest-datadir=1.3.0=py_0
+  - pytest-forked=1.0.1=py_0
+  - pytest-xdist=1.26.1=py_0
   - python=3.6.5=1
   - python-dateutil=2.7.5=py_0
   - python-utils=2.3.0=py_1
@@ -170,6 +182,7 @@ dependencies:
   - readline=7.0=hcfe32e1_1001
   - requests=2.21.0=py36_1000
   - rhash=1.3.6=h1de35cc_1001
+  - rope=0.10.7=py_1
   - scalapack=2.0.2=h3480a31_1003
   - scipy=1.1.0=py36_blas_openblash7943236_201
   - scotch=6.0.6=hde27766_1002
@@ -201,16 +214,17 @@ dependencies:
   - tornado=5.1.1=py36h1de35cc_1000
   - tqdm=4.29.1=py_0
   - traitlets=4.3.2=py36_1000
+  - typed-ast=1.2.0=py36h1de35cc_1000
   - urllib3=1.24.1=py36_1000
   - vtk=8.1.1=py36hdceb404_201
   - wcwidth=0.1.7=py_1
   - webencodings=0.5.1=py_1
   - wheel=0.32.3=py36_0
   - widgetsnbextension=3.4.2=py36_1000
+  - wrapt=1.11.1=py36h1de35cc_0
   - xerces-c=3.2.0=h5d6a6da_2
   - xz=5.2.4=h1de35cc_1001
   - yaml=0.1.7=h1de35cc_1001
   - zeromq=4.2.5=h0a44026_1006
   - zict=0.1.3=py_0
   - zlib=1.2.11=h1de35cc_1004
-
