@@ -103,6 +103,8 @@ def build(opts):
         fcdict = {key: (value, 'freeCAD') for (key, value) in opts['params'].items()}
         set_params(doc, fcdict)
 
+    doc.recompute() # recompute here to update any sketches that change due to parameters
+
     if 'built_part_names' not in opts:
         opts['built_part_names'] = {}
     if 'serial_stp_parts' not in opts:
