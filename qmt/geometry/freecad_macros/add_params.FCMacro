@@ -1,0 +1,33 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT License.
+
+#
+# Macro that creates parameters in a spreadsheet and labels them for use.
+#
+
+import FreeCAD
+doc = FreeCAD.activeDocument()
+
+param_dict = {'l1':0.1,'l2':0.2,'l3':0.3} # sample entries
+
+objList = doc.Objects
+objNames = [x.Name for x in objList]
+# If we do, delete it (we will rebuild from the json)
+if 'modelParams' in objNames:
+    doc.removeObject('modelParams')
+doc.recompute()
+doc.addObject('Spreadsheet::Sheet', 'modelParams')
+spreadSheet = doc.modelParams
+spreadSheet.set('A1', 'paramName')
+spreadSheet.set('B1', 'paramValue')
+spreadSheet.setColumnWidth('A', 200)
+spreadSheet.setStyle('A1:B1', 'bold', 'add')
+
+for i in range(len(param_dict)):
+    key = list(param_dict.keys())[i]
+    valStr = str(param_dict[key])
+    spreadSheet.set('A' + str(i + 2), key)
+    spreadSheet.set('B' + str(i + 2), valStr)
+    spreadSheet.setAlias('B' + str(i + 2), str(key))
+doc.recompute()
+
