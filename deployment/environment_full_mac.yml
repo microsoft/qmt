@@ -35,6 +35,7 @@ dependencies:
   - dask-core=1.1.0=py_0
   - dask-jobqueue=0.4.1=py_0
   - decorator=4.3.2=py_0
+  - descartes=1.1.0=py36_0
   - dill=0.2.8.2=py36_1000
   - distributed=1.25.2=py36_1000
   - docrep=0.2.5=py_0
