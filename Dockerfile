@@ -20,6 +20,7 @@ RUN apt-get -qq update && \
     make \
     slurm-client \
     software-properties-common \
+    sudo \
     vim \
     wget && \
     apt-get -qq -y autoremove && \
