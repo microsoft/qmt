@@ -20,9 +20,10 @@ steps:
     azureSubscriptionEndpoint: 'Station Q Santa Barbara compute cluster'
     azureContainerRegistry: $(quantumContainerRegistry)
     command: login
-- script: |
-    docker build . -t $(imageName):$(Build.BuildId) -t $(imageName):latest
+- script: docker build . -t $(imageName):$(Build.BuildId) -t $(imageName):latest
   displayName: Build QMT Image
+- script: mkdir $(System.DefaultWorkingDirectory)/test_results/htmlcov
+  displayName: Creating Test Results Directory
 - script: docker run -v $(System.DefaultWorkingDirectory)/test_results:/test_results $(imageName) pytest /app/qmt/tests --verbose -n auto --capture=no  --junit-xml=/test_results/TEST.xml --cov=qmt --cov-report=xml:/test_results/coverage.xml --cov-report=html:/test_results/htmlcov
   displayName: Run QMT Tests
 - task: PublishTestResults@2
