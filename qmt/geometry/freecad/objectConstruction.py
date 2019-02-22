@@ -280,7 +280,6 @@ def build_lithography(part, opts, info_holder):
     for objID in info_holder.lithoDict['layers'][layerNum]['objIDs']:
         if part.fc_name == info_holder.lithoDict['layers'][layerNum]['objIDs'][objID]['partName']:
             returnObjs.append(gen_G(info_holder, opts, layerNum, objID))
-
     logging.debug([o.Name for o in returnObjs])
     return genUnion(returnObjs, consumeInputs=True
                                 if not DBG_OUT else False)
@@ -558,20 +557,23 @@ def initialize_lithography(info, opts, fillShells=True):
 def gen_offset(opts, obj, offsetVal):
     """Generates an offset non-destructively."""
     doc = FreeCAD.ActiveDocument
-    # First, we need to check if the object needs special treatment:
-    treatment = 'standard'
-    try:
-        partname = next(label for (label, built_name) in
-                        opts['built_part_names'].iteritems() if built_name == obj.Name)
-        input_part = next(input_part for input_part in
-                          opts['input_parts'] if input_part.label == partname)
+    # First, we need to identify if we are working with a special part:
+    my_part_label = None
+    for part_label in opts['built_part_names']: # Loop through built parts
+        built_part_name = opts['built_part_names'][part_label] # Part name
+        if built_part_name == obj.Name: # Is this the part we're working with now?
+            my_part_label = part_label # If so, set the label
+            break
+    if my_part_label is None: # If we haven't found the part, it's not special
+        treatment = 'standard'
+    else: # If we have, figure out which directive we used to make it
+        for input_part in opts['input_parts']:
+            if input_part.label == part_label:
+                break
         treatment = input_part.directive
-    except:
-        pass
-
+    # Extrude or lithography parts are treated normally:
     if treatment == 'extrude' or treatment == 'lithography':
         treatment = 'standard'
-
     if treatment == 'standard':
         # Apparently the offset function is buggy for very small offsets...
         if offsetVal < 1e-5:
