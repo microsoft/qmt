@@ -2,8 +2,8 @@
 # Licensed under the MIT License.
 
 from __future__ import absolute_import, division, print_function
-
 from qmt.geometry.freecad.objectConstruction import *
+import pytest
 
 
 def test_build(fix_exampleDir, fix_FCDoc):
@@ -104,6 +104,7 @@ def test_makeSAG_triangle_with_square_base(fix_FCDoc, fix_rectangle_sketch):
     # Volume of pyramid is hwl/3
     assert np.isclose(sag.Shape.Volume, 1.48, 0.0001)
 
+
 def test_makeSAG_triangle_with_no_rectangular_part(fix_FCDoc, fix_rectangle_sketch):
     r'''
     Test the case where there is no rectangular part at the bottom
@@ -122,6 +123,7 @@ def test_makeSAG_triangle_with_no_rectangular_part(fix_FCDoc, fix_rectangle_sket
     # Volume of pyramid is hwl/3
     assert np.isclose(sag.Shape.Volume, 0.48, 0.0001)
 
+
 def test_makeSAG_with_fat_top(fix_FCDoc, fix_rectangle_sketch):
     r'''
     Test the case where the top is fatter than the bottom, but not fatter than the middle
@@ -135,6 +137,7 @@ def test_makeSAG_with_fat_top(fix_FCDoc, fix_rectangle_sketch):
     assert np.allclose(getBB(sag), (-0.2, 1.2, -0.2, 1.2, 0, 2))
     # Volume of incomplete pyramid is h(a^2 + ab + b^2)/3
     assert np.isclose(sag.Shape.Volume, 2.69333)
+
 
 def test_makeSAG_with_fattest_top(fix_FCDoc, fix_rectangle_sketch):
     r'''
@@ -151,6 +154,7 @@ def test_makeSAG_with_fattest_top(fix_FCDoc, fix_rectangle_sketch):
     # Volume of incomplete pyramid is h(a^2 + ab + b^2)/3
     assert np.isclose(sag.Shape.Volume, 2.69333)
 
+
 def test_makeSAG_with_no_over_hang(fix_FCDoc, fix_rectangle_sketch):
     r'''
     Test the case where there is no overhang
@@ -164,6 +168,17 @@ def test_makeSAG_with_no_over_hang(fix_FCDoc, fix_rectangle_sketch):
     assert np.allclose(getBB(sag), (0, 1, 0, 1, 0, 2))
     # Volume of incomplete pyramid is h(a^2 + ab + b^2)/3
     assert np.isclose(sag.Shape.Volume, 1.81333)
+
+
+def test_makeSAG_with_no_top(fix_FCDoc, fix_rectangle_sketch):
+    r'''
+    Assertion should fail if you try to build a SAG with no top. This is because there is no way to calculate offset if there is no height to the roof, and that case needs to be handled separately. However it's a pretty useless case so we don't support it
+     ________
+    |________|        NOT TO SCALE
+    '''
+    sketch = fix_rectangle_sketch()
+    with pytest.raises(Exception):
+        sag = makeSAG(sketch, 0, 1, 1, 0.1, 0)[0]
 
 # ~ def test_modelBuilder_saveFreeCADState():
 # ~ mb = modelBuilder()
