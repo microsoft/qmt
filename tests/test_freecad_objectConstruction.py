@@ -153,8 +153,7 @@ def test_makeSAG_with_fattest_top(fix_FCDoc, fix_rectangle_sketch):
 
 def test_makeSAG_with_no_over_hang(fix_FCDoc, fix_rectangle_sketch):
     r'''
-    Test the case where the top is fatter than the bottom and than the middle
-    Not physical, but the software should be able to handle it anyway
+    Test the case where there is no overhang
      ________
     /        \        NOT TO SCALE
     |________|
