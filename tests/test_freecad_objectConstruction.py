@@ -44,7 +44,7 @@ def test_build_extrude(fix_FCDoc, fix_hexagon_sketch):
 # ~ assert np.allclose(getBB(wire)[4:6], (0,1))  # z direction constrained
 
 
-def test_makeSAG_typical(fix_FCDoc, fix_rectangle_sketch):
+def test_makeSAG(fix_FCDoc, fix_rectangle_sketch):
     r'''
     Test the case where there's a flat top
           __
@@ -62,6 +62,29 @@ def test_makeSAG_typical(fix_FCDoc, fix_rectangle_sketch):
     assert np.allclose(getBB(sag), (-0.1, 1.1, -0.1, 1.1, 0, 2))
     # Volume of incomplete pyramid is h(a^2 + ab + b^2)/3
     assert np.isclose(sag.Shape.Volume, 2.01333)
+
+
+def test_makeSAG_offset(fix_FCDoc, fix_rectangle_sketch):
+    r'''
+    Create an offset
+          __
+         /__\
+        //  \\
+       //    \\
+      //      \\        NOT TO SCALE
+     //_      _\\ 
+    /__ |    | __\
+       ||____||
+       |______|
+    '''
+    sketch = fix_rectangle_sketch()
+    sag = makeSAG(sketch, 0, 1, 2, 0.1, 0.1, 0.1)[0]
+    assert sag.TypeId == "Part::Feature"
+    # The bounding box is expanded by offset * (1 + cos(alpha))/ sin(alpha) = offset * cot(alpha) in each x-y direction
+    # In this case tan(alpha) = 5
+    assert np.allclose(getBB(sag), (-0.22198, 1.22198, -0.22198, 1.22198, -0.1, 2.1))
+    # Volume of incomplete pyramid is h(a^2 + ab + b^2)/3
+    assert np.isclose(sag.Shape.Volume, 3.20247)
 
 
 def test_makeSAG_triangle_with_rectangular_base(fix_FCDoc, fix_rectangle_sketch):
@@ -172,13 +195,14 @@ def test_makeSAG_with_no_over_hang(fix_FCDoc, fix_rectangle_sketch):
 
 def test_makeSAG_with_no_top(fix_FCDoc, fix_rectangle_sketch):
     r'''
-    Assertion should fail if you try to build a SAG with no top. This is because there is no way to calculate offset if there is no height to the roof, and that case needs to be handled separately. However it's a pretty useless case so we don't support it
-     ________
-    |________|        NOT TO SCALE
+    Assertion should fail if you try to build a SAG with no slope to the roof. This is because this is a different geometry, especially when handling offsets
+       ________
+     _|        |_
+    |____________|        NOT TO SCALE
     '''
     sketch = fix_rectangle_sketch()
     with pytest.raises(Exception):
-        sag = makeSAG(sketch, 0, 1, 1, 0.1, 0)[0]
+        sag = makeSAG(sketch, 0, 1, 2, 0.1, -0.1)[0]
 
 # ~ def test_modelBuilder_saveFreeCADState():
 # ~ mb = modelBuilder()

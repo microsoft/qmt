@@ -85,7 +85,8 @@ def build(opts):
     for part in opts['input_parts']:
         if part.fc_name is None:
             obj_list = doc.getObjectsByLabel(part.label)
-            assert len(obj_list) == 1, 'Part labeled ' + str(part.label)+' returned object list '+str(obj_list)
+            assert len(obj_list) == 1, 'Part labeled ' + \
+                str(part.label)+' returned object list '+str(obj_list)
             fc_name = obj_list[0].Name
             part.fc_name = fc_name
         else:
@@ -407,24 +408,25 @@ def buildAlShell(sketch, zBottom, width, verts, thickness,
 def makeSAG(sketch, zBot, zMid, zTop, tIn, tOut, offset=0.):
     doc = FreeCAD.ActiveDocument
     assert(zBot <= zMid)
-    assert(zMid < zTop)
+    assert(zMid <= zTop)
 
     # First, compute the geometric quantities we will need:
     a = zTop - zMid  # height of the top part
     b = tOut + tIn  # width of one of the triangular pieces of the top
-    alpha = np.arctan(a / np.float(b))  # lower angle of the top part
+    assert not np.isclose(b, 0) # if there is no slope to the roof, it's a different geometry which we don't handle
+    alpha = np.arctan(a / b)  # lower angle of the top part
     c = a + 2 * offset  # height of the top part including the offset
     # horizontal width of the trianglular part of the top after offset
     d = c / np.tan(alpha)
     # horizontal shift in the triangular part of the top after an offset
-    f = offset / np.sin(alpha)
+    f = offset * (1 - np.cos(alpha)) / np.sin(alpha)
 
     sketchList = splitSketch(sketch)
     returnParts = []
     for tempSketch in sketchList:
         botSketch = draftOffset(tempSketch, offset)  # the base of the wire
         midSketch = draftOffset(tempSketch, f + d - tIn)  # the base of the cap
-        top_offset = -tIn + f
+        top_offset = f - tIn
         topSketch = draftOffset(tempSketch, top_offset)  # the top of the cap
         # If topSketch has been shrunk exactly to a line or a point, relax the offset to 5E-5. Any closer and FreeCAD seems to suffer from numerical errors
         if topSketch.Shape.Area == 0:
