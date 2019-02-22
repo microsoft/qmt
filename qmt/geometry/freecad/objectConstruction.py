@@ -85,7 +85,7 @@ def build(opts):
     for part in opts['input_parts']:
         if part.fc_name is None:
             obj_list = doc.getObjectsByLabel(part.label)
-            assert len(obj_list) == 1
+            assert len(obj_list) == 1, 'Part labeled ' + str(part.label)+' returned object list '+str(obj_list)
             fc_name = obj_list[0].Name
             part.fc_name = fc_name
         else:
