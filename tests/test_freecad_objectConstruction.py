@@ -11,7 +11,6 @@ def test_build(fix_exampleDir, fix_FCDoc):
     myPart = Part3DData('block_of_gold', 'Sketch', 'extrude', 'metal_gate',
                         material='Au', thickness=10)
     opts = {
-        'pyenv': 'python2',
         'file_path': os.path.join(fix_exampleDir, 'geometry_sweep', 'geometry_sweep_showcase.fcstd'),
         'input_parts': [myPart],
         'xsec_dict': {}
@@ -45,15 +44,127 @@ def test_build_extrude(fix_FCDoc, fix_hexagon_sketch):
 # ~ assert np.allclose(getBB(wire)[4:6], (0,1))  # z direction constrained
 
 
-# ~ def test_makeSAG():
-# ~ '''Test SAG construction via bounding box.'''
-# ~ sketch = aux_unit_square_sketch()
-# ~ sag = makeSAG(sketch, 0, 1, 2, 0.3, 0.1)
-# ~ assert sag.TypeId == "Part::Feature"
-# ~ assert np.allclose(getBB(sag)[0:2], (-0.1, 1.1))
-# ~ assert np.allclose(getBB(sag)[2:4], (-0.1, 1.1))
-# ~ assert np.allclose(getBB(sag)[4:6], (0., 2.))
+def test_makeSAG_typical(fix_FCDoc, fix_rectangle_sketch):
+    r'''
+    Test the case where there's a flat top
+          __
+         /  \
+        /    \
+       /      \
+      /        \        NOT TO SCALE
+     /          \ 
+    /_          _\
+      |________|
+    '''
+    sketch = fix_rectangle_sketch()
+    sag = makeSAG(sketch, 0, 1, 2, 0.1, 0.1)[0]
+    assert sag.TypeId == "Part::Feature"
+    assert np.allclose(getBB(sag), (-0.1, 1.1, -0.1, 1.1, 0, 2))
+    # Volume of incomplete pyramid is h(a^2 + ab + b^2)/3
+    assert np.isclose(sag.Shape.Volume, 2.01333)
 
+
+def test_makeSAG_triangle_with_rectangular_base(fix_FCDoc, fix_rectangle_sketch):
+    r'''
+    Test the case where the top collapses down to a line 
+          /\
+         /  \
+        /    \
+       /      \        NOT TO SCALE
+      /        \
+     /          \ 
+    /_          _\
+      |________|
+    '''
+    sketch = fix_rectangle_sketch(1, 2)
+    sag = makeSAG(sketch, 0, 1, 2, 0.5, 0.1)[0]
+    assert sag.TypeId == "Part::Feature"
+    assert np.allclose(getBB(sag), (-0.1, 1.1, -0.1, 2.1, 0, 2))
+    # Volume of pyramid is hwl/3
+    # Volume of triangular prism is hwl/2
+    assert np.isclose(sag.Shape.Volume, 3.08, 0.0001)
+
+
+def test_makeSAG_triangle_with_square_base(fix_FCDoc, fix_rectangle_sketch):
+    r'''
+    Test the case where the top collapses down to a point 
+          /\
+         /  \
+        /    \
+       /      \        NOT TO SCALE
+      /        \
+     /          \ 
+    /_          _\
+      |________|
+    '''
+    sketch = fix_rectangle_sketch()
+    sag = makeSAG(sketch, 0, 1, 2, 0.5, 0.1)[0]
+    assert sag.TypeId == "Part::Feature"
+    assert np.allclose(getBB(sag), (-0.1, 1.1, -0.1, 1.1, 0, 2))
+    # Volume of pyramid is hwl/3
+    assert np.isclose(sag.Shape.Volume, 1.48, 0.0001)
+
+def test_makeSAG_triangle_with_no_rectangular_part(fix_FCDoc, fix_rectangle_sketch):
+    r'''
+    Test the case where there is no rectangular part at the bottom
+          /\
+         /  \
+        /    \
+       /      \        NOT TO SCALE
+      /        \
+     /          \ 
+    /____________\
+    '''
+    sketch = fix_rectangle_sketch()
+    sag = makeSAG(sketch, 0, 0, 1, 0.5, 0.1)[0]
+    assert sag.TypeId == "Part::Feature"
+    assert np.allclose(getBB(sag), (-0.1, 1.1, -0.1, 1.1, 0, 1))
+    # Volume of pyramid is hwl/3
+    assert np.isclose(sag.Shape.Volume, 0.48, 0.0001)
+
+def test_makeSAG_with_fat_top(fix_FCDoc, fix_rectangle_sketch):
+    r'''
+    Test the case where the top is fatter than the bottom, but not fatter than the middle
+     ____________
+    /__        __\        NOT TO SCALE
+       |______|
+    '''
+    sketch = fix_rectangle_sketch()
+    sag = makeSAG(sketch, 0, 1, 2, -0.1, 0.2)[0]
+    assert sag.TypeId == "Part::Feature"
+    assert np.allclose(getBB(sag), (-0.2, 1.2, -0.2, 1.2, 0, 2))
+    # Volume of incomplete pyramid is h(a^2 + ab + b^2)/3
+    assert np.isclose(sag.Shape.Volume, 2.69333)
+
+def test_makeSAG_with_fattest_top(fix_FCDoc, fix_rectangle_sketch):
+    r'''
+    Test the case where the top is fatter than the bottom and than the middle
+    Not physical, but the software should be able to handle it anyway
+    ______________
+    \__        __/        NOT TO SCALE
+       |______|
+    '''
+    sketch = fix_rectangle_sketch()
+    sag = makeSAG(sketch, 0, 1, 2, -0.2, 0.1)[0]
+    assert sag.TypeId == "Part::Feature"
+    assert np.allclose(getBB(sag), (-0.2, 1.2, -0.2, 1.2, 0, 2))
+    # Volume of incomplete pyramid is h(a^2 + ab + b^2)/3
+    assert np.isclose(sag.Shape.Volume, 2.69333)
+
+def test_makeSAG_with_no_over_hang(fix_FCDoc, fix_rectangle_sketch):
+    r'''
+    Test the case where the top is fatter than the bottom and than the middle
+    Not physical, but the software should be able to handle it anyway
+     ________
+    /        \        NOT TO SCALE
+    |________|
+    '''
+    sketch = fix_rectangle_sketch()
+    sag = makeSAG(sketch, 0, 1, 2, 0.1, 0)[0]
+    assert sag.TypeId == "Part::Feature"
+    assert np.allclose(getBB(sag), (0, 1, 0, 1, 0, 2))
+    # Volume of incomplete pyramid is h(a^2 + ab + b^2)/3
+    assert np.isclose(sag.Shape.Volume, 1.81333)
 
 # ~ def test_modelBuilder_saveFreeCADState():
 # ~ mb = modelBuilder()

@@ -68,10 +68,10 @@ def fix_two_cycle_sketch():
 
 
 @pytest.fixture(scope='function')
-def fix_unit_square_sketch():
+def fix_rectangle_sketch():
     '''Return unit square sketch function object.'''
 
-    def aux_unit_square_sketch():
+    def aux_rectangle_sketch(x_length = 1, y_length = 1, x_start = 0, y_start = 0):
         '''Helper function to drop a simple unit square sketch.
            The segments are carefully ordered.
         '''
@@ -80,10 +80,10 @@ def fix_unit_square_sketch():
         vec = FreeCAD.Vector
         lseg = Part.LineSegment
 
-        a = (0, 0, 0)
-        b = (1, 0, 0)
-        c = (1, 1, 0)
-        d = (0, 1, 0)
+        a = (x_start, y_start, 0)
+        b = (x_length, y_start, 0)
+        c = (x_length, y_length, 0)
+        d = (x_start, y_length, 0)
 
         doc = FreeCAD.ActiveDocument
         sketch = doc.addObject('Sketcher::SketchObject', 'Sketch')
@@ -94,7 +94,7 @@ def fix_unit_square_sketch():
         doc.recompute()
         return sketch
 
-    return aux_unit_square_sketch
+    return aux_rectangle_sketch
 
 
 @pytest.fixture(scope='function')
