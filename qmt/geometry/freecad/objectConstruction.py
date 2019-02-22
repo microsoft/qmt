@@ -411,7 +411,7 @@ def makeSAG(sketch, zBot, zMid, zTop, tIn, tOut, offset=0.):
 
     # First, compute the geometric quantities we will need:
     a = zTop - zMid  # height of the top part
-    b = tOut + tIn  # width of one of the trianglular pieces of the top
+    b = tOut + tIn  # width of one of the triangular pieces of the top
     alpha = np.arctan(a / np.float(b))  # lower angle of the top part
     c = a + 2 * offset  # height of the top part including the offset
     # horizontal width of the trianglular part of the top after offset
@@ -426,7 +426,7 @@ def makeSAG(sketch, zBot, zMid, zTop, tIn, tOut, offset=0.):
         midSketch = draftOffset(tempSketch, f + d - tIn)  # the base of the cap
         top_offset = -tIn + f
         topSketch = draftOffset(tempSketch, top_offset)  # the top of the cap
-        # If topSketch has been shrunk exactly to a line or a point, relax the offset to 5E-5. Any close and FreeCAD seems to suffer from numerical errors
+        # If topSketch has been shrunk exactly to a line or a point, relax the offset to 5E-5. Any closer and FreeCAD seems to suffer from numerical errors
         if topSketch.Shape.Area == 0:
             top_offset -= 5E-5
             delete(topSketch)
