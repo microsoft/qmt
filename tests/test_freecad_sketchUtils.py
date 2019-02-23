@@ -120,7 +120,7 @@ def test_findEdgeCycles2(fix_FCDoc, fix_two_cycle_sketch):
     assert np.allclose(com, com_ref)
 
 
-def test_splitSketch(fix_FCDoc, fix_two_cycle_sketch, fix_unit_square_sketch):
+def test_splitSketch(fix_FCDoc, fix_two_cycle_sketch, fix_rectangle_sketch):
     '''Test if multi-cycle sketches are split correctly.'''
     sketch = fix_two_cycle_sketch()
 
@@ -134,7 +134,7 @@ def test_splitSketch(fix_FCDoc, fix_two_cycle_sketch, fix_unit_square_sketch):
     for p in centers_tri:
         assert p in centers_orig and p not in centers_sq
 
-    sketch = fix_unit_square_sketch()
+    sketch = fix_rectangle_sketch()
     # TODO: not true if splitSketch duplicates
     # ~ assert sketch.Content == splitSketch(sketch)[0].Content
 

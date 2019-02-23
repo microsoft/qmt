@@ -128,10 +128,10 @@ def test_extrudeBetween(fix_FCDoc, fix_hexagon_sketch):
     assert getBB(pad)[-2:] == (10, 20)
 
 
-def test_liftObject(fix_FCDoc, fix_unit_square_sketch):
+def test_liftObject(fix_FCDoc, fix_rectangle_sketch):
     '''Test sweeping lift for sketches.'''
     # TODO: why do we have to make union with the lifted sketch?.
-    sketch = fix_unit_square_sketch()
+    sketch = fix_rectangle_sketch()
     # ~ vol = liftObject(sketch, 42, consumeInputs=False)
     # ~ assert vol.Shape.Volume == 42
 
