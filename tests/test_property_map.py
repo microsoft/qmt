@@ -36,6 +36,15 @@ def test_property_map():
     assert np.all(prop_map1(-np.ones((2, 3))) == 'no')
 
 
+def test_property_map_nonuniform_types():
+    str_map = DummyPartMap(['part1', 'part2'])
+    props = {'part1': 1, 'part2': 1.5}
+    prop_map = PropertyMap(str_map, lambda p: props[p])
+    assert prop_map((1., 2.)) == 1.5
+    assert np.all(prop_map(np.ones((2, 3))) == 1.5)
+    assert np.all(prop_map(-np.ones((2, 3))) == 1)
+
+
 def test_materials_property_map():
     int_map = DummyPartMap([0, 1])
     str_map = DummyPartMap(['part1', 'part2'])
