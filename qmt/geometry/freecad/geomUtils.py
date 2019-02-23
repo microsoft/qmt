@@ -265,59 +265,64 @@ def draftOffset(inputSketch, t):
     '''
     # ~ from qmt.geometry.freecad.geomUtils import extrude, copy_move, delete
 
-    if t == 0.:
+    if np.isclose(t,0):
         return copy_move(inputSketch)
     deltaT = np.abs(t)
     offsetVec1 = vec(-deltaT, -deltaT, 0.)
     offsetVec2 = vec(deltaT, deltaT, 0.)
 
     offset0 = copy_move(inputSketch)
-    offset1 = Draft.offset(inputSketch, offsetVec1, copy=True)
-    offset2 = Draft.offset(inputSketch, offsetVec2, copy=True)
-
-    solid0 = extrude(offset0, 10.0)
-    solid1 = extrude(offset1, 10.0)
-    solid2 = extrude(offset2, 10.0)
-
-    # Compute the volumes of these solids:
-    V0 = solid0.Shape.Volume
+    # Currently FreeCAD throws an error if we try to collapse a shape into a point through offsetting. If that happens, set delta to 5E-5. Any closer and FreeCAD seems to suffer from numerical errors
     try:
-        V1 = solid1.Shape.Volume
+        offset1 = Draft.offset(inputSketch, offsetVec1, copy=True)
     except:
-        V1 = None
+        deltaT -= 5E-5
+        offset1 = Draft.offset(inputSketch, vec(-deltaT, -deltaT, 0.), copy=True)
     try:
-        V2 = solid2.Shape.Volume
+        offset2 = Draft.offset(inputSketch, offsetVec2, copy=True)
     except:
-        V2 = None
+        deltaT -= 5E-5
+        offset2 = Draft.offset(inputSketch, vec(deltaT, deltaT, 0.), copy=True)
+
+    # Compute the areas of the sketches. FreeCAD will throw an exception if we try to make a Face out of a line or a point, we catch that give it an area of 0
+    try:
+        A0 = np.abs(Part.Face(offset0.Shape).Area)
+    except:
+        A0 = 0
+    try:
+        A1 = np.abs(Part.Face(offset1.Shape).Area)
+    except:
+        A1 = 0
+    try:
+        A2 = np.abs(Part.Face(offset2.Shape).Area)
+    except:
+        A2 = 0
 
     # If everything worked properly, these should either be ordered as
-    # V1<V0<V2 or V2<V0<V1:
-    if V2 > V0 and V0 > V1:
-        bigSketch = offset2;
+    # A1<A0<A2 or A2<A0<A1:
+    if A2 > A0 and A0 > A1:
+        bigSketch = offset2
         littleSketch = offset1
-    elif V1 > V0 and V0 > V2:
-        bigSketch = offset1;
+    elif A1 > A0 and A0 > A2:
+        bigSketch = offset1
         littleSketch = offset2
-    elif V2 > V1 and V1 > V0:
-        bigSketch = offset2;
+    elif A2 > A1 and A1 > A0:
+        bigSketch = offset2
         littleSketch = None
     # If we aren't in correct case, we still might be able to salvage things
     # for certain values of t:
-    elif V1 > V2 and V2 > V0:
-        bigSketch = offset1;
+    elif A1 > A2 and A2 > A0:
+        bigSketch = offset1
         littleSketch = None
-    elif V2 < V1 and V1 < V0:
-        bigSketch = None;
+    elif A2 < A1 and A1 < A0:
+        bigSketch = None
         littleSketch = offset2
-    elif V1 < V2 and V2 < V0:
-        bigSketch = None;
+    elif A1 < A2 and A2 < A0:
+        bigSketch = None
         littleSketch = offset1
     else:
-        bigSketch = None;
+        bigSketch = None
         littleSketch = None
-    delete(solid0)
-    delete(solid1)
-    delete(solid2)
     if t < 0 and littleSketch is not None:
         returnSketch = copy_move(littleSketch)
     elif t > 0 and bigSketch is not None:

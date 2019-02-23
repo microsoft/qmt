@@ -21,11 +21,11 @@ from qmt.geometry.freecad.geomUtils import (
     extrudeBetween, draftOffset, intersect,
     checkOverlap, subtract,
     crossSection
-    )
+)
 from qmt.geometry.freecad.sketchUtils import (
     findSegments, splitSketch, extendSketch,
     findEdgeCycles
-    )
+)
 
 from qmt.data.geometry import Geo3DData, store_serial
 
@@ -85,7 +85,8 @@ def build(opts):
     for part in opts['input_parts']:
         if part.fc_name is None:
             obj_list = doc.getObjectsByLabel(part.label)
-            assert len(obj_list) == 1, 'Part labeled ' + str(part.label)+' returned object list '+str(obj_list)
+            assert len(obj_list) == 1, 'Part labeled ' + \
+                str(part.label)+' returned object list '+str(obj_list)
             fc_name = obj_list[0].Name
             part.fc_name = fc_name
         else:
@@ -100,10 +101,11 @@ def build(opts):
     # Update the model parameters
     if 'params' in opts:
         # Extend params dictionary to original parts schema
-        fcdict = {key: (value, 'freeCAD') for (key, value) in opts['params'].items()}
+        fcdict = {key: (value, 'freeCAD')
+                  for (key, value) in opts['params'].items()}
         set_params(doc, fcdict)
 
-    doc.recompute() # recompute here to update any sketches that change due to parameters
+    doc.recompute()  # recompute here to update any sketches that change due to parameters
 
     if 'built_part_names' not in opts:
         opts['built_part_names'] = {}
@@ -134,7 +136,8 @@ def build(opts):
         assert part is not None
         doc.recompute()
         built_parts.append(part)
-        opts['built_part_names'][input_part.label] = part.Name  # needed for litho steps
+        # needed for litho steps
+        opts['built_part_names'][input_part.label] = part.Name
 
     # Cleanup
     if not DBG_OUT:
@@ -152,28 +155,31 @@ def build(opts):
                 continue
             if checkOverlap([part, other_part]):
                 cut = subtract(part, copy_move(other_part), consumeInputs=True
-                                                            if not DBG_OUT else False)
+                               if not DBG_OUT else False)
                 simple_copy = doc.addObject('Part::Feature', "simple_copy")
-                simple_copy.Shape = cut.Shape  # no solid, just its shape (can be disjoint)
+                # no solid, just its shape (can be disjoint)
+                simple_copy.Shape = cut.Shape
                 delete(cut)
                 part = simple_copy
                 built_parts[i] = simple_copy
 
     # Update names and store the built parts
-    built_parts_dict = {} # dict for cross sections
+    built_parts_dict = {}  # dict for cross sections
     for input_part, built_part in zip(opts['input_parts'], built_parts):
         built_part.Label = input_part.label  # here it's collision free
         input_part.serial_stp = store_serial([built_part], exportCAD, 'stp')
         input_part.built_fc_name = built_part.Name
         geo.add_part(input_part.label, input_part)
-        built_parts_dict[input_part.label] = built_part # dict for cross sections
+        # dict for cross sections
+        built_parts_dict[input_part.label] = built_part
 
     # Build cross sections:
     for xsec_name in opts['xsec_dict']:
         axis = opts['xsec_dict'][xsec_name]['axis']
         distance = opts['xsec_dict'][xsec_name]['distance']
-        polygons = buildCrossSection(xsec_name, axis, distance, built_parts_dict)
-        geo.add_xsec(xsec_name,polygons,axis=axis,distance=distance)
+        polygons = buildCrossSection(
+            xsec_name, axis, distance, built_parts_dict)
+        geo.add_xsec(xsec_name, polygons, axis=axis, distance=distance)
 
     # Store the FreeCAD document
     geo.set_data('fcdoc', doc)
@@ -199,11 +205,12 @@ def build_extrude(part):
     splitSketches = splitSketch(sketch)
     extParts = []
     for sketch in splitSketches:
-        extParts.append(extrudeBetween(sketch, z0, z0 + deltaz, name=part.label))
+        extParts.append(extrudeBetween(
+            sketch, z0, z0 + deltaz, name=part.label))
         delete(sketch)
     doc.recompute()
     return genUnion(extParts, consumeInputs=True
-                              if not DBG_OUT else False)
+                    if not DBG_OUT else False)
 
 
 def build_sag(part, offset=0.):
@@ -216,7 +223,7 @@ def build_sag(part, offset=0.):
     tOut = part.t_out
     doc = FreeCAD.ActiveDocument
     sketch = doc.getObject(part.fc_name)
-    sag = makeSAG(sketch, zBot, zMid, zTop, tIn, tOut, offset=offset)
+    sag = makeSAG(sketch, zBot, zMid, zTop, tIn, tOut, offset=offset)[0]
     sag.Label = part.label
     doc.recompute()
     return sag
@@ -282,8 +289,7 @@ def build_lithography(part, opts, info_holder):
             returnObjs.append(gen_G(info_holder, opts, layerNum, objID))
     logging.debug([o.Name for o in returnObjs])
     return genUnion(returnObjs, consumeInputs=True
-                                if not DBG_OUT else False)
-
+                    if not DBG_OUT else False)
 
 
 ################################################################################
@@ -385,7 +391,7 @@ def buildAlShell(sketch, zBottom, width, verts, thickness,
         depoVol = extrudeBetween(depoZone, zMin, zMax)
         etchedCoatingUnionClone = intersect(
             [depoVol, coatingUnionClone], consumeInputs=True
-                                          if not DBG_OUT else False)
+            if not DBG_OUT else False)
         return etchedCoatingUnionClone
     else:  # etchZone instead
         coatingBB = getBB(coatingUnionClone)
@@ -394,36 +400,52 @@ def buildAlShell(sketch, zBottom, width, verts, thickness,
         etchVol = extrudeBetween(etchZone, zMin, zMax)
         etchedCoatingUnionClone = subtract(
             coatingUnionClone, etchVol, consumeInputs=True
-                                        if not DBG_OUT else False)
+            if not DBG_OUT else False)
         return etchedCoatingUnionClone
 
 
 def makeSAG(sketch, zBot, zMid, zTop, tIn, tOut, offset=0.):
     doc = FreeCAD.ActiveDocument
+    assert(zBot <= zMid)
+    assert(zMid <= zTop)
+
     # First, compute the geometric quantities we will need:
     a = zTop - zMid  # height of the top part
-    b = tOut + tIn  # width of one of the trianglular pieces of the top
-    alpha = np.abs(np.arctan(a / np.float(b)))  # lower angle of the top part
+    b = tOut + tIn  # width of one of the triangular pieces of the top
+    # if there is no slope to the roof, it's a different geometry which we don't handle:
+    assert not np.isclose(b, 0), 'Either overshoot or inner displacement values need to be non-zero for SAG \
+                                 (otherwise use extrude)'
+    # This also means there would be no slope to the roof:
+    assert not np.isclose(a,0), 'Top and middle z values need to be different for SAG (otherwise use extrude).'
+    alpha = np.arctan(a / b)  # lower angle of the top part
     c = a + 2 * offset  # height of the top part including the offset
     # horizontal width of the trianglular part of the top after offset
     d = c / np.tan(alpha)
     # horizontal shift in the triangular part of the top after an offset
-    f = offset / np.sin(alpha)
+    f = offset * (1 - np.cos(alpha)) / np.sin(alpha)
 
     sketchList = splitSketch(sketch)
     returnParts = []
     for tempSketch in sketchList:
-        # TODO: right now, if we try to taper the top of the SAG wire to a point, this
-        # breaks, since the offset of topSketch is empty. We should detect and handle this.
-        # For now, just make sure that the wire has a small flat top.
         botSketch = draftOffset(tempSketch, offset)  # the base of the wire
         midSketch = draftOffset(tempSketch, f + d - tIn)  # the base of the cap
-        topSketch = draftOffset(tempSketch, -tIn + f)  # the top of the cap
+        top_offset = f - tIn
+        topSketch = draftOffset(tempSketch, top_offset)  # the top of the cap
+        # If topSketch has been shrunk exactly to a line or a point, relax the offset to 5E-5. Any closer and FreeCAD seems to suffer from numerical errors
+        if topSketch.Shape.Area == 0:
+            top_offset -= 5E-5
+            delete(topSketch)
+            topSketch = draftOffset(tempSketch, top_offset)
+
         delete(tempSketch)  # remove the copied sketch part
         # Make the bottom wire:
-        rectPartTemp = extrude(botSketch, zMid - zBot)
-        rectPart = copy_move(rectPartTemp, moveVec=(0., 0., zBot - offset))
-        delete(rectPartTemp)
+        if zMid - zBot != 0:
+            rectPartTemp = extrude(botSketch, zMid - zBot)
+            rectPart = copy_move(rectPartTemp, moveVec=(0., 0., zBot - offset))
+            delete(rectPartTemp)
+        else:
+            rectPart = None
+
         # make the cap of the wire:
         topSketchTemp = copy_move(topSketch, moveVec=(
             0., 0., zTop - zMid + 2 * offset))
@@ -434,13 +456,14 @@ def makeSAG(sketch, zBot, zMid, zTop, tIn, tOut, offset=0.):
         capPart = copy_move(capPartTemp, moveVec=(0., 0., zMid - offset))
         delete(capPartTemp)
         delete(topSketchTemp)
+
         delete(topSketch)
         delete(midSketch)
         delete(botSketch)
-        returnParts += [capPart, rectPart]
-        returnPart = genUnion(returnParts, consumeInputs=True
-                                           if not DBG_OUT else False)
-    return returnPart
+        returnPart = genUnion([capPart, rectPart], consumeInputs=True
+                              if not DBG_OUT else False) if rectPart is not None else capPart
+        returnParts.append(returnPart)
+    return returnParts
 
 
 def initialize_lithography(info, opts, fillShells=True):
@@ -502,7 +525,8 @@ def initialize_lithography(info, opts, fillShells=True):
         try:
             built_part_name = opts['built_part_names'][baseSubstrate.label]
         except:
-            raise KeyError("No substrate built for '" + str(baseSubstrate.label) + "'")
+            raise KeyError("No substrate built for '" +
+                           str(baseSubstrate.label) + "'")
         info.lithoDict['substrate'][()] += [doc.getObject(built_part_name)]
     # ~ import sys
     # ~ sys.stderr.write(">>> litdic " + str(info.lithoDict) + "\n")
@@ -518,7 +542,7 @@ def initialize_lithography(info, opts, fillShells=True):
     bottom = min(bases)
     totalThickness = sum(thicknesses)
     assert len(info.lithoDict['substrate'][
-                   ()]) > 0  # Otherwise, we don't have a reference for the lateral BB
+        ()]) > 0  # Otherwise, we don't have a reference for the lateral BB
     substrateUnion = genUnion(info.lithoDict['substrate'][()],
                               consumeInputs=False)  # total substrate
     BB = list(getBB(substrateUnion))  # bounding box
@@ -626,7 +650,8 @@ def screened_H_union_list(info, opts, obj, m, j, offsetTuple, checkOffsetTuple):
                                            tList=list(checkOffsetTuple))  # list of H parts
         info.trash += HDict[checkOffsetTuple]
     if offsetTuple not in HDict:  # If we haven't computed this yet
-        HDict[offsetTuple] = H_offset(info, opts, m, j, tList=list(offsetTuple))  # list of H parts
+        HDict[offsetTuple] = H_offset(
+            info, opts, m, j, tList=list(offsetTuple))  # list of H parts
         info.trash += HDict[offsetTuple]
     HObjCheckList = HDict[checkOffsetTuple]
     HObjList = HDict[offsetTuple]
@@ -643,7 +668,8 @@ def screened_H_union_list(info, opts, obj, m, j, offsetTuple, checkOffsetTuple):
                 [obj, HObjPart]):  # if we need to include an overlap
             returnList.append(HObjList[i])
 
-    logging.debug('<<< %s', [o.Name + ' (' + o.Label + ')' for o in returnList])
+    logging.debug(
+        '<<< %s', [o.Name + ' (' + o.Label + ')' for o in returnList])
     return returnList
 
 
@@ -672,7 +698,8 @@ def screened_A_UnionList(info, opts, obj, t, ti, offsetTuple, checkOffsetTuple):
         if checkOverlap([obj, ACheck]):
             returnList.append(info.lithoDict['substrate'][offsetTuple][i])
 
-    logging.debug('<<< %s', [o.Name + ' (' + o.Label + ')' for o in returnList])
+    logging.debug(
+        '<<< %s', [o.Name + ' (' + o.Label + ')' for o in returnList])
     return returnList
 
 
@@ -700,7 +727,7 @@ def H_offset(info, opts, layerNum, objID, tList=[]):
     # First, check if we have to do anything:
     layers = info.lithoDict['layers']
     if checkOffsetTuple in layers[layerNum]['objIDs'][
-        objID]['HDict']:
+            objID]['HDict']:
         return layers[layerNum]['objIDs'][objID][
             'HDict'][checkOffsetTuple]
     # First, compute t:
@@ -710,8 +737,10 @@ def H_offset(info, opts, layerNum, objID, tList=[]):
     # thickness of this layer
     ti = layers[layerNum]['thickness']
     # Set the aux. thickness t:
-    B = layers[layerNum]['objIDs'][objID]['B']  # B prism for this layer & objID
-    C = layers[layerNum]['objIDs'][objID]['C']  # C prism for this layer & ObjID
+    # B prism for this layer & objID
+    B = layers[layerNum]['objIDs'][objID]['B']
+    # C prism for this layer & ObjID
+    C = layers[layerNum]['objIDs'][objID]['C']
     B_t = gen_offset(opts, B, t)  # offset the B prism
     C_t = gen_offset(opts, C, t)  # offset the C prism
     info.trash.append(B_t)
@@ -735,11 +764,13 @@ def H_offset(info, opts, layerNum, objID, tList=[]):
         intObj = intersect([C_t, obj])
         info.trash.append(intObj)
         returnList.append(intObj)
-        logging.debug('%s (%s) -> %s (%s)', obj.Name, obj.Label, intObj.Name, intObj.Label)
+        logging.debug('%s (%s) -> %s (%s)', obj.Name,
+                      obj.Label, intObj.Name, intObj.Label)
 
     layers[layerNum]['objIDs'][objID]['HDict'][checkOffsetTuple] = returnList
 
-    logging.debug('<<< %s', [o.Name + ' (' + o.Label + ')' for o in returnList])
+    logging.debug(
+        '<<< %s', [o.Name + ' (' + o.Label + ')' for o in returnList])
     return returnList
 
 
@@ -759,7 +790,7 @@ def gen_U(info, layerNum, objID):
         if m < layerNum:  # then this is a lower layer
             for j in layers[m].keys():
                 if 'G' not in layers[layerNum][
-                    'objIDs'][objID]:
+                        'objIDs'][objID]:
                     gen_G(info, m, j)
                 G = layers[layerNum]['objIDs'][objID]['G']
                 if checkOverlap([B, G]):
@@ -797,17 +828,17 @@ def gen_G(info, opts, layerNum, objID):
             # ~ obj.Shape.Solids
             # ~ try:
 
-                # ~ __s__ = obj.Shape.Faces
-                # ~ __s__ = Part.Solid(Part.Shell(__s__))
-                # ~ __o__ = FreeCAD.ActiveDocument.addObject("Part::Feature", obj.Name + "_solid")
-                # ~ __o__.Label = obj.Label + "_solid"
-                # ~ __o__.Shape = __s__
+            # ~ __s__ = obj.Shape.Faces
+            # ~ __s__ = Part.Solid(Part.Shell(__s__))
+            # ~ __o__ = FreeCAD.ActiveDocument.addObject("Part::Feature", obj.Name + "_solid")
+            # ~ __o__.Label = obj.Label + "_solid"
+            # ~ __o__.Shape = __s__
 
             # ~ except Part.OCCError:
-                #Draft.downgrade(obj,delete=True)  # doesn't work without GUI
-                # ~ for solid in obj.Shape.Solids:
-                    # ~ for shell in solid.Shells:
-                        # ~ pass
+            # Draft.downgrade(obj,delete=True)  # doesn't work without GUI
+            # ~ for solid in obj.Shape.Solids:
+            # ~ for shell in solid.Shells:
+            # ~ pass
 
             # ~ solid_hlist.append(__o__)
             # ~ info.trash.append(obj)
@@ -860,5 +891,5 @@ def buildCrossSection(sliceName, axis, distance, built_parts_dict):
             patchName = fcName
             patchName = '{}_{}'.format(part_name, i)
             # this mapping is necessary since numpy floats have a pickle error:
-            polygons[patchName] = [map(float,point) for point in points]
+            polygons[patchName] = [map(float, point) for point in points]
     return polygons
