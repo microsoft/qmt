@@ -33,9 +33,12 @@ class PropertyMap(object):
 
         unique_parts = set(np.asanyarray(parts).flat)
         unique_props = [self.propMap(p) for p in unique_parts]
-        obj_type = type(unique_props[0])
-        if obj_type is str:
+        obj_types = [type(p) for p in unique_props]
+        if obj_types[0] is str:
+            assert all(t is str for t in obj_types)
             obj_type = object
+        else:
+            obj_type = np.result_type(*obj_types)
         result = np.empty(np.shape(parts), dtype=obj_type)
         for part, prop in zip(unique_parts, unique_props):
             result[parts == part] = prop
