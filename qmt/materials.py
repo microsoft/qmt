@@ -200,7 +200,7 @@ class Materials(collections.Mapping):
 
         def set_property(key):
             if key in kwargs and kwargs[key] is not None:
-                material[key] = kwargs.pop(key)
+                material[key] = float(kwargs.pop(key))
 
         material['type'] = mat_type
         set_property('relativePermittivity')  # \eps_r
