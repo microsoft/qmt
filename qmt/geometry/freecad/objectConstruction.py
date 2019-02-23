@@ -413,7 +413,11 @@ def makeSAG(sketch, zBot, zMid, zTop, tIn, tOut, offset=0.):
     # First, compute the geometric quantities we will need:
     a = zTop - zMid  # height of the top part
     b = tOut + tIn  # width of one of the triangular pieces of the top
-    assert not np.isclose(b, 0) # if there is no slope to the roof, it's a different geometry which we don't handle
+    # if there is no slope to the roof, it's a different geometry which we don't handle:
+    assert not np.isclose(b, 0), 'Either overshoot or inner displacement values need to be non-zero for SAG \
+                                 (otherwise use extrude)'
+    # This also means there would be no slope to the roof:
+    assert not np.isclose(a,0), 'Top and middle z values need to be different for SAG (otherwise use extrude).'
     alpha = np.arctan(a / b)  # lower angle of the top part
     c = a + 2 * offset  # height of the top part including the offset
     # horizontal width of the trianglular part of the top after offset
