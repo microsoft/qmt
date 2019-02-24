@@ -4,9 +4,7 @@
 
 """Functions that deal with file i/o."""
 
-import os
-
-import FreeCAD
+import FreeCAD  # noqa: F401 FreeCAD import is needed before Part and Mesh
 import Part
 import Mesh
 
@@ -18,9 +16,10 @@ def exportMeshed(obj, fileName):
     '''
     # These previous methods use more complicated routines (netgen or mefisto)
     # that produce more controllable meshes but sometimes fail.
-    # meshedObj = FreeCAD.ActiveDocument.addObject("Mesh::Feature",obj.Name+"_mesh")
-    # meshedObj.Mesh=MeshPart.meshFromShape(Shape=obj.Shape,Fineness=0,SecondOrder=0,Optimize=0,
-    # AllowQuad=0)
+    # meshedObj = FreeCAD.ActiveDocument.addObject("Mesh::Feature",
+    #                                              obj.Name+"_mesh")
+    # meshedObj.Mesh=MeshPart.meshFromShape(Shape=obj.Shape,Fineness=0,
+    # SecondOrder=0,Optimize=0,AllowQuad=0)
     # meshedObj.Mesh=Mesh.Mesh(obj.Shape.tessellate(0.01))
     # meshedObj.Mesh.write(fileName,"STL",meshedObj.Name)
     meshedObj = Mesh.export([obj], fileName)

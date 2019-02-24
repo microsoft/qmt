@@ -15,19 +15,20 @@ def test_band_offsets():
     mat2 = matlib.find('InAs', eunit='eV')
     mat3 = matlib.find('GaAs', eunit='eV')
     assert matlib.conduction_band_minimum(mat1) - mat1['directBandGap'] == \
-           approx(matlib.valence_band_maximum(mat1))
-    assert matlib.conduction_band_minimum(mat1) - matlib.conduction_band_minimum(
-        mat2) == approx(materials.conduction_band_offset(mat1, mat2))
+        approx(matlib.valence_band_maximum(mat1))
+    assert matlib.conduction_band_minimum(mat1) - \
+        matlib.conduction_band_minimum(mat2) == \
+        approx(materials.conduction_band_offset(mat1, mat2))
     assert matlib.valence_band_maximum(mat1) + mat1['directBandGap'] == \
-           approx(matlib.conduction_band_minimum(mat1))
+        approx(matlib.conduction_band_minimum(mat1))
     assert matlib.valence_band_maximum(mat1) - matlib.valence_band_maximum(
         mat2) == approx(materials.valence_band_offset(mat1, mat2))
     assert materials.conduction_band_offset(mat1, mat2) + \
-           materials.conduction_band_offset(mat2, mat3) == \
-           approx(materials.conduction_band_offset(mat1, mat3))
+        materials.conduction_band_offset(mat2, mat3) == \
+        approx(materials.conduction_band_offset(mat1, mat3))
     assert materials.valence_band_offset(mat1, mat2) + \
-           materials.valence_band_offset(mat2, mat3) == \
-           approx(materials.valence_band_offset(mat1, mat3))
+        materials.valence_band_offset(mat2, mat3) == \
+        approx(materials.valence_band_offset(mat1, mat3))
 
 
 def test_bowing_parameters():
@@ -49,9 +50,9 @@ def test_bowing_parameters():
     # check interpolation with bowing parameters
     x = 0.2
     gap = (1 - x) * inas['directBandGap'] + x * insb['directBandGap'] \
-          - x * (1 - x) * bow['directBandGap']
+        - x * (1 - x) * bow['directBandGap']
     mass = (1 - x) * inas['electronMass'] + x * insb['electronMass'] \
-           - x * (1 - x) * bow['electronMass']
+        - x * (1 - x) * bow['electronMass']
     assert alloy['directBandGap'] == approx(gap)
     assert alloy['electronMass'] == approx(mass)
     # parameters for which we don't have bowing parameters should be linearly
@@ -62,29 +63,45 @@ def test_bowing_parameters():
 
 
 def test_band_offsets_fallback():
-    """Test calculation of band positions and offsets via fallback on Anderson's rule."""
+    """
+    Test calculation of band positions and offsets via fallback on Anderson's
+    rule.
+    """
     # define a couple of semiconductors without valenceBandOffset
     matlib = materials.Materials()
-    matlib.add_material('GaAs', 'semi', electronAffinity=4070., directBandGap=1519.)
-    matlib.add_material('InAs', 'semi', directBandGap=417., electronAffinity=4900.)
-    matlib.add_material('InSb', 'semi', electronAffinity=4590., directBandGap=235.)
+    matlib.add_material(
+        'GaAs',
+        'semi',
+        electronAffinity=4070.,
+        directBandGap=1519.)
+    matlib.add_material(
+        'InAs',
+        'semi',
+        directBandGap=417.,
+        electronAffinity=4900.)
+    matlib.add_material(
+        'InSb',
+        'semi',
+        electronAffinity=4590.,
+        directBandGap=235.)
     mat1 = matlib.find('InSb', eunit='eV')
     mat2 = matlib.find('InAs', eunit='eV')
     mat3 = matlib.find('GaAs', eunit='eV')
     assert matlib.conduction_band_minimum(mat1) - mat1['directBandGap'] == \
-           approx(matlib.valence_band_maximum(mat1))
-    assert matlib.conduction_band_minimum(mat1) - matlib.conduction_band_minimum(
-        mat2) == approx(materials.conduction_band_offset(mat1, mat2))
+        approx(matlib.valence_band_maximum(mat1))
+    assert matlib.conduction_band_minimum(mat1) - \
+        matlib.conduction_band_minimum(mat2) == \
+        approx(materials.conduction_band_offset(mat1, mat2))
     assert matlib.valence_band_maximum(mat1) + mat1['directBandGap'] == \
-           approx(matlib.conduction_band_minimum(mat1))
+        approx(matlib.conduction_band_minimum(mat1))
     assert matlib.valence_band_maximum(mat1) - matlib.valence_band_maximum(
         mat2) == approx(materials.valence_band_offset(mat1, mat2))
     assert materials.conduction_band_offset(mat1, mat2) + \
-           materials.conduction_band_offset(mat2, mat3) == \
-           approx(materials.conduction_band_offset(mat1, mat3))
+        materials.conduction_band_offset(mat2, mat3) == \
+        approx(materials.conduction_band_offset(mat1, mat3))
     assert materials.valence_band_offset(mat1, mat2) + \
-           materials.valence_band_offset(mat2, mat3) == \
-           approx(materials.valence_band_offset(mat1, mat3))
+        materials.valence_band_offset(mat2, mat3) == \
+        approx(materials.valence_band_offset(mat1, mat3))
 
 
 def test_effective_mass():
@@ -100,11 +117,11 @@ def test_effective_mass():
     assert gasb.hole_mass('light', '110') > gasb.hole_mass('light', '111')
     # compare DOS average masses to directional masses
     assert gasb.hole_mass('heavy', '001') < gasb.hole_mass('heavy', 'dos') < \
-           gasb.hole_mass('heavy', '110')
+        gasb.hole_mass('heavy', '110')
     assert gasb.hole_mass('light', '001') > gasb.hole_mass('light', 'dos') > \
-           gasb.hole_mass('light', '110')
+        gasb.hole_mass('light', '110')
     assert gasb.hole_mass('light', 'dos') < gasb.hole_mass('heavy', 'dos') < \
-           gasb.hole_mass('dos', 'dos')
+        gasb.hole_mass('dos', 'dos')
     # compare to a few reference values from http://www.ioffe.ru/SVA/NSM/
     assert gasb.hole_mass('heavy', 'dos') == approx(0.4, rel=0.2)
     assert gasb.hole_mass('light', 'dos') == approx(0.05, rel=0.2)

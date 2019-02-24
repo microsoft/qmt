@@ -9,7 +9,7 @@ import FreeCAD
 import Draft
 import Part
 
-from .auxiliary import *
+from .auxiliary import delete, deepRemove
 from .sketchUtils import findSegments
 
 vec = FreeCAD.Vector
@@ -52,7 +52,8 @@ def copy_move(obj, moveVec=(0., 0., 0.), copy=True):
     return f
 
 
-# ~ # TODO: consuming is questionable because inputs might be needed in a delayed fashion
+# TODO: consuming is questionable because inputs might be needed in a delayed
+# fashion
 def make_solid(obj, consumeInputs=False):
     doc = FreeCAD.ActiveDocument
     shell = obj.Shape.Faces
@@ -61,14 +62,15 @@ def make_solid(obj, consumeInputs=False):
     solid.Label = obj.Label + "_solid"
     solid.Shape = shell
     doc.recompute()
-    del shell, solid
+    del shell
     return solid
 
 
 def makeHexFace(sketch, zBottom, width):
-    '''Given a sketch for a wire, make the first face. Also need to make sure it
-    is placed normal to the initial line segment in the sketch. This will ensure
-    that the wire and shell can be constructed with sweep operations.
+    '''
+    Given a sketch for a wire, make the first face. Also need to make sure it
+    is placed normal to the initial line segment in the sketch. This will
+    ensure that the wire and shell can be constructed with sweep operations.
     '''
     doc = FreeCAD.ActiveDocument
     lineSegments = findSegments(sketch)
@@ -78,7 +80,8 @@ def makeHexFace(sketch, zBottom, width):
     dx = x1 - x0
     dy = y1 - y0
     # First, make the initial face:
-    face = Draft.makePolygon(6, radius=width * 0.5, inscribed=False, face=True)
+    face = Draft.makePolygon(6, radius=width * 0.5, inscribed=False,
+                             face=True)
     doc.recompute()
     # Spin the face so that its faces are oriented normal to the path:
     alpha = 90 - np.arctan(-dy / dx) * 180. / np.pi
@@ -189,7 +192,8 @@ def subtractParts(domainObj, partList):
         doc.recompute()
         diffObj = copy_move(diffObjTemp)
         delete(diffObjTemp)
-    # TODO : This routine is leaving some nuisance objects around that should be deleted.
+    # TODO : This routine is leaving some nuisance objects around that should
+    # be deleted.
     return diffObj
 
 
@@ -211,7 +215,8 @@ def intersect(objList, consumeInputs=False):
 
 
 def checkOverlap(objList):
-    ''' Checks if a list of objects, when intersected, contains a finite volume.abs
+    '''
+    Checks if a list of objects, when intersected, contains a finitevolume.abs
     Returns true if it does, returns false if the intersection is empty.
     '''
     intObj = intersect(objList)
@@ -224,7 +229,8 @@ def checkOverlap(objList):
 
 
 def isNonempty(obj):
-    ''' Checks if an object is nonempty (returns True) or empty (returns False).
+    '''
+    Checks if an object is nonempty (returns True) or empty (returns False).
     '''
     if not obj.Shape.Vertexes:
         return False
@@ -233,7 +239,8 @@ def isNonempty(obj):
 
 
 def extrudeBetween(sketch, zMin, zMax, name=None):
-    ''' Non-destructively extrude a sketch between zMin and zMax.
+    '''
+    Non-destructively extrude a sketch between zMin and zMax.
     '''
     doc = FreeCAD.ActiveDocument
     tempExt = extrude(sketch, zMax - zMin, name=name)
@@ -245,11 +252,13 @@ def extrudeBetween(sketch, zMin, zMax, name=None):
 
 
 def liftObject(obj, d, consumeInputs=False):
-    ''' Create a new solid by lifting an object by a distance d along z, filling
+    '''
+    Create a new solid by lifting an object by a distance d along z, filling
     in the space swept out.
     '''
     objBB = getBB(obj)
-    liftedObj = copy_move(obj, moveVec=(0., 0., d))  # lift up the original sketch
+    # lift up the original sketch
+    liftedObj = copy_move(obj, moveVec=(0., 0., d))
     fillBB = np.array(objBB)
     fillBB[5] = fillBB[4] + d  # Make a new BB defining the missing space
     fillObj = makeBB(tuple(fillBB))  # Make a box to fill the space
@@ -265,37 +274,43 @@ def draftOffset(inputSketch, t):
     '''
     # ~ from qmt.geometry.freecad.geomUtils import extrude, copy_move, delete
 
-    if np.isclose(t,0):
+    if np.isclose(t, 0):
         return copy_move(inputSketch)
     deltaT = np.abs(t)
     offsetVec1 = vec(-deltaT, -deltaT, 0.)
     offsetVec2 = vec(deltaT, deltaT, 0.)
 
     offset0 = copy_move(inputSketch)
-    # Currently FreeCAD throws an error if we try to collapse a shape into a point through offsetting. If that happens, set delta to 5E-5. Any closer and FreeCAD seems to suffer from numerical errors
+    # Currently FreeCAD throws an error if we try to collapse a shape into a
+    # point through offsetting. If that happens, set delta to 5E-5. Any closer
+    # and FreeCAD seems to suffer from numerical errors
     try:
         offset1 = Draft.offset(inputSketch, offsetVec1, copy=True)
-    except:
+    except BaseException:
         deltaT -= 5E-5
-        offset1 = Draft.offset(inputSketch, vec(-deltaT, -deltaT, 0.), copy=True)
+        offset1 = Draft.offset(
+            inputSketch, vec(-deltaT, -deltaT, 0.), copy=True)
     try:
         offset2 = Draft.offset(inputSketch, offsetVec2, copy=True)
-    except:
+    except BaseException:
         deltaT -= 5E-5
-        offset2 = Draft.offset(inputSketch, vec(deltaT, deltaT, 0.), copy=True)
+        offset2 = Draft.offset(inputSketch, vec(deltaT, deltaT, 0.),
+                               copy=True)
 
-    # Compute the areas of the sketches. FreeCAD will throw an exception if we try to make a Face out of a line or a point, we catch that give it an area of 0
+    # Compute the areas of the sketches. FreeCAD will throw an exception if we
+    # try to make a Face out of a line or a point, we catch that give it an
+    # area of 0
     try:
         A0 = np.abs(Part.Face(offset0.Shape).Area)
-    except:
+    except BaseException:
         A0 = 0
     try:
         A1 = np.abs(Part.Face(offset1.Shape).Area)
-    except:
+    except BaseException:
         A1 = 0
     try:
         A2 = np.abs(Part.Face(offset2.Shape).Area)
-    except:
+    except BaseException:
         A2 = 0
 
     # If everything worked properly, these should either be ordered as
@@ -328,11 +343,11 @@ def draftOffset(inputSketch, t):
     elif t > 0 and bigSketch is not None:
         returnSketch = copy_move(bigSketch)
     else:
-        raise ValueError(
-            'Failed to offset the sketch ' + str(inputSketch.Name) + ' by amount ' + str(t))
+        raise ValueError('Failed to offset the sketch ' +
+                         str(inputSketch.Name) + ' by amount ' + str(t))
 
-    # # now that we have the three solids, we need to figure out which is bigger
-    # # and which is smaller.
+    # # now that we have the three solids, we need to figure out which is
+    # # bigger and which is smaller.
     # diff10 = subtract(solid1,solid0)
     # diff20 = subtract(solid2,solid0)
     # numVerts10 = len(diff10.Shape.Vertexes)
@@ -342,7 +357,8 @@ def draftOffset(inputSketch, t):
     # elif numVerts10 == 0 and numVerts20 > 0 :
     #     positiveOffsetIndex = 2
     # else:
-    #     raise ValueError('draftOffset has failed to give a non-empty shape!')
+    #     raise ValueError('draftOffset has failed to give a non-empty '
+    #                      'shape!')
     # delete(solid0)
     # delete(solid1)
     # delete(solid2)

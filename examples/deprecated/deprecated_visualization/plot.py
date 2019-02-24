@@ -17,4 +17,4 @@ def plot(filename, hv):
     elif file_type == 'mobility_plots':
         return _plot_mobility(filename, hv)
     else:
-        raise NameError('Plot type not recognized: '+str(file_type))
+        raise NameError('Plot type not recognized: ' + str(file_type))

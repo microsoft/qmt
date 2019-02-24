@@ -3,7 +3,8 @@
 
 #
 # This defines the physical material specification format, which is stored as
-# a json file. To add to the json or regenerate it, run this module as a script.
+# a json file. To add to the json or regenerate it, run this module as a
+# script.
 #
 
 from __future__ import absolute_import, division, print_function
@@ -33,10 +34,11 @@ __all__ = ['Material', 'Materials',
 
 
 class Material(collections.Mapping):
-    """Wrapper for an entry in the materials database.
+    """
+    Wrapper for an entry in the materials database.
 
-    Allows for the retrieval of a material's properties. Adds units awareness on top of a plain
-    dict containing the properties.
+    Allows for the retrieval of a material's properties. Adds units awareness
+    on top of a plain dict containing the properties.
 
     :param str name: Material name.
     :param dict properties: Collection of material properties.
@@ -55,9 +57,15 @@ class Material(collections.Mapping):
         else:
             self.energyUnit = toFloat(units.meV / parseUnit(eunit))
         # Tuple of key values that have energy units:
-        self.energy_quantities = ('workFunction', 'fermiEnergy', 'electronAffinity',
-                                  'directBandGap', 'valenceBandOffset', 'chargeNeutralityLevel',
-                                  'interbandMatrixElement', 'spinOrbitSplitting')
+        self.energy_quantities = (
+            'workFunction',
+            'fermiEnergy',
+            'electronAffinity',
+            'directBandGap',
+            'valenceBandOffset',
+            'chargeNeutralityLevel',
+            'interbandMatrixElement',
+            'spinOrbitSplitting')
 
     def __getitem__(self, key):
         try:
@@ -71,7 +79,8 @@ class Material(collections.Mapping):
 
     def __setitem__(self, key, value):
         if key in self.energy_quantities:
-            scaled_value = toFloat(value / self.energyUnit)  # if is an energy quantity, scale it
+            # if is an energy quantity, scale it
+            scaled_value = toFloat(value / self.energyUnit)
         else:
             scaled_value = value  # otherwise just pass
         self.properties[key] = scaled_value
@@ -87,17 +96,22 @@ class Material(collections.Mapping):
             self.name, self.properties, self.energyUnit)
 
     def serialize_dict(self):
-        """Return a dict with the material properties that can be dumped to json."""
+        """
+        Return a dict with the material properties that can be dumped to json.
+        """
         return self.properties
 
     def hole_mass(self, band, direction):
-        """Determine effective mass for a valence band.
+        """
+        Determine effective mass for a valence band.
 
-        :param str band: Which valence band: 'heavy' or 'light' for a specific band. Also 'dos' for
-            a density-of-states mass corresponding to both bands.
-        :param str direction: Momentum direction: One of '001', '110', or '111'. 'z' is equivalent
-            to '001'. Can also be 'dos' for the scalar density-of-states mass of a corresponding
-            isotropic band dispersion.
+        :param str band: Which valence band: 'heavy' or 'light' for a specific
+            band. Also 'dos' for a density-of-states mass corresponding to
+            both bands.
+        :param str direction: Momentum direction: One of '001', '110', or
+            '111'. 'z' is equivalent to '001'. Can also be 'dos' for the
+            scalar density-of-states mass of a corresponding isotropic band
+            dispersion.
         """
         # DOS effective mass corresponding to both heavy and light hole band
         # [Lax and Mavroides (1955) Eq. 17]
@@ -115,23 +129,24 @@ class Material(collections.Mapping):
         else:
             raise RuntimeError('invalid band: {}'.format(band))
 
-        # DOS effective mass corresponding to anisotropic (possibly warped) band.
+        # DOS effective mass corresponding to anisotropic (possibly warped)
+        # band.
         # [We use the expansion from Lax and Mavroides (1955) Eq. 15;
         #  also cf. Lawaetz (1971) Eqs. 33-36.
-        #  These approximations agree with the exact averages obtained by angular integration to
-        #  within a few percent for relevant materials, cf. Table 1 of Mecholsky, Resca, Pegg
-        #  & Fornari (2016).]
+        #  These approximations agree with the exact averages obtained by
+        #  angular integration to within a few percent for relevant materials,
+        #  cf. Table 1 of Mecholsky, Resca, Pegg & Fornari (2016).]
         if direction == 'dos':
             # light-to-heavy hole splitting
             gamma_bar = np.sqrt(2 * (gamma2 ** 2 + gamma3 ** 2))
             # anisotropy factor for heavy or light hole
             gamma_hl = -sign * 6 * (gamma3 ** 2 - gamma2 ** 2) / \
-                       (gamma_bar * (gamma1 + sign * gamma_bar))
+                (gamma_bar * (gamma1 + sign * gamma_bar))
             return 1. / (gamma1 + sign * gamma_bar) * \
-                   (1 + 0.05 * gamma_hl + 0.0164 * gamma_hl ** 2) ** (2 / 3.)
-            # The following expression would hold if the band was circularly symmetric in xy-plane
-            # return (self.holeMass(band, '001') * self.holeMass(band,
-            # '110')**2)**(1 / 3.)
+                (1 + 0.05 * gamma_hl + 0.0164 * gamma_hl ** 2) ** (2 / 3.)
+            # The following expression would hold if the band was circularly
+            # symmetric in xy-plane return (self.holeMass(band, '001') *
+            # self.holeMass(band,'110')**2)**(1 / 3.)
 
         # Effective mass for a specific band and direction [Vurgaftman et al.
         # (2001) Eqs. 2.16-2.17]
@@ -146,12 +161,14 @@ class Material(collections.Mapping):
 
 
 class Materials(collections.Mapping):
-    """Class for creating, loading, and manipulating a json file that
+    """
+    Class for creating, loading, and manipulating a json file that
     contains information about materials.
 
-    The default constructor (matPath=None, matDict=None) sets matPath to the module's
-    materials.json and loads it. If both matPath and matDict are specified, the Materials
-    database is initialized from the given path and then updated with the supplied dict.
+    The default constructor (matPath=None, matDict=None) sets matPath to the
+    module's materials.json and loads it. If both matPath and matDict are
+    specified, the Materials database is initialized from the given path and
+    then updated with the supplied dict.
 
     :param str matPath:
         Path to the mat json file. If initialized with None, should be set
@@ -159,14 +176,16 @@ class Materials(collections.Mapping):
     :param dict matDict:
         Dictionary of materials to fill the database.
     :param Bool load:
-        Load the json file. Needs to be False when creating a new materials.json file.
+        Load the json file. Needs to be False when creating a new
+        materials.json file.
     """
 
     def __init__(self, matPath=None, matDict=None, load=True):
         self.matDict = {}
         self.bowingParameters = {}
         if matPath is None and matDict is None:
-            matPath = os.path.join(os.path.dirname(__file__), 'materials.json')
+            matPath = os.path.join(os.path.dirname(__file__),
+                                   'materials.json')
         self.matPath = matPath
 
         if matPath is not None and load:
@@ -191,7 +210,10 @@ class Materials(collections.Mapping):
         self.matDict[name] = self._make_material(mat_type, **kwargs)
 
     def set_bowing_parameters(self, name_a, name_b, mat_type, **kwargs):
-        """Generate a bowing parameter set and add it to the bowingParameters dict."""
+        """
+        Generate a bowing parameter set and add it to the bowingParameters
+        dict.
+        """
         self.bowingParameters[(name_a, name_b)] = self._make_material(
             mat_type, **kwargs)
 
@@ -209,7 +231,8 @@ class Materials(collections.Mapping):
             set_property('workFunction')  # Work function \Phi [in meV]
             set_property('fermiEnergy')
         if mat_type == 'semi':
-            set_property('electronAffinity')  # Electron affinity \chi [in meV]
+            # Electron affinity \chi [in meV]
+            set_property('electronAffinity')
             set_property('directBandGap')  # E_g(\Gamma) [in meV]
             # wrt InSb valence band maximum [in meV]
             set_property('valenceBandOffset')
@@ -226,10 +249,12 @@ class Materials(collections.Mapping):
             set_property('surfaceChargeDensity')
 
             # Unused so far
-            # set_property('holeMass')  # Hole mass [in units of bare electron mass]
-            # set_property('valence_band_maximum')  # Position of valence band maximum [in meV]
-            # set_property('conduction_band_minimum')  # Position of conduction band minimum [in
-            # meV]
+            # # Hole mass [in units of bare electron mass]
+            # set_property('holeMass')
+            # # Position of valence band maximum [in meV]
+            # set_property('valence_band_maximum')
+            # Position of conduction band minimum [in meV]
+            # set_property('conduction_band_minimum')
             # set_property('bulkDoping')  # Bulk doping [unit?]
 
         if kwargs:
@@ -244,10 +269,12 @@ class Materials(collections.Mapping):
         self.matDict[key] = val.properties
 
     def find(self, name, eunit=None):
-        """Retrieve a named material from the database.
+        """
+        Retrieve a named material from the database.
 
         If the material is not found directly, an attempt is made to construct
-        it by mixing two known materials. If that also fails, a KeyError is raised.
+        it by mixing two known materials. If that also fails, a KeyError is
+        raised.
 
         :param str name:
             Name of the desired material.
@@ -259,13 +286,14 @@ class Materials(collections.Mapping):
         else:
             # print("parsing", name)
             # A_y B_x C
-            bin_pattern1 = r"([A-Z][a-z]*)(\d+\.?\d*|\.\d+)([A-Z][a-z]*)(\d+\.?\d*|\.\d+)([A-Z][" \
-                           r"a-z]*)"
+            bin_pattern1 = (r"([A-Z][a-z]*)(\d+\.?\d*|\.\d+)([A-Z][a-z]*)"
+                            r"(\d+\.?\d*|\.\d+)([A-Z][a-z]*)")
             # A B_y C_x
-            bin_pattern2 = r"([A-Z][a-z]*)([A-Z][a-z]*)(\d+\.?\d*|\.\d+)([A-Z][a-z]*)(" \
-                           r"\d+\.?\d*|\.\d+)"
+            bin_pattern2 = (r"([A-Z][a-z]*)([A-Z][a-z]*)(\d+\.?\d*|\.\d+)"
+                            r"([A-Z][a-z]*)(\d+\.?\d*|\.\d+)")
             # (A)_y (B)_x
-            bin_pattern3 = r"\((.+)\)(\d+\.?\d*|\.\d+)\((.+)\)(\d+\.?\d*|\.\d+)"
+            bin_pattern3 = (r"\((.+)\)(\d+\.?\d*|\.\d+)\((.+)\)"
+                            r"(\d+\.?\d*|\.\d+)")
             match1 = re.match(bin_pattern1, name)
             match2 = re.match(bin_pattern2, name)
             match3 = re.match(bin_pattern3, name)
@@ -289,14 +317,16 @@ class Materials(collections.Mapping):
         return Material(name, properties, eunit=eunit)
 
     def _make_binary_alloy(self, nameA, nameB, x):
-        """Interpolate properties of binary alloy A_{1-x} B_x.
+        """
+        Interpolate properties of binary alloy A_{1-x} B_x.
 
-        The material database must contain properties for the two named materials.
-        Properties of the alloy are computed by quadratic interpolation between the endpoints if
-        there is a corresponding bowing parameter for this property and alloy. Otherwise linear
-        interpolation is employed. Following Eq. 4.1 of
-        [Vurgaftman et al., J. Appl. Phys. 89, 5837 (2001)], the quadratic interpolation formula
-        uses the convention
+        The material database must contain properties for the two named
+        materials.
+        Properties of the alloy are computed by quadratic interpolation
+        between the endpoints if there is a corresponding bowing parameter
+        for this property and alloy. Otherwise linear interpolation is
+        employed. Following Eq. 4.1 of [Vurgaftman et al., J. Appl. Phys. 89,
+        5837 (2001)], the quadratic interpolation formula uses the convention
             O(A_{1-x} B_x) = (1-x) O(A) + x O(B) - x(1-x) O_{AB} ,
         with the bowing parameter O_{AB}.
         """
@@ -357,17 +387,21 @@ class Materials(collections.Mapping):
             self.load()
 
     def conduction_band_minimum(self, mat):
-        """Calculate the energy of the conduction band minimum $E_c$ of a semiconductor material.
+        r"""
+        Calculate the energy of the conduction band minimum $E_c$ of a
+        semiconductor material.
 
-        The reference energy E=0 is fixed to the vacuum level, as defined by the electron affinity
-        of InSb. If Anderson's rule were exact, this method would return the (negative) electron
-        affinity of `mat`. Since Anderson's rule ignores interface effects, it is preferable to use
-        empirically determined band offsets for the alignment of bands in heterostructures rather
-        than electron affinities (c.f. Vurgaftman et al. (2001)). Therefore, we use the electron
-        affinity of a single material as reference point and try to align all other materials
+        The reference energy E=0 is fixed to the vacuum level, as defined by
+        the electron affinity of InSb. If Anderson's rule were exact, this
+        method would return the (negative) electron affinity of `mat`. Since
+        Anderson's rule ignores interface effects, it is preferable to use
+        empirically determined band offsets for the alignment of bands in
+        heterostructures rather than electron affinities (c.f. Vurgaftman et
+        al. (2001)). Therefore, we use the electron affinity of a single
+        material as reference point and try to align all other materials
         according to the respective band offsets.
-        If the material's valenceBandOffset is not known, we return `-mat[electronAffinity]`,
-        effectively falling back on Anderson's rule.
+        If the material's valenceBandOffset is not known, we return
+        `-mat[electronAffinity]`, effectively falling back on Anderson's rule.
 
         :param Material mat:
             Material whose conduction band position is to be determined.
@@ -377,7 +411,8 @@ class Materials(collections.Mapping):
         - valence_band_maximum(mat) is equivalent to
           `self.conduction_band_minimum(mat) - mat['directBandGap']`
         - conduction_band_offset(mat1, mat2) is equivalent to
-          `self.conduction_band_minimum(mat1) - self.conduction_band_minimum(mat2)`
+          `self.conduction_band_minimum(mat1) - \
+              self.conduction_band_minimum(mat2)`
         """
         ref_name = 'InSb'
         if mat['type'] == 'metal':
@@ -395,22 +430,27 @@ class Materials(collections.Mapping):
         except KeyError:
             # fall back to Anderson's rule
             if 'cbo' not in locals():
-                msg = "Material '{}' misses valenceBandOffset or directBandGap.".format(
-                    mat.name)
+                msg = (f"Material '{mat.name}' misses valenceBandOffset or "
+                       "directBandGap.")
             elif 'ref' not in locals():
-                msg = "Reference material '" + ref_name + "' missing from materials library."
+                msg = (f"Reference material '{ref_name}' missing from "
+                       "materials library.")
             else:
-                msg = "Reference material '" + ref_name + "' misses valenceBandOffset or " \
-                                                          "directBandGap or electronAffinity."
+                msg = (f"Reference material '{ref_name}' misses "
+                       "valenceBandOffset or directBandGap or "
+                       "electronAffinity.")
             msg += " Falling back on Anderson's rule."
             print(msg)
             return -mat['electronAffinity']
 
     def valence_band_maximum(self, mat):
-        """Calculate the energy of the valence band maximum $E_v$ of a semiconductor material.
+        """
+        Calculate the energy of the valence band maximum $E_v$ of a
+        semiconductor material.
 
-        The reference energy E=0 is fixed to the vacuum level, as defined by the electron affinity
-        of InSb. See conduction_band_minimum for additional details.
+        The reference energy E=0 is fixed to the vacuum level, as defined by
+        the electron affinity of InSb. See conduction_band_minimum for
+        additional details.
 
         :param Material mat:
             Material whose valence band position is to be determined.
@@ -440,15 +480,18 @@ class Materials(collections.Mapping):
             if 'vbo' not in locals():
                 msg = "Material '" + mat.name + "' misses valenceBandOffset."
             elif 'ref' not in locals():
-                msg = "Reference material '" + ref_name + "' missing from materials library."
+                msg = "Reference material '" + ref_name + \
+                    "' missing from materials library."
             else:
-                msg = "Reference material '" + ref_name + "' misses valenceBandOffset or " \
-                                                          "directBandGap or electronAffinity."
+                msg = (f"Reference material '{ref_name}' misses "
+                       "valenceBandOffset or directBandGap or "
+                       "electronAffinity.")
             msg += " Falling back on Anderson's rule."
             print(msg)
             return -(mat['electronAffinity'] + mat['directBandGap'])
 
-    # TODO: make this user-configurable and shift all energy properties reported by materials
+    # TODO: make this user-configurable and shift all energy properties
+    # reported by materials
     def reference_level(self, eunit=None):
         if eunit is None:
             eunit = units.meV
@@ -459,7 +502,8 @@ class Materials(collections.Mapping):
 
 def conduction_band_offset(mat, ref_mat):
     """
-    Calculate the conduction band offset $E_c - E_{c,ref}$ between two semiconductor materials.
+    Calculate the conduction band offset $E_c - E_{c,ref}$ between two
+    semiconductor materials.
 
     :param Material mat:
         Material whose conduction band position is to be determined.
@@ -474,11 +518,11 @@ def conduction_band_offset(mat, ref_mat):
     except KeyError:
         # fall back to Anderson's rule
         if 'cbo' not in locals():
-            msg = "Material '{}' misses valenceBandOffset or directBandGap.".format(
-                mat.name)
+            msg = (f"Material '{mat.name}' misses valenceBandOffset or "
+                   "directBandGap.")
         else:
-            msg = "Reference material '" + ref_mat.name + \
-                  "' misses valenceBandOffset or directBandGap."
+            msg = (f"Reference material '{ref_mat.name}' misses "
+                   "valenceBandOffset or directBandGap.")
         msg += " Falling back on Anderson's rule."
         print(msg)
         chi = mat['electronAffinity']
@@ -487,7 +531,8 @@ def conduction_band_offset(mat, ref_mat):
 
 def valence_band_offset(mat, ref_mat):
     """
-    Calculate the valence band offset $E_v - E_{v,ref}$ between two semiconductor materials.
+    Calculate the valence band offset $E_v - E_{v,ref}$ between two
+    semiconductor materials.
 
     :param Material mat:
         Material whose conduction band position is to be determined.
@@ -502,9 +547,10 @@ def valence_band_offset(mat, ref_mat):
     except KeyError:
         # fall back to Anderson's rule
         if 'vbo' not in locals():
-            msg = "Material '" + mat.name + "' misses valenceBandOffset."
+            msg = f"Material '{mat.name}' misses valenceBandOffset."
         else:
-            msg = "Reference material '" + ref_mat.name + "' misses valenceBandOffset."
+            msg = (f"Reference material '{ref_mat.name}' misses "
+                   "valenceBandOffset.")
         msg += " Falling back on Anderson's rule."
         print(msg)
         e_ion = mat['electronAffinity'] + mat['directBandGap']
@@ -514,7 +560,8 @@ def valence_band_offset(mat, ref_mat):
 
 def write_database_to_markdown(out_file, mat_lib):
     """
-    Write all materials parameters in mat_lib to a nicely formatted markdown file.
+    Write all materials parameters in mat_lib to a nicely formatted markdown
+    file.
 
     :param stream out_file: Output file handle.
     :param Materials mat_lib: Materials database to be written.
@@ -554,12 +601,15 @@ def write_database_to_markdown(out_file, mat_lib):
         Sources:
         * Robertson, EPJAP 28, 265 (2004): High dielectric constant oxides,
           https://doi.org/10.1051/epjap:2004206
-        * Biercuk et al., APL 83, 2405 (2003), Low-temperature atomic-layer-deposition lift-off
+        * Biercuk et al., APL 83, 2405 (2003), Low-temperature
+          atomic-layer-deposition lift-off
         method
-          for microelectronic and nanoelectronic applications, https://doi.org/10.1063/1.1612904
-        * Yota et al.,  JVSTA 31, 01A134 (2013), Characterization of atomic layer deposition HfO2,
-          Al2O3, and plasma-enhanced chemical vapor deposition Si3N4 as metal-insulator-metal
-          capacitor dielectric for GaAs HBT technology, https://doi.org/10.1116/1.4769207
+          for microelectronic and nanoelectronic applications,
+          https://doi.org/10.1063/1.1612904
+        * Yota et al.,  JVSTA 31, 01A134 (2013), Characterization of atomic
+          layer deposition HfO2, Al2O3, and plasma-enhanced chemical vapor
+          deposition Si3N4 as metal-insulator-metal capacitor dielectric for
+          GaAs HBT technology, https://doi.org/10.1116/1.4769207
         """), file=out_file)
 
     print('## Semiconductors', file=out_file)
@@ -595,21 +645,25 @@ def write_database_to_markdown(out_file, mat_lib):
     writer.write_table()
     print(textwrap.dedent("""\
         Sources:
-        * [Vurgaftman] Vurgaftman et al., APR 89, 5815 (2001): Band parameters for III-V compound
-          semiconductors and their alloys,  https://doi.org/10.1063/1.1368156
-        * [Heedt] Heedt, et al. Resolving ambiguities in nanowire field-effect transistor
-          characterization. Nanoscale 7, 18188-18197, 2015. https://doi.org/10.1039/c5nr03608a
-        * [Monch] Monch, Semiconductor Surfaces and Interfaces, 3rd Edition, Springer (2001).
+        * [Vurgaftman] Vurgaftman et al., APR 89, 5815 (2001): Band parameters
+          for III-V compound semiconductors and their alloys,
+          https://doi.org/10.1063/1.1368156
+        * [Heedt] Heedt, et al. Resolving ambiguities in nanowire field-effect
+          transistor characterization. Nanoscale 7, 18188-18197, 2015.
+          https://doi.org/10.1039/c5nr03608a
+        * [Monch] Monch, Semiconductor Surfaces and Interfaces, 3rd Edition,
+          Springer (2001).
         * [ioffe.ru] http://www.ioffe.ru/SVA/NSM/Semicond
         """), file=out_file)
 
     print(textwrap.dedent("""\
         ### Bowing parameters
 
-        Properties of an alloy $A_{1-x} B_x$ are computed by quadratic interpolation between the
-        endpoints if there is a corresponding bowing parameter for this property and alloy.
-        Otherwise linear interpolation is employed. The quadratic interpolation formula uses the
-        convention
+        Properties of an alloy $A_{1-x} B_x$ are computed by quadratic
+        interpolation between the endpoints if there is a corresponding bowing
+        parameter for this property and alloy.
+        Otherwise linear interpolation is employed. The quadratic
+        interpolation formula uses the convention
             $O(A_{1-x} B_x) = (1-x) O(A) + x O(B) - x(1-x) O_{AB}$,
         with the bowing parameter $O_{AB}$.
         """), file=out_file)
@@ -643,8 +697,9 @@ def write_database_to_markdown(out_file, mat_lib):
     writer.write_table()
     print(textwrap.dedent("""\
         Sources:
-        * [Vurgaftman] Vurgaftman et al., APR 89, 5815 (2001): Band parameters for III-V compound
-          semiconductors and their alloys,  https://doi.org/10.1063/1.1368156
+        * [Vurgaftman] Vurgaftman et al., APR 89, 5815 (2001): Band parameters
+          for III-V compound semiconductors and their alloys,
+          https://doi.org/10.1063/1.1368156
         """), file=out_file)
 
 
@@ -659,8 +714,8 @@ def generate_file(fname=None):
                            # Ashcroft and Mermin:
                            fermiEnergy=11700.)
     materials.add_material('Au', 'metal', relativePermittivity=1,
-                           # source- Wikipedia quotes it as 5.1-5.47; this is the
-                           # average.
+                           # source- Wikipedia quotes it as 5.1-5.47; this is
+                           # the average.
                            workFunction=5285.,
                            # Ashcroft and Mermin:
                            fermiEnergy=5530.)
@@ -668,8 +723,8 @@ def generate_file(fname=None):
                            # source - Ioffe Institute,
                            # http://www.ioffe.ru/SVA/NSM/Semicond/Si/basic.html
                            workFunction=4050.,
-                           # unknown / probably depends on doping density; setting
-                           # it to Au for now.
+                           # unknown / probably depends on doping density;
+                           # setting it to Au for now.
                            fermiEnergy=5530.)
     materials.add_material('NbTiN', 'metal', relativePermittivity=1,
                            # Unknown; just setting it to Al for now.
@@ -681,10 +736,12 @@ def generate_file(fname=None):
     # Sources:
     # - Robertson, EPJAP 28, 265 (2004): High dielectric constant oxides,
     #   https://doi.org/10.1051/epjap:2004206
-    # - Biercuk et al., APL 83, 2405 (2003), Low-temperature atomic-layer-deposition lift-off method
-    #   for microelectronic and nanoelectronic applications, https://doi.org/10.1063/1.1612904
-    # - Yota et al.,  JVSTA 31, 01A134 (2013), Characterization of atomic layer deposition HfO2,
-    #   Al2O3, and plasma-enhanced chemical vapor deposition Si3N4 as metal-insulator-metal
+    # - Biercuk et al., APL 83, 2405 (2003), Low-temperature
+    #   atomic-layer-deposition lift-off method for microelectronic and
+    #   nanoelectronic applications, https://doi.org/10.1063/1.1612904
+    # - Yota et al.,  JVSTA 31, 01A134 (2013), Characterization of atomic
+    #   layer deposition HfO2, Al2O3, and plasma-enhanced chemical vapor
+    #   deposition Si3N4 as metal-insulator-metal
     # capacitor dielectric for GaAs HBT technology,
     # https://doi.org/10.1116/1.4769207
 
@@ -706,8 +763,8 @@ def generate_file(fname=None):
     # [Robertson] eps=25
     # [Biercuk] eps=16-19 for ALD HfO2
     # [Yota] eps=18.7 for ALD HfO2
-    # NB: Dielectric constant of ALD HfO2 seems to depend strongly on growth conditions like
-    # temperature.
+    # NB: Dielectric constant of ALD HfO2 seems to depend strongly on growth
+    # conditions like temperature.
     materials.add_material('HfO2', 'dielectric',
                            relativePermittivity=25.)  # Robertson
 
@@ -727,88 +784,114 @@ def generate_file(fname=None):
     # === Semiconductors ===
     # Sources:
     # - [ioffe.ru] http://www.ioffe.ru/SVA/NSM/Semicond
-    # - [Vurgaftman] Vurgaftman et al., APR 89, 5815 (2001): Band parameters for III-V compound
-    #   semiconductors and their alloys,  https://doi.org/10.1063/1.1368156
-    # - [Heedt] Heedt, et al. Resolving ambiguities in nanowire field-effect transistor
-    #   characterization. Nanoscale 7, 18188-18197, 2015. https://doi.org/10.1039/c5nr03608a
-    # - [Monch] Monch, Semiconductor Surfaces and Interfaces, 3rd Edition, Springer (2001).
+    # - [Vurgaftman] Vurgaftman et al., APR 89, 5815 (2001): Band parameters
+    #   for III-V compound semiconductors and their alloys,
+    #   https://doi.org/10.1063/1.1368156
+    # - [Heedt] Heedt, et al. Resolving ambiguities in nanowire field-effect
+    #   transistor characterization. Nanoscale 7, 18188-18197, 2015.
+    #   https://doi.org/10.1039/c5nr03608a
+    # - [Monch] Monch, Semiconductor Surfaces and Interfaces, 3rd Edition,
+    #   Springer (2001).
     materials.add_material('GaAs', 'semi',
                            relativePermittivity=13.1,  # source?
                            # 300K,
                            # http://www.ioffe.ru/SVA/NSM/Semicond/GaAs/basic.html
                            electronAffinity=4070.,
                            # Vurgaftman et al. (2001)
-                           electronMass=0.067, directBandGap=1519., valenceBandOffset=-800.,
-                           luttingerGamma1=6.98, luttingerGamma2=2.06, luttingerGamma3=2.93,
-                           spinOrbitSplitting=341., interbandMatrixElement=28800.)
+                           electronMass=0.067, directBandGap=1519.,
+                           valenceBandOffset=-800., luttingerGamma1=6.98,
+                           luttingerGamma2=2.06, luttingerGamma3=2.93,
+                           spinOrbitSplitting=341.,
+                           interbandMatrixElement=28800.)
     # caution: AlAs has global CB minimum at X! We give values for the local
     # minimum at Gamma here.
     materials.add_material('AlAs', 'semi',
-                           # 300K, http://www.ioffe.ru/SVA/NSM/Semicond/AlGaAs/basic.html
-                           # Values for interpolating properties of Al_{x}Ga_{1-x}As with x<0.45.
+                           # 300K,
+                           # http://www.ioffe.ru/SVA/NSM/Semicond/AlGaAs/basic.html
+                           # Values for interpolating properties of
+                           # Al_{x}Ga_{1-x}As with x<0.45.
                            # Pure GaAs has \chi_a=3.5 eV.
-                           relativePermittivity=12.90 - 2.84, electronAffinity=4070. - 1100.,
+                           relativePermittivity=12.90 - 2.84,
+                           electronAffinity=4070. - 1100.,
                            # Vurgaftman et al. (2001)
-                           electronMass=0.15, directBandGap=3099, valenceBandOffset=-1330.,
-                           luttingerGamma1=3.76, luttingerGamma2=0.82, luttingerGamma3=1.42,
-                           spinOrbitSplitting=280., interbandMatrixElement=21100.)
+                           electronMass=0.15, directBandGap=3099,
+                           valenceBandOffset=-1330., luttingerGamma1=3.76,
+                           luttingerGamma2=0.82, luttingerGamma3=1.42,
+                           spinOrbitSplitting=280.,
+                           interbandMatrixElement=21100.)
     materials.add_material('InAs', 'semi',
-                           relativePermittivity=15.15,  # ioffe.ru at 300 K; Davies quotes 14.6
+                           # ioffe.ru at 300 K; Davies quotes 14.6
+                           relativePermittivity=15.15,
                            # Vurgaftman et al. (2001)
-                           electronMass=0.026, directBandGap=417., valenceBandOffset=-590.,
-                           # NB: uncertainty on InAs Luttinger parameters seems to be
-                           # large
-                           luttingerGamma1=20., luttingerGamma2=8.5, luttingerGamma3=9.2,
-                           spinOrbitSplitting=390., interbandMatrixElement=21500.,
+                           electronMass=0.026, directBandGap=417.,
+                           valenceBandOffset=-590.,
+                           # NB: uncertainty on InAs Luttinger parameters
+                           # seems to be large
+                           luttingerGamma1=20., luttingerGamma2=8.5,
+                           luttingerGamma3=9.2, spinOrbitSplitting=390.,
+                           interbandMatrixElement=21500.,
                            # ioffe.ru:
                            electronAffinity=4900.,
                            # Heedt:
-                           chargeNeutralityLevel=417. + 160., surfaceChargeDensity=3e12)
+                           chargeNeutralityLevel=417. + 160.,
+                           surfaceChargeDensity=3e12)
     materials.add_material('GaSb', 'semi',
                            # 300 K,
                            # http://www.ioffe.ru/SVA/NSM/Semicond/GaSb/basic.html
                            relativePermittivity=15.7, electronAffinity=4060.,
                            # Vurgaftman et al. (2001)
-                           electronMass=.039, directBandGap=812., valenceBandOffset=-30.,
-                           luttingerGamma1=13.4, luttingerGamma2=4.7, luttingerGamma3=6.0,
-                           spinOrbitSplitting=760., interbandMatrixElement=27000.)
+                           electronMass=.039, directBandGap=812.,
+                           valenceBandOffset=-30., luttingerGamma1=13.4,
+                           luttingerGamma2=4.7, luttingerGamma3=6.0,
+                           spinOrbitSplitting=760.,
+                           interbandMatrixElement=27000.)
     materials.add_material('AlSb', 'semi',
-                           # https://en.wikipedia.org/wiki/Aluminium_antimonide and
+                           # https://en.wikipedia.org/wiki/Aluminium_antimonide
+                           # and
                            # https://www.azom.com/article.aspx?ArticleID=8427
                            relativePermittivity=11.,
                            # Vurgaftman et al. (2001)
-                           electronMass=.14, directBandGap=2386., valenceBandOffset=-410.,
-                           luttingerGamma1=5.18, luttingerGamma2=1.19, luttingerGamma3=1.97,
-                           spinOrbitSplitting=676., interbandMatrixElement=18700.)
+                           electronMass=.14, directBandGap=2386.,
+                           valenceBandOffset=-410., luttingerGamma1=5.18,
+                           luttingerGamma2=1.19, luttingerGamma3=1.97,
+                           spinOrbitSplitting=676.,
+                           interbandMatrixElement=18700.)
     materials.add_material('InSb', 'semi',
                            # 300 K,
                            # http://www.ioffe.ru/SVA/NSM/Semicond/InSb/basic.html
                            relativePermittivity=16.8, electronAffinity=4590.,
                            # Vurgaftman et al. (2001)
-                           electronMass=.0135, directBandGap=235., valenceBandOffset=0.,
-                           luttingerGamma1=34.8, luttingerGamma2=15.5, luttingerGamma3=16.5,
-                           spinOrbitSplitting=810., interbandMatrixElement=23300.,
-                           # Monch has some values for this, but I don't think we have too
-                           # good an idea. For now, I'll use mid-gap states of density equal to
-                           # InAs. TODO: experimentally determine this!
-                           chargeNeutralityLevel=0.5 * 235., surfaceChargeDensity=3e12)
+                           electronMass=.0135, directBandGap=235.,
+                           valenceBandOffset=0., luttingerGamma1=34.8,
+                           luttingerGamma2=15.5, luttingerGamma3=16.5,
+                           spinOrbitSplitting=810.,
+                           interbandMatrixElement=23300.,
+                           # Monch has some values for this, but I don't think
+                           # we have too good an idea. For now, I'll use
+                           # mid-gap states of density equal to InAs.
+                           # TODO: experimentally determine this!
+                           chargeNeutralityLevel=0.5 * 235.,
+                           surfaceChargeDensity=3e12)
     materials.add_material('InP', 'semi',
                            # 300 K,
                            # http://www.ioffe.ru/SVA/NSM/Semicond/InP/basic.html
                            relativePermittivity=12.5, electronAffinity=4380.,
                            # Vurgaftman et al. (2001)
-                           electronMass=.0795, directBandGap=1423.6, valenceBandOffset=-940.,
-                           luttingerGamma1=5.08, luttingerGamma2=1.60, luttingerGamma3=2.10,
-                           spinOrbitSplitting=108., interbandMatrixElement=20700.)
+                           electronMass=.0795, directBandGap=1423.6,
+                           valenceBandOffset=-940., luttingerGamma1=5.08,
+                           luttingerGamma2=1.60, luttingerGamma3=2.10,
+                           spinOrbitSplitting=108.,
+                           interbandMatrixElement=20700.)
     materials.add_material('Si', 'semi',
                            # 300 K,
                            # http://www.ioffe.ru/SVA/NSM/Semicond/Si/basic.html
                            relativePermittivity=11.7, electronAffinity=4050.,
-                           electronMass=(0.98 + 0.19 * 2) ** (1. / 3.),  # DOS mass
+                           electronMass=(
+                               0.98 + 0.19 * 2) ** (1. / 3.),  # DOS mass
                            # Yu & Cardona
                            directBandGap=3480.,
-                           luttingerGamma1=4.28, luttingerGamma2=0.339, luttingerGamma3=1.446,
-                           spinOrbitSplitting=44.)
+                           luttingerGamma1=4.28, luttingerGamma2=0.339,
+                           luttingerGamma3=1.446, spinOrbitSplitting=44.)
 
     # bowing parameters from Vurgaftman et al. (2001)
     materials.set_bowing_parameters(
@@ -836,9 +919,10 @@ def generate_file(fname=None):
         electronMass=0.0092,
         directBandGap=425.,
         spinOrbitSplitting=100.)
-    materials.set_bowing_parameters('InAs', 'InSb', 'semi', electronMass=0.035, directBandGap=670.0,
-                                    # the bowing of the spinOrbitSplitting seems
-                                    # to be closer to zero for some
+    materials.set_bowing_parameters('InAs', 'InSb', 'semi',
+                                    electronMass=0.035, directBandGap=670.0,
+                                    # the bowing of the spinOrbitSplitting
+                                    # seems to be closer to zero for some
                                     # first-principles calculations!
                                     spinOrbitSplitting=1200.)
 

@@ -4,7 +4,7 @@
 """Testing FreeCAD helper functions."""
 
 import pytest
-from qmt.geometry.freecad.auxiliary import *
+from qmt.geometry.freecad.auxiliary import delete, deepRemove
 from qmt.geometry.freecad.geomUtils import extrude
 
 

@@ -14,7 +14,9 @@ dependencies:
   - boost=1.66 # 1.67 (introduced by freecad) has issues
   - dask
   - dask-jobqueue
+  - descartes
   - fenics
+  - flake8
   - freecad
   - future
   - holoviews

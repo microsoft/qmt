@@ -31,14 +31,21 @@ class PoissonTaskExample(Task):
     def _solve_instance(self, input_result_list, current_options):
         geo_result_instance = input_result_list[0]
         xs = np.arange(0., geo_result_instance['part1']['side length'], 0.01)
-        densities = [np.array([current_options['part1']['voltage']]*len(xs))]*3
-        bands = [np.array([current_options['part1']['voltage']]*len(xs))]*3
-        output = Density1D(densities, units.meV, bands, units.meV, xs, units.nm) 
+        densities = [
+            np.array([current_options['part1']['voltage']] * len(xs))] * 3
+        bands = [np.array([current_options['part1']['voltage']] * len(xs))] * 3
+        output = Density1D(
+            densities,
+            units.meV,
+            bands,
+            units.meV,
+            xs,
+            units.nm)
         return output
 
 
 tag1 = qtf.SweepTag('s1')
-tag2 = qtf.SweepTag('v1')   
+tag2 = qtf.SweepTag('v1')
 
 geo_dict = {'part1': {'side length': tag1}}
 geo_task = GeometryTaskExample(options=geo_dict)
@@ -46,7 +53,8 @@ geo_task = GeometryTaskExample(options=geo_dict)
 poisson_dict = {'part1': {'voltage': tag2}}
 poisson_task = PoissonTaskExample(geo_task, options=poisson_dict)
 
-sweeps = [{tag1: 1., tag2: 10.}, {tag1: 2., tag2: 10.}, {tag1: 1., tag2: 5.}, {tag1: 4., tag2: 3.}]
+sweeps = [{tag1: 1., tag2: 10.}, {tag1: 2., tag2: 10.},
+          {tag1: 1., tag2: 5.}, {tag1: 4., tag2: 3.}]
 
 sweep_man = qtf.SweepManager(sweeps)
 

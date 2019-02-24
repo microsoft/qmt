@@ -4,10 +4,14 @@
 """Testing QMT sketch util functions."""
 
 from __future__ import division
-
 import pytest
-
-from qmt.geometry.freecad.sketchUtils import *
+import numpy as np
+from qmt.geometry.freecad.sketchUtils import findSegments, nextSegment, \
+    addCycleSketch, findCycle, findEdgeCycles, extendSketch, \
+    findEdgeCycles2, splitSketch
+from qmt.geometry.freecad.auxiliary import deepRemove
+import FreeCAD
+import Part
 
 vec = FreeCAD.Vector
 
@@ -70,7 +74,8 @@ def test_findCycle(fix_FCDoc, fix_two_cycle_sketch):
     ref1 = [0, 1, 2, 3]  # square cycle indices
     ref2 = [4, 5, 6]  # triangular cycle indices
     for i in range(4):
-        c = findCycle(segArr, i, range(segArr.shape[0]))  # update starting point
+        # update starting point
+        c = findCycle(segArr, i, range(segArr.shape[0]))
         assert c == ref1[i:] + ref1[:i]  # advancing rotation
     for i in range(3):
         c = findCycle(segArr, i + 4, range(segArr.shape[0]))

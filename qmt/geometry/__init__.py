@@ -4,3 +4,5 @@
 """Geometry generation and handling."""
 
 from .property_map import PropertyMap, MaterialPropertyMap
+
+__all__ = ['PropertyMap', 'MaterialPropertyMap']

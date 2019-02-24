@@ -16,6 +16,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+import subprocess
 import os
 import sys
 # ~ import FreeCAD
@@ -191,20 +192,19 @@ texinfo_documents = [
 intersphinx_mapping = {'https://docs.python.org/': None}
 
 # Create package and class graphs
-import subprocess
 try:
     subprocess.check_call(['pyreverse3', '-o', 'png', '../qmt'])
-except:
+except BaseException:
     subprocess.check_call(['pyreverse', '-o', 'png', '../qmt'])
 os.rename('packages.png', 'source/packages.png')
 os.rename('classes.png', 'source/classes.png')
 
 # Ensure __init__ doesn't get skipped by sphinx-apidoc autodocumentation
 # Fix: don't document __init__, but the class itself.
-#def skip(app, what, name, obj, skip, options):
+# def skip(app, what, name, obj, skip, options):
 #    if name == "__init__":
 #        return False
 #    return skip
 #
-#def setup(app):
+# def setup(app):
 #    app.connect("autodoc-skip-member", skip)

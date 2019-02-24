@@ -38,7 +38,8 @@ runModel.modelDict = runModel.genEmptyModelDict()
 matLib = qmt.Materials()
 runModel.modelDict['materials'] = matLib.serialize_dict()
 
-# Tell FreeCAD what to do with the names we passed in. All the units here are in microns.
+# Tell FreeCAD what to do with the names we passed in. All the units here are
+# in microns.
 # The simplest type of object directive is an extrude, which just takes one 2D
 # shape and makes it into a 3D prism.
 runModel.addPart('substrate', 'Rectangle', 'extrude', 'dielectric',

@@ -2,8 +2,11 @@
 # Licensed under the MIT License.
 
 from __future__ import absolute_import, division, print_function
-from qmt.geometry.freecad.objectConstruction import *
+from qmt.geometry.freecad.objectConstruction import build, build_extrude, \
+    makeSAG, getBB
 import pytest
+import os
+import numpy as np
 
 
 def test_build(fix_exampleDir, fix_FCDoc):
@@ -11,10 +14,12 @@ def test_build(fix_exampleDir, fix_FCDoc):
     myPart = Part3DData('block_of_gold', 'Sketch', 'extrude', 'metal_gate',
                         material='Au', thickness=10)
     opts = {
-        'file_path': os.path.join(fix_exampleDir, 'geometry_sweep', 'geometry_sweep_showcase.fcstd'),
+        'file_path': os.path.join(
+            fix_exampleDir,
+            'geometry_sweep',
+            'geometry_sweep_showcase.fcstd'),
         'input_parts': [myPart],
-        'xsec_dict': {}
-    }
+        'xsec_dict': {}}
     fix_FCDoc.load(opts['file_path'])
     build(opts)
     # TODO
@@ -25,7 +30,7 @@ def test_build_extrude(fix_FCDoc, fix_hexagon_sketch):
     sketch = fix_hexagon_sketch()
     input_part = Part3DData('label', sketch.Name, 'extrude', 'metal_gate',
                             material='Au', thickness=10)
-    built_part = build_extrude(input_part)
+    built_part = build_extrude(input_part)  # noqa: F841
     # TODO
 
 # ~ def test_buildWire():
@@ -34,8 +39,10 @@ def test_build_extrude(fix_FCDoc, fix_hexagon_sketch):
 # ~ '''
 # ~ sketch = myDoc.addObject('Sketcher::SketchObject','Sketch')
 # ~ geoList = []
-# ~ geoList.append(Part.LineSegment(FreeCAD.Vector(0,0,0),FreeCAD.Vector(1,2,0)))
-# ~ geoList.append(Part.LineSegment(FreeCAD.Vector(1,2,0),FreeCAD.Vector(3,3,0)))
+# ~ geoList.append(Part.LineSegment(FreeCAD.Vector(0,0,0),
+#                                   FreeCAD.Vector(1,2,0)))
+# ~ geoList.append(Part.LineSegment(FreeCAD.Vector(1,2,0),
+#                                   FreeCAD.Vector(3,3,0)))
 # ~ sketch.addGeometry(geoList,False)
 # ~ myDoc.recompute()
 # ~ wire = buildWire(sketch, 0, 1)
@@ -52,7 +59,7 @@ def test_makeSAG(fix_FCDoc, fix_rectangle_sketch):
         /    \
        /      \
       /        \        NOT TO SCALE
-     /          \ 
+     /          \
     /_          _\
       |________|
     '''
@@ -72,7 +79,7 @@ def test_makeSAG_offset(fix_FCDoc, fix_rectangle_sketch):
         //  \\
        //    \\
       //      \\        NOT TO SCALE
-     //_      _\\ 
+     //_      _\\
     /__ |    | __\
        ||____||
        |______|
@@ -80,22 +87,25 @@ def test_makeSAG_offset(fix_FCDoc, fix_rectangle_sketch):
     sketch = fix_rectangle_sketch()
     sag = makeSAG(sketch, 0, 1, 2, 0.1, 0.1, 0.1)[0]
     assert sag.TypeId == "Part::Feature"
-    # The bounding box is expanded by offset * (1 + cos(alpha))/ sin(alpha) = offset * cot(alpha) in each x-y direction
+    # The bounding box is expanded by offset * (1 + cos(alpha))/ sin(alpha)
+    # = offset * cot(alpha) in each x-y direction
     # In this case tan(alpha) = 5
-    assert np.allclose(getBB(sag), (-0.22198, 1.22198, -0.22198, 1.22198, -0.1, 2.1))
+    assert np.allclose(
+        getBB(sag), (-0.22198, 1.22198, -0.22198, 1.22198, -0.1, 2.1))
     # Volume of incomplete pyramid is h(a^2 + ab + b^2)/3
     assert np.isclose(sag.Shape.Volume, 3.20247)
 
 
-def test_makeSAG_triangle_with_rectangular_base(fix_FCDoc, fix_rectangle_sketch):
+def test_makeSAG_triangle_with_rectangular_base(
+        fix_FCDoc, fix_rectangle_sketch):
     r'''
-    Test the case where the top collapses down to a line 
+    Test the case where the top collapses down to a line
           /\
          /  \
         /    \
        /      \        NOT TO SCALE
       /        \
-     /          \ 
+     /          \
     /_          _\
       |________|
     '''
@@ -110,13 +120,13 @@ def test_makeSAG_triangle_with_rectangular_base(fix_FCDoc, fix_rectangle_sketch)
 
 def test_makeSAG_triangle_with_square_base(fix_FCDoc, fix_rectangle_sketch):
     r'''
-    Test the case where the top collapses down to a point 
+    Test the case where the top collapses down to a point
           /\
          /  \
         /    \
        /      \        NOT TO SCALE
       /        \
-     /          \ 
+     /          \
     /_          _\
       |________|
     '''
@@ -128,7 +138,8 @@ def test_makeSAG_triangle_with_square_base(fix_FCDoc, fix_rectangle_sketch):
     assert np.isclose(sag.Shape.Volume, 1.48, 0.0001)
 
 
-def test_makeSAG_triangle_with_no_rectangular_part(fix_FCDoc, fix_rectangle_sketch):
+def test_makeSAG_triangle_with_no_rectangular_part(
+        fix_FCDoc, fix_rectangle_sketch):
     r'''
     Test the case where there is no rectangular part at the bottom
           /\
@@ -136,7 +147,7 @@ def test_makeSAG_triangle_with_no_rectangular_part(fix_FCDoc, fix_rectangle_sket
         /    \
        /      \        NOT TO SCALE
       /        \
-     /          \ 
+     /          \
     /____________\
     '''
     sketch = fix_rectangle_sketch()
@@ -149,7 +160,8 @@ def test_makeSAG_triangle_with_no_rectangular_part(fix_FCDoc, fix_rectangle_sket
 
 def test_makeSAG_with_fat_top(fix_FCDoc, fix_rectangle_sketch):
     r'''
-    Test the case where the top is fatter than the bottom, but not fatter than the middle
+    Test the case where the top is fatter than the bottom, but not fatter
+    than the middle
      ____________
     /__        __\        NOT TO SCALE
        |______|
@@ -195,14 +207,16 @@ def test_makeSAG_with_no_over_hang(fix_FCDoc, fix_rectangle_sketch):
 
 def test_makeSAG_with_no_top(fix_FCDoc, fix_rectangle_sketch):
     r'''
-    Assertion should fail if you try to build a SAG with no slope to the roof. This is because this is a different geometry, especially when handling offsets
+    Assertion should fail if you try to build a SAG with no slope to the roof.
+    This is because this is a different geometry, especially when handling
+    offsets
        ________
      _|        |_
     |____________|        NOT TO SCALE
     '''
     sketch = fix_rectangle_sketch()
     with pytest.raises(Exception):
-        sag = makeSAG(sketch, 0, 1, 2, 0.1, -0.1)[0]
+        makeSAG(sketch, 0, 1, 2, 0.1, -0.1)[0]
 
 # ~ def test_modelBuilder_saveFreeCADState():
 # ~ mb = modelBuilder()

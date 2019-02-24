@@ -58,13 +58,15 @@ name_tag = SweepTag('name tag description')
 lang_tag = SweepTag('language tag description')
 name = NameTask({'name': name_tag})
 greet = HelloDependentTask(name, {'language': lang_tag})
-sweeps = [{name_tag: 'John', lang_tag: 'English'}, {name_tag: 'Jose', lang_tag: 'Spanish'}]
+sweeps = [{name_tag: 'John', lang_tag: 'English'},
+          {name_tag: 'Jose', lang_tag: 'Spanish'}]
 tm = SweepManager(sweeps)
 
 tm.run(greet).result()
 
 print('Or cartesian products:')
-name = NameTask({'name': name_tag})  # need new NameTask, 'greet' consumed the previous
+# need new NameTask, 'greet' consumed the previous
+name = NameTask({'name': name_tag})
 greet = HelloDependentTask(name, {'language': lang_tag})
 values = {name_tag: ['John', 'Jose'], lang_tag: ['English', 'Spanish']}
 cartesian = SweepManager.construct_cartesian_product(values)

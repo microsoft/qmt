@@ -4,7 +4,6 @@
 """Fixtures for QMT unit tests."""
 
 import os
-import sys
 import pytest
 import qmt
 
@@ -32,17 +31,19 @@ def fix_FCDoc():
     FreeCAD.closeDocument('testDoc')
 
 
-################################################################################
+##########################################################################
 # Sketches
 
 @pytest.fixture(scope='function')
 def fix_two_cycle_sketch():
     '''Return two-cycle sketch function object.'''
 
-    def aux_two_cycle_sketch(a=(20, 20, 0), b=(-30, 20, 0), c=(-30, -10, 0), d=(20, -10, 0),
-                             e=(50, 50, 0), f=(60, 50, 0), g=(55, 60, 0)):
-        '''Helper function to drop a simple multi-cycle sketch.
-           The segments are ordered into one rectangle and one triangle.
+    def aux_two_cycle_sketch(a=(20, 20, 0), b=(-30, 20, 0), c=(-30, -10, 0),
+                             d=(20, -10, 0), e=(50, 50, 0), f=(60, 50, 0),
+                             g=(55, 60, 0)):
+        '''
+        Helper function to drop a simple multi-cycle sketch.
+        The segments are ordered into one rectangle and one triangle.
         '''
         # Note: the z-component is zero, as sketches are plane objects.
         #       Adjust orientation with Sketch.Placement(Normal, Rotation)
@@ -71,7 +72,7 @@ def fix_two_cycle_sketch():
 def fix_rectangle_sketch():
     '''Return unit square sketch function object.'''
 
-    def aux_rectangle_sketch(x_length = 1, y_length = 1, x_start = 0, y_start = 0):
+    def aux_rectangle_sketch(x_length=1, y_length=1, x_start=0, y_start=0):
         '''Helper function to drop a simple unit square sketch.
            The segments are carefully ordered.
         '''
@@ -108,15 +109,17 @@ def fix_hexagon_sketch():
         vec = FreeCAD.Vector
         doc = FreeCAD.ActiveDocument
         sketch = doc.addObject('Sketcher::SketchObject', 'HexSketch')
-        ProfileLib.RegularPolygon.makeRegularPolygon('HexSketch', 6, vec(1, 1, 0), vec(1 + r, 1, 0),
-                                                     False)
+        ProfileLib.RegularPolygon.makeRegularPolygon(
+            'HexSketch', 6, vec(
+                1, 1, 0), vec(
+                1 + r, 1, 0), False)
         doc.recompute()
         return sketch
 
     return aux_hexagon_sketch
 
 
-################################################################################
+##########################################################################
 # Tasks environment
 
 @pytest.fixture(scope='function')
@@ -129,20 +132,23 @@ def fix_task_env():
     def input_task_example(parts_dict):
         """Simple example task. This is the first task in the chain.
 
-        :param dict parts_dict: Dictionary specifying the input parts. It should be of the form
-        {"part":list_of_points}.
+        :param dict parts_dict: Dictionary specifying the input parts. It
+            should be of the form {"part":list_of_points}.
         """
         for key_val in parts_dict:
             print(str(key_val) + ' ' + str(parts_dict[key_val]))
         return parts_dict
 
     def gathered_task_example(input_data_list, num_points):
-        """Takes the example task and does some work on it. This is a gathered task, which means
-        that all the previous work is gathered up and worked on together.
+        """
+        Takes the example task and does some work on it. This is a
+        gathered_task, which means that all the previous work is gathered up
+        and worked on together.
 
-        :param list input_data_list: List of dictionaries from several input tasks.
-        :param list num_points: List of ints specifying the number of grid points for a given
-        geometry.
+        :param list input_data_list: List of dictionaries from several input
+            tasks.
+        :param list num_points: List of ints specifying the number of grid
+            points for a given geometry.
         """
         return_list = []
         for i, geom in enumerate(input_data_list):
@@ -154,10 +160,13 @@ def fix_task_env():
         return return_list
 
     def post_processing_task_example(input_data, gathered_data, prefactor):
-        """Takes input from the gathered task and does some more work in parallel.
+        """
+        Takes input from the gathered task and does some more work in
+        parallel.
 
         :param dict input_data: An input geometry.
-        :param dict gathered_data: One of the meshes produced from gathered_task_example.
+        :param dict gathered_data: One of the meshes produced from
+            gathered_task_example.
         :param float prefactor: Prefactor used to scale the output
         """
         result = 0.0
@@ -166,4 +175,5 @@ def fix_task_env():
                 np.sum(input_data[part]) * np.sum(gathered_data[part])
         return result
 
-    return input_task_example, gathered_task_example, post_processing_task_example
+    return input_task_example, gathered_task_example, \
+        post_processing_task_example

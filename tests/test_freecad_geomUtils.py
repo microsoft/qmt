@@ -5,7 +5,13 @@
 
 from __future__ import division
 
-from qmt.geometry.freecad.geomUtils import *
+from qmt.geometry.freecad.geomUtils import extrude, copy_move, makeHexFace, \
+    genUnion, intersect, subtract, getBB, makeBB, checkOverlap, \
+    extrudeBetween, draftOffset, centerObjects, crossSection
+import FreeCAD
+import Part
+import Draft
+import numpy as np
 
 vec = FreeCAD.Vector
 
@@ -23,13 +29,14 @@ def test_extrude(fix_FCDoc, fix_two_cycle_sketch):
 def test_copy_move(fix_FCDoc, fix_hexagon_sketch):
     '''Test copy.'''
     # TODO: warning.
-    # ~ sketch = aux_two_cycle_sketch() # WARNING: multi-cycle sketches don't get moved correctly
+    # WARNING: multi-cycle sketches don't get moved correctly
     #  -> need sanitation
+    # ~ sketch = aux_two_cycle_sketch()
     sketch = fix_hexagon_sketch()
     sketch2 = copy_move(sketch, vec(0, 0, 20), copy=True)
     fix_FCDoc.recompute()
     assert sketch.Shape.Edges[0].Vertexes[0].Point[2] + 20 == \
-           sketch2.Shape.Edges[0].Vertexes[0].Point[2]
+        sketch2.Shape.Edges[0].Vertexes[0].Point[2]
 
 
 def test_makeHexFace(fix_FCDoc):
@@ -50,12 +57,15 @@ def test_genUnion(fix_FCDoc):
     '''Test union via bounding box.'''
     box1 = fix_FCDoc.addObject("Part::Box", "Box1")
     box2 = fix_FCDoc.addObject("Part::Box", "Box2")
-    box2.Placement = FreeCAD.Placement(vec(10, 0, 0), FreeCAD.Rotation(vec(0, 0, 1), 0))
+    box2.Placement = FreeCAD.Placement(
+        vec(10, 0, 0), FreeCAD.Rotation(vec(0, 0, 1), 0))
     box3 = fix_FCDoc.addObject("Part::Box", "Box2")
     fix_FCDoc.recompute()
     assert genUnion([]) is None
     assert genUnion([box3]).Shape.CenterOfMass == box1.Shape.CenterOfMass
-    assert genUnion([box3], consumeInputs=True).Shape.CenterOfMass == box1.Shape.CenterOfMass
+    assert genUnion(
+        [box3],
+        consumeInputs=True).Shape.CenterOfMass == box1.Shape.CenterOfMass
     union = genUnion([box1, box2], consumeInputs=True)
     assert union.Shape.BoundBox.XLength == 20
 
@@ -80,7 +90,8 @@ def test_subtract(fix_FCDoc):
     '''Test subtract by checking volume.'''
     box1 = fix_FCDoc.addObject("Part::Box", "Box1")
     box2 = fix_FCDoc.addObject("Part::Box", "Box2")
-    box2.Placement = FreeCAD.Placement(vec(5, 0, 0), FreeCAD.Rotation(vec(0, 0, 1), 0))
+    box2.Placement = FreeCAD.Placement(
+        vec(5, 0, 0), FreeCAD.Rotation(vec(0, 0, 1), 0))
     fix_FCDoc.recompute()
     cut = subtract(box1, box2, consumeInputs=True)
     assert np.isclose(cut.Shape.Volume, 10 ** 3 * 0.5)
@@ -89,12 +100,15 @@ def test_subtract(fix_FCDoc):
 def test_subtractParts(fix_FCDoc):
     '''Test subtract by checking volume.
     '''
-    #   TODO: the FC v0.16 Draft requires UiLoader, which doesn't work from the cli.
-    box1 = fix_FCDoc.addObject("Part::Box", "Box1")
+    # TODO: the FC v0.16 Draft requires UiLoader, which doesn't work from the
+    # cli.
+    box1 = fix_FCDoc.addObject("Part::Box", "Box1")  # noqa: F841
     box2 = fix_FCDoc.addObject("Part::Box", "Box2")
     box3 = fix_FCDoc.addObject("Part::Box", "Box3")
-    box2.Placement = FreeCAD.Placement(vec(5, 0, 0), FreeCAD.Rotation(vec(0, 0, 1), 0))
-    box3.Placement = FreeCAD.Placement(vec(-8, 0, 0), FreeCAD.Rotation(vec(0, 0, 1), 0))
+    box2.Placement = FreeCAD.Placement(
+        vec(5, 0, 0), FreeCAD.Rotation(vec(0, 0, 1), 0))
+    box3.Placement = FreeCAD.Placement(
+        vec(-8, 0, 0), FreeCAD.Rotation(vec(0, 0, 1), 0))
     # ~ cut = subtractParts(box1, [box2, box3])
     # ~ assert np.isclose(cut.Shape.Volume, 10**3 * 0.3)
 
@@ -103,7 +117,8 @@ def test_intersect(fix_FCDoc):
     '''Test intersect by checking volume.'''
     box1 = fix_FCDoc.addObject("Part::Box", "Box1")
     box2 = fix_FCDoc.addObject("Part::Box", "Box2")
-    box2.Placement = FreeCAD.Placement(vec(7, 0, 0), FreeCAD.Rotation(vec(0, 0, 1), 0))
+    box2.Placement = FreeCAD.Placement(
+        vec(7, 0, 0), FreeCAD.Rotation(vec(0, 0, 1), 0))
     fix_FCDoc.recompute()
     cut = intersect((box1, box2), consumeInputs=True)
     assert np.isclose(cut.Shape.Volume, 10 ** 3 * 0.3)
@@ -113,10 +128,12 @@ def test_checkOverlap(fix_FCDoc):
     '''Test overlap between two volumes.'''
     box1 = fix_FCDoc.addObject("Part::Box", "Box1")
     box2 = fix_FCDoc.addObject("Part::Box", "Box2")
-    box2.Placement = FreeCAD.Placement(vec(9.9, 0, 0), FreeCAD.Rotation(vec(0, 0, 1), 0))
+    box2.Placement = FreeCAD.Placement(
+        vec(9.9, 0, 0), FreeCAD.Rotation(vec(0, 0, 1), 0))
     fix_FCDoc.recompute()
     assert checkOverlap((box1, box2)) is True
-    box2.Placement = FreeCAD.Placement(vec(10.1, 0, 0), FreeCAD.Rotation(vec(0, 0, 1), 0))
+    box2.Placement = FreeCAD.Placement(
+        vec(10.1, 0, 0), FreeCAD.Rotation(vec(0, 0, 1), 0))
     fix_FCDoc.recompute()
     assert checkOverlap((box1, box2)) is False
 
@@ -131,7 +148,7 @@ def test_extrudeBetween(fix_FCDoc, fix_hexagon_sketch):
 def test_liftObject(fix_FCDoc, fix_rectangle_sketch):
     '''Test sweeping lift for sketches.'''
     # TODO: why do we have to make union with the lifted sketch?.
-    sketch = fix_rectangle_sketch()
+    sketch = fix_rectangle_sketch()  # noqa: F841
     # ~ vol = liftObject(sketch, 42, consumeInputs=False)
     # ~ assert vol.Shape.Volume == 42
 
@@ -140,7 +157,12 @@ def test_draftOffset(fix_FCDoc):
     '''Check if draft offset resizes the object. TODO: edge cases'''
     pl = FreeCAD.Placement()
     pl.Base = vec(1, 1, 0)
-    draft = Draft.makeRectangle(length=2, height=2, placement=pl, face=False, support=None)
+    draft = Draft.makeRectangle(
+        length=2,
+        height=2,
+        placement=pl,
+        face=False,
+        support=None)
     draft2 = draftOffset(draft, 20)
     assert draft.Height.Value + 40 == draft2.Height.Value
 
@@ -150,7 +172,8 @@ def test_centerObjects(fix_FCDoc):
     # TODO: centering or snapping to zero?
     box1 = fix_FCDoc.addObject("Part::Box", "Box1")
     box2 = fix_FCDoc.addObject("Part::Box", "Box2")
-    box2.Placement = FreeCAD.Placement(vec(1.5, 3.5, 2.5), FreeCAD.Rotation(vec(0, 0, 1), 0))
+    box2.Placement = FreeCAD.Placement(
+        vec(1.5, 3.5, 2.5), FreeCAD.Rotation(vec(0, 0, 1), 0))
     fix_FCDoc.recompute()
     assert centerObjects(()) is None
     # ~ print(getBB(box1))

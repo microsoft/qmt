@@ -6,19 +6,20 @@
 from shapely.geometry import Polygon, LineString
 from qmt.data import Geo2DData, Geo3DData, serialize_file
 
+
 def build_2d_geometry(parts, edges, lunit='nm', build_order=None):
     """
     Build a geometry in 2D.
 
     :param dict parts: Dictionary for holding the 2D parts, of the form
-                       {'part_name':list of 2d points}.
+        {'part_name':list of 2d points}.
     :param dict edges: Dictionary of 2D edges, of the form:
-                       {'edge_name':list of 2d points}.
+        {'edge_name':list of 2d points}.
     :param str lunit: length_unit (nm).
-    :param list build_order: None or a list of all parts, determining the build order. Items on
-                             the left are highest priority and items on the right are lowest.
-                             If None is given (default), then build order is determined just
-                             taken to be the order of the parts and edges.
+    :param list build_order: None or a list of all parts, determining the
+        build order. Items on the left are highest priority and items on the
+        right are lowest. If None is given (default), then build order is
+        determined just taken to be the order of the parts and edges.
     """
     geo_2d = Geo2DData()
     if build_order is None:
@@ -36,8 +37,11 @@ def build_2d_geometry(parts, edges, lunit='nm', build_order=None):
         elif object_name in edges:
             geo_2d.add_edge(object_name, LineString(edges[object_name]))
         else:
-            raise ValueError("Object of name " + object_name + " was found neither in edges nor "
-                                                               "parts.")
+            raise ValueError(
+                "Object of name " +
+                object_name +
+                " was found neither in edges nor "
+                "parts.")
     geo_2d.lunit = lunit
     return geo_2d
 
@@ -47,18 +51,20 @@ def build_3d_geometry(input_parts, input_file=None, xsec_dict=None,
     """
     Build a geometry in 3D.
 
-    :param list input_parts: Ordered list of input parts, leftmost items get built first
-    :param str input_file: Path to FreeCAD template file. Either this or serialized_input_file
-        must be set (but not both).
-    :param dict xsec_dict: Dictionary of cross-section specifications. It should be of the
-        form {'xsec_name':{'axis':(1,0,0),'distance':0.}}, where the axis parameter is a tuple
-        defining the axis that defines the normal of the cross section, and distance is
-        the length along the axis used to set the cross section.
-    :param bytes serialized_input_file: FreeCAD template file that has been serialized using
-        qmt.data.serialize_file. This is useful for passing a
-        file into a docker container or other environment that
-        doesn't have access to a shared drive. Either this or
+    :param list input_parts: Ordered list of input parts, leftmost items get
+        built first
+    :param str input_file: Path to FreeCAD template file. Either this or
         serialized_input_file must be set (but not both).
+    :param dict xsec_dict: Dictionary of cross-section specifications. It
+        should be of the form {'xsec_name':{'axis':(1,0,0),'distance':0.}},
+        where the axis parameter is a tuple defining the axis that defines
+        the normal of the cross section, and distance is the length along the
+        axis used to set the cross section.
+    :param bytes serialized_input_file: FreeCAD template file that has been
+        serialized using qmt.data.serialize_file. This is useful for passing a
+        file into a docker container or other environment that doesn't have
+        access to a shared drive. Either this or serialized_input_file must be
+        set (but not both).
     :param dict params: Dictionary of parameters to use in FreeCAD.
     :return Geo3DData: A built geometry.
     """

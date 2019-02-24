@@ -51,7 +51,7 @@ def silent_stdout():
     stored_fileno = None
     try:
         stored_fileno = os.dup(sys.stdout.fileno())
-    except:
+    except BaseException:
         pass
     with open(os.devnull, 'w') as devnull:
         sys.stdout = devnull  # for python stdout.write
@@ -61,7 +61,7 @@ def silent_stdout():
         finally:
             sys.stdout = stored_py
             if stored_fileno is not None:
-                os.dup2(stored_fileno, 1) 
+                os.dup2(stored_fileno, 1)
 
 
 def _remove_from_zip(zipfname, *filenames):  # pragma: no cover

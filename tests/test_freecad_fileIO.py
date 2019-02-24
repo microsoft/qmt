@@ -6,8 +6,11 @@
 from __future__ import absolute_import, division, print_function
 
 import pytest
-
-from qmt.geometry.freecad.fileIO import *
+import os
+from qmt.geometry.freecad.fileIO import exportMeshed, exportCAD
+import FreeCAD  # : F401 FreeCAD import is needed before Part and Mesh
+import Part
+import Mesh
 
 
 def test_exportMeshed(fix_testDir, fix_FCDoc):
@@ -40,8 +43,8 @@ def test_exportCAD(fix_testDir, fix_FCDoc):
     Part.insert(filePath, fix_FCDoc.Name)
     CADImport = fix_FCDoc.getObject("tmp_testExport")
 
-    import FreeCAD
-    transBB = testBB[0:][::2] + testBB[1:][::2]  # reformat to FreeCAD representation
+    # reformat to FreeCAD representation
+    transBB = testBB[0:][::2] + testBB[1:][::2]
     refBB = FreeCAD.Base.BoundBox(*transBB)
     assert repr(CADImport.Shape.BoundBox) == repr(refBB)
 

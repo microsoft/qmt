@@ -5,7 +5,7 @@
 
 
 def test_task_init(fix_task_env):
-    input_task_example, gathered_task_example, post_processing_task_example = fix_task_env
+    input_task_example, _, _ = fix_task_env
     parts = {'a': [0., 1., 2.], 'b': [-3., 10., 2.], 'c': [20.]}
     input_data = input_task_example(parts)
     assert input_data == parts
@@ -13,7 +13,8 @@ def test_task_init(fix_task_env):
 
 def test_run_task_chain(fix_task_env):
     import numpy as np
-    input_task_example, gathered_task_example, post_processing_task_example = fix_task_env
+    input_task_example, gathered_task_example, post_processing_task_example \
+        = fix_task_env
     parts = {'a': [0., 1., 2.], 'b': [-3., 10., 2.], 'c': [20.]}
     numpoints = 20
     prefactor = 0.1
@@ -41,7 +42,8 @@ def test_run_dask(fix_task_env):
     from dask.distributed import Client
     dc = Client(processes=False)
 
-    input_task_example, gathered_task_example, post_processing_task_example = fix_task_env
+    input_task_example, gathered_task_example, post_processing_task_example \
+        = fix_task_env
     parts = {'a': [0., 1., 2.], 'b': [-3., 10., 2.], 'c': [20.]}
     numpoints = 20
     prefactor = 0.1
@@ -73,7 +75,8 @@ def test_run_dask(fix_task_env):
 
 def test_sweep(fix_task_env):
     import numpy as np
-    input_task_example, gathered_task_example, post_processing_task_example = fix_task_env
+    input_task_example, gathered_task_example, post_processing_task_example \
+        = fix_task_env
 
     results = []
     collected_inputs = []
@@ -99,8 +102,10 @@ def test_docker_sweep(fix_task_env):
     from dask.distributed import Client
     import numpy as np
 
-    # First, set up dask cluster, which for now is just one scheduler and one worker
-    # TODO: Make this run in series of docker containers (e.g. with docker-compose)
+    # First, set up dask cluster, which for now is just one scheduler and one
+    # worker
+    # TODO: Make this run in series of docker containers (e.g. with
+    # docker-compose)
     scheduler_command = ['dask-scheduler',
                          '--port', '8781', '--no-bokeh']
     worker_command = ['dask-worker',
@@ -115,7 +120,8 @@ def test_docker_sweep(fix_task_env):
         client = Client('0.0.0.0:8781')
 
         # Next, perform the same sweep as before:
-        input_task_example, gathered_task_example, post_processing_task_example = fix_task_env
+        input_task_example, gathered_task_example, \
+            post_processing_task_example = fix_task_env
 
         delayeds = []
         collected_inputs = []
