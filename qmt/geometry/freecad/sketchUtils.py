@@ -110,10 +110,10 @@ def addCycleSketch(name, wire):
     # ~ return Draft.makeSketch([wire], name=name, autoconstraints=True)
 
     sketch = doc.addObject('Sketcher::SketchObject', name)
+    old_v1 = None  # redundant declaration, but it pleases the linter
     for i, edge in enumerate(wire.Edges):
         v0 = vec(tuple(edge.Vertexes[0].Point))
         v1 = vec(tuple(edge.Vertexes[1].Point))
-        old_v1 = None  # redundant declaration, but it pleases the linter
         if i > 0:
             if(v0 - old_v1).Length > 1e-5:  # fix invalid wire segments
                 v1 = vec(tuple(edge.Vertexes[0].Point))
