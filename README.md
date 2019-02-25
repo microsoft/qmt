@@ -18,6 +18,9 @@ Note that this initial release does not contain examples or introductory documen
 
 We are using GitHub Flow for the development of this code. Please see [here](https://guides.github.com/introduction/flow/) for a tutorial.
 
+## Linting
+
+PEP 8 linting is automatically enforced during the build. If you want to check linting locally, run `flake8 .` inside the QMT folder. You can also use `autopep8 --recursive --in-place --aggressive --aggressive .` to automatically fix some mistakes. These packages are included in the anaconda environment.
 
 # Contributing
 
