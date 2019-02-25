@@ -2,8 +2,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-# Let's make a really loooooooooooooooooooooooooooooooooooooooooooooooooong comment to break linting
-
 from setuptools import setup
 
 setup(
