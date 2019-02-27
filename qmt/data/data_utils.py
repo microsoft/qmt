@@ -10,6 +10,7 @@ import h5py
 import time
 import dask
 import dask.delayed
+import tempfile
 
 
 def serialize_file(path):
@@ -33,7 +34,7 @@ def store_serial(obj, save_fct, ext_format, scratch_dir=None):
     The parameter `ext_format` can be used for format distinction in some `save_fct`.
     '''
     if not scratch_dir:
-        scratch_dir = os.curdir
+        scratch_dir = tempfile.gettempdir()
     tmp_path = os.path.join(scratch_dir, uuid.uuid4().hex + '.' + ext_format)
     save_fct(obj, tmp_path)
     serial_data = serialize_file(tmp_path)
@@ -49,7 +50,7 @@ def load_serial(serial_obj, load_fct, ext_format=None, scratch_dir=None):
     if not ext_format:
         ext_format = 'tmpdata'
     if not scratch_dir:
-        scratch_dir = os.curdir
+        scratch_dir = tempfile.gettempdir()
     tmp_path = os.path.join(scratch_dir, uuid.uuid4().hex + '.' + ext_format)
     write_deserialised(serial_obj, tmp_path)
     obj = load_fct(tmp_path)
