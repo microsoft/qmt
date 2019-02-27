@@ -23,9 +23,9 @@ from six import iteritems, itervalues
 try:
     import qmt.physics_constants as pc
 
-    units = pc.units
-    parseUnit = pc.parse_unit
-    toFloat = pc.to_float
+    UNITS = pc.units
+    PARSE_UNIT = pc.parse_unit
+    TO_FLOAT = pc.to_float
 except ImportError:  # to avoid problems if we are using FreeCAD
     pass
 
@@ -53,9 +53,9 @@ class Material(collections.Mapping):
         self.name = name
         self.properties = dict(properties)
         if eunit is None:
-            self.energyUnit = units.meV
+            self.energy_unit = UNITS.meV
         else:
-            self.energyUnit = toFloat(units.meV / parseUnit(eunit))
+            self.energy_unit = TO_FLOAT(UNITS.meV / PARSE_UNIT(eunit))
         # Tuple of key values that have energy units:
         self.energy_quantities = (
             'workFunction',
@@ -74,13 +74,13 @@ class Material(collections.Mapping):
             raise KeyError(
                 "KeyError: material '{}' has no '{}'".format(self.name, key))
         if key in self.energy_quantities:
-            value *= self.energyUnit
+            value *= self.energy_unit
         return value
 
     def __setitem__(self, key, value):
         if key in self.energy_quantities:
             # if is an energy quantity, scale it
-            scaled_value = toFloat(value / self.energyUnit)
+            scaled_value = TO_FLOAT(value / self.energy_unit)
         else:
             scaled_value = value  # otherwise just pass
         self.properties[key] = scaled_value
@@ -93,7 +93,7 @@ class Material(collections.Mapping):
 
     def __repr__(self):
         return 'Material({}, {}, {})'.format(
-            self.name, self.properties, self.energyUnit)
+            self.name, self.properties, self.energy_unit)
 
     def serialize_dict(self):
         """
@@ -152,12 +152,11 @@ class Material(collections.Mapping):
         # (2001) Eqs. 2.16-2.17]
         if direction in ('z', '001'):
             return 1. / (gamma1 + sign * 2 * gamma2)
-        elif direction == '110':
+        if direction == '110':
             return 2. / (2 * gamma1 + sign * gamma2 + sign * 3 * gamma3)
-        elif direction == '111':
+        if direction == '111':
             return 1. / (gamma1 + sign * 2 * gamma3)
-        else:
-            raise RuntimeError('invalid direction: ' + str(direction))
+        raise RuntimeError('invalid direction: ' + str(direction))
 
 
 class Materials(collections.Mapping):
@@ -181,43 +180,44 @@ class Materials(collections.Mapping):
     """
 
     def __init__(self, matPath=None, matDict=None, load=True):
-        self.matDict = {}
-        self.bowingParameters = {}
+        self.mat_dict = {}
+        self.bowing_parameters = {}
         if matPath is None and matDict is None:
             matPath = os.path.join(os.path.dirname(__file__),
                                    'materials.json')
-        self.matPath = matPath
+        self.mat_path = matPath
 
         if matPath is not None and load:
             self.load()
 
         if matDict is not None:
-            self.bowingParameters.update(
+            self.bowing_parameters.update(
                 matDict.pop('__bowing_parameters', {}))
-            self.matDict = matDict
+            self.mat_dict = matDict
 
     def __iter__(self):
-        return iter(self.matDict)
+        return iter(self.mat_dict)
 
     def __len__(self):
-        return len(self.matDict)
+        return len(self.mat_dict)
 
     def add_material(self, name, mat_type, **kwargs):
         """Generate a material and add it to the matDict.
         """
         if mat_type in ('metal', 'dielectric'):
             kwargs['electronMass'] = kwargs.get('electronMass', 1.)
-        self.matDict[name] = self._make_material(mat_type, **kwargs)
+        self.mat_dict[name] = self._make_material(mat_type, **kwargs)
 
     def set_bowing_parameters(self, name_a, name_b, mat_type, **kwargs):
         """
         Generate a bowing parameter set and add it to the bowingParameters
         dict.
         """
-        self.bowingParameters[(name_a, name_b)] = self._make_material(
+        self.bowing_parameters[(name_a, name_b)] = self._make_material(
             mat_type, **kwargs)
 
-    def _make_material(self, mat_type, **kwargs):
+    @staticmethod
+    def _make_material(mat_type, **kwargs):
         material = {}
 
         def set_property(key):
@@ -266,7 +266,7 @@ class Materials(collections.Mapping):
 
     def __setitem__(self, key, val):
         # This assumes that val is a Material object
-        self.matDict[key] = val.properties
+        self.mat_dict[key] = val.properties
 
     def find(self, name, eunit=None):
         """
@@ -281,8 +281,8 @@ class Materials(collections.Mapping):
         :param str eunit:
             Unit of energy. This is passed on to the Material constructor.
         """
-        if name in self.matDict:
-            properties = self.matDict[name]
+        if name in self.mat_dict:
+            properties = self.mat_dict[name]
         else:
             # print("parsing", name)
             # A_y B_x C
@@ -298,19 +298,16 @@ class Materials(collections.Mapping):
             match2 = re.match(bin_pattern2, name)
             match3 = re.match(bin_pattern3, name)
             if match1:
-                A, y, B, x, C = match1.groups()
-                x, y = float(x), float(y)
-                x /= x + y
+                A, y, B, x, C = match1.groups()  # pylint: disable=C0103
+                x /= x + y  # pylint: disable=C0103
                 properties = self._make_binary_alloy(A + C, B + C, x)
             elif match2:
-                A, B, y, C, x = match2.groups()
-                x, y = float(x), float(y)
-                x /= x + y
+                A, B, y, C, x = match2.groups()  # pylint: disable=C0103
+                x /= x + y  # pylint: disable=C0103
                 properties = self._make_binary_alloy(A + B, A + C, x)
             elif match3:
-                A, y, B, x = match3.groups()
-                x, y = float(x), float(y)
-                x /= x + y
+                A, y, B, x = match3.groups()  # pylint: disable=C0103
+                x /= x + y  # pylint: disable=C0103
                 properties = self._make_binary_alloy(A, B, x)
             else:
                 raise KeyError(name)
@@ -331,12 +328,12 @@ class Materials(collections.Mapping):
         with the bowing parameter O_{AB}.
         """
         assert x >= 0 and x <= 1
-        if (nameB, nameA) in self.bowingParameters:
+        if (nameB, nameA) in self.bowing_parameters:
             nameA, nameB = nameB, nameA
             x = 1. - x
         matA, matB = self.find(
             nameA, eunit='meV'), self.find(nameB, eunit='meV')
-        bow = self.bowingParameters.get((nameA, nameB), {})
+        bow = self.bowing_parameters.get((nameA, nameB), {})
         alloy = {}
         for key, valA in iteritems(matA):
             if key not in matB:
@@ -352,38 +349,38 @@ class Materials(collections.Mapping):
         return alloy
 
     def serialize_dict(self):
-        db = self.matDict.copy()
+        db = self.mat_dict.copy()
         bowingParms = {}
-        for k, v in iteritems(self.bowingParameters):
+        for k, v in iteritems(self.bowing_parameters):
             bowingParms[str(k)] = v
         db['__bowing_parameters'] = bowingParms
         return db
 
     def deserialize_dict(self, db):
         bowingParms = db.pop('__bowing_parameters', {})
-        self.matDict = db
-        self.bowingParameters = {}
+        self.mat_dict = db
+        self.bowing_parameters = {}
         for k, v in iteritems(bowingParms):
-            self.bowingParameters[literal_eval(k)] = v
+            self.bowing_parameters[literal_eval(k)] = v
 
     def save(self):
         """Save the current materials database to disk.
         """
         db = self.serialize_dict()
-        with open(self.matPath, 'w') as myFile:
+        with open(self.mat_path, 'w') as myFile:
             json.dump(db, myFile, indent=4, sort_keys=True)
 
     def load(self):
         """Load the materials database from disk.
         """
         try:
-            with open(self.matPath, 'r') as myFile:
+            with open(self.mat_path, 'r') as myFile:
                 db = json.load(myFile)
             self.deserialize_dict(db)
         except IOError:
-            print("Could not load materials file %s." % self.matPath)
+            print("Could not load materials file %s." % self.mat_path)
             print("Generating a new file at that location...")
-            generate_file(self.matPath)
+            generate_file(self.mat_path)
             self.load()
 
     def conduction_band_minimum(self, mat):
@@ -418,14 +415,14 @@ class Materials(collections.Mapping):
         if mat['type'] == 'metal':
             return -mat['workFunction'] - mat['fermiEnergy']
         elif mat['type'] == 'dielectric':
-            return 0. * mat.energyUnit  # vacuum energy
+            return 0. * mat.energy_unit  # vacuum energy
         assert mat['type'] == 'semi'
         try:
             cbo = mat['valenceBandOffset'] + mat['directBandGap']
-            ref = self.matDict[ref_name]
+            ref = self.mat_dict[ref_name]
             ref_level = -(ref['electronAffinity'] +
                           ref['directBandGap'] + ref['valenceBandOffset'])
-            ref_level *= mat.energyUnit
+            ref_level *= mat.energy_unit
             return cbo + ref_level
         except KeyError:
             # fall back to Anderson's rule
@@ -463,17 +460,17 @@ class Materials(collections.Mapping):
           `self.valence_band_maximum(mat1) - self.valence_band_maximum(mat2)`
         """
         if mat['type'] == 'metal':
-            return -10.e3 * mat.energyUnit  # very low
+            return -10.e3 * mat.energy_unit  # very low
         elif mat['type'] == 'dielectric':
-            return -10.e3 * mat.energyUnit  # very low
+            return -10.e3 * mat.energy_unit  # very low
         assert mat['type'] == 'semi'
         ref_name = 'InSb'
         try:
             vbo = mat['valenceBandOffset']
-            ref = self.matDict[ref_name]
+            ref = self.mat_dict[ref_name]
             ref_level = -(ref['electronAffinity'] +
                           ref['directBandGap'] + ref['valenceBandOffset'])
-            ref_level *= mat.energyUnit
+            ref_level *= mat.energy_unit
             return vbo + ref_level
         except KeyError:
             # fall back to Anderson's rule
@@ -494,10 +491,10 @@ class Materials(collections.Mapping):
     # reported by materials
     def reference_level(self, eunit=None):
         if eunit is None:
-            eunit = units.meV
+            eunit = UNITS.meV
         else:
-            eunit = toFloat(units.meV / parseUnit(eunit))
-        return -self.matDict['InSb']['electronAffinity'] * eunit
+            eunit = TO_FLOAT(UNITS.meV / PARSE_UNIT(eunit))
+        return -self.mat_dict['InSb']['electronAffinity'] * eunit
 
 
 def conduction_band_offset(mat, ref_mat):
@@ -510,7 +507,7 @@ def conduction_band_offset(mat, ref_mat):
     :param Material ref_mat:
         Material whose conduction band minimum is used as reference energy.
     """
-    assert mat.energyUnit == ref_mat.energyUnit
+    assert mat.energy_unit == ref_mat.energy_unit
     try:
         cbo = mat['valenceBandOffset'] + mat['directBandGap']
         ref_level = ref_mat['valenceBandOffset'] + ref_mat['directBandGap']
@@ -539,7 +536,7 @@ def valence_band_offset(mat, ref_mat):
     :param Material ref_mat:
         Material whose conduction band minimum is used as reference energy.
     """
-    assert mat.energyUnit == ref_mat.energyUnit
+    assert mat.energy_unit == ref_mat.energy_unit
     try:
         vbo = mat['valenceBandOffset']
         ref_level = ref_mat['valenceBandOffset']
@@ -574,7 +571,7 @@ def write_database_to_markdown(out_file, mat_lib):
     writer = pytablewriter.MarkdownTableWriter()
     writer.stream = out_file
     table = []
-    for name in sorted(mat_lib.matDict.keys()):
+    for name in sorted(mat_lib.mat_dict.keys()):
         mat = mat_lib.find(name, eunit='eV')
         if mat['type'] == 'metal':
             table.append([name, mat['workFunction']])
@@ -590,7 +587,7 @@ def write_database_to_markdown(out_file, mat_lib):
 
     print('## Dielectrics', file=out_file)
     table = []
-    for name in sorted(mat_lib.matDict.keys()):
+    for name in sorted(mat_lib.mat_dict.keys()):
         mat = mat_lib.find(name, eunit='eV')
         if mat['type'] == 'dielectric':
             table.append([name, mat['relativePermittivity']])
@@ -677,15 +674,15 @@ def write_database_to_markdown(out_file, mat_lib):
                                           'interbandMatrixElement',
                                           'spinOrbitSplitting'))
     table = []
-    bowing_mats = sorted(mat_lib.bowingParameters.keys())
+    bowing_mats = sorted(mat_lib.bowing_parameters.keys())
     bowing_props = []
     for p, desc in semi_props:
         if np.any([p in bow_parms for bow_parms in itervalues(
-                mat_lib.bowingParameters)]):
+                mat_lib.bowing_parameters)]):
             bowing_props.append(p)
             table.append([desc])
     for name in bowing_mats:
-        bow_parms = mat_lib.bowingParameters[name]
+        bow_parms = mat_lib.bowing_parameters[name]
         for i, p in enumerate(bowing_props):
             if p in bow_parms:
                 value = bow_parms[p] * scale_factors.get(p, 1.)
