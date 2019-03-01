@@ -8,15 +8,15 @@ name: py36
 channels:
   - conda-forge
 dependencies:
-  - python=3.6.5 # higher versions introduce fenics errors on Mac OS. Feel free to comment out if on linux
+  # - python=3.6.5 # higher versions introduce fenics errors on Mac OS. Feel free to comment out if on linux
   - adaptive
+  - astroid=2.1.0 # 2.2.0 has a bug when used with pylint
   - autopep8
   - boost=1.66 # 1.67 (introduced by freecad) has issues
   - dask
   - dask-jobqueue
   - descartes
   - fenics
-  - flake8
   - freecad
   - future
   - holoviews
@@ -24,6 +24,7 @@ dependencies:
   - h5py
   - jupyter
   - kwant
+  - libgcc-ng=7.2.0 # needed to import this particular version of freecad
   - libgfortran-ng # need for fenics
   - matplotlib
   - mkl
@@ -42,3 +43,5 @@ dependencies:
   - sphinx
   - sympy=1.0.* # we're not forward compatible
   - tqdm
+  - pip:
+    - pytablewriter

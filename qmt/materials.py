@@ -1,11 +1,11 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-#
-# This defines the physical material specification format, which is stored as
-# a json file. To add to the json or regenerate it, run this module as a
-# script.
-#
+"""
+This defines the physical material specification format, which is stored as a
+json file. To add to the json or regenerate it, run this module as a script.
+"""
+
 
 from __future__ import absolute_import, division, print_function
 
@@ -164,36 +164,36 @@ class Materials(collections.Mapping):
     Class for creating, loading, and manipulating a json file that
     contains information about materials.
 
-    The default constructor (matPath=None, matDict=None) sets matPath to the
-    module's materials.json and loads it. If both matPath and matDict are
+    The default constructor (mat_path=None, mat_dict=None) sets mat_path to the
+    module's materials.json and loads it. If both mat_path and mat_dict are
     specified, the Materials database is initialized from the given path and
     then updated with the supplied dict.
 
-    :param str matPath:
+    :param str mat_path:
         Path to the mat json file. If initialized with None, should be set
         manually before loading/saving.
-    :param dict matDict:
+    :param dict mat_dict:
         Dictionary of materials to fill the database.
     :param Bool load:
         Load the json file. Needs to be False when creating a new
         materials.json file.
     """
 
-    def __init__(self, matPath=None, matDict=None, load=True):
+    def __init__(self, mat_path=None, mat_dict=None, load=True):
         self.mat_dict = {}
         self.bowing_parameters = {}
-        if matPath is None and matDict is None:
-            matPath = os.path.join(os.path.dirname(__file__),
-                                   'materials.json')
-        self.mat_path = matPath
+        if mat_path is None and mat_dict is None:
+            mat_path = os.path.join(os.path.dirname(__file__),
+                                    'materials.json')
+        self.mat_path = mat_path
 
-        if matPath is not None and load:
+        if mat_path is not None and load:
             self.load()
 
-        if matDict is not None:
+        if mat_dict is not None:
             self.bowing_parameters.update(
-                matDict.pop('__bowing_parameters', {}))
-            self.mat_dict = matDict
+                mat_dict.pop('__bowing_parameters', {}))
+            self.mat_dict = mat_dict
 
     def __iter__(self):
         return iter(self.mat_dict)
@@ -202,7 +202,7 @@ class Materials(collections.Mapping):
         return len(self.mat_dict)
 
     def add_material(self, name, mat_type, **kwargs):
-        """Generate a material and add it to the matDict.
+        """Generate a material and add it to the mat_dict.
         """
         if mat_type in ('metal', 'dielectric'):
             kwargs['electronMass'] = kwargs.get('electronMass', 1.)
@@ -268,7 +268,7 @@ class Materials(collections.Mapping):
         # This assumes that val is a Material object
         self.mat_dict[key] = val.properties
 
-    def find(self, name, eunit=None):
+    def find(self, name, eunit=None):  # pylint: disable=R0914
         """
         Retrieve a named material from the database.
 
@@ -299,21 +299,24 @@ class Materials(collections.Mapping):
             match3 = re.match(bin_pattern3, name)
             if match1:
                 A, y, B, x, C = match1.groups()  # pylint: disable=C0103
+                x, y = float(x), float(y)  # pylint: disable=C0103
                 x /= x + y  # pylint: disable=C0103
                 properties = self._make_binary_alloy(A + C, B + C, x)
             elif match2:
                 A, B, y, C, x = match2.groups()  # pylint: disable=C0103
+                x, y = float(x), float(y)  # pylint: disable=C0103
                 x /= x + y  # pylint: disable=C0103
                 properties = self._make_binary_alloy(A + B, A + C, x)
             elif match3:
                 A, y, B, x = match3.groups()  # pylint: disable=C0103
+                x, y = float(x), float(y)  # pylint: disable=C0103
                 x /= x + y  # pylint: disable=C0103
                 properties = self._make_binary_alloy(A, B, x)
             else:
                 raise KeyError(name)
         return Material(name, properties, eunit=eunit)
 
-    def _make_binary_alloy(self, nameA, nameB, x):
+    def _make_binary_alloy(self, name_A, name_B, x):  # pylint: disable=C0103
         """
         Interpolate properties of binary alloy A_{1-x} B_x.
 
@@ -327,56 +330,58 @@ class Materials(collections.Mapping):
             O(A_{1-x} B_x) = (1-x) O(A) + x O(B) - x(1-x) O_{AB} ,
         with the bowing parameter O_{AB}.
         """
-        assert x >= 0 and x <= 1
-        if (nameB, nameA) in self.bowing_parameters:
-            nameA, nameB = nameB, nameA
+        assert 0 <= x <= 1
+        if (name_B, name_A) in self.bowing_parameters:
+            name_A, name_B = name_B, name_A
             x = 1. - x
-        matA, matB = self.find(
-            nameA, eunit='meV'), self.find(nameB, eunit='meV')
-        bow = self.bowing_parameters.get((nameA, nameB), {})
+        mat_A, mat_B = self.find(  # pylint: disable=C0103
+            name_A, eunit='meV'), self.find(name_B, eunit='meV')
+        bow = self.bowing_parameters.get((name_A, name_B), {})
         alloy = {}
-        for key, valA in iteritems(matA):
-            if key not in matB:
+        for key, val_A in iteritems(mat_A):  # pylint: disable=C0103
+            if key not in mat_B:
                 continue
-            valB = matB[key]
+            val_B = mat_B[key]  # pylint: disable=C0103
             if key == 'type':
-                assert valA == valB
-                val = valA
+                assert val_A == val_B
+                val = val_A
             else:
-                bowVal = bow.get(key, 0)
-                val = (1 - x) * valA + x * valB - x * (1 - x) * bowVal
+                bow_val = bow.get(key, 0)
+                val = (1 - x) * val_A + x * val_B - x * (1 - x) * bow_val
             alloy[key] = val
         return alloy
 
     def serialize_dict(self):
-        db = self.mat_dict.copy()
-        bowingParms = {}
-        for k, v in iteritems(self.bowing_parameters):
-            bowingParms[str(k)] = v
-        db['__bowing_parameters'] = bowingParms
-        return db
+        """Serialize the materials dictionary."""
+        mat_dict_copy = self.mat_dict.copy()
+        bowing_params = {}
+        for key, value in iteritems(self.bowing_parameters):
+            bowing_params[str(key)] = value
+        mat_dict_copy['__bowing_parameters'] = bowing_params
+        return mat_dict_copy
 
-    def deserialize_dict(self, db):
-        bowingParms = db.pop('__bowing_parameters', {})
-        self.mat_dict = db
+    def deserialize_dict(self, mat_dict):
+        """Deserialize the materials dictionary."""
+        bowing_params = mat_dict.pop('__bowing_parameters', {})
+        self.mat_dict = mat_dict
         self.bowing_parameters = {}
-        for k, v in iteritems(bowingParms):
-            self.bowing_parameters[literal_eval(k)] = v
+        for key, value in iteritems(bowing_params):
+            self.bowing_parameters[literal_eval(key)] = value
 
     def save(self):
         """Save the current materials database to disk.
         """
-        db = self.serialize_dict()
-        with open(self.mat_path, 'w') as myFile:
-            json.dump(db, myFile, indent=4, sort_keys=True)
+        mat_dict = self.serialize_dict()
+        with open(self.mat_path, 'w') as my_file:
+            json.dump(mat_dict, my_file, indent=4, sort_keys=True)
 
     def load(self):
         """Load the materials database from disk.
         """
         try:
-            with open(self.mat_path, 'r') as myFile:
-                db = json.load(myFile)
-            self.deserialize_dict(db)
+            with open(self.mat_path, 'r') as my_file:
+                mat_dict = json.load(my_file)
+            self.deserialize_dict(mat_dict)
         except IOError:
             print("Could not load materials file %s." % self.mat_path)
             print("Generating a new file at that location...")
@@ -414,7 +419,7 @@ class Materials(collections.Mapping):
         ref_name = 'InSb'
         if mat['type'] == 'metal':
             return -mat['workFunction'] - mat['fermiEnergy']
-        elif mat['type'] == 'dielectric':
+        if mat['type'] == 'dielectric':
             return 0. * mat.energy_unit  # vacuum energy
         assert mat['type'] == 'semi'
         try:
@@ -461,7 +466,7 @@ class Materials(collections.Mapping):
         """
         if mat['type'] == 'metal':
             return -10.e3 * mat.energy_unit  # very low
-        elif mat['type'] == 'dielectric':
+        if mat['type'] == 'dielectric':
             return -10.e3 * mat.energy_unit  # very low
         assert mat['type'] == 'semi'
         ref_name = 'InSb'
@@ -490,6 +495,7 @@ class Materials(collections.Mapping):
     # TODO: make this user-configurable and shift all energy properties
     # reported by materials
     def reference_level(self, eunit=None):
+        """Returns the reference level"""
         if eunit is None:
             eunit = UNITS.meV
         else:
@@ -555,7 +561,7 @@ def valence_band_offset(mat, ref_mat):
         return e_ref - e_ion
 
 
-def write_database_to_markdown(out_file, mat_lib):
+def write_database_to_markdown(out_file, mat_lib):  # pylint: disable=R0914
     """
     Write all materials parameters in mat_lib to a nicely formatted markdown
     file.
@@ -631,12 +637,10 @@ def write_database_to_markdown(out_file, mat_lib):
         iteritems(mat_lib)) if mat['type'] == 'semi']
     for name in semi_names:
         mat = mat_lib.find(name, eunit='eV')
-        for i, (p, _) in enumerate(semi_props):
-            if p in scale_factors and p in mat:
-                value = scale_factors[p] * mat[p]
-            else:
-                value = mat.get(p, '')
-            table[i].append(value)
+        for i, (prop, _) in enumerate(semi_props):
+            table[i].append(scale_factors[prop] * mat[prop]
+                            if prop in scale_factors and prop in mat
+                            else mat.get(prop, ''))
     writer.header_list = [''] + semi_names
     writer.value_matrix = table
     writer.write_table()
@@ -676,19 +680,16 @@ def write_database_to_markdown(out_file, mat_lib):
     table = []
     bowing_mats = sorted(mat_lib.bowing_parameters.keys())
     bowing_props = []
-    for p, desc in semi_props:
-        if np.any([p in bow_parms for bow_parms in itervalues(
+    for prop, desc in semi_props:
+        if np.any([prop in bow_parms for bow_parms in itervalues(
                 mat_lib.bowing_parameters)]):
-            bowing_props.append(p)
+            bowing_props.append(prop)
             table.append([desc])
     for name in bowing_mats:
         bow_parms = mat_lib.bowing_parameters[name]
-        for i, p in enumerate(bowing_props):
-            if p in bow_parms:
-                value = bow_parms[p] * scale_factors.get(p, 1.)
-            else:
-                value = ''
-            table[i].append(value)
+        for i, prop in enumerate(bowing_props):
+            table[i].append(bow_parms[prop] * scale_factors.get(prop, 1.)
+                            if prop in bow_parms else '')
     writer.header_list = [''] + ['({}, {})'.format(*k) for k in bowing_mats]
     writer.value_matrix = table
     writer.write_table()
@@ -701,6 +702,7 @@ def write_database_to_markdown(out_file, mat_lib):
 
 
 def generate_file(fname=None):
+    """Generate the markdown file"""
     materials = Materials(fname, load=False)
 
     # === Metals ===
@@ -925,14 +927,14 @@ def generate_file(fname=None):
 
     materials.save()
 
-    with open('materials.md', 'w') as f:
-        write_database_to_markdown(f, materials)
+    with open('materials.md', 'w') as file_p:
+        write_database_to_markdown(file_p, materials)
 
 
 # New physical materials go here:
 if __name__ == '__main__':
     if len(sys.argv) > 1:
-        fname = sys.argv[1]
+        F_NAME = sys.argv[1]
     else:
-        fname = None
-    generate_file(fname)
+        F_NAME = None
+    generate_file(F_NAME)

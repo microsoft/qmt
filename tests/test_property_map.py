@@ -52,7 +52,7 @@ def test_materials_property_map():
     str_map = DummyPartMap(['part1', 'part2'])
     part_materials1 = {0: 'InAs', 1: 'GaSb'}
     part_materials2 = {'part1': 'InAs', 'part2': 'Al'}
-    mat_lib = Materials(matDict={})
+    mat_lib = Materials(mat_dict={})
     mat_lib.add_material(
         'InAs',
         'semi',

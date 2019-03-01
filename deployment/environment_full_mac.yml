@@ -46,7 +46,6 @@ dependencies:
   - expat=2.2.5=h0a44026_1002
   - fastcache=1.0.2=py36h1de35cc_1001
   - fenics=2017.2.0=np113py36_3
-  - flake8=3.7.6=py36_0
   - freecad=0.18b0=py36h1ae927f_2
   - freeimage=3.17.0=0
   - freetype=2.8.1=hfa320df_1
@@ -159,7 +158,6 @@ dependencies:
   - pyasn1=0.4.4=py_1
   - pycodestyle=2.5.0=py_0
   - pycparser=2.19=py_0
-  - pyflakes=2.1.0=py_0
   - pygments=2.3.1=py_0
   - pylint=2.2.2=py36_1000
   - pynacl=1.3.0=py36h1de35cc_1000

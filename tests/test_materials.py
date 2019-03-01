@@ -45,7 +45,7 @@ def test_bowing_parameters():
         inas) < matlib.conduction_band_minimum(insb)
     # check that we have bowing parameters for m_* and E_g, which are
     # significant for this alloy
-    bow = matlib.bowingParameters[('InAs', 'InSb')]
+    bow = matlib.bowing_parameters[('InAs', 'InSb')]
     assert 'directBandGap' in bow and 'electronMass' in bow
     # check interpolation with bowing parameters
     x = 0.2
