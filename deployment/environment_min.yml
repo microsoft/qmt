@@ -33,6 +33,7 @@ dependencies:
   - petsc
   - pylint
   - pytest
+  - pytest-cov
   - pytest-datadir
   - pytest-xdist
   - rope
