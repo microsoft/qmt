@@ -40,6 +40,7 @@ dependencies:
   - dbus=1.13.0=h3a4f0e9_0
   - decorator=4.3.2=py_0
   - defusedxml=0.5.0=py_1
+  - descartes=1.1.0=py_2
   - dill=0.2.9=py36_0
   - distributed=1.26.0=py36_1
   - docrep=0.2.5=py_0
