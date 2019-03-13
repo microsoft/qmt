@@ -8,12 +8,13 @@ name: py36
 channels:
   - conda-forge
 dependencies:
-  - python=3.6.5 # higher versions introduce fenics errors on Mac OS. Feel free to comment out if on linux
+  # - python=3.6.5 # higher versions introduce fenics errors on Mac OS. Feel free to comment out if on linux
   - adaptive
   - autopep8
   - boost=1.66 # 1.67 (introduced by freecad) has issues
   - dask
   - dask-jobqueue
+  - deepdish
   - descartes
   - fenics
   - freecad
