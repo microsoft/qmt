@@ -2,20 +2,22 @@
 # Licensed under the MIT License.
 
 from collections import namedtuple
+from typing import NamedTuple, Tuple
+from qmt.physics_constants import ArrayQuantity, Quantity
 
 Potential2dData = namedtuple('Potential2dData', ['coordinates', 'coordinate_units', 'potential',
                                                  'potential_units'])
-ThomasFermi2dData = namedtuple('ThomasFermi2dData', ['coordinates',
-                                                     'potential',
-                                                     'density',
-                                                     'conduction_band',
-                                                     'valence_band',
-                                                     'reference_level',
-                                                     'temperature',
-                                                     'coordinate_units',
-                                                     'potential_units',
-                                                     'energy_units'
-                                                     ])
+
+
+class ThomasFermi2dData(NamedTuple):
+    coordinates: Tuple[ArrayQuantity, ArrayQuantity]
+    potential: ArrayQuantity
+    density: ArrayQuantity
+    conduction_band: Quantity
+    valence_band: Quantity
+    reference_level: Quantity
+    temperature: Quantity
+
 
 Bdg2dData = namedtuple('Bdg2dData', ['coordinates',
                                      'energies',
@@ -29,9 +31,11 @@ Bdg2dData = namedtuple('Bdg2dData', ['coordinates',
 Phase2dData = namedtuple('Phase2dData', ['coordinates',
                                          'superconducting_phase',
                                          'coordinate_units',
-                                        ])
+                                         ])
 
 # TODO: this needs to be pruned
+
+
 class SchrodingerPoissonDatas:
     def __init__(self, poisson_obj, density, density_per_subband, density_units, rho, rho_units,
                  psis, energies, potential, potential_units, mesh, mesh_units, bands, temperature,
@@ -73,13 +77,15 @@ class SchrodingerPoissonDatas:
         self.content['poisson'] = self.poisson
         self.content['density'] = self.density
         self.content['density_per_subband'] = self.density_per_subband
-        self.content['density_units'] = self._serialize_unit(self.density_units)
+        self.content['density_units'] = self._serialize_unit(
+            self.density_units)
         self.content['rho'] = self.rho
         self.content['rho_units'] = self._serialize_unit(self.rho_units)
         self.content['psis'] = self.psis
         self.content['energies'] = self.energies
         self.content['potential'] = self.potential
-        self.content['potential_units'] = self._serialize_unit(self.potential_units)
+        self.content['potential_units'] = self._serialize_unit(
+            self.potential_units)
         self.content['mesh'] = self.mesh
         self.content['mesh_units'] = self._serialize_unit(self.mesh_units)
         self.content['bands'] = self.bands
@@ -94,13 +100,15 @@ class SchrodingerPoissonDatas:
         self.poisson = self.content['poisson']
         self.density = self.content['density']
         self.density_per_subband = self.content['density_per_subband']
-        self.denisty_units = self._deserialize_unit(self.content['density_units'])
+        self.denisty_units = self._deserialize_unit(
+            self.content['density_units'])
         self.rho = self.content['rho']
         self.rho_units = self._deserialize_unit(self.content['rho_units'])
         self.psis = self.content['psis']
         self.energies = self.content['energies']
         self.potential = self.content['potential']
-        self.potential_units = self._deserialize_unit(self.content['potential_units'])
+        self.potential_units = self._deserialize_unit(
+            self.content['potential_units'])
         self.mesh = self.content['mesh']
         self.mesh_units = self._deserialize_unit(self.content['mesh_units'])
         self.bands = self.content['bands']

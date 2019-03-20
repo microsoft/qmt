@@ -8,23 +8,9 @@ from scipy import constants as sc
 from sympy.matrices import eye
 from sympy.physics.matrices import msigma
 from sympy.physics.quantum import TensorProduct as kron
+from types import SimpleNamespace
+import numpy as np
 
-try:
-    from types import SimpleNamespace
-except ImportError:
-    # SimpleNamespace was introduced in python 3.3; in earlier versions use the
-    # simple implementation from docs.python.org
-    class SimpleNamespace:
-        def __init__(self, **kwargs):
-            self.__dict__.update(kwargs)
-
-        def __repr__(self):
-            keys = sorted(self.__dict__)
-            items = ("{}={!r}".format(k, self.__dict__[k]) for k in keys)
-            return "{}({})".format(type(self).__name__, ", ".join(items))
-
-        def __eq__(self, other):
-            return self.__dict__ == other.__dict__
 
 units = SimpleNamespace(
     nm=spu.nm,
@@ -48,7 +34,7 @@ units = SimpleNamespace(
     mK=spu.K / 1e3,
     amp=spu.coulomb / spu.s,
     nA=1e-9 * spu.coulomb / spu.s,
-    )
+)
 
 
 def parse_unit(s):
@@ -68,15 +54,15 @@ def parse_unit(s):
 constants = SimpleNamespace(
     hbar=spu.hbar,
     k_B=sc.physical_constants['Boltzmann constant in eV/K'][0] *
-        units.eV / units.K,
+    units.eV / units.K,
     m_e=sc.physical_constants["electron mass"][0] * spu.kg,
     q_e=sc.physical_constants["elementary charge"][0] * units.coulomb,
     mu_b=sc.physical_constants["Bohr magneton in eV/T"][0] *
-         units.eV / units.tesla,
+    units.eV / units.tesla,
     epsilon0=sc.epsilon_0 * spu.farad / spu.m,
     c=sc.physical_constants["speed of light in vacuum"][0] * spu.m / spu.s,
     pi=sc.pi
-    )
+)
 
 # Unify unit conversion between old and new units module
 if "convert_to" in dir(spu):
@@ -105,7 +91,7 @@ matrices = SimpleNamespace(
     s_x=msigma(1),
     s_y=msigma(2),
     s_z=msigma(3),
-    )
+)
 
 matrices.tau_00 = kron(matrices.s_0, matrices.s_0)
 matrices.tau_0x = kron(matrices.s_0, matrices.s_x)
@@ -127,4 +113,48 @@ matrices.tau_zx = kron(matrices.s_z, matrices.s_x)
 matrices.tau_zy = kron(matrices.s_z, matrices.s_y)
 matrices.tau_zz = kron(matrices.s_z, matrices.s_z)
 
-__all__ = ["units", "constants", "matrices", "parse_unit", "to_float"]
+
+class ArrayQuantity(np.ndarray):
+    """
+    Extend a numpy array to have units information from sympy
+    From https://docs.scipy.org/doc/numpy/user/basics.subclassing.html#simple-example-adding-an-extra-attribute-to-ndarray
+    """
+    def __new__(cls, input_array, unit=None):
+        # Input array is an already formed ndarray instance
+        # We first cast to be our class type
+        obj = np.asarray(input_array).view(cls)
+        # add the unit to the created instance
+        obj.unit = unit
+        obj.dtype = input_array.dtype
+        # Finally, we must return the newly created object:
+        return obj
+
+    def __array_finalize__(self, obj):
+        # see InfoArray.__array_finalize__ for comments
+        if obj is None:
+            return
+        self.info = getattr(obj, 'info', None)
+
+    def is_dimensionless(self):
+        return self.unit == None
+
+
+class Quantity(float):
+    """
+    A simple subclass of float that includes a unit
+    Note that this is only a wrapper that does not support arithematic operations or comparisons.
+    Those only work with the float values, and does not take the units into account. We might want
+    to switch to pint (https://github.com/hgrecco/pint) if we want to support that
+    """
+    def __new__(cls, value: float, unit=None):
+        return super().__new__(cls, value)
+
+    def __init__(self, value: float, unit=None):
+        self.unit = unit
+
+    def is_dimensionless(self):
+        return self.unit == None
+
+
+__all__ = ["units", "constants", "matrices",
+           "parse_unit", "to_float", "Quantity", "ArrayQuantity"]
