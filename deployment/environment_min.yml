@@ -23,6 +23,7 @@ dependencies:
   - hpc05
   - h5py
   - jupyter
+  - jupyter_contrib_nbextensions
   - kwant
   - libgcc-ng=7.2.0 # higher versions cause import errors from FreeCAD
   - libgfortran-ng # need for fenics
@@ -30,6 +31,7 @@ dependencies:
   - mkl
   - mkl-service
   - mpi4py
+  - nb_conda
   - numpy
   - numpy-stl
   - petsc
