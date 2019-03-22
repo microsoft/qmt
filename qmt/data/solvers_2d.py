@@ -14,8 +14,8 @@ class ThomasFermi2dData(NamedTuple):
     coordinates: Tuple[np.ndarray, np.ndarray]
     potential: np.ndarray
     density: np.ndarray
-    conduction_band: Mul
-    valence_band: Mul
+    conduction_band: np.ndarray
+    valence_band: np.ndarray
     reference_level: Mul
     temperature: Mul
 
