@@ -86,6 +86,11 @@ def to_float(expr):
     return float(cancel(expr))
 
 
+def to_float_vec(arr):
+    """Vectorized version of to_float"""
+    return np.vectorize(to_float)(arr)
+
+
 matrices = SimpleNamespace(
     s_0=eye(2),
     s_x=msigma(1),
@@ -114,4 +119,4 @@ matrices.tau_zy = kron(matrices.s_z, matrices.s_y)
 matrices.tau_zz = kron(matrices.s_z, matrices.s_z)
 
 
-__all__ = ["units", "constants", "matrices", "parse_unit", "to_float"]
+__all__ = ["units", "constants", "matrices", "parse_unit", "to_float", "to_float_vec"]

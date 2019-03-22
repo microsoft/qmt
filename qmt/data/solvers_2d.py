@@ -3,20 +3,21 @@
 
 from collections import namedtuple
 from typing import NamedTuple, Tuple
-from qmt.physics_constants import ArrayQuantity, Quantity
+from sympy.core.mul import Mul
+import numpy as np
 
 Potential2dData = namedtuple('Potential2dData', ['coordinates', 'coordinate_units', 'potential',
                                                  'potential_units'])
 
 
 class ThomasFermi2dData(NamedTuple):
-    coordinates: Tuple[ArrayQuantity, ArrayQuantity]
-    potential: ArrayQuantity
-    density: ArrayQuantity
-    conduction_band: Quantity
-    valence_band: Quantity
-    reference_level: Quantity
-    temperature: Quantity
+    coordinates: Tuple[np.ndarray, np.ndarray]
+    potential: np.ndarray
+    density: np.ndarray
+    conduction_band: Mul
+    valence_band: Mul
+    reference_level: Mul
+    temperature: Mul
 
 
 Bdg2dData = namedtuple('Bdg2dData', ['coordinates',
