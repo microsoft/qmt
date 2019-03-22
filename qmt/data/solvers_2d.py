@@ -6,10 +6,12 @@ from typing import NamedTuple, Tuple
 from sympy.core.mul import Mul
 import numpy as np
 
-Potential2dData = namedtuple('Potential2dData', ['coordinates', 'coordinate_units', 'potential',
-                                                 'potential_units'])
+class Potential2dData(NamedTuple):
+    coordinates: Tuple[np.ndarray, np.ndarray]
+    potential: np.ndarray
 
-
+# Conceptually this is ThomasFermi2dData(Potential2dData), but python doesn't
+# let us do that yet :(
 class ThomasFermi2dData(NamedTuple):
     coordinates: Tuple[np.ndarray, np.ndarray]
     potential: np.ndarray
