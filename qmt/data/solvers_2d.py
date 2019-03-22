@@ -35,8 +35,6 @@ Phase2dData = namedtuple('Phase2dData', ['coordinates',
                                          ])
 
 # TODO: this needs to be pruned
-
-
 class SchrodingerPoissonDatas:
     def __init__(self, poisson_obj, density, density_per_subband, density_units, rho, rho_units,
                  psis, energies, potential, potential_units, mesh, mesh_units, bands, temperature,
