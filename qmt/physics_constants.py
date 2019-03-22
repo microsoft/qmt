@@ -114,47 +114,4 @@ matrices.tau_zy = kron(matrices.s_z, matrices.s_y)
 matrices.tau_zz = kron(matrices.s_z, matrices.s_z)
 
 
-class ArrayQuantity(np.ndarray):
-    """
-    Extend a numpy array to have units information from sympy
-    From https://docs.scipy.org/doc/numpy/user/basics.subclassing.html#simple-example-adding-an-extra-attribute-to-ndarray
-    """
-    def __new__(cls, input_array, unit=None):
-        # Input array is an already formed ndarray instance
-        # We first cast to be our class type
-        obj = np.asarray(input_array).view(cls)
-        # add the unit to the created instance
-        obj.unit = unit
-        obj.dtype = input_array.dtype
-        # Finally, we must return the newly created object:
-        return obj
-
-    def __array_finalize__(self, obj):
-        # see InfoArray.__array_finalize__ for comments
-        if obj is None:
-            return
-        self.info = getattr(obj, 'info', None)
-
-    def is_dimensionless(self):
-        return self.unit == None
-
-
-class Quantity(float):
-    """
-    A simple subclass of float that includes a unit
-    Note that this is only a wrapper that does not support arithematic operations or comparisons.
-    Those only work with the float values, and does not take the units into account. We might want
-    to switch to pint (https://github.com/hgrecco/pint) if we want to support that
-    """
-    def __new__(cls, value: float, unit=None):
-        return super().__new__(cls, value)
-
-    def __init__(self, value: float, unit=None):
-        self.unit = unit
-
-    def is_dimensionless(self):
-        return self.unit == None
-
-
-__all__ = ["units", "constants", "matrices",
-           "parse_unit", "to_float", "Quantity", "ArrayQuantity"]
+__all__ = ["units", "constants", "matrices", "parse_unit", "to_float"]
