@@ -14,28 +14,28 @@ import tempfile
 
 
 def serialize_file(path):
-    '''Return a serialised blob of the contents of a given file path.'''
-    with open(path, 'rb') as f:
-        serial_data = codecs.encode(f.read(), 'base64').decode()
+    """Return a serialised blob of the contents of a given file path."""
+    with open(path, "rb") as f:
+        serial_data = codecs.encode(f.read(), "base64").decode()
     return serial_data
 
 
 def write_deserialised(serial_obj, path):
-    '''Write a deserialised file from a serialised blob to a given file path.'''
-    data = codecs.decode(serial_obj.encode(), 'base64')
-    with open(path, 'wb') as f:
+    """Write a deserialised file from a serialised blob to a given file path."""
+    data = codecs.decode(serial_obj.encode(), "base64")
+    with open(path, "wb") as f:
         f.write(data)
 
 
 def store_serial(obj, save_fct, ext_format, scratch_dir=None):
-    '''
+    """
     Return a serialised representation of
     `save_fct(obj, scratch_dir/temporary_file.ext_format)`.
     The parameter `ext_format` can be used for format distinction in some `save_fct`.
-    '''
+    """
     if not scratch_dir:
         scratch_dir = tempfile.gettempdir()
-    tmp_path = os.path.join(scratch_dir, uuid.uuid4().hex + '.' + ext_format)
+    tmp_path = os.path.join(scratch_dir, uuid.uuid4().hex + "." + ext_format)
     save_fct(obj, tmp_path)
     serial_data = serialize_file(tmp_path)
     os.remove(tmp_path)
@@ -43,15 +43,15 @@ def store_serial(obj, save_fct, ext_format, scratch_dir=None):
 
 
 def load_serial(serial_obj, load_fct, ext_format=None, scratch_dir=None):
-    '''
+    """
     Return the original object stored with `store_serial`.
     The `load_fct` must be a correct complement of the previously used `store_fct`.
-    '''
+    """
     if not ext_format:
-        ext_format = 'tmpdata'
+        ext_format = "tmpdata"
     if not scratch_dir:
         scratch_dir = tempfile.gettempdir()
-    tmp_path = os.path.join(scratch_dir, uuid.uuid4().hex + '.' + ext_format)
+    tmp_path = os.path.join(scratch_dir, uuid.uuid4().hex + "." + ext_format)
     write_deserialised(serial_obj, tmp_path)
     obj = load_fct(tmp_path)
     os.remove(tmp_path)
@@ -75,9 +75,13 @@ def reduce_data(reduce_function, task, dask_client):
     sweep_holder = task.computed_result  # List of futures that resolve to the data
     sweep_vals = task.computed_result.sweep.sweep_list  # List of the tag values
     # First, map the get_data method as a delayed function over the futures:
-    mappped_futures = list(map(lambda x: dask.delayed(reduce_function)(x), sweep_holder.futures))
+    mappped_futures = list(
+        map(lambda x: dask.delayed(reduce_function)(x), sweep_holder.futures)
+    )
     # Next, send these futures to the client to perform the reduction remotely:
-    extracted_data = list(map(lambda x: dask_client.compute(x), mappped_futures))  # list of
+    extracted_data = list(
+        map(lambda x: dask_client.compute(x), mappped_futures)
+    )  # list of
     # futures pointing to processed data
     return sweep_vals, extracted_data
 
@@ -108,20 +112,24 @@ def stream_data_to_file(extracted_data, filename, dask_client, sweep_vals=None):
                        an integer list.
     """
     from tqdm import tqdm
+
     if sweep_vals is None:
         sweep_vals = range(len(extracted_data))
-    with h5py.File(filename, 'w') as data_file:
+    with h5py.File(filename, "w") as data_file:
         # loop through data, write data as it comes in
         job_finished = [False] * len(extracted_data)
         pbar = tqdm(total=len(extracted_data))
         while not all(job_finished):
-            time.sleep(1.)
+            time.sleep(1.0)
             for index, future in enumerate(extracted_data):
-                if future.status == 'finished' and not job_finished[index]:
+                if future.status == "finished" and not job_finished[index]:
                     for k in future.result().keys():
-                        data_file.create_dataset(str(index) + '_' + k, data=future.result()[k])
+                        data_file.create_dataset(
+                            str(index) + "_" + k, data=future.result()[k]
+                        )
                     for k in sweep_vals[index].keys():
-                        data_file.create_dataset(str(index) + '_' + str(k),
-                                                 data=sweep_vals[index][k])
+                        data_file.create_dataset(
+                            str(index) + "_" + str(k), data=sweep_vals[index][k]
+                        )
                     job_finished[index] = True
                     pbar.update(1)
