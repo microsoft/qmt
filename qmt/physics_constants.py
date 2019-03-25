@@ -138,8 +138,5 @@ class UArray(np.ndarray):
             return
         self.info = getattr(obj, "info", None)
 
-    def is_dimensionless(self):
-        return self.unit == None
-
 
 __all__ = ["units", "constants", "matrices", "parse_unit", "to_float", "UArray"]

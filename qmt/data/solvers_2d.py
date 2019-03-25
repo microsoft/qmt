@@ -5,19 +5,20 @@ from collections import namedtuple
 from typing import NamedTuple, Tuple
 from sympy.core.mul import Mul
 import numpy as np
+from qmt.physics_constants import UArray
 
 class Potential2dData(NamedTuple):
-    coordinates: Tuple[np.ndarray, np.ndarray]
-    potential: np.ndarray
+    coordinates: Tuple[UArray, UArray]
+    potential: UArray
 
-# Conceptually this is ThomasFermi2dData(Potential2dData), but python doesn't
-# let us do that yet :(
+# Conceptually this is ThomasFermi2dData(Potential2dData), but python doesn't let us do
+# that yet :(
 class ThomasFermi2dData(NamedTuple):
-    coordinates: Tuple[np.ndarray, np.ndarray]
-    potential: np.ndarray
-    density: np.ndarray
-    conduction_band: np.ndarray
-    valence_band: np.ndarray
+    coordinates: Tuple[UArray, UArray]
+    potential: UArray
+    density: UArray
+    conduction_band: UArray
+    valence_band: UArray
     reference_level: Mul
     temperature: Mul
 
