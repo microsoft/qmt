@@ -40,63 +40,60 @@ units = SimpleNamespace(
 def parse_unit(s):
     """convert name of a unit into the corresponding sympy value"""
     for u in dir(units):
-        if u[:2] == '__':
+        if u[:2] == "__":
             continue
         if u == s:
             return units.__dict__[u]
     # if s is a sympy object we assume it has already been parsed and pass it
     # through
-    if hasattr(s, 'subs'):
+    if hasattr(s, "subs"):
         return s
-    raise RuntimeError('unknown unit: {}'.format(s))
+    raise RuntimeError("unknown unit: {}".format(s))
 
 
 constants = SimpleNamespace(
     hbar=spu.hbar,
-    k_B=sc.physical_constants['Boltzmann constant in eV/K'][0] *
-    units.eV / units.K,
+    k_B=sc.physical_constants["Boltzmann constant in eV/K"][0] * units.eV / units.K,
     m_e=sc.physical_constants["electron mass"][0] * spu.kg,
     q_e=sc.physical_constants["elementary charge"][0] * units.coulomb,
-    mu_b=sc.physical_constants["Bohr magneton in eV/T"][0] *
-    units.eV / units.tesla,
+    mu_b=sc.physical_constants["Bohr magneton in eV/T"][0] * units.eV / units.tesla,
     epsilon0=sc.epsilon_0 * spu.farad / spu.m,
     c=sc.physical_constants["speed of light in vacuum"][0] * spu.m / spu.s,
-    pi=sc.pi
+    pi=sc.pi,
 )
 
 # Unify unit conversion between old and new units module
 if "convert_to" in dir(spu):
+
     def canonicalize(expr, base=None):
         """Convert all units to given base units (default: SI base units)"""
         if base is None:
             base = (spu.m, spu.kg, spu.s, spu.A, spu.K, spu.mol, spu.cd)
         return spu.convert_to(expr, base)
+
+
 else:
+
     def canonicalize(expr, base=None):
         return expr
 
 
 def cancel(expr):
-    """Cancel different units referring to the same dimension, e.g. cancel(kg/g) -> 1000"""
+    """
+    Cancel different units referring to the same dimension, e.g. cancel(kg/g) -> 1000
+    """
     return canonicalize(expr, 1)
 
 
 def to_float(expr):
-    """Convert sympy expression involving units to a float. Fails if expr is not dimensionless."""
+    """
+    Convert sympy expression involving units to a float. Fails if expr is not
+    dimensionless.
+    """
     return float(cancel(expr))
 
 
-def to_float_vec(arr):
-    """Vectorized version of to_float"""
-    return np.vectorize(to_float)(arr)
-
-
-matrices = SimpleNamespace(
-    s_0=eye(2),
-    s_x=msigma(1),
-    s_y=msigma(2),
-    s_z=msigma(3),
-)
+matrices = SimpleNamespace(s_0=eye(2), s_x=msigma(1), s_y=msigma(2), s_z=msigma(3))
 
 matrices.tau_00 = kron(matrices.s_0, matrices.s_0)
 matrices.tau_0x = kron(matrices.s_0, matrices.s_x)
@@ -119,4 +116,30 @@ matrices.tau_zy = kron(matrices.s_z, matrices.s_y)
 matrices.tau_zz = kron(matrices.s_z, matrices.s_z)
 
 
-__all__ = ["units", "constants", "matrices", "parse_unit", "to_float", "to_float_vec"]
+class UArray(np.ndarray):
+    """
+    Extend a numpy array to have units information from sympy
+    From https://docs.scipy.org/doc/numpy/user/basics.subclassing.html#simple-example-adding-an-extra-attribute-to-ndarray
+    """
+
+    def __new__(cls, input_array, unit=None):
+        # Input array is an already formed ndarray instance
+        # We first cast to be our class type
+        obj = np.asarray(input_array).view(cls)
+        # add the unit to the created instance
+        obj.unit = unit
+        obj.dtype = input_array.dtype
+        # Finally, we must return the newly created object:
+        return obj
+
+    def __array_finalize__(self, obj):
+        # see InfoArray.__array_finalize__ for comments
+        if obj is None:
+            return
+        self.info = getattr(obj, "info", None)
+
+    def is_dimensionless(self):
+        return self.unit == None
+
+
+__all__ = ["units", "constants", "matrices", "parse_unit", "to_float", "ArrayQuantity"]
