@@ -142,4 +142,4 @@ class UArray(np.ndarray):
         return self.unit == None
 
 
-__all__ = ["units", "constants", "matrices", "parse_unit", "to_float", "ArrayQuantity"]
+__all__ = ["units", "constants", "matrices", "parse_unit", "to_float", "UArray"]
