@@ -125,6 +125,8 @@ class UArray(np.ndarray):
     def __new__(cls, input_array, unit=None):
         # Input array is an already formed ndarray instance
         # We first cast to be our class type
+        if input_array is None:
+            return None
         obj = np.asarray(input_array).view(cls)
         # add the unit to the created instance
         obj.unit = unit

@@ -2,7 +2,7 @@
 # Licensed under the MIT License.
 
 from collections import namedtuple
-from typing import NamedTuple, Tuple
+from typing import NamedTuple, Optional, Tuple
 from sympy.core.mul import Mul
 import numpy as np
 from qmt.physics_constants import UArray
@@ -22,20 +22,17 @@ class ThomasFermi2dData(NamedTuple):
     reference_level: Mul
     temperature: Mul
 
-
-Bdg2dData = namedtuple('Bdg2dData', ['coordinates',
-                                     'energies',
-                                     'wave_functions',
-                                     'coordinate_units',
-                                     'energy_units',
-                                     'hamiltonian',
-                                     ])
+class Bdg2dData(NamedTuple):
+    coordinates: Tuple[UArray, UArray]
+    energies: UArray
+    wave_functions: UArray
+    hamiltonian:Optional[UArray]
 
 
-Phase2dData = namedtuple('Phase2dData', ['coordinates',
-                                         'superconducting_phase',
-                                         'coordinate_units',
-                                         ])
+class Phase2dData(NamedTuple):
+    coordinates: Tuple[UArray, UArray]
+    superconducting_phase: np.ndarray
+
 
 # TODO: this needs to be pruned
 class SchrodingerPoissonDatas:
