@@ -6,7 +6,7 @@
 from qmt.data.data_utils import *
 
 
-def test_store_serial(fix_testDir, fix_FCDoc):
+def test_store_serial(datadir, fix_FCDoc):
     '''Test serialisation to memory.'''
     import FreeCAD
     # Serialise document
@@ -14,7 +14,7 @@ def test_store_serial(fix_testDir, fix_FCDoc):
     serial_data = store_serial(fix_FCDoc, lambda d, p: d.saveAs(p), 'fcstd')
 
     # Write to a file
-    file_path = os.path.join(fix_testDir, 'test.fcstd')
+    file_path = os.path.join(datadir, 'test.fcstd')
     import codecs
     data = codecs.decode(serial_data.encode(), 'base64')
     with open(file_path, 'wb') as of:
@@ -26,5 +26,4 @@ def test_store_serial(fix_testDir, fix_FCDoc):
     doc.load(file_path)
 
     assert doc.getObject('some_content') is not None
-    os.remove(file_path)
     FreeCAD.closeDocument('instance')
