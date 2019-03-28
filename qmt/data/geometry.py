@@ -369,7 +369,6 @@ class Geo3DData(object):
             for i, poly in enumerate(poly_list):
                 parts_2d[f"{name}_{i}"] = list(poly.exterior.coords)
         
-        build_order.reverse()
         from qmt.tasks import build_2d_geometry
         return build_2d_geometry(
             parts_2d,
