@@ -340,7 +340,7 @@ class Geo3DData(object):
                         polys_2d[name].append(poly)
 
             # Among these polygons, if there're polygons that are equal to each other,
-            # give priority to the higher build_order
+            # give priority to the higher build_order, and delete the other one
             polys_2d_with_name = []
             for name, poly_list in polys_2d.items():
                 for poly in poly_list:
@@ -355,7 +355,7 @@ class Geo3DData(object):
                         polys_2d[name_2].remove(poly_2)
 
             # We remove all polygons in the union of polygons that didn't contain other
-            # polygons. This covers cases like this
+            # polygons, and add them to polys_2d. This covers cases like this
             #  ___________        ___________
             # |  _______  |      |           |
             # | |___|___| |  =>  |           |  =>  done
@@ -364,18 +364,20 @@ class Geo3DData(object):
             done_parts = []
             for name, poly_list in part_polygons.items():
                 part_polygons[name] = [poly for poly in poly_list if not rm_polys_union.contains(poly)]
-                if not poly_list:
+                if not part_polygons[name]:
                     build_order.append(name)
                     done_parts.append(name)
             for name in done_parts:
                 del part_polygons[name]
         
-        # Now we deal with the virtual parts
+        # Now we deal with the virtual parts, which are just added as is
         for name, poly_list in virtual_part_polygons.items():
             build_order.append(name)
             polys_2d[name] = poly_list
 
         # Convert from polygons back to list of coords, to be fed to build_2d_geometry
+        # If a part has multiple disconnected 2d slices in the cross section, they're
+        # named {part_name}_0, {part_name}_1, etc
         parts_2d = {}
         for name, poly_list in polys_2d.items():
             if len(poly_list) == 1:
