@@ -305,7 +305,8 @@ class Geo3DData(object):
         part_polygons = {}
         polys_2d = {}
         virtual_part_polygons = {}
-        # let's part_polygons
+        # part_polygons is a dictionary of part_name to polygons. virtual_part_polygons
+        # is the same for virtual parts
         for part_name in self.build_order:
             polygons = []
             for name, points in self.xsecs[xsec_name]["polygons"].items():
