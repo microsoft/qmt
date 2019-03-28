@@ -48,8 +48,6 @@ def test_xsection(datadir):
         input_file=file_path,
         xsec_dict={"test_xsec": {"axis": (1, 0, 0), "distance": 0}},
     )
-    # Currently build_3d_geometry is stateful. Cleaing up
-    FreeCAD.closeDocument('instance')
 
     cut_2d_geo_data = geo_data.xsec_to_2d("test_xsec")
 
@@ -113,8 +111,6 @@ def test_simple_xsection(datadir):
         input_file=file_path,
         xsec_dict={"test_xsec": {"axis": (1, 0, 0), "distance": 0}},
     )
-    # Currently build_3d_geometry is stateful. Cleaing up
-    FreeCAD.closeDocument('instance')
 
     cut_2d_geo_data = geo_data.xsec_to_2d("test_xsec")
 

@@ -5,9 +5,12 @@
 
 import numpy as np
 from shapely.ops import unary_union
-from shapely.geometry import Polygon
+from shapely.geometry import LineString, MultiLineString, Polygon
 from itertools import chain, combinations
 from typing import Optional
+import FreeCAD
+import Part
+from FreeCAD import Base
 
 from qmt.materials import Materials
 from .data_utils import load_serial, store_serial, write_deserialised
@@ -302,8 +305,11 @@ class Geo3DData(object):
             vec = vec - x_new * self.xsecs[xsec_name]["distance"]
             return [vec.dot(y_new), vec.dot(z_new)]
 
+        def _inverse_project(vec):
+            return x_new * self.xsecs[xsec_name]["distance"] + vec[0] * y_new+vec[1] * z_new
+
+
         part_polygons = {}
-        polys_2d = {}
         virtual_part_polygons = {}
         # part_polygons is a dictionary of part_name to polygons. virtual_part_polygons
         # is the same for virtual parts
@@ -311,90 +317,74 @@ class Geo3DData(object):
             polygons = []
             for name, points in self.xsecs[xsec_name]["polygons"].items():
                 if name.startswith(f"{part_name}_"):
-                    polygons.append(Polygon(map(_project, points)))
+                    poly = Polygon(map(_project, points))
+                    # we add a name to the polygon so we can reference it easier later
+                    poly.name = name
+                    polygons.append(poly)
             if polygons:
-                polys_2d[part_name] = []
                 if self.parts[part_name].domain_type == "virtual":
                     virtual_part_polygons[part_name] = polygons
                 else:
                     part_polygons[part_name] = polygons
-                    
+
+        def _build_containment_graph(poly_list):
+            poly_by_area = sorted(poly_list, key = lambda p: p.area)
+
+            # graph["poly_name"] is a list of polygons that poly_name contains
+            # it does not include nested containment
+            graph = {poly.name: [] for poly in poly_list}
+
+            for i, poly in enumerate(poly_by_area):
+                for bigger_poly in poly_by_area[i+1:]:
+                    if bigger_poly.contains(poly):
+                        graph[bigger_poly.name].append(poly)
+            return graph
+
+        def _is_inside(poly, part):
+            min_x, min_y, max_x, max_y = poly.bounds
+            x = np.random.uniform(min_x, max_x)
+            x_line = LineString([(x, min_y), (x, max_y)])
+            intersec = x_line.intersection(poly)
+            if type(intersec) == MultiLineString:
+                intersec = intersec[0]
+            x_line_intercept_min, x_line_intercept_max = intersec.xy[1].tolist()
+            y = np.random.uniform(x_line_intercept_min, x_line_intercept_max)
+
+            x,y,z = _inverse_project([x,y])
+            freecad_solid = Part.Solid(FreeCAD.ActiveDocument.getObject(part.built_fc_name).Shape)
+            return freecad_solid.isInside(Base.Vector(x,y,z), 1e-5, True)
+
         # Let's deal with the physical domains first, which can have cavities
-        # Loop invariance: at the start and end of the loop, the polygons in
-        # part_polygons that don't contain any other polygons should be added to the
-        # 2d geometry
-        build_order = []
-        while part_polygons:
-            # find the polygons that don't contain any other polygons. They can be
-            # constructed as is
-            for name, poly_list in part_polygons.items():
-                for poly in poly_list:
-                    contains_poly = False
-                    for check_poly in chain.from_iterable(part_polygons.values()):
-                        if check_poly is poly:
-                            continue
-                        if poly.contains(check_poly) and not poly.equals(check_poly):
-                            contains_poly = True
-                            break
-                    if contains_poly == False:
-                        polys_2d[name].append(poly)
+        geo_2d = Geo2DData()
+        self.get_data('fcdoc') # The document name is "instance"
+        for name, poly_list in part_polygons.items():
+            cont_graph = _build_containment_graph(poly_list)
+            polys_to_add = []
+            for poly in poly_list:
+                for interior_poly in cont_graph[poly.name]:
+                    poly = poly.difference(interior_poly)
+                if _is_inside(poly, self.parts[name]):
+                    polys_to_add.append(poly)
+            if not polys_to_add:
+                continue
+            if len(polys_to_add) == 1:
+                geo_2d.add_part(name, polys_to_add[0])
+                continue
+            for i, poly in enumerate(polys_to_add):
+                geo_2d.add_part(f"{name}_{i}", poly)
 
-            # Among these polygons, if there're polygons that are equal to each other,
-            # give priority to the higher build_order, and delete the other one
-            polys_2d_with_name = []
-            for name, poly_list in polys_2d.items():
-                for poly in poly_list:
-                    polys_2d_with_name.append([name, poly])
-            for (name_1, poly_1), (name_2, poly_2) in combinations(polys_2d_with_name, r=2):
-                if poly_1.equals(poly_2):
-                    ind1 = self.build_order.index(name_1)
-                    ind2 = self.build_order.index(name_2)
-                    if ind1 >= ind2:
-                        polys_2d[name_1].remove(poly_1)
-                    else:
-                        polys_2d[name_2].remove(poly_2)
-
-            # We remove all polygons in the union of polygons that didn't contain other
-            # polygons, and add them to polys_2d. This covers cases like this
-            #  ___________        ___________
-            # |  _______  |      |           |
-            # | |___|___| |  =>  |           |  =>  done
-            # |___________|      |___________|
-            rm_polys_union = unary_union(list(chain.from_iterable(polys_2d.values())))
-            done_parts = []
-            for name, poly_list in part_polygons.items():
-                part_polygons[name] = [poly for poly in poly_list if not rm_polys_union.contains(poly)]
-                if not part_polygons[name]:
-                    build_order.append(name)
-                    done_parts.append(name)
-            for name in done_parts:
-                del part_polygons[name]
-        
         # Now we deal with the virtual parts, which are just added as is
         for name, poly_list in virtual_part_polygons.items():
-            build_order.append(name)
-            polys_2d[name] = poly_list
-
-        # Convert from polygons back to list of coords, to be fed to build_2d_geometry
-        # If a part has multiple disconnected 2d slices in the cross section, they're
-        # named {part_name}_0, {part_name}_1, etc
-        parts_2d = {}
-        for name, poly_list in polys_2d.items():
             if len(poly_list) == 1:
-                parts_2d[name] = list(poly_list[0].exterior.coords)
+                geo_2d.add_part(name, poly_list[0])
                 continue
-            ind = build_order.index(name)
-            build_order[ind:ind+1] = tuple(f"{name}_{i}" for i,_ in enumerate(poly_list))
             for i, poly in enumerate(poly_list):
-                parts_2d[f"{name}_{i}"] = list(poly.exterior.coords)
-        
-        from qmt.tasks import build_2d_geometry
-        return build_2d_geometry(
-            parts_2d,
-            edges = {},
-            build_order = build_order,
-            lunit=lunit)
+                geo_2d.add_part(f"{name}_{i}", poly)
 
+        geo_2d.lunit = lunit
+        # Clean up freecad document
+        FreeCAD.closeDocument('instance')
+        return geo_2d
 
 class Part3DData(object):
     """

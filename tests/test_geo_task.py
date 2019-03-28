@@ -40,8 +40,6 @@ def test_geo_task(datadir):
     for d1 in np.linspace(2., 7., 3):
         built_geo = build_3d_geometry(input_parts=build_order,input_file=input_file_path,
                                       params={'d1': d1})
-        # Currently build_3d_geometry is stateful. Cleaing up
-        FreeCAD.closeDocument('instance')
         results += [built_geo]
     
 
