@@ -355,7 +355,7 @@ class Geo3DData(object):
             """
             # Select a random interior point by first getting a random point in x, then
             # finding the intersections with the polygon at that point in x. Then sample
-            # a random along the first intersection line (if there're multiple)
+            # a random y along the first intersection line (if there're multiple)
             min_x, min_y, max_x, max_y = poly.bounds
             x = np.random.uniform(min_x, max_x)
             x_line = LineString([(x, min_y), (x, max_y)])
