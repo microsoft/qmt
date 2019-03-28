@@ -4,7 +4,10 @@
 """Geometry data classes."""
 
 import numpy as np
-from shapely.ops import cascaded_union
+from shapely.ops import unary_union
+from shapely.geometry import Polygon
+from itertools import chain
+from typing import Optional
 
 from qmt.materials import Materials
 from .data_utils import load_serial, store_serial, write_deserialised
@@ -99,7 +102,7 @@ class Geo2DData(object):
         :return bb_list: List of [min_x,max_x,min_y,max_y]
         """
         all_shapes = list(self.parts.values()) + list(self.edges.values())
-        bbox_vertices = cascaded_union(all_shapes).envelope.exterior.coords.xy
+        bbox_vertices = unary_union(all_shapes).envelope.exterior.coords.xy
         min_x = min(bbox_vertices[0])
         max_x = max(bbox_vertices[0])
         min_y = min(bbox_vertices[1])
@@ -274,6 +277,105 @@ class Geo3DData(object):
                 [item[0:4].replace(' ', '_') for item in self.build_order]) + '.fcstd'
         write_deserialised(self.serial_fcdoc, file_path)
         return file_path
+
+    def xsec_to_2d(self, xsec_name:str, lunit: Optional[str] = None) -> Geo2DData:
+        """
+        Generates a Geo2DData from a cross section
+        :param xsec_name: Name of the cross section
+        :return: Geo2DData object
+        """
+        # Get our new coordinates
+        # This construction ensures that y_new (the first axis in our new 2d coodinate
+        # system) is always aligned (by projection) to one of the old axes, prefering
+        # x, then y, then z
+        x_new = np.array(self.xsecs[xsec_name]["axis"])
+        y_new = np.array([0.,0,0])
+        axis_ind = -1
+        while not np.any(y_new):
+            axis_ind += 1
+            y_new[axis_ind] = 1
+            y_new -= y_new.dot(x_new) * x_new
+        y_new /= np.linalg.norm(y_new)
+        z_new = np.cross(x_new, y_new)
+
+        def _project(vec):
+            vec = vec - x_new * self.xsecs[xsec_name]["distance"]
+            return [vec.dot(y_new), vec.dot(z_new)]
+
+        part_polygons = {}
+        polys_2d = {}
+        virtual_part_polygons = {}
+        # let's part_polygons
+        for part_name in self.build_order:
+            polygons = []
+            for name, points in self.xsecs[xsec_name]["polygons"].items():
+                if name.startswith(f"{part_name}_"):
+                    polygons.append(Polygon(map(_project, points)))
+            if polygons:
+                polys_2d[part_name] = []
+                if self.parts[part_name].domain_type == "virtual":
+                    virtual_part_polygons[part_name] = polygons
+                else:
+                    part_polygons[part_name] = polygons
+                    
+        # Let's deal with the physical domains first, which can have cavities
+        # Loop invariance: at the start and end of the loop, the polygons in
+        # part_polygons that don't contain any other polygons should be added to the
+        # 2d geometry
+        build_order = []
+        while part_polygons:
+            # find the polygons that don't contain any other polygons. They can be
+            # constructed as is
+            for name, poly_list in part_polygons.items():
+                for poly in poly_list:
+                    contains_poly = False
+                    for check_poly in chain.from_iterable(part_polygons.values()):
+                        if check_poly is poly:
+                            continue
+                        if poly.contains(check_poly) and not poly.equals(check_poly):
+                            contains_poly = True
+                            break
+                    if contains_poly == False:
+                        polys_2d[name].append(poly)
+
+            # We remove all polygons in the union of polygons that didn't contain other
+            # polygons. This covers cases like this
+            #  ___________        ___________
+            # |  _______  |      |           |
+            # | |___|___| |  =>  |           |  =>  done
+            # |___________|      |___________|
+            rm_polys_union = unary_union(list(chain.from_iterable(polys_2d.values())))
+            done_parts = []
+            for name, poly_list in part_polygons.items():
+                part_polygons[name] = [poly for poly in poly_list if not rm_polys_union.contains(poly)]
+                if not poly_list:
+                    build_order.append(name)
+                    done_parts.append(name)
+            for name in done_parts:
+                del part_polygons[name]
+        
+        # Now we deal with the virtual parts
+        for name, poly_list in virtual_part_polygons.items():
+            build_order.append(name)
+            polys_2d[name] = poly_list
+
+        parts_2d = {}
+        for name, poly_list in polys_2d.items():
+            if len(poly_list) == 1:
+                parts_2d[name] = list(poly_list[0].exterior.coords)
+                continue
+            ind = build_order.index(name)
+            build_order[ind:ind+1] = tuple(f"{name}_{i}" for i,_ in enumerate(poly_list))
+            for i, poly in enumerate(poly_list):
+                parts_2d[f"{name}_{i}"] = list(poly.exterior.coords)
+        
+        build_order.reverse()
+        from qmt.tasks import build_2d_geometry
+        return build_2d_geometry(
+            parts_2d,
+            edges = {},
+            build_order = build_order,
+            lunit=lunit)
 
 
 class Part3DData(object):

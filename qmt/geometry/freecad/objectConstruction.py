@@ -882,14 +882,13 @@ def buildCrossSection(sliceName, axis, distance, built_parts_dict):
         built_part = built_parts_dict[part_name]
         # loop over FreeCAD shapes corresponding to part
         # slice the 3D part
-        fcName = part_name + '_section_' + sliceName
+        fcName = f"{part_name}_section_{sliceName}"
         section = crossSection(built_part, axis=axis, d=distance, name=fcName)
         # separate disjoint pieces
         segments, cycles = findEdgeCycles(section)
         for i, cycle in enumerate(cycles):
             points = [tuple(segments[idx, 0]) for idx in cycle]
-            patchName = fcName
-            patchName = '{}_{}'.format(part_name, i)
+            patchName = f"{part_name}_{i}"
             # this mapping is necessary since numpy floats have a pickle error:
-            polygons[patchName] = [map(float, point) for point in points]
+            polygons[patchName] = [list(map(float, point)) for point in points]
     return polygons

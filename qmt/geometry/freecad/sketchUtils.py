@@ -142,12 +142,13 @@ def findEdgeCycles(sketch):  # TODO: port objectConstruction crossection stuff
     # Next, detect cycles:
     availSegIDs = range(lineSegments.shape[0])
     cycles = []
-    for i in range(len(availSegIDs)):
-        if len(availSegIDs) > 0:
-            startingIndex = availSegIDs[0]
-            newCycle = findCycle(lineSegments, startingIndex, availSegIDs)
-            cycles += [newCycle]
-            availSegIDs = [item for item in availSegIDs if item not in newCycle]
+    for _ in range(lineSegments.shape[0]):
+        if len(availSegIDs) <= 0:
+            break
+        startingIndex = availSegIDs[0]
+        newCycle = findCycle(lineSegments, startingIndex, availSegIDs)
+        cycles += [newCycle]
+        availSegIDs = [item for item in availSegIDs if item not in newCycle]
     return lineSegments, cycles
 
 
