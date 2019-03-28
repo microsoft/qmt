@@ -82,6 +82,7 @@ def test_xsection(datadir):
         (10.0, 4.0),
     }
 
+
 def test_simple_xsection(datadir):
     small1 = Part3DData(
         "small1",

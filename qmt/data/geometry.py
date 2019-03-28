@@ -376,6 +376,9 @@ class Geo3DData(object):
         for name, poly_list in part_polygons.items():
             cont_graph = _build_containment_graph(poly_list)
             polys_to_add = []
+            # For each polygon (in each part), we subtract from it all interior polygons
+            # And then check if what remains is inside the part or not (it could be a
+            # cavity). We add it if it's not a cavity
             for poly in poly_list:
                 for interior_poly in cont_graph[poly.name]:
                     poly = poly.difference(interior_poly)
