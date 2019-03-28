@@ -339,7 +339,6 @@ class Geo3DData(object):
             poly_by_area = sorted(poly_list, key = lambda p: p.area)
 
             # graph["poly_name"] is a list of polygons that poly_name contains
-            # 
             graph = {poly.name: [] for poly in poly_list}
 
             for i, poly in enumerate(poly_by_area):
