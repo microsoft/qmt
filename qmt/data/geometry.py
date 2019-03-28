@@ -302,10 +302,12 @@ class Geo3DData(object):
         z_new = np.cross(x_new, y_new)
 
         def _project(vec):
+            """Projects a 3D vector into our 2D cross section plane"""
             vec = vec - x_new * self.xsecs[xsec_name]["distance"]
             return [vec.dot(y_new), vec.dot(z_new)]
 
         def _inverse_project(vec):
+            """Inverse of _project"""
             return x_new * self.xsecs[xsec_name]["distance"] + vec[0] * y_new+vec[1] * z_new
 
 
@@ -328,10 +330,16 @@ class Geo3DData(object):
                     part_polygons[part_name] = polygons
 
         def _build_containment_graph(poly_list):
+            """
+            Given a list of polygons, build a directed graph where edge A -> B means
+            A contains B. This intentionally does not include nested containment. Which
+            means if A contains B and B contains C, we will only get the edges A -> B
+            and B -> C, not A -> C
+            """
             poly_by_area = sorted(poly_list, key = lambda p: p.area)
 
             # graph["poly_name"] is a list of polygons that poly_name contains
-            # it does not include nested containment
+            # 
             graph = {poly.name: [] for poly in poly_list}
 
             for i, poly in enumerate(poly_by_area):
@@ -341,6 +349,13 @@ class Geo3DData(object):
             return graph
 
         def _is_inside(poly, part):
+            """
+            Given a polygon, generate a random point inside of it, and then check if
+            that point is in the (3D) part
+            """
+            # Select a random interior point by first getting a random point in x, then
+            # finding the intersections with the polygon at that point in x. Then sample
+            # a random along the first intersection line (if there're multiple)
             min_x, min_y, max_x, max_y = poly.bounds
             x = np.random.uniform(min_x, max_x)
             x_line = LineString([(x, min_y), (x, max_y)])
@@ -350,6 +365,7 @@ class Geo3DData(object):
             x_line_intercept_min, x_line_intercept_max = intersec.xy[1].tolist()
             y = np.random.uniform(x_line_intercept_min, x_line_intercept_max)
 
+            # Get 3D coordinates and check if it's in the freecad shape
             x,y,z = _inverse_project([x,y])
             freecad_solid = Part.Solid(FreeCAD.ActiveDocument.getObject(part.built_fc_name).Shape)
             return freecad_solid.isInside(Base.Vector(x,y,z), 1e-5, True)
