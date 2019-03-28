@@ -6,7 +6,7 @@
 import numpy as np
 from shapely.ops import unary_union
 from shapely.geometry import Polygon
-from itertools import chain
+from itertools import chain, combinations
 from typing import Optional
 
 from qmt.materials import Materials
@@ -338,6 +338,21 @@ class Geo3DData(object):
                     if contains_poly == False:
                         polys_2d[name].append(poly)
 
+            # Among these polygons, if there're polygons that are equal to each other,
+            # give priority to the higher build_order
+            polys_2d_with_name = []
+            for name, poly_list in polys_2d.items():
+                for poly in poly_list:
+                    polys_2d_with_name.append([name, poly])
+            for (name_1, poly_1), (name_2, poly_2) in combinations(polys_2d_with_name, r=2):
+                if poly_1.equals(poly_2):
+                    ind1 = self.build_order.index(name_1)
+                    ind2 = self.build_order.index(name_2)
+                    if ind1 >= ind2:
+                        polys_2d[name_1].remove(poly_1)
+                    else:
+                        polys_2d[name_2].remove(poly_2)
+
             # We remove all polygons in the union of polygons that didn't contain other
             # polygons. This covers cases like this
             #  ___________        ___________
@@ -359,6 +374,7 @@ class Geo3DData(object):
             build_order.append(name)
             polys_2d[name] = poly_list
 
+        # Convert from polygons back to list of coords, to be fed to build_2d_geometry
         parts_2d = {}
         for name, poly_list in polys_2d.items():
             if len(poly_list) == 1:
