@@ -352,20 +352,20 @@ class Geo3DData(object):
 
         def _is_inside(poly, part):
             """
-            Given a polygon, generate a random point inside of it, and then check if
-            that point is in the (3D) part
+            Given a polygon, find a point inside of it, and then check if that point is
+            in the (3D) part
             """
-            # Select a random interior point by first getting a random point in x, then
-            # finding the intersections with the polygon at that point in x. Then sample
-            # a random y along the first intersection line (if there're multiple)
+            # Find the midpoint in x, then find the intersections with the polygon on
+            # that vertical line. Then find the midpoint in y along the first
+            # intersection line (if there're multiple)
             min_x, min_y, max_x, max_y = poly.bounds
-            x = np.random.uniform(min_x, max_x)
+            x = (min_x + max_x) / 2
             x_line = LineString([(x, min_y), (x, max_y)])
             intersec = x_line.intersection(poly)
             if type(intersec) == MultiLineString:
                 intersec = intersec[0]
             x_line_intercept_min, x_line_intercept_max = intersec.xy[1].tolist()
-            y = np.random.uniform(x_line_intercept_min, x_line_intercept_max)
+            y = (x_line_intercept_min + x_line_intercept_max) / 2
 
             # Get 3D coordinates and check if it's in the freecad shape
             x,y,z = _inverse_project([x,y])
