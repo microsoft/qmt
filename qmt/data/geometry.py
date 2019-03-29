@@ -26,7 +26,7 @@ class Geo2DData(object):
     conditions and surface conditions.
     """
 
-    def __init__(self, lunit='nm'):
+    def __init__(self, lunit="nm"):
         self.parts = {}
         self.edges = {}
         self.build_order = []
@@ -62,7 +62,10 @@ class Geo2DData(object):
         else:
             if not ignore_if_absent:
                 raise ValueError(
-                    "Attempted to remove the part " + part_name + ", which doesn't exist.")
+                    "Attempted to remove the part "
+                    + part_name
+                    + ", which doesn't exist."
+                )
             else:
                 pass
 
@@ -94,7 +97,10 @@ class Geo2DData(object):
         else:
             if not ignore_if_absent:
                 raise ValueError(
-                    "Attempted to remove the edge " + edge_name + ", which doesn't exist.")
+                    "Attempted to remove the edge "
+                    + edge_name
+                    + ", which doesn't exist."
+                )
             else:
                 pass
 
@@ -152,18 +158,25 @@ class Geo3DData(object):
         - parts is a dict of Part3D objects, keyed by the label of each Part3D object.
         - build_order is a list of strings indicating the construction order.
     """
+
     EXTERIOR_BC_NAME = "exterior"
 
     def __init__(self):
         self.build_order = []
         self.parts = {}  # dict of parts in this geometry
-        self.xsecs = {} # dict of cross-sections in this geometry
+        self.xsecs = {}  # dict of cross-sections in this geometry
         self.serial_fcdoc = None  # serialized FreeCAD document for this geometry
         self.mesh_verts = None  # numpy array corresponding to the mesh vertices
-        self.mesh_tets = None  # numpy array; each row contains the vertex indices in one tet
-        self.mesh_regions = None  # 1D array; each entry is the region ID of the corresponding tet
+        self.mesh_tets = (
+            None
+        )  # numpy array; each row contains the vertex indices in one tet
+        self.mesh_regions = (
+            None
+        )  # 1D array; each entry is the region ID of the corresponding tet
         self.mesh_id_dict = None  # dictionary with part name keys mapping to region IDs
-        self.virtual_mesh_regions = None # Dict with 1D arrays; each entry specifies what tets belong to virtual region
+        self.virtual_mesh_regions = (
+            None
+        )  # Dict with 1D arrays; each entry specifies what tets belong to virtual region
         self.materials_database = Materials()
 
     def get_material(self, part_name):
@@ -204,11 +217,14 @@ class Geo3DData(object):
         else:
             if not ignore_if_absent:
                 raise ValueError(
-                    "Attempted to remove the part " + part_name + ", which doesn't exist.")
+                    "Attempted to remove the part "
+                    + part_name
+                    + ", which doesn't exist."
+                )
             else:
                 pass
 
-    def add_xsec(self, xsec_name, polygons, axis=(1., 0.,0.), distance=0.):
+    def add_xsec(self, xsec_name, polygons, axis=(1.0, 0.0, 0.0), distance=0.0):
         """
         Make a cross-section of the geometry perpendicular to the axis at a given distance from the origin.
         :param str xsec_name: a strong giving the name for the cross section.
@@ -216,7 +232,11 @@ class Geo3DData(object):
         :param tuple axis: Tuple defining the axis that defines the normal of the cross section.
         :param float distance: Distance along the axis used to set the cross section.
         """
-        self.xsecs[xsec_name] = {'axis':axis,'distance':distance,'polygons':polygons}
+        self.xsecs[xsec_name] = {
+            "axis": axis,
+            "distance": distance,
+            "polygons": polygons,
+        }
 
     def set_data(self, data_name, data, scratch_dir=None):
         """
@@ -228,26 +248,32 @@ class Geo3DData(object):
         :param data:           The corresponding data that we would like to set.
         :param scratch_dir:    Optional existing temporary (fast) storage location.
         """
-        if data_name == 'fcdoc':
+        if data_name == "fcdoc":
+
             def _save_fct(doc, path):
                 doc.saveAs(path)
 
-            self.serial_fcdoc = store_serial(data, _save_fct, 'fcstd', scratch_dir=scratch_dir)
+            self.serial_fcdoc = store_serial(
+                data, _save_fct, "fcstd", scratch_dir=scratch_dir
+            )
 
-        elif data_name == 'mesh' or data_name == 'rmf':
+        elif data_name == "mesh" or data_name == "rmf":
             import fenics as fn
 
             def _save_fct(data, path):
                 fn.File(path) << data
 
-            if data_name == 'mesh':
-                self.serial_mesh = store_serial(data, _save_fct, 'xml', scratch_dir=scratch_dir)
-            if data_name == 'rmf':
-                self.serial_region_marker = store_serial(data, _save_fct, 'xml',
-                                                         scratch_dir=scratch_dir)
+            if data_name == "mesh":
+                self.serial_mesh = store_serial(
+                    data, _save_fct, "xml", scratch_dir=scratch_dir
+                )
+            if data_name == "rmf":
+                self.serial_region_marker = store_serial(
+                    data, _save_fct, "xml", scratch_dir=scratch_dir
+                )
 
         else:
-            raise ValueError(str(data_name) + ' was not a valid data_name.')
+            raise ValueError(str(data_name) + " was not a valid data_name.")
 
     def get_data(self, data_name, mesh=None, scratch_dir=None):
         """
@@ -257,18 +283,18 @@ class Geo3DData(object):
         :param scratch_dir:    Optional existing temporary (fast) storage location.
         :return data:          The freeCAD document or fenics object that was stored.
         """
-        if data_name == 'fcdoc':
+        if data_name == "fcdoc":
             import FreeCAD
 
             def _load_fct(path):
-                doc = FreeCAD.newDocument('instance')
-                FreeCAD.setActiveDocument('instance')
+                doc = FreeCAD.newDocument("instance")
+                FreeCAD.setActiveDocument("instance")
                 doc.load(path)
                 return doc
 
             return load_serial(self.serial_fcdoc, _load_fct, scratch_dir=scratch_dir)
         else:
-            raise ValueError(str(data_name) + ' was not a valid data_name.')
+            raise ValueError(str(data_name) + " was not a valid data_name.")
 
     def write_fcstd(self, file_path=None):
         """Write geometry to a fcstd file.
@@ -276,12 +302,14 @@ class Geo3DData(object):
         Returns the fcstd file path.
         """
         if file_path is None:
-            file_path = '_'.join(
-                [item[0:4].replace(' ', '_') for item in self.build_order]) + '.fcstd'
+            file_path = (
+                "_".join([item[0:4].replace(" ", "_") for item in self.build_order])
+                + ".fcstd"
+            )
         write_deserialised(self.serial_fcdoc, file_path)
         return file_path
 
-    def xsec_to_2d(self, xsec_name:str, lunit: Optional[str] = None) -> Geo2DData:
+    def xsec_to_2d(self, xsec_name: str, lunit: Optional[str] = None) -> Geo2DData:
         """
         Generates a Geo2DData from a cross section
         :param xsec_name: Name of the cross section
@@ -292,7 +320,7 @@ class Geo3DData(object):
         # system) is always aligned (by projection) to one of the old axes, prefering
         # x, then y, then z
         x_new = np.array(self.xsecs[xsec_name]["axis"])
-        y_new = np.array([0.,0,0])
+        y_new = np.array([0.0, 0, 0])
         axis_ind = -1
         while not np.any(y_new):
             axis_ind += 1
@@ -308,8 +336,11 @@ class Geo3DData(object):
 
         def _inverse_project(vec):
             """Inverse of _project"""
-            return x_new * self.xsecs[xsec_name]["distance"] + vec[0] * y_new+vec[1] * z_new
-
+            return (
+                x_new * self.xsecs[xsec_name]["distance"]
+                + vec[0] * y_new
+                + vec[1] * z_new
+            )
 
         part_polygons = {}
         virtual_part_polygons = {}
@@ -336,7 +367,7 @@ class Geo3DData(object):
             means if A contains B and B contains C, we will only get the edges A -> B
             and B -> C, not A -> C
             """
-            poly_by_area = sorted(poly_list, key = lambda p: p.area)
+            poly_by_area = sorted(poly_list, key=lambda p: p.area)
 
             # graph["poly_name"] is a list of polygons that poly_name contains
             graph = {poly.name: [] for poly in poly_list}
@@ -344,7 +375,7 @@ class Geo3DData(object):
             for i, poly in enumerate(poly_by_area):
                 # Find the smallest polygon that contains poly (if any), and add it to
                 # the graph
-                for bigger_poly in poly_by_area[i+1:]:
+                for bigger_poly in poly_by_area[i + 1 :]:
                     if bigger_poly.contains(poly):
                         graph[bigger_poly.name].append(poly)
                         break
@@ -368,13 +399,15 @@ class Geo3DData(object):
             y = (x_line_intercept_min + x_line_intercept_max) / 2
 
             # Get 3D coordinates and check if it's in the freecad shape
-            x,y,z = _inverse_project([x,y])
-            freecad_solid = Part.Solid(FreeCAD.ActiveDocument.getObject(part.built_fc_name).Shape)
-            return freecad_solid.isInside(Base.Vector(x,y,z), 1e-5, True)
+            x, y, z = _inverse_project([x, y])
+            freecad_solid = Part.Solid(
+                FreeCAD.ActiveDocument.getObject(part.built_fc_name).Shape
+            )
+            return freecad_solid.isInside(Base.Vector(x, y, z), 1e-5, True)
 
         # Let's deal with the physical domains first, which can have cavities
         geo_2d = Geo2DData()
-        self.get_data('fcdoc') # The document name is "instance"
+        self.get_data("fcdoc")  # The document name is "instance"
         for name, poly_list in part_polygons.items():
             cont_graph = _build_containment_graph(poly_list)
             polys_to_add = []
@@ -404,8 +437,9 @@ class Geo3DData(object):
 
         geo_2d.lunit = lunit
         # Clean up freecad document
-        FreeCAD.closeDocument('instance')
+        FreeCAD.closeDocument("instance")
         return geo_2d
+
 
 class Part3DData(object):
     """
@@ -471,22 +505,50 @@ class Part3DData(object):
     """
 
     def __init__(
-        self, label, fc_name, directive, domain_type=None, material=None,
-        z0=0, thickness=None, target_wire=None, shell_verts=None,
-        depo_mode=None, z_middle=None, t_in=None, t_out=None,
-        layer_num=None, litho_base=None,
-        mesh_max_size=None, mesh_min_size=None, mesh_growth_rate=None,
-        mesh_scale_vector=None, boundary_condition=None,
-        ns=None, phi_nl=None, ds=None
+        self,
+        label,
+        fc_name,
+        directive,
+        domain_type=None,
+        material=None,
+        z0=0,
+        thickness=None,
+        target_wire=None,
+        shell_verts=None,
+        depo_mode=None,
+        z_middle=None,
+        t_in=None,
+        t_out=None,
+        layer_num=None,
+        litho_base=None,
+        mesh_max_size=None,
+        mesh_min_size=None,
+        mesh_growth_rate=None,
+        mesh_scale_vector=None,
+        boundary_condition=None,
+        ns=None,
+        phi_nl=None,
+        ds=None,
     ):
 
         # Input validation
-        if directive not in ['extrude', 'wire', 'wire_shell', 'SAG', 'lithography', '3d_shape']:
-            raise NameError('Error - directive ' + directive + ' is not a valid directive!')
-        if domain_type not in ['semiconductor', 'metal_gate', 'virtual', 'dielectric']:
-            raise NameError('Error - domainType ' + domain_type + ' not valid!')
+        if directive not in [
+            "extrude",
+            "wire",
+            "wire_shell",
+            "SAG",
+            "lithography",
+            "3d_shape",
+        ]:
+            raise NameError(
+                "Error - directive " + directive + " is not a valid directive!"
+            )
+        if domain_type not in ["semiconductor", "metal_gate", "virtual", "dielectric"]:
+            raise NameError("Error - domainType " + domain_type + " not valid!")
         if domain_type not in ["semiconductor", "dielectric"] and ns is not None:
-            raise ValueError("Cannot set a volume charge density on a gate or virtual part.")
+            raise ValueError(
+                "Cannot set a volume charge density on a gate or virtual part."
+            )
 
         # Input storage
         self.label = label
@@ -521,6 +583,6 @@ class Part3DData(object):
         Returns the STEP file path.
         """
         if file_path is None:
-            file_path = self.label + '.stp'
+            file_path = self.label + ".stp"
         write_deserialised(self.serial_stp, file_path)
         return file_path
