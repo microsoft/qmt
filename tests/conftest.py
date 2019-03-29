@@ -9,7 +9,7 @@ import pytest
 import qmt
 
 
-@pytest.fixture(scope='session')
+@pytest.fixture(scope="session")
 def fix_exampleDir():
     """Return the example directory path."""
     rootPath = os.path.join(os.path.dirname(qmt.__file__), os.pardir)
