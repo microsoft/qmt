@@ -10,14 +10,15 @@ import pytest
 from qmt.geometry.freecad.fileIO import *
 
 
-def test_exportMeshed(fix_testDir, fix_FCDoc):
-    '''Test mesh export/import.'''
-    filePath = os.path.join(fix_testDir, 'testExport.stl')
+def test_exportMeshed(datadir, fix_FCDoc):
+    """Test mesh export/import."""
+    filePath = os.path.join(datadir, "testExport.stl")
     from qmt.geometry.freecad.geomUtils import makeBB
-    testBB = (-1., 1., -2., 2., -3., 3.)
+
+    testBB = (-1.0, 1.0, -2.0, 2.0, -3.0, 3.0)
     testShape = makeBB(testBB)
     exportMeshed(testShape, filePath)
-    Mesh.insert(filePath, 'testDoc')
+    Mesh.insert(filePath, "testDoc")
     meshImport = fix_FCDoc.getObject("testExport")
     xMin = meshImport.Mesh.BoundBox.XMin
     xMax = meshImport.Mesh.BoundBox.XMax
@@ -26,14 +27,14 @@ def test_exportMeshed(fix_testDir, fix_FCDoc):
     zMin = meshImport.Mesh.BoundBox.ZMin
     zMax = meshImport.Mesh.BoundBox.ZMax
     assert testBB == (xMin, xMax, yMin, yMax, zMin, zMax)
-    os.remove(filePath)
 
 
-def test_exportCAD(fix_testDir, fix_FCDoc):
-    '''Test step export/import.'''
-    filePath = os.path.join(fix_testDir, 'tmp_testExport.stp')
+def test_exportCAD(datadir, fix_FCDoc):
+    """Test step export/import."""
+    filePath = os.path.join(datadir, "tmp_testExport.stp")
     from qmt.geometry.freecad.geomUtils import makeBB
-    testBB = (-1., 1.5, -2., 2.5, -3., 3.5)
+
+    testBB = (-1.0, 1.5, -2.0, 2.5, -3.0, 3.5)
     testShape = makeBB(testBB)
     exportCAD([testShape], filePath)
 
@@ -41,16 +42,15 @@ def test_exportCAD(fix_testDir, fix_FCDoc):
     CADImport = fix_FCDoc.getObject("tmp_testExport")
 
     import FreeCAD
+
     transBB = testBB[0:][::2] + testBB[1:][::2]  # reformat to FreeCAD representation
     refBB = FreeCAD.Base.BoundBox(*transBB)
     assert repr(CADImport.Shape.BoundBox) == repr(refBB)
 
-    os.remove(filePath)
-
     with pytest.raises(TypeError) as err:
-        exportCAD(testShape, 'dummy.stp')
-    assert 'must be a list' in str(err.value)
+        exportCAD(testShape, "dummy.stp")
+    assert "must be a list" in str(err.value)
 
     with pytest.raises(ValueError) as err:
-        exportCAD([testShape], 'not_a_step_file')
-    assert 'not a supported extension' in str(err.value)
+        exportCAD([testShape], "not_a_step_file")
+    assert "not a supported extension" in str(err.value)

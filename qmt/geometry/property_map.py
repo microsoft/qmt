@@ -56,25 +56,33 @@ class MaterialPropertyMap(PropertyMap):
     :param fill_value: Value to be filled in places where there is no part or the part does not have a material or the material does not have the property `prop_name`. The default behavior `fill_value='raise'` is to raise a KeyError in these cases.
     """
 
-    def __init__(self, part_map, part_materials, mat_lib, prop_name, eunit=None,
-                 fill_value='raise'):
+    def __init__(
+        self,
+        part_map,
+        part_materials,
+        mat_lib,
+        prop_name,
+        eunit=None,
+        fill_value="raise",
+    ):
         self.fillValue = fill_value
-        self.materialsDict = dict((p, mat_lib.find(m, eunit))
-                                  for p, m in iteritems(part_materials))
+        self.materialsDict = dict(
+            (p, mat_lib.find(m, eunit)) for p, m in iteritems(part_materials)
+        )
 
         self.partProps = {}
         for p, mat in iteritems(self.materialsDict):
             try:
-                if prop_name == 'conductionBandMinimum':
+                if prop_name == "conductionBandMinimum":
                     self.partProps[p] = mat_lib.conduction_band_minimum(mat)
-                elif prop_name == 'valenceBandMaximum':
+                elif prop_name == "valenceBandMaximum":
                     self.partProps[p] = mat_lib.valence_band_maximum(mat)
-                elif prop_name == 'lightHoleMass':
-                    self.partProps[p] = mat.hole_mass('light', 'dos')
-                elif prop_name == 'heavyHoleMass':
-                    self.partProps[p] = mat.hole_mass('heavy', 'dos')
-                elif prop_name == 'dosHoleMass':
-                    self.partProps[p] = mat.hole_mass('dos', 'dos')
+                elif prop_name == "lightHoleMass":
+                    self.partProps[p] = mat.hole_mass("light", "dos")
+                elif prop_name == "heavyHoleMass":
+                    self.partProps[p] = mat.hole_mass("heavy", "dos")
+                elif prop_name == "dosHoleMass":
+                    self.partProps[p] = mat.hole_mass("dos", "dos")
                 else:
                     self.partProps[p] = mat[prop_name]
             except KeyError:
@@ -84,7 +92,7 @@ class MaterialPropertyMap(PropertyMap):
             try:
                 return self.partProps[part]
             except KeyError:
-                if self.fillValue == 'raise':
+                if self.fillValue == "raise":
                     raise
                 return self.fillValue
 

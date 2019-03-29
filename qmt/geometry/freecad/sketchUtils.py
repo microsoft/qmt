@@ -17,18 +17,20 @@ vec = FreeCAD.Vector
 
 
 def findSegments(sketch):
-    '''Return the line segments in a sketch as a numpy array.
+    """Return the line segments in a sketch as a numpy array.
     Note: in FC0.17 sketches contain wires by default.
-    '''
+    """
     lineSegments = []
     for wire in sketch.Shape.Wires:
         for edge in wire.Edges:
-            lineSegments.append([tuple(edge.Vertexes[0].Point), tuple(edge.Vertexes[1].Point)])
+            lineSegments.append(
+                [tuple(edge.Vertexes[0].Point), tuple(edge.Vertexes[1].Point)]
+            )
     return np.array(lineSegments)
 
 
 def nextSegment(lineSegments, segIndex, tol=1e-8, fixOrder=True):
-    '''Return the next line segment index in a collection of tuples defining
+    """Return the next line segment index in a collection of tuples defining
     several cycles.
     WARNING: this will by default fixOrder, i.e. side effects on the caller.
 
@@ -37,25 +39,31 @@ def nextSegment(lineSegments, segIndex, tol=1e-8, fixOrder=True):
         segIndex:     the index to consider
         tol:          repair tolerance for matching
         fixOrder:     whether the order lineSegments should be repaired on the fly
-    '''
+    """
     # initial end point - all other segment starts
-    diffList0 = np.sum(np.abs(lineSegments[segIndex, 1, :] - lineSegments[:, 0, :]), axis=1)
+    diffList0 = np.sum(
+        np.abs(lineSegments[segIndex, 1, :] - lineSegments[:, 0, :]), axis=1
+    )
     # initial end point - all other segment ends
-    diffList1 = np.sum(np.abs(lineSegments[segIndex, 1, :] - lineSegments[:, 1, :]), axis=1)
+    diffList1 = np.sum(
+        np.abs(lineSegments[segIndex, 1, :] - lineSegments[:, 1, :]), axis=1
+    )
 
-    diffList0[segIndex] = 1000.
-    diffList1[segIndex] = 1000.
+    diffList0[segIndex] = 1000.0
+    diffList1[segIndex] = 1000.0
     nextList0 = np.where(diffList0 <= tol)[0]
     nextList1 = np.where(diffList1 <= tol)[0]
     if len(nextList0) + len(nextList1) > 1:
-        raise ValueError('Multiple possible paths found while parsing cycles in sketch.')
+        raise ValueError(
+            "Multiple possible paths found while parsing cycles in sketch."
+        )
     elif len(nextList0) + len(nextList1) < 1:
-        raise ValueError('No paths found while parsing cycles in sketch.')
+        raise ValueError("No paths found while parsing cycles in sketch.")
     elif len(nextList0) == 1:
         return nextList0[0]
     else:
         if fixOrder:
-            # the points were out of order, so they need to be switched            
+            # the points were out of order, so they need to be switched
             nextPoint0 = deepcopy(lineSegments[nextList1[0], 0, :])
             nextPoint1 = deepcopy(lineSegments[nextList1[0], 1, :])
             lineSegments[nextList1[0], 0, :] = nextPoint1
@@ -64,13 +72,15 @@ def nextSegment(lineSegments, segIndex, tol=1e-8, fixOrder=True):
 
 
 def findCycle(lineSegments, startingIndex, availSegIDs):
-    '''Find a cycle in a collection of line segments given a starting index.
+    """Find a cycle in a collection of line segments given a starting index.
     Return the list of indices in the cycle.
-    '''
+    """
     currentIndex = startingIndex
     segList = [startingIndex]
     for i in availSegIDs:
-        currentIndex = nextSegment(lineSegments, currentIndex)  # throws eventually if not in cycle
+        currentIndex = nextSegment(
+            lineSegments, currentIndex
+        )  # throws eventually if not in cycle
         if currentIndex in segList:
             break
         else:
@@ -90,40 +100,40 @@ def findCycle(lineSegments, startingIndex, availSegIDs):
 
 
 def addCycleSketch(name, wire):
-    ''' Add a sketch of a cycle (closed wire) to a FC document.
-    '''
+    """ Add a sketch of a cycle (closed wire) to a FC document.
+    """
     assert wire.isClosed()
     doc = FreeCAD.ActiveDocument
-    if (doc.getObject(name) is not None):
+    if doc.getObject(name) is not None:
         raise ValueError("Error: sketch " + name + " already exists.")
 
     # makeSketch() could handle constraints itself and does recompute() well,
     # but sometimes we may have invalid wires, which it handles badly (fixsometime)
     # ~ return Draft.makeSketch([wire], name=name, autoconstraints=True)
 
-    sketch = doc.addObject('Sketcher::SketchObject', name)
-    for i,edge in enumerate(wire.Edges):
+    sketch = doc.addObject("Sketcher::SketchObject", name)
+    for i, edge in enumerate(wire.Edges):
         v0 = vec(tuple(edge.Vertexes[0].Point))
         v1 = vec(tuple(edge.Vertexes[1].Point))
         if i > 0:
-            if(v0 - old_v1).Length > 1e-5:  # fix invalid wire segments
+            if (v0 - old_v1).Length > 1e-5:  # fix invalid wire segments
                 v1 = vec(tuple(edge.Vertexes[0].Point))
                 v0 = vec(tuple(edge.Vertexes[1].Point))
         old_v1 = v1
         sketch.addGeometry(Part.LineSegment(v0, v1))
         if i > 0:
-            sketch.addConstraint(Sketcher.Constraint('Coincident', i - 1, 2, i, 1))
-    sketch.addConstraint(Sketcher.Constraint('Coincident', i, 2, 0, 1))
+            sketch.addConstraint(Sketcher.Constraint("Coincident", i - 1, 2, i, 1))
+    sketch.addConstraint(Sketcher.Constraint("Coincident", i, 2, 0, 1))
     doc.recompute()
     return sketch
 
 
 def addPolyLineSketch(name, doc, segmentOrder, lineSegments):
-    ''' Add a sketch given segment order and line segments
-    '''
-    if (doc.getObject(name) is not None):  # this name already exists
+    """ Add a sketch given segment order and line segments
+    """
+    if doc.getObject(name) is not None:  # this name already exists
         raise ValueError("Error: sketch " + name + " already exists.")
-    obj = doc.addObject('Sketcher::SketchObject', name)
+    obj = doc.addObject("Sketcher::SketchObject", name)
     for segIndex, segment in enumerate(lineSegments):
         startPoint = segment[0, :]
         endPoint = segment[1, :]
@@ -131,7 +141,7 @@ def addPolyLineSketch(name, doc, segmentOrder, lineSegments):
     for i in range(len(lineSegments)):
         connectIndex = segmentOrder[i]
         if connectIndex < len(lineSegments):
-            obj.addConstraint(Sketcher.Constraint('Coincident', i, 2, connectIndex, 1))
+            obj.addConstraint(Sketcher.Constraint("Coincident", i, 2, connectIndex, 1))
     doc.recompute()
     return obj
 
@@ -142,12 +152,13 @@ def findEdgeCycles(sketch):  # TODO: port objectConstruction crossection stuff
     # Next, detect cycles:
     availSegIDs = range(lineSegments.shape[0])
     cycles = []
-    for i in range(len(availSegIDs)):
-        if len(availSegIDs) > 0:
-            startingIndex = availSegIDs[0]
-            newCycle = findCycle(lineSegments, startingIndex, availSegIDs)
-            cycles += [newCycle]
-            availSegIDs = [item for item in availSegIDs if item not in newCycle]
+    for _ in range(lineSegments.shape[0]):
+        if len(availSegIDs) <= 0:
+            break
+        startingIndex = availSegIDs[0]
+        newCycle = findCycle(lineSegments, startingIndex, availSegIDs)
+        cycles += [newCycle]
+        availSegIDs = [item for item in availSegIDs if item not in newCycle]
     return lineSegments, cycles
 
 
@@ -157,20 +168,20 @@ def findEdgeCycles2(sketch):
 
 
 def splitSketch(sketch):
-    '''Splits a sketch into several, returning a list of names of the new sketches.
-    '''
+    """Splits a sketch into several, returning a list of names of the new sketches.
+    """
     if not sketch.Shape.Wires:
         raise ValueError("No wires in sketch.")
     sketchList = []
     for i, wire in enumerate(sketch.Shape.Wires):
-        sketchList.append(addCycleSketch(sketch.Name + '_' + str(i), wire))
+        sketchList.append(addCycleSketch(sketch.Name + "_" + str(i), wire))
     return sketchList
 
 
 def extendSketch(sketch, d):
-    ''' For a disconnected polyline, extends the last points of the sketch by 
+    """ For a disconnected polyline, extends the last points of the sketch by 
     a distance d. 
-    '''
+    """
     doc = FreeCAD.ActiveDocument
     segments = findSegments(sketch)
     connections = []
@@ -185,11 +196,11 @@ def extendSketch(sketch, d):
     seg1Index = connections.index(len(segments))
     segIndices = [seg0Index, seg1Index]
 
-    # Since we automatically reorder these, we know the orientation. 
+    # Since we automatically reorder these, we know the orientation.
     seg0 = segments[seg0Index]
-    x0, y0, z0 = seg0[0];
+    x0, y0, z0 = seg0[0]
     x1, y1, z1 = seg0[1]
-    dx = x1 - x0;
+    dx = x1 - x0
     dy = y1 - y0
     alpha = np.abs(np.arctan(dy / dx))
     if x0 < x1:
@@ -204,9 +215,9 @@ def extendSketch(sketch, d):
     segments[seg0Index][0][1] = y0p
 
     seg1 = segments[seg1Index]
-    x0, y0, z0 = seg1[0];
+    x0, y0, z0 = seg1[0]
     x1, y1, z1 = seg1[1]
-    dx = x1 - x0;
+    dx = x1 - x0
     dy = y1 - y0
     alpha = np.abs(np.arctan(dy / dx))
     if x1 < x0:
@@ -220,15 +231,17 @@ def extendSketch(sketch, d):
     segments[seg1Index][1][0] = x1p
     segments[seg1Index][1][1] = y1p
 
-    myNewLine = addPolyLineSketch(sketch.Name + '_extension', doc, connections, segments)
+    myNewLine = addPolyLineSketch(
+        sketch.Name + "_extension", doc, connections, segments
+    )
     return myNewLine
 
 
 def makeIntoSketch(inputObj, sketchName=None):
-    ''' Turn a 2D generic object like a polyline into a sketch.
-    '''
+    """ Turn a 2D generic object like a polyline into a sketch.
+    """
     if sketchName is None:
-        sketchName = inputObj.Name + '_sketch'
+        sketchName = inputObj.Name + "_sketch"
     returnSketch = Draft.makeSketch(inputObj, autoconstraints=True, name=sketchName)
     deepRemove(obj=inputObj)
     FreeCAD.ActiveDocument.recompute()

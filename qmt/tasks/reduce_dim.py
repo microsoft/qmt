@@ -1,10 +1,10 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-#from qmt.tasks import Task
+# from qmt.tasks import Task
 #
 #
-#class ReduceDim3D(Task):
+# class ReduceDim3D(Task):
 #    def __init__(self, geo_3d, options=None, name='reduce_dim_3d_task'):
 #        """
 #        Reduces a 3D geometry to a 2D geometry for use with 2D solvers.
@@ -37,7 +37,7 @@
 #        return geo_2d
 #
 #
-#class ReduceDim2D(Task):
+# class ReduceDim2D(Task):
 #    def __init__(self, geo_2d, options=None, name='reduce_dim_2d_task'):
 #        """
 #        Reduces a 2D geometry to a 1D geometry for use with 1D solvers.

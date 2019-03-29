@@ -5,8 +5,10 @@
 
 from shapely.geometry import Polygon, LineString
 from qmt.data import Geo2DData, Geo3DData, serialize_file
+import FreeCAD
 
-def build_2d_geometry(parts, edges, lunit='nm', build_order=None):
+
+def build_2d_geometry(parts, edges, lunit="nm", build_order=None):
     """
     Build a geometry in 2D.
 
@@ -36,14 +38,21 @@ def build_2d_geometry(parts, edges, lunit='nm', build_order=None):
         elif object_name in edges:
             geo_2d.add_edge(object_name, LineString(edges[object_name]))
         else:
-            raise ValueError("Object of name " + object_name + " was found neither in edges nor "
-                                                               "parts.")
+            raise ValueError(
+                "Object of name " + object_name + " was found neither in edges nor "
+                "parts."
+            )
     geo_2d.lunit = lunit
     return geo_2d
 
 
-def build_3d_geometry(input_parts, input_file=None, xsec_dict=None,
-                      serialized_input_file=None, params=None):
+def build_3d_geometry(
+    input_parts,
+    input_file=None,
+    xsec_dict=None,
+    serialized_input_file=None,
+    params=None,
+):
     """
     Build a geometry in 3D.
 
@@ -63,11 +72,9 @@ def build_3d_geometry(input_parts, input_file=None, xsec_dict=None,
     :return Geo3DData: A built geometry.
     """
     if input_file is None and serialized_input_file is None:
-        raise ValueError(
-            "One of input_file or serialized_input_file must be non-none.")
+        raise ValueError("One of input_file or serialized_input_file must be non-none.")
     elif input_file is not None and serialized_input_file is not None:
-        raise ValueError(
-            "Both input_file and serialized_input_file were non-none.")
+        raise ValueError("Both input_file and serialized_input_file were non-none.")
     elif input_file is not None:
         serial_fcdoc = serialize_file(input_file)
     else:
@@ -77,13 +84,16 @@ def build_3d_geometry(input_parts, input_file=None, xsec_dict=None,
     if xsec_dict is None:
         xsec_dict = {}
     options_dict = {}
-    options_dict['serial_fcdoc'] = serial_fcdoc
-    options_dict['input_parts'] = input_parts
-    options_dict['params'] = params
-    options_dict['xsec_dict'] = xsec_dict
+    options_dict["serial_fcdoc"] = serial_fcdoc
+    options_dict["input_parts"] = input_parts
+    options_dict["params"] = params
+    options_dict["xsec_dict"] = xsec_dict
 
     data = Geo3DData()
     data.serial_fcdoc = serial_fcdoc
-    data.get_data('fcdoc')
+    data.get_data("fcdoc")
     from qmt.geometry.freecad.objectConstruction import build
-    return build(options_dict)
+
+    built = build(options_dict)
+    FreeCAD.closeDocument("instance")
+    return built
