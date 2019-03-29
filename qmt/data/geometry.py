@@ -342,9 +342,12 @@ class Geo3DData(object):
             graph = {poly.name: [] for poly in poly_list}
 
             for i, poly in enumerate(poly_by_area):
+                # Find the smallest polygon that contains poly (if any), and add it to
+                # the graph
                 for bigger_poly in poly_by_area[i+1:]:
                     if bigger_poly.contains(poly):
                         graph[bigger_poly.name].append(poly)
+                        break
             return graph
 
         def _is_inside(poly, part):
