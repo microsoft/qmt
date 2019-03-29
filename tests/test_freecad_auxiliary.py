@@ -9,7 +9,7 @@ from qmt.geometry.freecad.geomUtils import extrude
 
 
 def test_delete(fix_FCDoc, fix_two_cycle_sketch):
-    '''Test direct deletion of objects.'''
+    """Test direct deletion of objects."""
     sketch = fix_two_cycle_sketch()
     part = extrude(sketch, 10)
     delete(sketch)
@@ -19,12 +19,12 @@ def test_delete(fix_FCDoc, fix_two_cycle_sketch):
 
 
 def test_deepRemove(fix_FCDoc, fix_two_cycle_sketch):
-    '''Test deep (recursive) removal by all parameters.'''
+    """Test deep (recursive) removal by all parameters."""
 
     # check input sanitation
     with pytest.raises(RuntimeError) as err:
         deepRemove(None)
-    assert 'No object selected' in str(err.value)
+    assert "No object selected" in str(err.value)
 
     # simple deletion
     sketch = fix_two_cycle_sketch()
@@ -47,10 +47,10 @@ def test_deepRemove(fix_FCDoc, fix_two_cycle_sketch):
     box2 = fix_FCDoc.addObject("Part::Box", "Box2")
     box3 = fix_FCDoc.addObject("Part::Box", "Box3")
     inter1 = fix_FCDoc.addObject("Part::MultiCommon", "inter1")
-    inter1.Shapes = [box1, box2, ]
+    inter1.Shapes = [box1, box2]
     fix_FCDoc.recompute()
     inter2 = fix_FCDoc.addObject("Part::MultiCommon", "inter2")
-    inter2.Shapes = [inter1, box3, ]
+    inter2.Shapes = [inter1, box3]
     fix_FCDoc.recompute()
     fix_FCDoc.removeObject(box1.Name)  # interjected delete without recompute
     deepRemove(inter2)

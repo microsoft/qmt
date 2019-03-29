@@ -7,23 +7,25 @@ from qmt.data.data_utils import *
 
 
 def test_store_serial(datadir, fix_FCDoc):
-    '''Test serialisation to memory.'''
+    """Test serialisation to memory."""
     import FreeCAD
+
     # Serialise document
-    obj = fix_FCDoc.addObject('App::FeaturePython', 'some_content')
-    serial_data = store_serial(fix_FCDoc, lambda d, p: d.saveAs(p), 'fcstd')
+    obj = fix_FCDoc.addObject("App::FeaturePython", "some_content")
+    serial_data = store_serial(fix_FCDoc, lambda d, p: d.saveAs(p), "fcstd")
 
     # Write to a file
-    file_path = os.path.join(datadir, 'test.fcstd')
+    file_path = os.path.join(datadir, "test.fcstd")
     import codecs
-    data = codecs.decode(serial_data.encode(), 'base64')
-    with open(file_path, 'wb') as of:
+
+    data = codecs.decode(serial_data.encode(), "base64")
+    with open(file_path, "wb") as of:
         of.write(data)
 
     # Load back and check
-    doc = FreeCAD.newDocument('instance')
-    FreeCAD.setActiveDocument('instance')
+    doc = FreeCAD.newDocument("instance")
+    FreeCAD.setActiveDocument("instance")
     doc.load(file_path)
 
-    assert doc.getObject('some_content') is not None
-    FreeCAD.closeDocument('instance')
+    assert doc.getObject("some_content") is not None
+    FreeCAD.closeDocument("instance")
