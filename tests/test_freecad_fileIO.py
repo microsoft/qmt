@@ -10,9 +10,9 @@ import pytest
 from qmt.geometry.freecad.fileIO import *
 
 
-def test_exportMeshed(fix_testDir, fix_FCDoc):
+def test_exportMeshed(datadir, fix_FCDoc):
     """Test mesh export/import."""
-    filePath = os.path.join(fix_testDir, "testExport.stl")
+    filePath = os.path.join(datadir, "testExport.stl")
     from qmt.geometry.freecad.geomUtils import makeBB
 
     testBB = (-1.0, 1.0, -2.0, 2.0, -3.0, 3.0)
@@ -27,12 +27,11 @@ def test_exportMeshed(fix_testDir, fix_FCDoc):
     zMin = meshImport.Mesh.BoundBox.ZMin
     zMax = meshImport.Mesh.BoundBox.ZMax
     assert testBB == (xMin, xMax, yMin, yMax, zMin, zMax)
-    os.remove(filePath)
 
 
-def test_exportCAD(fix_testDir, fix_FCDoc):
+def test_exportCAD(datadir, fix_FCDoc):
     """Test step export/import."""
-    filePath = os.path.join(fix_testDir, "tmp_testExport.stp")
+    filePath = os.path.join(datadir, "tmp_testExport.stp")
     from qmt.geometry.freecad.geomUtils import makeBB
 
     testBB = (-1.0, 1.5, -2.0, 2.5, -3.0, 3.5)
@@ -47,8 +46,6 @@ def test_exportCAD(fix_testDir, fix_FCDoc):
     transBB = testBB[0:][::2] + testBB[1:][::2]  # reformat to FreeCAD representation
     refBB = FreeCAD.Base.BoundBox(*transBB)
     assert repr(CADImport.Shape.BoundBox) == repr(refBB)
-
-    os.remove(filePath)
 
     with pytest.raises(TypeError) as err:
         exportCAD(testShape, "dummy.stp")

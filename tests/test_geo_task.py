@@ -4,7 +4,7 @@
 """Testing the geometry task."""
 
 
-def test_geo_task(fix_testDir):
+def test_geo_task(datadir):
     """
     Tests the build geometry task. For now, just verifies that the build doesn't encounter errors.
     """
@@ -73,8 +73,8 @@ def test_geo_task(fix_testDir):
         layer_num=2,
         thickness=1,
     )
-    print(os.path.join(fix_testDir, "data", "geometry_test.fcstd"))
-    input_file_path = os.path.join(fix_testDir, "data", "geometry_test.fcstd")
+    input_file_path = os.path.join(datadir, "geometry_test.fcstd")
+    print(input_file_path)
 
     build_order = [block1, block2, sag, wire, shell, block3, substrate, wrap, wrap2]
     results = []

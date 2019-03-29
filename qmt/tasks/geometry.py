@@ -5,6 +5,7 @@
 
 from shapely.geometry import Polygon, LineString
 from qmt.data import Geo2DData, Geo3DData, serialize_file
+import FreeCAD
 
 
 def build_2d_geometry(parts, edges, lunit="nm", build_order=None):
@@ -93,4 +94,6 @@ def build_3d_geometry(
     data.get_data("fcdoc")
     from qmt.geometry.freecad.objectConstruction import build
 
-    return build(options_dict)
+    built = build(options_dict)
+    FreeCAD.closeDocument("instance")
+    return built

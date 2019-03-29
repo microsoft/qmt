@@ -4,7 +4,13 @@
 """Geometry data classes."""
 
 import numpy as np
-from shapely.ops import cascaded_union
+from shapely.ops import unary_union
+from shapely.geometry import LineString, MultiLineString, Polygon
+from itertools import chain, combinations
+from typing import Optional
+import FreeCAD
+import Part
+from FreeCAD import Base
 
 from qmt.materials import Materials
 from .data_utils import load_serial, store_serial, write_deserialised
@@ -105,7 +111,7 @@ class Geo2DData(object):
         :return bb_list: List of [min_x,max_x,min_y,max_y]
         """
         all_shapes = list(self.parts.values()) + list(self.edges.values())
-        bbox_vertices = cascaded_union(all_shapes).envelope.exterior.coords.xy
+        bbox_vertices = unary_union(all_shapes).envelope.exterior.coords.xy
         min_x = min(bbox_vertices[0])
         max_x = max(bbox_vertices[0])
         min_y = min(bbox_vertices[1])
@@ -302,6 +308,137 @@ class Geo3DData(object):
             )
         write_deserialised(self.serial_fcdoc, file_path)
         return file_path
+
+    def xsec_to_2d(self, xsec_name: str, lunit: Optional[str] = None) -> Geo2DData:
+        """
+        Generates a Geo2DData from a cross section
+        :param xsec_name: Name of the cross section
+        :return: Geo2DData object
+        """
+        # Get our new coordinates
+        # This construction ensures that y_new (the first axis in our new 2d coodinate
+        # system) is always aligned (by projection) to one of the old axes, prefering
+        # x, then y, then z
+        x_new = np.array(self.xsecs[xsec_name]["axis"])
+        y_new = np.array([0.0, 0, 0])
+        axis_ind = -1
+        while not np.any(y_new):
+            axis_ind += 1
+            y_new[axis_ind] = 1
+            y_new -= y_new.dot(x_new) * x_new
+        y_new /= np.linalg.norm(y_new)
+        z_new = np.cross(x_new, y_new)
+
+        def _project(vec):
+            """Projects a 3D vector into our 2D cross section plane"""
+            vec = vec - x_new * self.xsecs[xsec_name]["distance"]
+            return [vec.dot(y_new), vec.dot(z_new)]
+
+        def _inverse_project(vec):
+            """Inverse of _project"""
+            return (
+                x_new * self.xsecs[xsec_name]["distance"]
+                + vec[0] * y_new
+                + vec[1] * z_new
+            )
+
+        part_polygons = {}
+        virtual_part_polygons = {}
+        # part_polygons is a dictionary of part_name to polygons. virtual_part_polygons
+        # is the same for virtual parts
+        for part_name in self.build_order:
+            polygons = []
+            for name, points in self.xsecs[xsec_name]["polygons"].items():
+                if name.startswith(f"{part_name}_"):
+                    poly = Polygon(map(_project, points))
+                    # we add a name to the polygon so we can reference it easier later
+                    poly.name = name
+                    polygons.append(poly)
+            if polygons:
+                if self.parts[part_name].domain_type == "virtual":
+                    virtual_part_polygons[part_name] = polygons
+                else:
+                    part_polygons[part_name] = polygons
+
+        def _build_containment_graph(poly_list):
+            """
+            Given a list of polygons, build a directed graph where edge A -> B means
+            A contains B. This intentionally does not include nested containment. Which
+            means if A contains B and B contains C, we will only get the edges A -> B
+            and B -> C, not A -> C
+            """
+            poly_by_area = sorted(poly_list, key=lambda p: p.area)
+
+            # graph["poly_name"] is a list of polygons that poly_name contains
+            graph = {poly.name: [] for poly in poly_list}
+
+            for i, poly in enumerate(poly_by_area):
+                # Find the smallest polygon that contains poly (if any), and add it to
+                # the graph
+                for bigger_poly in poly_by_area[i + 1 :]:
+                    if bigger_poly.contains(poly):
+                        graph[bigger_poly.name].append(poly)
+                        break
+            return graph
+
+        def _is_inside(poly, part):
+            """
+            Given a polygon, find a point inside of it, and then check if that point is
+            in the (3D) part
+            """
+            # Find the midpoint in x, then find the intersections with the polygon on
+            # that vertical line. Then find the midpoint in y along the first
+            # intersection line (if there're multiple)
+            min_x, min_y, max_x, max_y = poly.bounds
+            x = (min_x + max_x) / 2
+            x_line = LineString([(x, min_y), (x, max_y)])
+            intersec = x_line.intersection(poly)
+            if type(intersec) == MultiLineString:
+                intersec = intersec[0]
+            x_line_intercept_min, x_line_intercept_max = intersec.xy[1].tolist()
+            y = (x_line_intercept_min + x_line_intercept_max) / 2
+
+            # Get 3D coordinates and check if it's in the freecad shape
+            x, y, z = _inverse_project([x, y])
+            freecad_solid = Part.Solid(
+                FreeCAD.ActiveDocument.getObject(part.built_fc_name).Shape
+            )
+            return freecad_solid.isInside(Base.Vector(x, y, z), 1e-5, True)
+
+        # Let's deal with the physical domains first, which can have cavities
+        geo_2d = Geo2DData()
+        self.get_data("fcdoc")  # The document name is "instance"
+        for name, poly_list in part_polygons.items():
+            cont_graph = _build_containment_graph(poly_list)
+            polys_to_add = []
+            # For each polygon (in each part), we subtract from it all interior polygons
+            # And then check if what remains is inside the part or not (it could be a
+            # cavity). We add it if it's not a cavity
+            for poly in poly_list:
+                for interior_poly in cont_graph[poly.name]:
+                    poly = poly.difference(interior_poly)
+                if _is_inside(poly, self.parts[name]):
+                    polys_to_add.append(poly)
+            if not polys_to_add:
+                continue
+            if len(polys_to_add) == 1:
+                geo_2d.add_part(name, polys_to_add[0])
+                continue
+            for i, poly in enumerate(polys_to_add):
+                geo_2d.add_part(f"{name}_{i}", poly)
+
+        # Now we deal with the virtual parts, which are just added as is
+        for name, poly_list in virtual_part_polygons.items():
+            if len(poly_list) == 1:
+                geo_2d.add_part(name, poly_list[0])
+                continue
+            for i, poly in enumerate(poly_list):
+                geo_2d.add_part(f"{name}_{i}", poly)
+
+        geo_2d.lunit = lunit
+        # Clean up freecad document
+        FreeCAD.closeDocument("instance")
+        return geo_2d
 
 
 class Part3DData(object):
