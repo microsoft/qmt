@@ -16,35 +16,35 @@ vec = FreeCAD.Vector
 
 
 def extrude_partwb(sketch, length, reverse=False, name=None):
-    '''Extrude via Part workbench.'''
+    """Extrude via Part workbench."""
     doc = FreeCAD.ActiveDocument
     if name is None:
-        f = doc.addObject('Part::Extrusion')
+        f = doc.addObject("Part::Extrusion")
     else:
-        f = doc.addObject('Part::Extrusion', name)
+        f = doc.addObject("Part::Extrusion", name)
     f.Base = sketch
     f.DirMode = "Normal"
     f.DirLink = None
     f.LengthFwd = length
-    f.LengthRev = 0.
+    f.LengthRev = 0.0
     f.Solid = True
     f.Reversed = reverse
     f.Symmetric = False
-    f.TaperAngle = 0.
-    f.TaperAngleRev = 0.
+    f.TaperAngle = 0.0
+    f.TaperAngleRev = 0.0
     # ~ f.Base.ViewObject.hide()
     doc.recompute()
     return f
 
 
 def extrude(sketch, length, reverse=False, name=None):
-    '''Selector for extrude method.'''
+    """Selector for extrude method."""
     return extrude_partwb(sketch, length, reverse, name)
 
 
-def copy_move(obj, moveVec=(0., 0., 0.), copy=True):
-    '''Create a duplciate of the object using a draft move operation.
-    '''
+def copy_move(obj, moveVec=(0.0, 0.0, 0.0), copy=True):
+    """Create a duplciate of the object using a draft move operation.
+    """
     f = Draft.move([obj], vec(moveVec[0], moveVec[1], moveVec[2]), copy=copy)
     if f.Shape.Vertexes:
         f.Shape = f.Shape.removeSplitter()  # get rid of redundant lines
@@ -66,10 +66,10 @@ def make_solid(obj, consumeInputs=False):
 
 
 def makeHexFace(sketch, zBottom, width):
-    '''Given a sketch for a wire, make the first face. Also need to make sure it
+    """Given a sketch for a wire, make the first face. Also need to make sure it
     is placed normal to the initial line segment in the sketch. This will ensure
     that the wire and shell can be constructed with sweep operations.
-    '''
+    """
     doc = FreeCAD.ActiveDocument
     lineSegments = findSegments(sketch)
     lineSegment = lineSegments[0]
@@ -81,16 +81,16 @@ def makeHexFace(sketch, zBottom, width):
     face = Draft.makePolygon(6, radius=width * 0.5, inscribed=False, face=True)
     doc.recompute()
     # Spin the face so that its faces are oriented normal to the path:
-    alpha = 90 - np.arctan(-dy / dx) * 180. / np.pi
-    center = vec(0., 0., 0.)
-    axis = vec(0., 0., 1.)
+    alpha = 90 - np.arctan(-dy / dx) * 180.0 / np.pi
+    center = vec(0.0, 0.0, 0.0)
+    axis = vec(0.0, 0.0, 1.0)
     face1 = Draft.rotate(face, alpha, center, axis=axis, copy=True)
     doc.recompute()
     # Rotate the wire into the proper plane:
-    alpha = 90.
-    center = vec(0., 0., 0.)
+    alpha = 90.0
+    center = vec(0.0, 0.0, 0.0)
     axis = vec(-dy, dx, 0)
-    face2 = Draft.rotate(face1, 90., center, axis=axis, copy=True)
+    face2 = Draft.rotate(face1, 90.0, center, axis=axis, copy=True)
     doc.recompute()
     # Finally, move it into position:
     rVec = vec(x0, y0, 0.5 * width + zBottom)
@@ -103,8 +103,8 @@ def makeHexFace(sketch, zBottom, width):
 
 
 def genUnion(objList, consumeInputs=False):
-    '''Generates a Union non-destructively.
-    '''
+    """Generates a Union non-destructively.
+    """
     doc = FreeCAD.ActiveDocument
     if not objList:
         return None
@@ -134,8 +134,8 @@ def genUnion(objList, consumeInputs=False):
 
 
 def getBB(obj):
-    '''Get the bounding box coords of an object.
-    '''
+    """Get the bounding box coords of an object.
+    """
     xMin = obj.Shape.BoundBox.XMin
     xMax = obj.Shape.BoundBox.XMax
     yMin = obj.Shape.BoundBox.YMin
@@ -146,14 +146,15 @@ def getBB(obj):
 
 
 def makeBB(BB):
-    '''Make a bounding box given BB tuple.
-    '''
+    """Make a bounding box given BB tuple.
+    """
     doc = FreeCAD.ActiveDocument
     xMin, xMax, yMin, yMax, zMin, zMax = BB
     box = doc.addObject("Part::Box")
     centerVector = vec(xMin, yMin, zMin)
-    box.Placement = FreeCAD.Placement(centerVector,
-                                      FreeCAD.Rotation(vec(0., 0., 0.), 0.))
+    box.Placement = FreeCAD.Placement(
+        centerVector, FreeCAD.Rotation(vec(0.0, 0.0, 0.0), 0.0)
+    )
     box.Length = xMax - xMin
     box.Width = yMax - yMin
     box.Height = zMax - zMin
@@ -162,8 +163,8 @@ def makeBB(BB):
 
 
 def subtract(obj0, obj1, consumeInputs=False):
-    '''Subtract two objects, optionally deleting the input objects.
-    '''
+    """Subtract two objects, optionally deleting the input objects.
+    """
     doc = FreeCAD.ActiveDocument
     tempObj = doc.addObject("Part::Cut")
     tempObj.Base = obj0
@@ -180,8 +181,8 @@ def subtract(obj0, obj1, consumeInputs=False):
 
 
 def subtractParts(domainObj, partList):
-    ''' Subtract given part objects from a domain.
-    '''
+    """ Subtract given part objects from a domain.
+    """
     doc = FreeCAD.ActiveDocument
     diffObj = copy_move(domainObj)
     for obj in partList:
@@ -194,8 +195,8 @@ def subtractParts(domainObj, partList):
 
 
 def intersect(objList, consumeInputs=False):
-    '''Intersect a list of objects, optionally deleting the input objects.
-    '''
+    """Intersect a list of objects, optionally deleting the input objects.
+    """
     doc = FreeCAD.ActiveDocument
     intersectTemp = doc.addObject("Part::MultiCommon")
     intersectTemp.Shapes = objList
@@ -211,9 +212,9 @@ def intersect(objList, consumeInputs=False):
 
 
 def checkOverlap(objList):
-    ''' Checks if a list of objects, when intersected, contains a finite volume.abs
+    """ Checks if a list of objects, when intersected, contains a finite volume.abs
     Returns true if it does, returns false if the intersection is empty.
-    '''
+    """
     intObj = intersect(objList)
     if not intObj.Shape.Vertexes:
         overlap = False
@@ -224,8 +225,8 @@ def checkOverlap(objList):
 
 
 def isNonempty(obj):
-    ''' Checks if an object is nonempty (returns True) or empty (returns False).
-    '''
+    """ Checks if an object is nonempty (returns True) or empty (returns False).
+    """
     if not obj.Shape.Vertexes:
         return False
     else:
@@ -233,11 +234,11 @@ def isNonempty(obj):
 
 
 def extrudeBetween(sketch, zMin, zMax, name=None):
-    ''' Non-destructively extrude a sketch between zMin and zMax.
-    '''
+    """ Non-destructively extrude a sketch between zMin and zMax.
+    """
     doc = FreeCAD.ActiveDocument
     tempExt = extrude(sketch, zMax - zMin, name=name)
-    ext = copy_move(tempExt, moveVec=(0., 0., zMin))
+    ext = copy_move(tempExt, moveVec=(0.0, 0.0, zMin))
     doc.recompute()
     doc.removeObject(tempExt.Name)
     doc.recompute()
@@ -245,11 +246,11 @@ def extrudeBetween(sketch, zMin, zMax, name=None):
 
 
 def liftObject(obj, d, consumeInputs=False):
-    ''' Create a new solid by lifting an object by a distance d along z, filling
+    """ Create a new solid by lifting an object by a distance d along z, filling
     in the space swept out.
-    '''
+    """
     objBB = getBB(obj)
-    liftedObj = copy_move(obj, moveVec=(0., 0., d))  # lift up the original sketch
+    liftedObj = copy_move(obj, moveVec=(0.0, 0.0, d))  # lift up the original sketch
     fillBB = np.array(objBB)
     fillBB[5] = fillBB[4] + d  # Make a new BB defining the missing space
     fillObj = makeBB(tuple(fillBB))  # Make a box to fill the space
@@ -260,29 +261,29 @@ def liftObject(obj, d, consumeInputs=False):
 
 
 def draftOffset(inputSketch, t):
-    ''' Attempt to offset the draft figure by a thickness t. Positive t is an
+    """ Attempt to offset the draft figure by a thickness t. Positive t is an
     inflation, while negative t is a deflation.
-    '''
+    """
     # ~ from qmt.geometry.freecad.geomUtils import extrude, copy_move, delete
 
-    if np.isclose(t,0):
+    if np.isclose(t, 0):
         return copy_move(inputSketch)
     deltaT = np.abs(t)
-    offsetVec1 = vec(-deltaT, -deltaT, 0.)
-    offsetVec2 = vec(deltaT, deltaT, 0.)
+    offsetVec1 = vec(-deltaT, -deltaT, 0.0)
+    offsetVec2 = vec(deltaT, deltaT, 0.0)
 
     offset0 = copy_move(inputSketch)
     # Currently FreeCAD throws an error if we try to collapse a shape into a point through offsetting. If that happens, set delta to 5E-5. Any closer and FreeCAD seems to suffer from numerical errors
     try:
         offset1 = Draft.offset(inputSketch, offsetVec1, copy=True)
     except:
-        deltaT -= 5E-5
-        offset1 = Draft.offset(inputSketch, vec(-deltaT, -deltaT, 0.), copy=True)
+        deltaT -= 5e-5
+        offset1 = Draft.offset(inputSketch, vec(-deltaT, -deltaT, 0.0), copy=True)
     try:
         offset2 = Draft.offset(inputSketch, offsetVec2, copy=True)
     except:
-        deltaT -= 5E-5
-        offset2 = Draft.offset(inputSketch, vec(deltaT, deltaT, 0.), copy=True)
+        deltaT -= 5e-5
+        offset2 = Draft.offset(inputSketch, vec(deltaT, deltaT, 0.0), copy=True)
 
     # Compute the areas of the sketches. FreeCAD will throw an exception if we try to make a Face out of a line or a point, we catch that give it an area of 0
     try:
@@ -329,7 +330,11 @@ def draftOffset(inputSketch, t):
         returnSketch = copy_move(bigSketch)
     else:
         raise ValueError(
-            'Failed to offset the sketch ' + str(inputSketch.Name) + ' by amount ' + str(t))
+            "Failed to offset the sketch "
+            + str(inputSketch.Name)
+            + " by amount "
+            + str(t)
+        )
 
     # # now that we have the three solids, we need to figure out which is bigger
     # # and which is smaller.
@@ -365,9 +370,9 @@ def draftOffset(inputSketch, t):
 
 
 def centerObjects(objsList):
-    ''' Move all the objects in the list in the x-y plane so that they are
+    """ Move all the objects in the list in the x-y plane so that they are
     centered about the origin.
-    '''
+    """
     if not objsList:
         return
     wholeObj = genUnion(objsList)
@@ -375,15 +380,15 @@ def centerObjects(objsList):
     x0 = 0.5 * (wholeBB[0] + wholeBB[1])
     y0 = 0.5 * (wholeBB[2] + wholeBB[3])
     for obj in objsList:
-        copy_move(obj, moveVec=(-x0, -y0, 0.), copy=False)
+        copy_move(obj, moveVec=(-x0, -y0, 0.0), copy=False)
     delete(wholeObj)
 
 
-def crossSection(obj, axis=(1., 0., 0.), d=1.0, name=None):
-    '''Return cross section of object along axis.'''
+def crossSection(obj, axis=(1.0, 0.0, 0.0), d=1.0, name=None):
+    """Return cross section of object along axis."""
     doc = FreeCAD.ActiveDocument
     if name is None:
-        name = obj.Name + '_section'
+        name = obj.Name + "_section"
     wires = list()
     shape = obj.Shape
     for i in shape.slice(vec(axis[0], axis[1], axis[2]), d):

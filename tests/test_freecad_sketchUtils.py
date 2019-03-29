@@ -13,7 +13,7 @@ vec = FreeCAD.Vector
 
 
 def test_findSegments(fix_FCDoc, fix_two_cycle_sketch):
-    '''Test if segment finding is ordered correctly.'''
+    """Test if segment finding is ordered correctly."""
     b = (-33, 22, 0)
     d = (22, -11, 0)
     sketch = fix_two_cycle_sketch(b=b, d=d)
@@ -23,7 +23,7 @@ def test_findSegments(fix_FCDoc, fix_two_cycle_sketch):
 
 
 def test_nextSegment(fix_FCDoc, fix_two_cycle_sketch):
-    '''Test if nextSegment correctly increments.'''
+    """Test if nextSegment correctly increments."""
 
     # Match the cycle segments
     sketch = fix_two_cycle_sketch()  # trivial case
@@ -39,9 +39,9 @@ def test_nextSegment(fix_FCDoc, fix_two_cycle_sketch):
     assert nextSegment(segArr, 6) == 4
 
     # Test order fixing
-    segArr = np.array([[[0, 0, 0], [1, 0, 0]],
-                       [[1, 1, 0], [1, 0, 0]],
-                       [[1, 1, 0], [0, 0, 0]]])
+    segArr = np.array(
+        [[[0, 0, 0], [1, 0, 0]], [[1, 1, 0], [1, 0, 0]], [[1, 1, 0], [0, 0, 0]]]
+    )
     assert (segArr[1] == np.array([[1, 1, 0], [1, 0, 0]])).all()
     nextSegment(segArr, 0, fixOrder=False)
     assert (segArr[1] == np.array([[1, 1, 0], [1, 0, 0]])).all()
@@ -54,17 +54,17 @@ def test_nextSegment(fix_FCDoc, fix_two_cycle_sketch):
     segArr = findSegments(sketch)
     with pytest.raises(ValueError) as err:
         nextSegment(segArr, 3)
-    assert 'Multiple possible paths found' in str(err.value)
+    assert "Multiple possible paths found" in str(err.value)
 
     # Open cycles
     segArr = np.array([[[0, 0, 0], [1, 0, 0]], [[1, 0, 0], [2, 0, 0]]])
     with pytest.raises(ValueError) as err:
         nextSegment(segArr, 1)
-    assert 'No paths found' in str(err.value)
+    assert "No paths found" in str(err.value)
 
 
 def test_findCycle(fix_FCDoc, fix_two_cycle_sketch):
-    '''Test cycle ordering.'''
+    """Test cycle ordering."""
     sketch = fix_two_cycle_sketch()
     segArr = findSegments(sketch)
     ref1 = [0, 1, 2, 3]  # square cycle indices
@@ -78,30 +78,30 @@ def test_findCycle(fix_FCDoc, fix_two_cycle_sketch):
 
 
 def test_addCycleSketch(fix_FCDoc, fix_two_cycle_sketch):
-    '''Test if cycles are correctly added.'''
+    """Test if cycles are correctly added."""
     b = (-30, 20, 0)
     d = (20, -10, 0)
     sketch = fix_two_cycle_sketch()
     wire = sketch.Shape.Wires[0]
-    sketch_new = addCycleSketch('cyclesketch', wire)
+    sketch_new = addCycleSketch("cyclesketch", wire)
 
     segArr = findSegments(sketch_new)
     assert (segArr[0][1] == [b]).all()
     assert (segArr[2][1] == [d]).all()
 
     with pytest.raises(ValueError) as err:
-        addCycleSketch('cyclesketch', wire)
-    assert 'already exists' in str(err.value)
+        addCycleSketch("cyclesketch", wire)
+    assert "already exists" in str(err.value)
 
 
 def test_addPolyLineSketch(fix_FCDoc):
-    '''Test if polylines are correctly added.'''
+    """Test if polylines are correctly added."""
     pass
     # TODO
 
 
 def test_findEdgeCycles(fix_FCDoc, fix_two_cycle_sketch):
-    '''Test multiple cycle ordering.'''
+    """Test multiple cycle ordering."""
     sketch = fix_two_cycle_sketch()
     _, cycles = findEdgeCycles(sketch)
     assert cycles[0] == [0, 1, 2, 3]
@@ -109,19 +109,23 @@ def test_findEdgeCycles(fix_FCDoc, fix_two_cycle_sketch):
 
 
 def test_findEdgeCycles2(fix_FCDoc, fix_two_cycle_sketch):
-    '''Test multiple cycle ordering.'''
+    """Test multiple cycle ordering."""
     sketch = fix_two_cycle_sketch()
-    com_ref = [(e.CenterOfMass.x, e.CenterOfMass.y, e.CenterOfMass.z)
-               for e in [wire.Edges for wire in sketch.Shape.Wires][0]]
+    com_ref = [
+        (e.CenterOfMass.x, e.CenterOfMass.y, e.CenterOfMass.z)
+        for e in [wire.Edges for wire in sketch.Shape.Wires][0]
+    ]
 
     wires = findEdgeCycles2(sketch)
-    com = [(e.CenterOfMass.x, e.CenterOfMass.y, e.CenterOfMass.z)
-           for e in [wire.Edges for wire in wires][0]]
+    com = [
+        (e.CenterOfMass.x, e.CenterOfMass.y, e.CenterOfMass.z)
+        for e in [wire.Edges for wire in wires][0]
+    ]
     assert np.allclose(com, com_ref)
 
 
 def test_splitSketch(fix_FCDoc, fix_two_cycle_sketch, fix_rectangle_sketch):
-    '''Test if multi-cycle sketches are split correctly.'''
+    """Test if multi-cycle sketches are split correctly."""
     sketch = fix_two_cycle_sketch()
 
     newsketchList = splitSketch(sketch)
@@ -140,8 +144,8 @@ def test_splitSketch(fix_FCDoc, fix_two_cycle_sketch, fix_rectangle_sketch):
 
 
 def test_extendSketch(fix_FCDoc):
-    '''Test unconnected sketch extension, all cases.'''
-    sketch = fix_FCDoc.addObject('Sketcher::SketchObject', 'Sketch')
+    """Test unconnected sketch extension, all cases."""
+    sketch = fix_FCDoc.addObject("Sketcher::SketchObject", "Sketch")
     geoList = []
     geoList.append(Part.LineSegment(vec(0, 0, 0), vec(0, 2, 0)))
     geoList.append(Part.LineSegment(vec(0, 2, 0), vec(-2, 2, 0)))
@@ -153,7 +157,7 @@ def test_extendSketch(fix_FCDoc):
 
     deepRemove(sketch)
     deepRemove(ext)
-    sketch = fix_FCDoc.addObject('Sketcher::SketchObject', 'Sketch')
+    sketch = fix_FCDoc.addObject("Sketcher::SketchObject", "Sketch")
     geoList = []
     geoList.append(Part.LineSegment(vec(0, 0, 0), vec(2, 0, 0)))
     geoList.append(Part.LineSegment(vec(2, 0, 0), vec(2, -2, 0)))
