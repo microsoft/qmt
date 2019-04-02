@@ -8,6 +8,7 @@ dependencies:
   - appdirs=1.4.3=py_1
   - appnope=0.1.0=py36_1000
   - asn1crypto=0.24.0=py36_1003
+  - aspy.yaml=1.2.0=py_0
   - astroid=2.2.5=py36_0
   - atomicwrites=1.3.0=py_0
   - attrs=19.1.0=py_0
@@ -23,8 +24,10 @@ dependencies:
   - boost-cpp=1.66.0=1
   - bzip2=1.0.6=h1de35cc_1002
   - ca-certificates=2019.3.9=hecc5488_0
+  - cached-property=1.5.1=py_0
   - certifi=2019.3.9=py36_0
   - cffi=1.12.2=py36h2d6ddff_1
+  - cfgv=1.6.0=py_0
   - chardet=3.0.4=py36_1003
   - click=7.0=py_0
   - cloudpickle=0.8.1=py_0
@@ -46,6 +49,7 @@ dependencies:
   - distributed=1.26.1=py36_0
   - docrep=0.2.5=py_0
   - docutils=0.14=py36_1001
+  - editdistance=0.5.3=py36h0a44026_0
   - eigen=3.3.7=h04f5b5a_1000
   - entrypoints=0.3=py36_1000
   - execnet=1.5.0=py_0
@@ -65,8 +69,11 @@ dependencies:
   - hpc05=v1.30=py36_0
   - hypre=2.11.2=1
   - icu=58.2=h0a44026_1000
+  - identify=1.4.1=py_0
   - idna=2.8=py36_1000
   - imagesize=1.1.0=py_0
+  - importlib_metadata=0.8=py36_0
+  - importlib_resources=1.0.2=py36_1000
   - intel-openmp=2019.3=199
   - ipykernel=5.1.0=py36h24bf2e0_1002
   - ipyparallel=6.2.3=py36_1000
@@ -138,6 +145,7 @@ dependencies:
   - nbformat=4.4.0=py_1
   - ncurses=6.1=h0a44026_1002
   - netgen=6.2.1804=py36_0
+  - nodeenv=1.3.3=py_0
   - notebook=5.7.7=py36_0
   - numexpr=2.6.9=py36h1702cab_1000
   - numpy=1.13.3=py36_blas_openblas_201
@@ -166,6 +174,7 @@ dependencies:
   - pkg-config=0.29.2=h112b980_1005
   - pluggy=0.9.0=py_0
   - ply=3.11=py_1
+  - pre_commit=1.15.1=py36_0
   - prometheus_client=0.6.0=py_0
   - prompt_toolkit=2.0.9=py_0
   - psutil=5.6.1=py36h1de35cc_0
@@ -204,7 +213,7 @@ dependencies:
   - rhash=1.3.6=h1de35cc_1001
   - rope=0.10.7=py_1
   - scalapack=2.0.2=h2db4217_1005
-  - scipy=1.2.1=py36hbd7caa9_1
+  - scipy=1.1.0=py36_blas_openblash7943236_201
   - scotch=6.0.6=hde27766_1002
   - send2trash=1.5.0=py_0
   - setuptools=40.8.0=py36_0
@@ -242,6 +251,7 @@ dependencies:
   - traitlets=4.3.2=py36_1000
   - typed-ast=1.3.1=py36h1de35cc_0
   - urllib3=1.24.1=py36_1000
+  - virtualenv=16.0.0=py36_1000
   - vtk=8.1.1=py36hdceb404_201
   - wcwidth=0.1.7=py_1
   - webencodings=0.5.1=py_1
@@ -253,6 +263,7 @@ dependencies:
   - yaml=0.1.7=h1de35cc_1001
   - zeromq=4.2.5=h0a44026_1006
   - zict=0.1.4=py_0
+  - zipp=0.3.3=py_0
   - zlib=1.2.11=h1de35cc_1004
   - pip:
     - fenics-dijitso==2017.2.0
