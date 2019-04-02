@@ -5,7 +5,6 @@
 
 import os
 import numpy as np
-import dask
 
 from qmt.data import Part3DData
 from qmt.tasks import build_3d_geometry
