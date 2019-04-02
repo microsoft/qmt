@@ -71,9 +71,11 @@ input_parts = [block1, block2, sag, virt, wire, shell, block3, substrate, wrap, 
 # Compute parametrised geometries in parallel with dask
 geometries = []
 for d1 in np.linspace(2.0, 7.0, 3):
-    geometries.append(build_3d_geometry(input_parts=input_parts,
-                                        input_file=input_file,
-                                        params={"d1": d1}))
+    geometries.append(
+        build_3d_geometry(
+            input_parts=input_parts, input_file=input_file, params={"d1": d1}
+        )
+    )
 
 # Create a local temporary directory to investigate results
 if not os.path.exists("tmp"):
