@@ -4,29 +4,11 @@
 
 Welcome to our qubit modeling tools (qmt)! This package is designed to automate the setup of complex geometries appropriate to physical qubit simulations. This package is licensed with an MIT open source license.
 
-For python package configuration, see the yml files in `qmt/deployment`.
+## Getting Started
 
-    conda env create -f qmt/deployment/environment_full_linux.yml
+If you're only using qmt without making code changes, you can use docker. See [Wiki link](https://github.com/Microsoft/qmt/wiki/Running-the-example-notebook-in-Docker).
 
-This creates an environment named py36. You can now activate that environment with
-
-    conda activate py36
-
-Before we can start using the environment, we need to make freecad available to python. You can find the path to freecad by running
-
-    find [path to conda]/pkgs/ -maxdepth 1 -type d -name "freecad*"
-
-Append /lib to the output from that command and echo it to our environment's site-packages:
-
-    echo "[output from previous command]/lib" > [path to conda]/envs/py36/lib/python3.6/site-packages/freecad.pth
-
-The final step is to make QMT itself available to conda. Run
-
-    conda develop -n py36 [path to QMT]
-
-And you should have a working QMT environment!
-
-Another option is using Docker. To use the latest image, see `qmt/deployment/docker_python.sh`.
+If you're developing qmt, it is advisable to set it up with conda instead. See [Conda Setup](https://github.com/Microsoft/qmt/wiki/Conda-Setup) for detailed instructions.
 
 A significant part of the repository consists of Python functions and macros to be executed within FreeCAD, either interactively or in batch mode. These require the latest version of FreeCAD (0.18), which works with Python 3.
 
@@ -36,7 +18,7 @@ Note that this initial release does not contain examples or introductory documen
 
 We are using GitHub Flow for the development of this code. Please see [here](https://guides.github.com/introduction/flow/) for a tutorial.
 
-This project uses [black](https://github.com/ambv/black) to improve code readability and to make changesets more readable. The package is included with the conda environment, and you can run it with `black [path_to_qmt] -t py36`. It also integrates with popular IDEs such as [PyCharm](https://plugins.jetbrains.com/plugin/10563-black-pycharm) and [VSCode](https://code.visualstudio.com/docs/python/editing#_formatting).
+This project uses [black](https://github.com/ambv/black) to improve code readability and to make changesets more readable. The package is included with the conda environment, and you can run it with `black [path_to_qmt] -t py36`. There's an included pre-commit hook that automatically formats your code on commit. It also integrates with popular IDEs such as [PyCharm](https://plugins.jetbrains.com/plugin/10563-black-pycharm) and [VSCode](https://code.visualstudio.com/docs/python/editing#_formatting).
 
 ## Contributing
 
