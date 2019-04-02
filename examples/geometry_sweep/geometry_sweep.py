@@ -5,7 +5,6 @@
 
 import os
 import numpy as np
-import dask
 
 from qmt.data import Part3DData
 from qmt.tasks import build_3d_geometry
@@ -67,13 +66,16 @@ virt = Part3DData("Virtual Domain", "Sketch008", "extrude", "virtual", thickness
 
 # Parameters for geometry building
 input_file = "geometry_sweep_showcase.fcstd"  # contains a model parameter 'd1'
-build_order = [block1, block2, sag, virt, wire, shell, block3, substrate, wrap, wrap2]
+input_parts = [block1, block2, sag, virt, wire, shell, block3, substrate, wrap, wrap2]
 
 # Compute parametrised geometries in parallel with dask
-futures = []
+geometries = []
 for d1 in np.linspace(2.0, 7.0, 3):
-    futures.append(dask.delayed(build_3d_geometry)(input_file, build_order, {"d1": d1}))
-geometries = dask.compute(*futures)
+    geometries.append(
+        build_3d_geometry(
+            input_parts=input_parts, input_file=input_file, params={"d1": d1}
+        )
+    )
 
 # Create a local temporary directory to investigate results
 if not os.path.exists("tmp"):
