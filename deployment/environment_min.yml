@@ -35,6 +35,7 @@ dependencies:
   - numpy
   - numpy-stl
   - petsc
+  - pre_commit
   - pylint
   - pytest
   - pytest-cov
