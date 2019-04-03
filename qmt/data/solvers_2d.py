@@ -1,23 +1,21 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-from collections import namedtuple
-from typing import NamedTuple, Optional, Tuple
+from typing import Optional, Tuple
 from sympy.core.mul import Mul
 import numpy as np
 from qmt.physics_constants import UArray
+from dataclasses import dataclass
 
 
-class Potential2dData(NamedTuple):
+@dataclass
+class Potential2dData:
     coordinates: Tuple[UArray, UArray]
     potential: UArray
 
 
-# Conceptually this is ThomasFermi2dData(Potential2dData), but python doesn't let us do
-# that yet :(
-class ThomasFermi2dData(NamedTuple):
-    coordinates: Tuple[UArray, UArray]
-    potential: UArray
+@dataclass
+class ThomasFermi2dData(Potential2dData):
     density: UArray
     conduction_band: UArray
     valence_band: UArray
@@ -25,14 +23,15 @@ class ThomasFermi2dData(NamedTuple):
     temperature: Mul
 
 
-class Bdg2dData(NamedTuple):
+@dataclass
+class Bdg2dData:
     coordinates: Tuple[UArray, UArray]
     energies: UArray
     wave_functions: UArray
-    hamiltonian: Optional[UArray]
 
 
-class Phase2dData(NamedTuple):
+@dataclass
+class Phase2dData:
     coordinates: Tuple[UArray, UArray]
     superconducting_phase: np.ndarray
 
