@@ -42,6 +42,7 @@ dependencies:
   - dask=1.1.4=py_0
   - dask-core=1.1.4=py_0
   - dask-jobqueue=0.4.1=py_0
+  - dataclasses=0.6=py_0
   - dbus=1.13.0=h3a4f0e9_0
   - decorator=4.4.0=py_0
   - deepdish=0.3.4=py_2

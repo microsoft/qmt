@@ -8,23 +8,8 @@ from scipy import constants as sc
 from sympy.matrices import eye
 from sympy.physics.matrices import msigma
 from sympy.physics.quantum import TensorProduct as kron
-
-try:
-    from types import SimpleNamespace
-except ImportError:
-    # SimpleNamespace was introduced in python 3.3; in earlier versions use the
-    # simple implementation from docs.python.org
-    class SimpleNamespace:
-        def __init__(self, **kwargs):
-            self.__dict__.update(kwargs)
-
-        def __repr__(self):
-            keys = sorted(self.__dict__)
-            items = ("{}={!r}".format(k, self.__dict__[k]) for k in keys)
-            return "{}({})".format(type(self).__name__, ", ".join(items))
-
-        def __eq__(self, other):
-            return self.__dict__ == other.__dict__
+from types import SimpleNamespace
+import numpy as np
 
 
 units = SimpleNamespace(
@@ -94,12 +79,17 @@ else:
 
 
 def cancel(expr):
-    """Cancel different units referring to the same dimension, e.g. cancel(kg/g) -> 1000"""
+    """
+    Cancel different units referring to the same dimension, e.g. cancel(kg/g) -> 1000
+    """
     return canonicalize(expr, 1)
 
 
 def to_float(expr):
-    """Convert sympy expression involving units to a float. Fails if expr is not dimensionless."""
+    """
+    Convert sympy expression involving units to a float. Fails if expr is not
+    dimensionless.
+    """
     return float(cancel(expr))
 
 
@@ -125,4 +115,30 @@ matrices.tau_zx = kron(matrices.s_z, matrices.s_x)
 matrices.tau_zy = kron(matrices.s_z, matrices.s_y)
 matrices.tau_zz = kron(matrices.s_z, matrices.s_z)
 
-__all__ = ["units", "constants", "matrices", "parse_unit", "to_float"]
+
+class UArray(np.ndarray):
+    """
+    Extend a numpy array to have units information from sympy
+    From https://docs.scipy.org/doc/numpy/user/basics.subclassing.html#simple-example-adding-an-extra-attribute-to-ndarray
+    """
+
+    def __new__(cls, input_array, unit=None):
+        # Input array is an already formed ndarray instance
+        # We first cast to be our class type
+        if input_array is None:
+            return None
+        obj = np.asarray(input_array).view(cls)
+        # add the unit to the created instance
+        obj.unit = unit
+        obj.dtype = input_array.dtype
+        # Finally, we must return the newly created object:
+        return obj
+
+    def __array_finalize__(self, obj):
+        # see InfoArray.__array_finalize__ for comments
+        if obj is None:
+            return
+        self.info = getattr(obj, "info", None)
+
+
+__all__ = ["units", "constants", "matrices", "parse_unit", "to_float", "UArray"]

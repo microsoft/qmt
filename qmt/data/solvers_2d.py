@@ -1,44 +1,40 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-from collections import namedtuple
-
-Potential2dData = namedtuple(
-    "Potential2dData",
-    ["coordinates", "coordinate_units", "potential", "potential_units"],
-)
-ThomasFermi2dData = namedtuple(
-    "ThomasFermi2dData",
-    [
-        "coordinates",
-        "potential",
-        "density",
-        "conduction_band",
-        "valence_band",
-        "reference_level",
-        "temperature",
-        "coordinate_units",
-        "potential_units",
-        "energy_units",
-    ],
-)
-
-Bdg2dData = namedtuple(
-    "Bdg2dData",
-    [
-        "coordinates",
-        "energies",
-        "wave_functions",
-        "coordinate_units",
-        "energy_units",
-        "hamiltonian",
-    ],
-)
+from typing import Optional, Tuple
+from sympy.core.mul import Mul
+import numpy as np
+from qmt.physics_constants import UArray
+from dataclasses import dataclass
 
 
-Phase2dData = namedtuple(
-    "Phase2dData", ["coordinates", "superconducting_phase", "coordinate_units"]
-)
+@dataclass
+class Potential2dData:
+    coordinates: Tuple[UArray, UArray]
+    potential: UArray
+
+
+@dataclass
+class ThomasFermi2dData(Potential2dData):
+    density: UArray
+    conduction_band: UArray
+    valence_band: UArray
+    reference_level: Mul
+    temperature: Mul
+
+
+@dataclass
+class Bdg2dData:
+    coordinates: Tuple[UArray, UArray]
+    energies: UArray
+    wave_functions: UArray
+
+
+@dataclass
+class Phase2dData:
+    coordinates: Tuple[UArray, UArray]
+    superconducting_phase: np.ndarray
+
 
 # TODO: this needs to be pruned
 class SchrodingerPoissonDatas:
