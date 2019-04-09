@@ -17,7 +17,7 @@ def test_exportMeshed(datadir, fix_FCDoc):
 
     testBB = (-1.0, 1.0, -2.0, 2.0, -3.0, 3.0)
     testShape = makeBB(testBB)
-    exportMeshed(testShape, filePath)
+    exportMeshed([testShape], filePath)
     Mesh.insert(filePath, "testDoc")
     meshImport = fix_FCDoc.getObject("testExport")
     xMin = meshImport.Mesh.BoundBox.XMin
