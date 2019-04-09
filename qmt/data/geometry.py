@@ -12,7 +12,6 @@ import FreeCAD
 import Part
 from FreeCAD import Base
 import matplotlib._color_data as mcd
-from matplotlib.figure import Figure
 from qmt.materials import Materials
 from .data_utils import load_serial, store_serial, write_deserialised
 from matplotlib.axes import Axes
@@ -157,17 +156,15 @@ class Geo2DData(object):
         self,
         parts_to_exclude: Sequence[str] = [],
         line_width: float = 20.0,
-        fig: Optional[Figure] = None,
-        subplot_args: Tuple = ((111,), {}),
+        ax: Optional[Axes] = None,
         colors: Sequence = list(mcd.XKCD_COLORS.values()),
     ) -> Axes:
         """
         Plots the 2d geometry
         :param parts_to_exclude: Part/edge names that won't be plotted
         :param line_width: Thickness of lines (only for edge lines)
-        :param fig: You can pass in a matplotlib figure and this method will add the
-            plot as a subplot to this figure. If it's None, a new figure will be
-            created
+        :param ax: You can pass in a matplotlib axes to plot in. If it's None, a new
+            figure with its corresponding axes will be created
         :param subplot_args: Tuple of args and kwargs to pass to add_subplot
         :param colors: Colors to use for plotting the parts and edges
         :return: 
@@ -175,10 +172,8 @@ class Geo2DData(object):
         from matplotlib import pyplot as plt
         import descartes
 
-        if not fig:
-            fig = plt.figure()
-        args, kwargs = subplot_args
-        ax = fig.add_subplot(*args, **kwargs)
+        if not ax:
+            ax = plt.figure().gca()
         pn = 0
         for part_name, part in self.edges.items():
             if part_name in parts_to_exclude:
