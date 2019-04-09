@@ -97,3 +97,14 @@ for i, geo in enumerate(geometries):
             + ") to STEP file."
         )
         part.write_stp(os.path.join("tmp", str(i) + "_" + label + ".stp"))
+        print(
+            str(i)
+            + ': "'
+            + label
+            + '" ('
+            + part.fc_name
+            + " -> "
+            + part.built_fc_name
+            + ") to STL file."
+        )
+        part.write_stl(os.path.join("tmp", str(i) + "_" + label + ".stl"))
