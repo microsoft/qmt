@@ -7,13 +7,15 @@ import numpy as np
 from shapely.ops import unary_union
 from shapely.geometry import LinearRing, LineString, MultiLineString, Polygon
 from itertools import chain, combinations
-from typing import Optional, Sequence
+from typing import Optional, Sequence, Tuple
 import FreeCAD
 import Part
 from FreeCAD import Base
 import matplotlib._color_data as mcd
+from matplotlib.figure import Figure
 from qmt.materials import Materials
 from .data_utils import load_serial, store_serial, write_deserialised
+from matplotlib.axes import Axes
 
 
 class Geo2DData(object):
@@ -153,24 +155,30 @@ class Geo2DData(object):
 
     def plot(
         self,
-        axis_limits: Sequence[float] = [],
         parts_to_exclude: Sequence[str] = [],
         line_width: float = 20.0,
-        figsize: Sequence[float] = (10, 10),
+        fig: Optional[Figure] = None,
+        subplot_args: Tuple = ((111,), {}),
         colors: Sequence = list(mcd.XKCD_COLORS.values()),
-    ):
+    ) -> Axes:
         """
         Plots the 2d geometry
-        :param axis_limits: Sequence with 4 values: xmin, ymin, xmax, ymax 
         :param parts_to_exclude: Part/edge names that won't be plotted
         :param line_width: Thickness of lines (only for edge lines)
-        :param figsize: Size of the figure
+        :param fig: You can pass in a matplotlib figure and this method will add the
+            plot as a subplot to this figure. If it's None, a new figure will be
+            created
+        :param subplot_args: Tuple of args and kwargs to pass to add_subplot
+        :param colors: Colors to use for plotting the parts and edges
+        :return: 
         """
         from matplotlib import pyplot as plt
         import descartes
 
-        fig = plt.figure(figsize=figsize)
-        ax = fig.add_subplot(111)
+        if not fig:
+            fig = plt.figure()
+        args, kwargs = subplot_args
+        ax = fig.add_subplot(*args, **kwargs)
         pn = 0
         for part_name, part in self.edges.items():
             if part_name in parts_to_exclude:
@@ -218,11 +226,9 @@ class Geo2DData(object):
                 size=14,
             )
             pn += 1
-        if axis_limits:
-            ax.axis(axis_limits)
-        else:
-            ax.axis("auto")
-        plt.show()
+        # Set axis to auto. The user can change this later if he wishes
+        ax.axis("auto")
+        return ax
 
 
 class Geo3DData(object):
