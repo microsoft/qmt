@@ -23,13 +23,13 @@ def exportMeshed(obj_list, file_name):
         raise TypeError("obj_list must be a list of objects.")
     # These previous methods use more complicated routines (netgen or mefisto)
     # that produce more controllable meshes but sometimes fail.
-    #obj = obj_list[0]
+    # obj = obj_list[0]
     # meshedObj = FreeCAD.ActiveDocument.addObject("Mesh::Feature",obj.Name+"_mesh")
     # meshedObj.Mesh=MeshPart.meshFromShape(Shape=obj.Shape,Fineness=0,SecondOrder=0,Optimize=0,
     # AllowQuad=0)
     # meshedObj.Mesh=Mesh.Mesh(obj.Shape.tessellate(0.01))
     # meshedObj.Mesh.write(fileName,"STL",meshedObj.Name)
-    supported_ext = (".stl")
+    supported_ext = ".stl"
     if file_name.endswith(supported_ext):
         with silent_stdout():
             Mesh.export(obj_list, file_name)
