@@ -5,13 +5,13 @@
 
 import numpy as np
 from shapely.ops import unary_union
-from shapely.geometry import LineString, MultiLineString, Polygon
+from shapely.geometry import LinearRing, LineString, MultiLineString, Polygon
 from itertools import chain, combinations
-from typing import Optional
+from typing import Optional, Sequence
 import FreeCAD
 import Part
 from FreeCAD import Base
-
+import matplotlib._color_data as mcd
 from qmt.materials import Materials
 from .data_utils import load_serial, store_serial, write_deserialised
 
@@ -150,6 +150,79 @@ class Geo2DData(object):
         """
         coord_list = list(np.array(self.edges[edge_name].coords.xy).T)[:]
         return coord_list
+
+    def plot(
+        self,
+        axis_limits: Sequence[float] = [],
+        parts_to_exclude: Sequence[str] = [],
+        line_width: float = 20.0,
+        figsize: Sequence[float] = (10, 10),
+        colors: Sequence = list(mcd.XKCD_COLORS.values()),
+    ):
+        """
+        Plots the 2d geometry
+        :param axis_limits: Sequence with 4 values: xmin, ymin, xmax, ymax 
+        :param parts_to_exclude: Part/edge names that won't be plotted
+        :param line_width: Thickness of lines (only for edge lines)
+        :param figsize: Size of the figure
+        """
+        from matplotlib import pyplot as plt
+        import descartes
+
+        fig = plt.figure(figsize=figsize)
+        ax = fig.add_subplot(111)
+        pn = 0
+        for part_name, part in self.edges.items():
+            if part_name in parts_to_exclude:
+                continue
+            if len(part.coords) == 2:
+                coords = np.asarray(part.coords)
+                vec = np.asarray(coords[0]) - np.asarray(coords[1])
+                vec /= np.linalg.norm(vec)
+                perp_vec = np.array([-vec[1], vec[0]])
+                half_width = line_width / 2
+                part1 = LineString(
+                    [
+                        coords[0] + half_width * perp_vec,
+                        coords[1] + half_width * perp_vec,
+                        coords[1] - half_width * perp_vec,
+                        coords[0] - half_width * perp_vec,
+                    ]
+                )
+            else:
+                part1 = part
+            pgn = Polygon(LinearRing(part1))
+            patch = descartes.PolygonPatch(pgn, fc=colors[pn].upper(), label=part_name)
+            ax.add_patch(patch)
+
+            plt.text(
+                list(*part.representative_point().coords)[0],
+                list(*part.representative_point().coords)[1],
+                part_name,
+                ha="center",
+                va="center",
+            )
+            pn += 1
+
+        for part_name, part in self.parts.items():
+            if part_name in parts_to_exclude:
+                continue
+            patch = descartes.PolygonPatch(part, fc=colors[pn].upper(), label=part_name)
+            ax.add_patch(patch)
+            plt.text(
+                list(*part.representative_point().coords)[0],
+                list(*part.representative_point().coords)[1],
+                part_name,
+                ha="center",
+                va="center",
+                size=14,
+            )
+            pn += 1
+        if axis_limits:
+            ax.axis(axis_limits)
+        else:
+            ax.axis("auto")
+        plt.show()
 
 
 class Geo3DData(object):
