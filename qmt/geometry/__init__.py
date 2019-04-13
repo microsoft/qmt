@@ -4,3 +4,4 @@
 """Geometry generation and handling."""
 
 from .property_map import PropertyMap, MaterialPropertyMap
+from .builder_3d import Geom3DBuilder
