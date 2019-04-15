@@ -12,6 +12,8 @@ import Part
 from FreeCAD import Base
 from shapely.geometry import LineString, MultiLineString, Polygon
 
+from qmt.data import Geo2DData
+
 
 class Geo3DData:
     """
@@ -64,7 +66,7 @@ class Geo3DData:
     def add_xsec(
         self,
         xsec_name: str,
-        polygons: Dict[str : List[List[float]]],
+        polygons: Dict[str, List[List[float]]],
         axis: Tuple[float, float, float] = (1.0, 0.0, 0.0),
         distance: float = 0.0,
     ):
@@ -198,7 +200,7 @@ class Geo3DData:
                     poly.name = name
                     polygons.append(poly)
             if polygons:
-                if self.parts[part_name].domain_type == "virtual":
+                if self.parts[part_name].virtual:
                     virtual_part_polygons[part_name] = polygons
                 else:
                     part_polygons[part_name] = polygons

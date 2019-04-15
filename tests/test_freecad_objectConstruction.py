@@ -3,15 +3,12 @@
 
 from __future__ import absolute_import, division, print_function
 from qmt.geometry.freecad.objectConstruction import *
+from qmt.geometry import part_3d
 import pytest
 
 
 def test_build(fix_exampleDir, fix_FCDoc):
-    from qmt.data import Part3DData
-
-    myPart = Part3DData(
-        "block_of_gold", "Sketch", "extrude", "metal_gate", material="Au", thickness=10
-    )
+    myPart = part_3d.ExtrudeData("block_of_gold", "Sketch", thickness=10)
     opts = {
         "file_path": os.path.join(
             fix_exampleDir, "geometry_sweep", "geometry_sweep_showcase.fcstd"
@@ -25,12 +22,8 @@ def test_build(fix_exampleDir, fix_FCDoc):
 
 
 def test_build_extrude(fix_FCDoc, fix_hexagon_sketch):
-    from qmt.data import Part3DData
-
     sketch = fix_hexagon_sketch()
-    input_part = Part3DData(
-        "label", sketch.Name, "extrude", "metal_gate", material="Au", thickness=10
-    )
+    input_part = part_3d.ExtrudeData("label", sketch.Name, thickness=10)
     built_part = build_extrude(input_part)
     # TODO
 

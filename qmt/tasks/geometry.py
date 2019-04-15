@@ -4,7 +4,7 @@
 """Geometry task classes for 1D, 2D and 3D."""
 
 from shapely.geometry import Polygon, LineString
-from qmt.data import Geo2DData, Geo3DData, serialize_file
+from qmt.data import Geo2DData, serialize_file
 import FreeCAD
 
 

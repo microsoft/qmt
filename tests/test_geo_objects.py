@@ -1,45 +1,19 @@
-from qmt.tasks import build_3d_geometry
-from qmt.data import Part3DData
+from qmt.geometry import part_3d, build_3d_geometry
 import numpy as np
 import os
 import FreeCAD
 
 
 def test_xsection(datadir):
-    small1 = Part3DData(
-        "small1",
-        "Sketch001",
-        "extrude",
-        domain_type="dielectric",
-        material="HfO2",
-        z0=-2,
-        thickness=2,
+    small1 = part_3d.ExtrudeData("small1", "Sketch001", z0=-2, thickness=2)
+
+    small2 = part_3d.ExtrudeData("small2", "Sketch002", z0=0, thickness=2)
+
+    smallv = part_3d.ExtrudeData(
+        "smallv", "Sketch001", z0=-1, thickness=2, virtual=True
     )
 
-    small2 = Part3DData(
-        "small2",
-        "Sketch002",
-        "extrude",
-        domain_type="dielectric",
-        material="HfO2",
-        z0=0,
-        thickness=2,
-    )
-
-    smallv = Part3DData(
-        "smallv", "Sketch001", "extrude", domain_type="virtual", z0=-1, thickness=2
-    )
-
-    big = Part3DData(
-        "big",
-        "Sketch",
-        "extrude",
-        domain_type="metal_gate",
-        material="Au",
-        boundary_condition={"voltage": 0.0},
-        z0=-4,
-        thickness=8,
-    )
+    big = part_3d.ExtrudeData("big", "Sketch", z0=-4, thickness=8)
 
     input_parts = [small1, small2, big, smallv]
     file_path = os.path.join(datadir, "simple.FCStd")
@@ -84,26 +58,9 @@ def test_xsection(datadir):
 
 
 def test_simple_xsection(datadir):
-    small1 = Part3DData(
-        "small1",
-        "Sketch001",
-        "extrude",
-        domain_type="dielectric",
-        material="HfO2",
-        z0=-2,
-        thickness=2,
-    )
+    small1 = part_3d.ExtrudeData("small1", "Sketch001", z0=-2, thickness=2)
 
-    big = Part3DData(
-        "big",
-        "Sketch",
-        "extrude",
-        domain_type="metal_gate",
-        material="Au",
-        boundary_condition={"voltage": 0.0},
-        z0=-4,
-        thickness=8,
-    )
+    big = part_3d.ExtrudeData("big", "Sketch", z0=-4, thickness=8)
 
     input_parts = [small1, big]
     file_path = os.path.join(datadir, "simple.FCStd")

@@ -1,0 +1,62 @@
+"""
+The Geo3DBuilder class, which is used to build 3D geometries
+"""
+
+from typing import Dict, List, Optional
+from qmt.data import serialize_file
+import FreeCAD
+from .part_3d import Part3DData
+from .geo_data import Geo3DData
+
+
+def build_3d_geometry(
+    input_parts: List[Part3DData],
+    input_file: Optional[str] = None,
+    xsec_dict: Dict[str, Dict] = None,
+    serialized_input_file: Optional[bytes] = None,
+    params: Optional[Dict] = None,
+) -> Geo3DData:
+    """
+    Build a geometry in 3D.
+
+    :param input_parts: Ordered list of input parts, leftmost items get built first
+    :param input_file: Path to FreeCAD template file. Either this or
+        serialized_input_file must be set (but not both)
+    :param xsec_dict: Dictionary of cross-section specifications. It should be of
+        the form {'xsec_name':{'axis':(1,0,0),'distance':0.}}, where the axis
+        parameter is a tuple defining the axis that defines the normal of the cross
+        section, and distance is the length along the axis used to set the cross
+        section
+    :param serialized_input_file: FreeCAD template file that has been serialized
+        using qmt.data.serialize_file. This is useful for passing a file into a
+        docker container or other environment that doesn't have access to a shared
+        drive. Either this or serialized_input_file must be set (but not both)
+    :param params: Dictionary of parameters to use in FreeCAD
+    :return: A built geometry
+    """
+    if input_file is None and serialized_input_file is None:
+        raise ValueError("One of input_file or serialized_input_file must be non-none.")
+    elif input_file is not None and serialized_input_file is not None:
+        raise ValueError("Both input_file and serialized_input_file were non-none.")
+    elif input_file is not None:
+        serial_fcdoc = serialize_file(input_file)
+    else:
+        serial_fcdoc = serialized_input_file
+    if params is None:
+        params = {}
+    if xsec_dict is None:
+        xsec_dict = {}
+    options_dict = {}
+    options_dict["serial_fcdoc"] = serial_fcdoc
+    options_dict["input_parts"] = input_parts
+    options_dict["params"] = params
+    options_dict["xsec_dict"] = xsec_dict
+
+    data = Geo3DData()
+    data.serial_fcdoc = serial_fcdoc
+    data.get_data("fcdoc")
+    from qmt.geometry.freecad.objectConstruction import build
+
+    built = build(options_dict)
+    FreeCAD.closeDocument("instance")
+    return built

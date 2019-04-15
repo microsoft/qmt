@@ -37,7 +37,8 @@ from qmt.geometry.freecad.sketchUtils import (
     findEdgeCycles,
 )
 
-from qmt.data.geometry import Geo3DData, store_serial
+from qmt.data import store_serial
+from qmt.geometry import Geo3DData, part_3d
 
 
 DBG_OUT = logging.getLogger().level <= logging.DEBUG
@@ -95,12 +96,9 @@ def build(opts):
     for part in opts["input_parts"]:
         if part.fc_name is None:
             obj_list = doc.getObjectsByLabel(part.label)
-            assert len(obj_list) == 1, (
-                "Part labeled "
-                + str(part.label)
-                + " returned object list "
-                + str(obj_list)
-            )
+            assert (
+                len(obj_list) == 1
+            ), f"Part labeled {part.label} returned object list {obj_list}"
             fc_name = obj_list[0].Name
             part.fc_name = fc_name
         else:
@@ -130,24 +128,20 @@ def build(opts):
     built_parts = []
     for input_part in opts["input_parts"]:
 
-        if input_part.directive == "extrude":
+        if isinstance(input_part, part_3d.ExtrudeData):
             part = build_extrude(input_part)
-        elif input_part.directive == "SAG":
+        elif isinstance(input_part, part_3d.SAGData):
             part = build_sag(input_part)
-        elif input_part.directive == "wire":
+        elif isinstance(input_part, part_3d.WireData):
             part = build_wire(input_part)
-        elif input_part.directive == "wire_shell":
+        elif isinstance(input_part, part_3d.WireShellData):
             part = build_wire_shell(input_part)
-        elif input_part.directive == "lithography":
+        elif isinstance(input_part, part_3d.LithographyData):
             part = build_lithography(input_part, opts, info_holder)
-        elif input_part.directive == "3d_shape":
+        elif isinstance(input_part, part_3d.Part3DData):
             part = build_pass(input_part)
         else:
-            raise ValueError(
-                "Directive "
-                + input_part.directive
-                + " is not a recognized directive type."
-            )
+            raise ValueError(f"{input_part} is not a recognized Part3DData type")
 
         assert part is not None
         doc.recompute()
@@ -164,12 +158,12 @@ def build(opts):
 
     # Subtraction (removes the need for subtractlists)
     for i, (input_part, part) in enumerate(zip(opts["input_parts"], built_parts)):
-        if input_part.domain_type == "virtual":
+        if input_part.virtual:
             continue
         for other_input_part, other_part in zip(
             opts["input_parts"][0:i], built_parts[0:i]
         ):
-            if other_input_part.domain_type == "virtual":
+            if other_input_part.virtual:
                 continue
             if checkOverlap([part, other_part]):
                 cut = subtract(
@@ -209,7 +203,7 @@ def build(opts):
 
 def build_pass(part):
     """Pass a part unchanged."""
-    assert part.directive == "3d_shape"
+    assert isinstance(part, part_3d.Part3DData)
     existing_part = FreeCAD.ActiveDocument.getObject(part.fc_name)
     assert existing_part is not None
     return existing_part
@@ -217,7 +211,7 @@ def build_pass(part):
 
 def build_extrude(part):
     """Build an extrude part."""
-    assert part.directive == "extrude"
+    assert isinstance(part, part_3d.ExtrudeData)
     z0 = part.z0
     deltaz = part.thickness
     doc = FreeCAD.ActiveDocument
@@ -233,7 +227,7 @@ def build_extrude(part):
 
 def build_sag(part, offset=0.0):
     """Build a SAG part."""
-    assert part.directive == "SAG"
+    assert isinstance(part, part_3d.SAGData)
     zBot = part.z0
     zMid = part.z_middle
     zTop = part.thickness + zBot
@@ -249,7 +243,7 @@ def build_sag(part, offset=0.0):
 
 def build_wire(part, offset=0.0):
     """Build a wire part."""
-    assert part.directive == "wire"
+    assert isinstance(part, part_3d.WireData)
     doc = FreeCAD.ActiveDocument
     zBottom = part.z0
     width = part.thickness
@@ -261,7 +255,7 @@ def build_wire(part, offset=0.0):
 
 def build_wire_shell(part, offset=0.0):
     """Build a wire shell part."""
-    assert part.directive == "wire_shell"
+    assert isinstance(part, part_3d.WireShellData)
     doc = FreeCAD.ActiveDocument
     zBottom = part.target_wire.z0
     radius = part.target_wire.thickness
@@ -269,14 +263,14 @@ def build_wire_shell(part, offset=0.0):
     shell_verts = part.shell_verts
     thickness = part.thickness
 
-    if part.depo_mode == "depo":
+    if part.depo_mode == part_3d.DepoMode.depo:
         depoZone = doc.getObject(part.fc_name)
         etchZone = None
-    elif part.depo_mode == "etch":
+    elif part.depo_mode == part_3d.DepoMode.etch:
         depoZone = None
         etchZone = doc.getObject(part.fc_name)
     else:
-        raise ValueError("Unknown depo_mode " + part.depo_mode)
+        raise ValueError(f"Unknown depo_mode {part.depo_mode}")
 
     shell = buildAlShell(
         wireSketch,
@@ -294,7 +288,7 @@ def build_wire_shell(part, offset=0.0):
 
 def build_lithography(part, opts, info_holder):
     """Build a lithography part."""
-    assert part.directive == "lithography"
+    assert isinstance(part, part_3d.LithographyData)
     if not info_holder.litho_setup_done:
         initialize_lithography(info_holder, opts, fillShells=True)
         info_holder.litho_setup_done = True
@@ -508,12 +502,12 @@ def initialize_lithography(info, opts, fillShells=True):
     # and subsequent tuples are offset by t_i for each index in the tuple.
     info.lithoDict["substrate"] = {(): []}
 
-    # To start, we need to collect up all the lithography directives, and
+    # To start, we need to collect up all the lithographies, and
     # organize them by layerNum and objectIDs within layers.
     baseSubstrateParts = []
     for part in opts["input_parts"]:
         # If this part is a litho step
-        if part.directive == "lithography":
+        if isinstance(part, part_3d.LithographyData):
             layerNum = part.layer_num  # layerNum of this part
             # Add the layerNum to the layer dictionary:
             if layerNum not in info.lithoDict["layers"]:
@@ -622,13 +616,13 @@ def gen_offset(opts, obj, offsetVal):
             break
     if my_part_label is None:  # If we haven't found the part, it's not special
         treatment = "standard"
-    else:  # If we have, figure out which directive we used to make it
+    else:  # If we have, figure out which class we used to make it
         for input_part in opts["input_parts"]:
             if input_part.label == part_label:
                 break
-        treatment = input_part.directive
+        treatment = type(input_part)
     # Extrude or lithography parts are treated normally:
-    if treatment == "extrude" or treatment == "lithography":
+    if treatment == part_3d.ExtrudeData or treatment == part_3d.LithographyData:
         treatment = "standard"
     if treatment == "standard":
         # Apparently the offset function is buggy for very small offsets...
@@ -644,11 +638,11 @@ def gen_offset(opts, obj, offsetVal):
             offsetDupe = copy_move(offset)
             doc.recompute()
             delete(offset)
-    elif treatment == "wire":
+    elif treatment == part_3d.WireData:
         offsetDupe = build_wire(input_part, offset=offsetVal)
-    elif treatment == "wire_shell":
+    elif treatment == part_3d.WireShellData:
         offsetDupe = build_wire_shell(input_part, offset=offsetVal)
-    elif treatment == "SAG":
+    elif treatment == part_3d.SAGData:
         offsetDupe = build_sag(input_part, offset=offsetVal)
     doc.recompute()
 
