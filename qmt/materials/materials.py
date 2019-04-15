@@ -7,7 +7,6 @@
 #
 
 from __future__ import absolute_import, division, print_function
-
 import collections
 import json
 import os
@@ -15,18 +14,14 @@ import re
 import sys
 import textwrap
 from ast import literal_eval
-
 import numpy as np
 from six import iteritems, itervalues
+import qmt.physics_constants as pc
 
-try:
-    import qmt.physics_constants as pc
+units = pc.units
+parseUnit = pc.parse_unit
+toFloat = pc.to_float
 
-    units = pc.units
-    parseUnit = pc.parse_unit
-    toFloat = pc.to_float
-except ImportError:  # to avoid problems if we are using FreeCAD
-    pass
 
 __all__ = ["Material", "Materials", "conduction_band_offset", "valence_band_offset"]
 

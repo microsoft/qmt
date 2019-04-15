@@ -56,6 +56,6 @@ def test_geo_task(datadir):
     # Investigate results
     with tempfile.TemporaryDirectory() as temp_dir_path:
         for i, result in enumerate(results):
-            file_name = os.path.join(temp_dir_path, str(i) + ".fcstd")
+            file_name = os.path.join(temp_dir_path, f"{i}.fcstd")
             result.write_fcstd(file_name)
             # TODO: should find a meaningful test here
