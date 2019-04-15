@@ -330,10 +330,7 @@ def draftOffset(inputSketch, t):
         returnSketch = copy_move(bigSketch)
     else:
         raise ValueError(
-            "Failed to offset the sketch "
-            + str(inputSketch.Name)
-            + " by amount "
-            + str(t)
+            f"Failed to offset the sketch {inputSketch.Name} by amount {t}"
         )
 
     # # now that we have the three solids, we need to figure out which is bigger

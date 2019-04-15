@@ -2,7 +2,7 @@ import numpy as np
 from six import iteritems
 
 
-class PropertyMap(object):
+class PropertyMap:
     """Map points in the simulation domain to properties of parts containing the points.
 
     :param PartMap part_map: Mapper from spatial location to part identifier.
