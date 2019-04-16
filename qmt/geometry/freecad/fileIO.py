@@ -5,6 +5,7 @@
 """Functions that deal with file i/o."""
 
 import os
+from typing import Sequence
 
 import FreeCAD
 import Part
@@ -13,7 +14,7 @@ import Mesh
 from .auxiliary import silent_stdout
 
 
-def exportMeshed(obj_list, file_name):
+def exportMeshed(obj_list: Sequence, file_name: str):
     """ Export a STL 3D Mesh file.
 
     :param list obj_list:       List of objects to export.
@@ -42,7 +43,7 @@ def exportMeshed(obj_list, file_name):
         )
 
 
-def exportCAD(obj_list, file_name):
+def exportCAD(obj_list: Sequence, file_name: str):
     """ Export a STEP (Standard for the Exchange of Product Data) 3D CAD file.
 
     :param list obj_list:       List of objects to export.

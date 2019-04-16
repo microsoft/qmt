@@ -86,25 +86,7 @@ for i, geo in enumerate(geometries):
     print("Writing parametrised instance " + str(i) + " to FreeCAD file.")
     geo.write_fcstd(os.path.join("tmp", str(i) + ".fcstd"))
     for label, part in geo.parts.items():
-        print(
-            str(i)
-            + ': "'
-            + label
-            + '" ('
-            + part.fc_name
-            + " -> "
-            + part.built_fc_name
-            + ") to STEP file."
-        )
+        print(f'{i}: "{label}" ({part.fc_name} -> {part.built_fc_name}) to STEP file.')
         part.write_stp(os.path.join("tmp", str(i) + "_" + label + ".stp"))
-        print(
-            str(i)
-            + ': "'
-            + label
-            + '" ('
-            + part.fc_name
-            + " -> "
-            + part.built_fc_name
-            + ") to STL file."
-        )
+        print(f'{i}: "{label}" ({part.fc_name} -> {part.built_fc_name}) to STL file.')
         part.write_stl(os.path.join("tmp", str(i) + "_" + label + ".stl"))
