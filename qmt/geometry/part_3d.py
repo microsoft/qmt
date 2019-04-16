@@ -22,6 +22,7 @@ class Part3DData:
         self.built_fc_name: Optional[str] = None  # This gets set on geometry build
         self.fc_name = label if fc_name is None else fc_name
         self.label = label
+        self.serial_stl: Optional[str] = None  # This gets set on geometry build
         self.serial_stp: Optional[str] = None  # This gets set on geometry build
         self.virtual = virtual
 
@@ -33,6 +34,16 @@ class Part3DData:
         if file_path is None:
             file_path = f"{self.label}.stp"
         write_deserialised(self.serial_stp, file_path)
+        return file_path
+
+    def write_stl(self, file_path=None):
+        """Write part geometry to a STEP file.
+
+        Returns the STEP file path.
+        """
+        if file_path is None:
+            file_path = f"{self.label}.stl"
+        write_deserialised(self.serial_stl, file_path)
         return file_path
 
 

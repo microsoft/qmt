@@ -166,7 +166,7 @@ class Geo2DData(object):
             figure with its corresponding axes will be created
         :param subplot_args: Tuple of args and kwargs to pass to add_subplot
         :param colors: Colors to use for plotting the parts and edges
-        :return: 
+        :return:
         """
         from matplotlib import pyplot as plt
         import descartes
