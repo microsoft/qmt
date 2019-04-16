@@ -17,7 +17,6 @@ import textwrap
 from ast import literal_eval
 
 import numpy as np
-from six import iteritems, itervalues
 
 try:
     import qmt.physics_constants as pc
@@ -327,7 +326,7 @@ class Materials(collections.Mapping):
         matA, matB = self.find(nameA, eunit="meV"), self.find(nameB, eunit="meV")
         bow = self.bowingParameters.get((nameA, nameB), {})
         alloy = {}
-        for key, valA in iteritems(matA):
+        for key, valA in matA.items():
             if key not in matB:
                 continue
             valB = matB[key]
@@ -343,7 +342,7 @@ class Materials(collections.Mapping):
     def serialize_dict(self):
         db = self.matDict.copy()
         bowingParms = {}
-        for k, v in iteritems(self.bowingParameters):
+        for k, v in self.bowingParameters.items():
             bowingParms[str(k)] = v
         db["__bowing_parameters"] = bowingParms
         return db
@@ -352,7 +351,7 @@ class Materials(collections.Mapping):
         bowingParms = db.pop("__bowing_parameters", {})
         self.matDict = db
         self.bowingParameters = {}
-        for k, v in iteritems(bowingParms):
+        for k, v in bowingParms.items():
             self.bowingParameters[literal_eval(k)] = v
 
     def save(self):
@@ -636,7 +635,7 @@ def write_database_to_markdown(out_file, mat_lib):
     scale_factors = dict(surfaceChargeDensity=1e-12)
     table = [[desc] for desc in list(zip(*semi_props))[1]]
     semi_names = [
-        name for name, mat in sorted(iteritems(mat_lib)) if mat["type"] == "semi"
+        name for name, mat in sorted(mat_lib.items()) if mat["type"] == "semi"
     ]
     for name in semi_names:
         mat = mat_lib.find(name, eunit="eV")
@@ -697,7 +696,7 @@ def write_database_to_markdown(out_file, mat_lib):
     bowing_props = []
     for p, desc in semi_props:
         if np.any(
-            [p in bow_parms for bow_parms in itervalues(mat_lib.bowingParameters)]
+            [p in bow_parms for bow_parms in mat_lib.bowingParameters.values()]
         ):
             bowing_props.append(p)
             table.append([desc])

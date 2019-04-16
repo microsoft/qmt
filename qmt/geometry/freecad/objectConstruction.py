@@ -4,7 +4,6 @@
 """Functions that perform composite executions."""
 
 import numpy as np
-from six import iteritems, text_type
 
 import logging
 
