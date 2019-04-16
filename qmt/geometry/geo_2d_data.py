@@ -1,22 +1,13 @@
-# Copyright (c) Microsoft Corporation. All rights reserved.
-# Licensed under the MIT License.
-
-"""Geometry data classes."""
-
-import numpy as np
-from shapely.ops import unary_union
 from shapely.geometry import LinearRing, LineString, MultiLineString, Polygon
-from itertools import chain, combinations
-from typing import Optional, Sequence, Tuple
-import FreeCAD
-import Part
-from FreeCAD import Base
-import matplotlib._color_data as mcd
-from .data_utils import load_serial, store_serial, write_deserialised
+from shapely.ops import unary_union
+from typing import List, Optional, Sequence
+import numpy as np
 from matplotlib.axes import Axes
+import matplotlib._color_data as mcd
+from .geo_data_base import GeoData
 
 
-class Geo2DData(object):
+class Geo2DData(GeoData):
     """
     Class for holding a 2D geometry specification. This class holds two main dicts:
         - parts is a dictionary of shapely Polygon objects
@@ -27,84 +18,72 @@ class Geo2DData(object):
     """
 
     def __init__(self, lunit="nm"):
-        self.parts = {}
+        super().__init__(lunit)
         self.edges = {}
-        self.build_order = []
-        self.lunit = lunit
 
-    def add_part(self, part_name, part, overwrite=False):
+    def add_part(self, part_name: str, part: Polygon, overwrite: bool = False):
         """
         Add a part to this geometry.
 
-        :param str part_name: Name of the part to create
-        :param Polygon part: Polygon object from shapely.geometry. This must be a valid Polygon.
-        :param bool overwrite: Should we allow this to overwrite?
+        :param part_name: Name of the part to create
+        :param part: Polygon object from shapely.geometry. This must be a valid Polygon.
+        :param overwrite: Should we allow this to overwrite?
         """
         if not part.is_valid:
-            raise ValueError("Part " + part_name + " is not a valid polygon.")
+            raise ValueError(f"Part {part_name} is not a valid polygon.")
         if (part_name in self.parts) and (not overwrite):
-            raise ValueError("Attempted to overwrite the part " + part_name + ".")
+            raise ValueError(f"Attempted to overwrite the part {part_name}.")
         else:
             self.parts[part_name] = part
             self.build_order += [part_name]
 
-    def remove_part(self, part_name, ignore_if_absent=False):
+    def remove_part(self, part_name: str, ignore_if_absent: bool = False):
         """
         Remove a part from this geometry.
 
-        :param str part_name: Name of part to remove
-        :param bool ignore_if_absent: Should we ignore an attempted removal if the part name
+        :param part_name: Name of part to remove
+        :param ignore_if_absent: Should we ignore an attempted removal if the part name
                                       is not found?
         """
         if part_name in self.parts:
             del self.parts[part_name]
             self.build_order.remove(part_name)
-        else:
-            if not ignore_if_absent:
-                raise ValueError(
-                    "Attempted to remove the part "
-                    + part_name
-                    + ", which doesn't exist."
-                )
-            else:
-                pass
+        elif not ignore_if_absent:
+            raise ValueError(
+                f"Attempted to remove the part {part_name}, which doesn't exist."
+            )
 
-    def add_edge(self, edge_name, edge, overwrite=False):
+    def add_edge(self, edge_name: str, edge: LineString, overwrite: bool = False):
         """
         Add an edge to this geometry.
 
-        :param str edge_name: Name of the edge to create
-        :param LineString edge: LineString object from shapely.geometry.
-        :param bool overwrite: Should we allow this to overwrite?
+        :param edge_name: Name of the edge to create
+        :param edge: LineString object from shapely.geometry.
+        :param overwrite: Should we allow this to overwrite?
         """
         if (edge_name in self.edges) and (not overwrite):
-            raise ValueError("Attempted to overwrite the edge " + edge_name + ".")
+            raise ValueError(f"Attempted to overwrite the edge {edge_name}.")
         else:
             self.edges[edge_name] = edge
             self.build_order += [edge_name]
 
-    def remove_edge(self, edge_name, ignore_if_absent=False):
+    def remove_edge(self, edge_name: str, ignore_if_absent: bool = False):
         """
         Remove an edge from this geometry.
 
-        :param str edge_name: Name of part to remove
-        :param bool ignore_if_absent: Should we ignore an attempted removal if the part name
+        :param edge_name: Name of part to remove
+        :param ignore_if_absent: Should we ignore an attempted removal if the part name
                                       is not found?
         """
         if edge_name in self.edges:
             del self.edges[edge_name]
             self.build_order.remove(edge_name)
-        else:
-            if not ignore_if_absent:
-                raise ValueError(
-                    "Attempted to remove the edge "
-                    + edge_name
-                    + ", which doesn't exist."
-                )
-            else:
-                pass
+        elif not ignore_if_absent:
+            raise ValueError(
+                f"Attempted to remove the edge {edge_name}, which doesn't exist."
+            )
 
-    def compute_bb(self):
+    def compute_bb(self) -> List[float]:
         """
         Computes the bounding box of all of the parts and edges in the geometry.
 
@@ -118,7 +97,7 @@ class Geo2DData(object):
         max_y = max(bbox_vertices[1])
         return [min_x, max_x, min_y, max_y]
 
-    def part_build_order(self):
+    def part_build_order(self) -> List[str]:
         """
         Returns the build order restricted to parts.
 
@@ -130,23 +109,23 @@ class Geo2DData(object):
                 priority += [geo_item]
         return priority
 
-    def part_coord_list(self, part_name):
+    def part_coord_list(self, part_name: str) -> List:
         """
         Get the list of vertex coordinates for a part
 
-        :param str part_name: Name of the part
-        :return list coord_list: List of coordinates of the vertices of the part.
+        :param part_name: Name of the part
+        :return coord_list: List of coordinates of the vertices of the part.
         """
         # Note that in shapely, the first coord is repeated at the end, which we trim off:
         coord_list = list(np.array(self.parts[part_name].exterior.coords.xy).T)[:-1]
         return coord_list
 
-    def edge_coord_list(self, edge_name):
+    def edge_coord_list(self, edge_name: str) -> List:
         """
         Get the list of vertex coordinates for an edge.
 
-        :param str edge_name: Name of the edge.
-        :return list coord_list: List of the coordinates of the edge.
+        :param edge_name: Name of the edge.
+        :return coord_list: List of the coordinates of the edge.
         """
         coord_list = list(np.array(self.edges[edge_name].coords.xy).T)[:]
         return coord_list

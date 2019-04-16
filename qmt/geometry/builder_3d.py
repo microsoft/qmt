@@ -6,7 +6,7 @@ from typing import Dict, List, Optional
 from qmt.data import serialize_file
 import FreeCAD
 from .part_3d import Part3DData
-from .geo_data import Geo3DData
+from .geo_3d_data import Geo3DData
 
 
 def build_3d_geometry(

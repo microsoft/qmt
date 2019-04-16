@@ -1,2 +1,2 @@
 from .materials import Material, Materials, conduction_band_offset, valence_band_offset
-from .mat_data import Mat3DData
+from .mat_builder import build_materials, make_materials_library

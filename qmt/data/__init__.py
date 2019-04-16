@@ -10,7 +10,6 @@ from .data_utils import (
     retrieve_data,
     stream_data_to_file,
 )
-from .geometry import Geo2DData
 from .solvers_2d import Potential2dData, ThomasFermi2dData, Bdg2dData, Phase2dData
 from .solvers_3d import (
     Fem3DData,

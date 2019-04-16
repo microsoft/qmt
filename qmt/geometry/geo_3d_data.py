@@ -11,20 +11,19 @@ import FreeCAD
 import Part
 from FreeCAD import Base
 from shapely.geometry import LineString, MultiLineString, Polygon
+from .geo_2d_data import Geo2DData
+from .geo_data_base import GeoData
 
-from qmt.data import Geo2DData
 
-
-class Geo3DData:
+class Geo3DData(GeoData):
     """
     Class for a 3D geometry specification. It holds:
         - parts is a dict of Part3D objects, keyed by the label of each Part3D object
         - build_order is a list of strings indicating the construction order
     """
 
-    def __init__(self):
-        self.build_order: List[str] = []
-        self.parts = {}  # dict of parts in this geometry
+    def __init__(self, lunit: str = "nm"):
+        super().__init__(lunit)
         # dict of cross sections in this geometry
         # A cross section is a dict with axis and distance fields
         # E.g. xsec_dict={"test_xsec": {"axis": (1, 0, 0), "distance": 0}}
@@ -140,7 +139,7 @@ class Geo3DData:
         else:
             raise ValueError(f"{data_name} was not a valid data_name.")
 
-    def write_fcstd(self, file_path=None):
+    def write_fcstd(self, file_path: Optional[str] = None):
         """Write geometry to a fcstd file.
 
         Returns the fcstd file path.
