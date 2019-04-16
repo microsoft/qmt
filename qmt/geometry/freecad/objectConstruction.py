@@ -15,7 +15,7 @@ import Draft
 
 # TODO: use namespace in code
 from qmt.geometry.freecad.auxiliary import *
-from qmt.geometry.freecad.fileIO import exportCAD
+from qmt.geometry.freecad.fileIO import exportCAD, exportMeshed
 from qmt.geometry.freecad.geomUtils import (
     extrude,
     copy_move,
@@ -189,6 +189,7 @@ def build(opts):
     for input_part, built_part in zip(opts["input_parts"], built_parts):
         built_part.Label = input_part.label  # here it's collision free
         input_part.serial_stp = store_serial([built_part], exportCAD, "stp")
+        input_part.serial_stl = store_serial([built_part], exportMeshed, "stl")
         input_part.built_fc_name = built_part.Name
         geo.add_part(input_part.label, input_part)
         # dict for cross sections
