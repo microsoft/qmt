@@ -323,7 +323,7 @@ def buildWire(sketch, zBottom, width, faceOverride=None, offset=0.0):
     else:
         face = faceOverride
     sketchForSweep = extendSketch(sketch, offset)
-    mySweepTemp = doc.addObject("Part::Sweep", sketch.Name + "_wire")
+    mySweepTemp = doc.addObject("Part::Sweep", f"{sketch.Name}_wire")
     mySweepTemp.Sections = [face]
     mySweepTemp.Spine = sketchForSweep
     mySweepTemp.Solid = True
@@ -375,7 +375,7 @@ def buildAlShell(
             extendedSketch, zBottom, width, faceOverride=shiftedFace
         )
         delete(extendedSketch)
-        shellCut = doc.addObject("Part::Cut", sketch.Name + "_cut_" + str(vert))
+        shellCut = doc.addObject("Part::Cut", f"{sketch.Name}_cut_{vert}")
         shellCut.Base = shiftedWire
         shellCut.Tool = originalWire
         doc.recompute()
@@ -386,7 +386,7 @@ def buildAlShell(
         delete(shiftedWire)
         shellList.append(shell)
     if len(shellList) > 1:
-        coatingUnion = doc.addObject("Part::MultiFuse", sketch.Name + "_coating")
+        coatingUnion = doc.addObject("Part::MultiFuse", f"{sketch.Name}_coating")
         coatingUnion.Shapes = shellList
         doc.recompute()
         coatingUnionClone = copy_move(coatingUnion)
@@ -473,7 +473,7 @@ def makeSAG(sketch, zBot, zMid, zTop, tIn, tOut, offset=0.0):
         topSketchTemp = copy_move(
             topSketch, moveVec=(0.0, 0.0, zTop - zMid + 2 * offset)
         )
-        capPartTemp = doc.addObject("Part::Loft", sketch.Name + "_cap")
+        capPartTemp = doc.addObject("Part::Loft", f"{sketch.Name}_cap")
         capPartTemp.Sections = [midSketch, topSketchTemp]
         capPartTemp.Solid = True
         doc.recompute()
@@ -552,7 +552,7 @@ def initialize_lithography(info, opts, fillShells=True):
         try:
             built_part_name = opts["built_part_names"][base_substrate.label]
         except:
-            raise KeyError("No substrate built for '" + str(base_substrate.label) + "'")
+            raise KeyError(f"No substrate built for '{base_substrate.label}'")
         info.lithoDict["substrate"][()] += [doc.getObject(built_part_name)]
     # ~ import sys
     # ~ sys.stderr.write(">>> litdic " + str(info.lithoDict) + "\n")
@@ -700,7 +700,7 @@ def screened_H_union_list(info, opts, obj, m, j, offsetTuple, checkOffsetTuple):
         if checkOverlap([obj, HObjPart]):  # if we need to include an overlap
             returnList.append(HObjList[i])
 
-    logging.debug("<<< %s", [o.Name + " (" + o.Label + ")" for o in returnList])
+    logging.debug("<<< %s", [f"{o.Name} ({o.Label})" for o in returnList])
     return returnList
 
 
@@ -728,7 +728,7 @@ def screened_A_UnionList(info, opts, obj, t, ti, offsetTuple, checkOffsetTuple):
         if checkOverlap([obj, ACheck]):
             returnList.append(info.lithoDict["substrate"][offsetTuple][i])
 
-    logging.debug("<<< %s", [o.Name + " (" + o.Label + ")" for o in returnList])
+    logging.debug("<<< %s", [f"{o.Name} ({o.Label})" for o in returnList])
     return returnList
 
 
@@ -801,7 +801,7 @@ def H_offset(info, opts, layer_num, objID, tList=[]):
 
     layers[layer_num]["objIDs"][objID]["HDict"][checkOffsetTuple] = returnList
 
-    logging.debug("<<< %s", [o.Name + " (" + o.Label + ")" for o in returnList])
+    logging.debug("<<< %s", [f"{o.Name} ({o.Label})" for o in returnList])
     return returnList
 
 
