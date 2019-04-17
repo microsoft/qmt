@@ -760,9 +760,7 @@ def H_offset(info, opts, layer_num, objID, tList=[]):
     if checkOffsetTuple in layers[layer_num]["objIDs"][objID]["HDict"]:
         return layers[layer_num]["objIDs"][objID]["HDict"][checkOffsetTuple]
     # First, compute t:
-    t = 0.0
-    for tIndex in tList:
-        t += layers[tIndex]["thickness"]
+    t = sum(layers[layer_num]["thickness"] for layer_num in tList)
     # thickness of this layer
     ti = layers[layer_num]["thickness"]
     # Set the aux. thickness t:
