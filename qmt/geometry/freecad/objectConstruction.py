@@ -297,14 +297,14 @@ def build_lithography(part, opts, info_holder):
 
     if DBG_OUT:
         FreeCAD.ActiveDocument.saveAs("tmp_after_init.fcstd")
-    layerNum = part.layer_num
+    layer_num = part.layer_num
     returnObjs = []
-    for objID in info_holder.lithoDict["layers"][layerNum]["objIDs"]:
+    for objID in info_holder.lithoDict["layers"][layer_num]["objIDs"]:
         if (
             part.fc_name
-            == info_holder.lithoDict["layers"][layerNum]["objIDs"][objID]["partName"]
+            == info_holder.lithoDict["layers"][layer_num]["objIDs"][objID]["partName"]
         ):
-            returnObjs.append(gen_G(info_holder, opts, layerNum, objID))
+            returnObjs.append(gen_G(info_holder, opts, layer_num, objID))
     logging.debug([o.Name for o in returnObjs])
     return genUnion(returnObjs, consumeInputs=True if not DBG_OUT else False)
 
@@ -323,7 +323,7 @@ def buildWire(sketch, zBottom, width, faceOverride=None, offset=0.0):
     else:
         face = faceOverride
     sketchForSweep = extendSketch(sketch, offset)
-    mySweepTemp = doc.addObject("Part::Sweep", sketch.Name + "_wire")
+    mySweepTemp = doc.addObject("Part::Sweep", f"{sketch.Name}_wire")
     mySweepTemp.Sections = [face]
     mySweepTemp.Spine = sketchForSweep
     mySweepTemp.Solid = True
@@ -375,7 +375,7 @@ def buildAlShell(
             extendedSketch, zBottom, width, faceOverride=shiftedFace
         )
         delete(extendedSketch)
-        shellCut = doc.addObject("Part::Cut", sketch.Name + "_cut_" + str(vert))
+        shellCut = doc.addObject("Part::Cut", f"{sketch.Name}_cut_{vert}")
         shellCut.Base = shiftedWire
         shellCut.Tool = originalWire
         doc.recompute()
@@ -386,7 +386,7 @@ def buildAlShell(
         delete(shiftedWire)
         shellList.append(shell)
     if len(shellList) > 1:
-        coatingUnion = doc.addObject("Part::MultiFuse", sketch.Name + "_coating")
+        coatingUnion = doc.addObject("Part::MultiFuse", f"{sketch.Name}_coating")
         coatingUnion.Shapes = shellList
         doc.recompute()
         coatingUnionClone = copy_move(coatingUnion)
@@ -473,7 +473,7 @@ def makeSAG(sketch, zBot, zMid, zTop, tIn, tOut, offset=0.0):
         topSketchTemp = copy_move(
             topSketch, moveVec=(0.0, 0.0, zTop - zMid + 2 * offset)
         )
-        capPartTemp = doc.addObject("Part::Loft", sketch.Name + "_cap")
+        capPartTemp = doc.addObject("Part::Loft", f"{sketch.Name}_cap")
         capPartTemp.Sections = [midSketch, topSketchTemp]
         capPartTemp.Solid = True
         doc.recompute()
@@ -499,60 +499,60 @@ def initialize_lithography(info, opts, fillShells=True):
     # The lithography step requires some infrastructure to track things
     # throughout.
     info.lithoDict = {}  # dictionary containing objects for the lithography step
-    info.lithoDict["layers"] = {}
+    layers = info.lithoDict["layers"] = {}
     # Dictionary for containing the substrate. () indicates un-offset objects,
     # and subsequent tuples are offset by t_i for each index in the tuple.
     info.lithoDict["substrate"] = {(): []}
 
     # To start, we need to collect up all the lithography directives, and
-    # organize them by layerNum and objectIDs within layers.
-    baseSubstrateParts = []
+    # organize them by layer_num and objectIDs within layers.
+    base_substrate_parts = []
     for part in opts["input_parts"]:
         # If this part is a litho step
         if part.directive == "lithography":
-            layerNum = part.layer_num  # layerNum of this part
-            # Add the layerNum to the layer dictionary:
-            if layerNum not in info.lithoDict["layers"]:
-                info.lithoDict["layers"][layerNum] = {"objIDs": {}}
-            layerDict = info.lithoDict["layers"][layerNum]
+            layer_num = part.layer_num  # layer_num of this part
+            # Add the layer_num to the layer dictionary:
+            if layer_num not in layers:
+                layers[layer_num] = {"objIDs": {}}
+            layer = layers[layer_num]
             # Generate the base and thickness of the layer:
-            layerBase = float(part.z0)
-            layerThickness = float(part.thickness)
+            layer_base = float(part.z0)
+            layer_thickness = float(part.thickness)
             # All parts within a given layer number are required to have
             # identical thickness and base, so check that:
-            if "base" in layerDict:
-                assert layerBase == layerDict["base"]
+            if "base" in layer:
+                assert layer_base == layer["base"]
             else:
-                layerDict["base"] = layerBase
-            if "thickness" in layerDict:
-                assert layerThickness == layerDict["thickness"]
+                layer["base"] = layer_base
+            if "thickness" in layer:
+                assert layer_thickness == layer["thickness"]
             else:
-                layerDict["thickness"] = layerThickness
+                layer["thickness"] = layer_thickness
             # A given part references a base sketch. However, we need to split
             # the sketch here into possibly disjoint sub-sketches to work
             # with them:
             sketch = doc.getObject(part.fc_name)
             splitSketches = splitSketch(sketch)
             for mySplitSketch in splitSketches:
-                objID = len(layerDict["objIDs"])
+                objID = len(layer["objIDs"])
                 objDict = {}
                 objDict["partName"] = part.fc_name
                 objDict["sketch"] = mySplitSketch
                 info.trash.append(mySplitSketch)
-                info.lithoDict["layers"][layerNum]["objIDs"][objID] = objDict
+                layers[layer_num]["objIDs"][objID] = objDict
             # Add the base substrate to the appropriate dictionary
-            baseSubstrateParts += part.litho_base
+            base_substrate_parts += part.litho_base
 
     # Get rid of any duplicates:
-    baseSubstrateParts = list(set(baseSubstrateParts))
+    base_substrate_parts = list(set(base_substrate_parts))
 
     # Now convert the part names for the substrate into 3D freeCAD objects, which
     # should have already been rendered.
-    for baseSubstrate in baseSubstrateParts:
+    for base_substrate in base_substrate_parts:
         try:
-            built_part_name = opts["built_part_names"][baseSubstrate.label]
+            built_part_name = opts["built_part_names"][base_substrate.label]
         except:
-            raise KeyError("No substrate built for '" + str(baseSubstrate.label) + "'")
+            raise KeyError(f"No substrate built for '{base_substrate.label}'")
         info.lithoDict["substrate"][()] += [doc.getObject(built_part_name)]
     # ~ import sys
     # ~ sys.stderr.write(">>> litdic " + str(info.lithoDict) + "\n")
@@ -560,13 +560,10 @@ def initialize_lithography(info, opts, fillShells=True):
     # Now that we have ordered the primitives, we need to compute a few
     # aux quantities that we will need. First, we compute the total bounding
     # box of the lithography procedure:
-    thicknesses = []
-    bases = []
-    for layerNum in info.lithoDict["layers"].keys():
-        thicknesses.append(info.lithoDict["layers"][layerNum]["thickness"])
-        bases.append(info.lithoDict["layers"][layerNum]["base"])
-    bottom = min(bases)
-    totalThickness = sum(thicknesses)
+
+    bottom = min(layer["base"] for layer in layers.values())
+    totalThickness = sum(layer["thickness"] for layer in layers.values())
+
     assert (
         len(info.lithoDict["substrate"][()]) > 0
     )  # Otherwise, we don't have a reference for the lateral BB
@@ -589,21 +586,21 @@ def initialize_lithography(info, opts, fillShells=True):
     # base of the layer to the top of the entire domain box. This is used for
     # forming the volumes occupied when substrate objects are offset and
     # checking for overlaps.
-    for layerNum in info.lithoDict["layers"].keys():
-        base = info.lithoDict["layers"][layerNum]["base"]
-        thickness = info.lithoDict["layers"][layerNum]["thickness"]
-        for objID in info.lithoDict["layers"][layerNum]["objIDs"]:
-            sketch = info.lithoDict["layers"][layerNum]["objIDs"][objID]["sketch"]
+    for layer_num in layers.keys():
+        base = layers[layer_num]["base"]
+        thickness = layers[layer_num]["thickness"]
+        for objID in layers[layer_num]["objIDs"]:
+            sketch = layers[layer_num]["objIDs"][objID]["sketch"]
             B = extrudeBetween(sketch, base, base + thickness)
             C = extrudeBetween(sketch, base, BB[5])
-            info.lithoDict["layers"][layerNum]["objIDs"][objID]["B"] = B
-            info.lithoDict["layers"][layerNum]["objIDs"][objID]["C"] = C
+            layers[layer_num]["objIDs"][objID]["B"] = B
+            layers[layer_num]["objIDs"][objID]["C"] = C
             info.trash.append(B)
             info.trash.append(C)
             # In addition, add a hook for the HDict, which will contain the "H"
             # constructions for this object, but offset to thicknesses of various
             # layers, according to the keys.
-            info.lithoDict["layers"][layerNum]["objIDs"][objID]["HDict"] = {}
+            layers[layer_num]["objIDs"][objID]["HDict"] = {}
 
 
 def gen_offset(opts, obj, offsetVal):
@@ -676,7 +673,7 @@ def screened_H_union_list(info, opts, obj, m, j, offsetTuple, checkOffsetTuple):
     # First, we need to check to see if we need to compute either of the
     # underlying H obj lists:
     HDict = info.lithoDict["layers"][m]["objIDs"][j]["HDict"]
-    # HDict stores a collection of H object component lists for each (layerNum,objID)
+    # HDict stores a collection of H object component lists for each (layer_num,objID)
     # pair. The index of this dictionary is a tuple: () indicates no
     # offset, while other indices indicate an offset by summing the thicknesses
     # from corresponding layers.
@@ -703,7 +700,7 @@ def screened_H_union_list(info, opts, obj, m, j, offsetTuple, checkOffsetTuple):
         if checkOverlap([obj, HObjPart]):  # if we need to include an overlap
             returnList.append(HObjList[i])
 
-    logging.debug("<<< %s", [o.Name + " (" + o.Label + ")" for o in returnList])
+    logging.debug("<<< %s", [f"{o.Name} ({o.Label})" for o in returnList])
     return returnList
 
 
@@ -731,12 +728,12 @@ def screened_A_UnionList(info, opts, obj, t, ti, offsetTuple, checkOffsetTuple):
         if checkOverlap([obj, ACheck]):
             returnList.append(info.lithoDict["substrate"][offsetTuple][i])
 
-    logging.debug("<<< %s", [o.Name + " (" + o.Label + ")" for o in returnList])
+    logging.debug("<<< %s", [f"{o.Name} ({o.Label})" for o in returnList])
     return returnList
 
 
-def H_offset(info, opts, layerNum, objID, tList=[]):
-    """For a given layerNum=n and ObjID=i, compute the deposited object.
+def H_offset(info, opts, layer_num, objID, tList=[]):
+    """For a given layer_num=n and ObjID=i, compute the deposited object.
 
     ```latex
     H_{n,i}(t) = C_{n,i}(t) \cap [ B_{n,i}(t) \cup (\cup_{m<n;j} H_{m,j}(t_i+t)) \cup (\cup_k A_k(t_i + t))],
@@ -751,28 +748,26 @@ def H_offset(info, opts, layerNum, objID, tList=[]):
 
     logging.debug(
         ">>> partname %s",
-        info.lithoDict["layers"][layerNum]["objIDs"][objID]["partName"],
+        info.lithoDict["layers"][layer_num]["objIDs"][objID]["partName"],
     )
 
     # This is a tuple that encodes the check offset t:
     checkOffsetTuple = tuple(sorted(tList))
     # This is a tuple that encodes the total offset t_i+t:
-    offsetTuple = tuple(sorted(tList + [layerNum]))
+    offsetTuple = tuple(sorted(tList + [layer_num]))
     # First, check if we have to do anything:
     layers = info.lithoDict["layers"]
-    if checkOffsetTuple in layers[layerNum]["objIDs"][objID]["HDict"]:
-        return layers[layerNum]["objIDs"][objID]["HDict"][checkOffsetTuple]
+    if checkOffsetTuple in layers[layer_num]["objIDs"][objID]["HDict"]:
+        return layers[layer_num]["objIDs"][objID]["HDict"][checkOffsetTuple]
     # First, compute t:
-    t = 0.0
-    for tIndex in tList:
-        t += layers[tIndex]["thickness"]
+    t = sum(layers[layer_num]["thickness"] for layer_num in tList)
     # thickness of this layer
-    ti = layers[layerNum]["thickness"]
+    ti = layers[layer_num]["thickness"]
     # Set the aux. thickness t:
     # B prism for this layer & objID
-    B = layers[layerNum]["objIDs"][objID]["B"]
+    B = layers[layer_num]["objIDs"][objID]["B"]
     # C prism for this layer & ObjID
-    C = layers[layerNum]["objIDs"][objID]["C"]
+    C = layers[layer_num]["objIDs"][objID]["C"]
     B_t = gen_offset(opts, B, t)  # offset the B prism
     C_t = gen_offset(opts, C, t)  # offset the C prism
     info.trash.append(B_t)
@@ -781,7 +776,7 @@ def H_offset(info, opts, layerNum, objID, tList=[]):
     # Build up the substrate due to previously deposited gates
     HOffsetList = []
     for m in layers.keys():
-        if m < layerNum:  # then this is a lower layer
+        if m < layer_num:  # then this is a lower layer
             for j in layers[m]["objIDs"].keys():
                 HOffsetList += screened_H_union_list(
                     info, opts, C_t, m, j, offsetTuple, checkOffsetTuple
@@ -802,14 +797,14 @@ def H_offset(info, opts, layerNum, objID, tList=[]):
             "%s (%s) -> %s (%s)", obj.Name, obj.Label, intObj.Name, intObj.Label
         )
 
-    layers[layerNum]["objIDs"][objID]["HDict"][checkOffsetTuple] = returnList
+    layers[layer_num]["objIDs"][objID]["HDict"][checkOffsetTuple] = returnList
 
-    logging.debug("<<< %s", [o.Name + " (" + o.Label + ")" for o in returnList])
+    logging.debug("<<< %s", [f"{o.Name} ({o.Label})" for o in returnList])
     return returnList
 
 
-def gen_U(info, layerNum, objID):
-    """For a given layerNum and objID, compute the quantity:
+def gen_U(info, layer_num, objID):
+    """For a given layer_num and objID, compute the quantity:
     ```latex
     U_{n,i}(t) = (\cup_{m<n;j} G_{m,j}) \cup (\cup_{k} A_k),
     ```
@@ -817,14 +812,14 @@ def gen_U(info, layerNum, objID):
     with B_i is empty.
     """
     layers = info.lithoDict["layers"]
-    B = layers[layerNum]["objIDs"][objID]["B"]  # B prism for this layer & objID
+    B = layers[layer_num]["objIDs"][objID]["B"]  # B prism for this layer & objID
     GList = []
     for m in layers.keys():
-        if m < layerNum:  # then this is a lower layer
+        if m < layer_num:  # then this is a lower layer
             for j in layers[m].keys():
-                if "G" not in layers[layerNum]["objIDs"][objID]:
+                if "G" not in layers[layer_num]["objIDs"][objID]:
                     gen_G(info, m, j)
-                G = layers[layerNum]["objIDs"][objID]["G"]
+                G = layers[layer_num]["objIDs"][objID]["G"]
                 if checkOverlap([B, G]):
                     GList.append(G)
     AList = []
@@ -836,13 +831,13 @@ def gen_U(info, layerNum, objID):
     return unionObj
 
 
-def gen_G(info, opts, layerNum, objID):
-    """Generate the gate deposition for a given layerNum and objID."""
+def gen_G(info, opts, layer_num, objID):
+    """Generate the gate deposition for a given layer_num and objID."""
 
-    layerobj = info.lithoDict["layers"][layerNum]["objIDs"][objID]
+    layerobj = info.lithoDict["layers"][layer_num]["objIDs"][objID]
     logging.debug(
         ">>> layer %d obj %d (part:%s B:%s C:%s sketch:%s)",
-        layerNum,
+        layer_num,
         objID,
         layerobj["partName"],
         layerobj["B"].Name,
@@ -852,7 +847,7 @@ def gen_G(info, opts, layerNum, objID):
 
     if "G" not in layerobj:
         if () not in layerobj["HDict"]:
-            layerobj["HDict"][()] = H_offset(info, opts, layerNum, objID)
+            layerobj["HDict"][()] = H_offset(info, opts, layer_num, objID)
 
         if DBG_OUT:
             FreeCAD.ActiveDocument.saveAs("tmp_after_H_offset.fcstd")
@@ -891,7 +886,7 @@ def gen_G(info, opts, layerNum, objID):
         if info.fillShells:
             G = copy_move(H)
         else:
-            U = gen_U(info, layerNum, objID)
+            U = gen_U(info, layer_num, objID)
             G = subtract(H, U)
             delete(U)
         layerobj["G"] = G
