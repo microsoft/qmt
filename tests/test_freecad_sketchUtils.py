@@ -3,8 +3,6 @@
 
 """Testing QMT sketch util functions."""
 
-from __future__ import division
-
 import pytest
 
 from qmt.geometry.freecad.sketchUtils import *

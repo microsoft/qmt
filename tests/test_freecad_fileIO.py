@@ -3,8 +3,6 @@
 
 """Testing QMT file I/O functions."""
 
-from __future__ import absolute_import, division, print_function
-
 import pytest
 
 from qmt.geometry.freecad.fileIO import *

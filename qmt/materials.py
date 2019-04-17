@@ -6,8 +6,6 @@
 # a json file. To add to the json or regenerate it, run this module as a script.
 #
 
-from __future__ import absolute_import, division, print_function
-
 import collections
 import json
 import os
@@ -695,9 +693,7 @@ def write_database_to_markdown(out_file, mat_lib):
     bowing_mats = sorted(mat_lib.bowingParameters.keys())
     bowing_props = []
     for p, desc in semi_props:
-        if np.any(
-            [p in bow_parms for bow_parms in mat_lib.bowingParameters.values()]
-        ):
+        if np.any([p in bow_parms for bow_parms in mat_lib.bowingParameters.values()]):
             bowing_props.append(p)
             table.append([desc])
     for name in bowing_mats:

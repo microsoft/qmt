@@ -3,8 +3,6 @@
 
 """Testing QMT geometry util functions."""
 
-from __future__ import division
-
 from qmt.geometry.freecad.geomUtils import *
 
 vec = FreeCAD.Vector
