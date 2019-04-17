@@ -506,7 +506,7 @@ def initialize_lithography(info, opts, fillShells=True):
 
     # To start, we need to collect up all the lithography directives, and
     # organize them by layer_num and objectIDs within layers.
-    baseSubstrateParts = []
+    base_substrate_parts = []
     for part in opts["input_parts"]:
         # If this part is a litho step
         if part.directive == "lithography":
@@ -516,18 +516,18 @@ def initialize_lithography(info, opts, fillShells=True):
                 layers[layer_num] = {"objIDs": {}}
             layer = layers[layer_num]
             # Generate the base and thickness of the layer:
-            layerBase = float(part.z0)
-            layerThickness = float(part.thickness)
+            layer_base = float(part.z0)
+            layer_thickness = float(part.thickness)
             # All parts within a given layer number are required to have
             # identical thickness and base, so check that:
             if "base" in layer:
-                assert layerBase == layer["base"]
+                assert layer_base == layer["base"]
             else:
-                layer["base"] = layerBase
+                layer["base"] = layer_base
             if "thickness" in layer:
-                assert layerThickness == layer["thickness"]
+                assert layer_thickness == layer["thickness"]
             else:
-                layer["thickness"] = layerThickness
+                layer["thickness"] = layer_thickness
             # A given part references a base sketch. However, we need to split
             # the sketch here into possibly disjoint sub-sketches to work
             # with them:
@@ -541,18 +541,18 @@ def initialize_lithography(info, opts, fillShells=True):
                 info.trash.append(mySplitSketch)
                 layers[layer_num]["objIDs"][objID] = objDict
             # Add the base substrate to the appropriate dictionary
-            baseSubstrateParts += part.litho_base
+            base_substrate_parts += part.litho_base
 
     # Get rid of any duplicates:
-    baseSubstrateParts = list(set(baseSubstrateParts))
+    base_substrate_parts = list(set(base_substrate_parts))
 
     # Now convert the part names for the substrate into 3D freeCAD objects, which
     # should have already been rendered.
-    for baseSubstrate in baseSubstrateParts:
+    for base_substrate in base_substrate_parts:
         try:
-            built_part_name = opts["built_part_names"][baseSubstrate.label]
+            built_part_name = opts["built_part_names"][base_substrate.label]
         except:
-            raise KeyError("No substrate built for '" + str(baseSubstrate.label) + "'")
+            raise KeyError("No substrate built for '" + str(base_substrate.label) + "'")
         info.lithoDict["substrate"][()] += [doc.getObject(built_part_name)]
     # ~ import sys
     # ~ sys.stderr.write(">>> litdic " + str(info.lithoDict) + "\n")
