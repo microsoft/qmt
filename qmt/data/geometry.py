@@ -358,7 +358,6 @@ class Geo3DData(object):
         :return data:          The freeCAD document or fenics object that was stored.
         """
         if data_name == "fcdoc":
-            import FreeCAD
 
             def _load_fct(path):
                 doc = FreeCAD.newDocument("instance")
