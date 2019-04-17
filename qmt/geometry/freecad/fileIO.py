@@ -7,7 +7,6 @@
 import os
 from typing import Sequence
 
-import FreeCAD
 import Part
 import Mesh
 
