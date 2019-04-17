@@ -499,7 +499,7 @@ def initialize_lithography(info, opts, fillShells=True):
     # The lithography step requires some infrastructure to track things
     # throughout.
     info.lithoDict = {}  # dictionary containing objects for the lithography step
-    info.lithoDict["layers"] = {}
+    layers = info.lithoDict["layers"] = {}
     # Dictionary for containing the substrate. () indicates un-offset objects,
     # and subsequent tuples are offset by t_i for each index in the tuple.
     info.lithoDict["substrate"] = {(): []}
@@ -512,34 +512,34 @@ def initialize_lithography(info, opts, fillShells=True):
         if part.directive == "lithography":
             layerNum = part.layer_num  # layerNum of this part
             # Add the layerNum to the layer dictionary:
-            if layerNum not in info.lithoDict["layers"]:
-                info.lithoDict["layers"][layerNum] = {"objIDs": {}}
-            layerDict = info.lithoDict["layers"][layerNum]
+            if layerNum not in layers:
+                layers[layerNum] = {"objIDs": {}}
+            layer = layers[layerNum]
             # Generate the base and thickness of the layer:
             layerBase = float(part.z0)
             layerThickness = float(part.thickness)
             # All parts within a given layer number are required to have
             # identical thickness and base, so check that:
-            if "base" in layerDict:
-                assert layerBase == layerDict["base"]
+            if "base" in layer:
+                assert layerBase == layer["base"]
             else:
-                layerDict["base"] = layerBase
-            if "thickness" in layerDict:
-                assert layerThickness == layerDict["thickness"]
+                layer["base"] = layerBase
+            if "thickness" in layer:
+                assert layerThickness == layer["thickness"]
             else:
-                layerDict["thickness"] = layerThickness
+                layer["thickness"] = layerThickness
             # A given part references a base sketch. However, we need to split
             # the sketch here into possibly disjoint sub-sketches to work
             # with them:
             sketch = doc.getObject(part.fc_name)
             splitSketches = splitSketch(sketch)
             for mySplitSketch in splitSketches:
-                objID = len(layerDict["objIDs"])
+                objID = len(layer["objIDs"])
                 objDict = {}
                 objDict["partName"] = part.fc_name
                 objDict["sketch"] = mySplitSketch
                 info.trash.append(mySplitSketch)
-                info.lithoDict["layers"][layerNum]["objIDs"][objID] = objDict
+                layers[layerNum]["objIDs"][objID] = objDict
             # Add the base substrate to the appropriate dictionary
             baseSubstrateParts += part.litho_base
 
@@ -560,13 +560,10 @@ def initialize_lithography(info, opts, fillShells=True):
     # Now that we have ordered the primitives, we need to compute a few
     # aux quantities that we will need. First, we compute the total bounding
     # box of the lithography procedure:
-    thicknesses = []
-    bases = []
-    for layerNum in info.lithoDict["layers"].keys():
-        thicknesses.append(info.lithoDict["layers"][layerNum]["thickness"])
-        bases.append(info.lithoDict["layers"][layerNum]["base"])
-    bottom = min(bases)
-    totalThickness = sum(thicknesses)
+
+    bottom = min(layer["base"] for layer in layers.values())
+    totalThickness = sum(layer["thickness"] for layer in layers.values())
+
     assert (
         len(info.lithoDict["substrate"][()]) > 0
     )  # Otherwise, we don't have a reference for the lateral BB
@@ -589,21 +586,21 @@ def initialize_lithography(info, opts, fillShells=True):
     # base of the layer to the top of the entire domain box. This is used for
     # forming the volumes occupied when substrate objects are offset and
     # checking for overlaps.
-    for layerNum in info.lithoDict["layers"].keys():
-        base = info.lithoDict["layers"][layerNum]["base"]
-        thickness = info.lithoDict["layers"][layerNum]["thickness"]
-        for objID in info.lithoDict["layers"][layerNum]["objIDs"]:
-            sketch = info.lithoDict["layers"][layerNum]["objIDs"][objID]["sketch"]
+    for layerNum in layers.keys():
+        base = layers[layerNum]["base"]
+        thickness = layers[layerNum]["thickness"]
+        for objID in layers[layerNum]["objIDs"]:
+            sketch = layers[layerNum]["objIDs"][objID]["sketch"]
             B = extrudeBetween(sketch, base, base + thickness)
             C = extrudeBetween(sketch, base, BB[5])
-            info.lithoDict["layers"][layerNum]["objIDs"][objID]["B"] = B
-            info.lithoDict["layers"][layerNum]["objIDs"][objID]["C"] = C
+            layers[layerNum]["objIDs"][objID]["B"] = B
+            layers[layerNum]["objIDs"][objID]["C"] = C
             info.trash.append(B)
             info.trash.append(C)
             # In addition, add a hook for the HDict, which will contain the "H"
             # constructions for this object, but offset to thicknesses of various
             # layers, according to the keys.
-            info.lithoDict["layers"][layerNum]["objIDs"][objID]["HDict"] = {}
+            layers[layerNum]["objIDs"][objID]["HDict"] = {}
 
 
 def gen_offset(opts, obj, offsetVal):
