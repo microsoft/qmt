@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from __future__ import print_function
 from qmt.basic_tasks import GeometryTask
 from qmt.ms_tasks import PoissonTask
 
