@@ -172,10 +172,10 @@ def splitSketch(sketch):
     """
     if not sketch.Shape.Wires:
         raise ValueError("No wires in sketch.")
-    sketchList = []
-    for i, wire in enumerate(sketch.Shape.Wires):
-        sketchList.append(addCycleSketch(sketch.Name + "_" + str(i), wire))
-    return sketchList
+    return [
+        addCycleSketch(f"{sketch.Name}_{i}", wire)
+        for i, wire in enumerate(sketch.Shape.Wires)
+    ]
 
 
 def extendSketch(sketch, d):
