@@ -141,9 +141,8 @@ def build(opts):
             part = build_pass(input_part)
         else:
             raise ValueError(
-                "Directive "
-                + input_part.directive
-                + " is not a recognized directive type."
+                f"Directive {input_part.directive} is not a"
+                " recognized directive type."
             )
 
         assert part is not None
