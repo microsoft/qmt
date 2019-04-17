@@ -82,4 +82,6 @@ def deserialize_fenics_function(
     return potential
 
 
-TransportData = namedtuple("TransportData", ["conductance", "smatrix", "solver", "disorder"])
+TransportData = namedtuple(
+    "TransportData", ["conductance", "smatrix", "solver", "disorder"]
+)
