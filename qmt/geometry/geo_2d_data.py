@@ -8,13 +8,18 @@ from .geo_data_base import GeoData
 
 
 class Geo2DData(GeoData):
-    """
-    Class for holding a 2D geometry specification. This class holds two main dicts:
+    """Class for holding a 2D geometry specification. This class holds two main dicts:
         - parts is a dictionary of shapely Polygon objects
         - edges is a dictionary of shapely LineString objects
 
     Parts are intended to be 2D domains, while edges are used for setting boundary
     conditions and surface conditions.
+
+    Parameters
+    ----------
+    lunit : str
+        Length unit (Default value = 'nm')
+
     """
 
     def __init__(self, lunit="nm"):
@@ -22,12 +27,19 @@ class Geo2DData(GeoData):
         self.edges = {}
 
     def add_part(self, part_name: str, part: Polygon, overwrite: bool = False):
-        """
-        Add a part to this geometry.
+        """Add a part to this geometry.
 
-        :param part_name: Name of the part to create
-        :param part: Polygon object from shapely.geometry. This must be a valid Polygon.
-        :param overwrite: Should we allow this to overwrite?
+        Parameters
+        ----------
+        part_name : str
+            Name of the part to create
+        part : Polygon
+            Polygon object from shapely.geometry. This must be a valid Polygon.
+        overwrite : bool
+            Should we allow this to overwrite? (Default value = False)
+        Returns
+        -------
+        None
         """
         if not part.is_valid:
             raise ValueError(f"Part {part_name} is not a valid polygon.")
@@ -38,12 +50,18 @@ class Geo2DData(GeoData):
             self.build_order += [part_name]
 
     def remove_part(self, part_name: str, ignore_if_absent: bool = False):
-        """
-        Remove a part from this geometry.
+        """Remove a part from this geometry.
 
-        :param part_name: Name of part to remove
-        :param ignore_if_absent: Should we ignore an attempted removal if the part name
-                                      is not found?
+        Parameters
+        ----------
+        part_name : str
+            Name of part to remove.
+        ignore_if_absent : bool
+            Should we ignore an attempted removal if the part name
+            is not found? (Default value = False)
+        Returns
+        -------
+        None
         """
         if part_name in self.parts:
             del self.parts[part_name]
@@ -54,12 +72,19 @@ class Geo2DData(GeoData):
             )
 
     def add_edge(self, edge_name: str, edge: LineString, overwrite: bool = False):
-        """
-        Add an edge to this geometry.
+        """Add an edge to this geometry.
 
-        :param edge_name: Name of the edge to create
-        :param edge: LineString object from shapely.geometry.
-        :param overwrite: Should we allow this to overwrite?
+        Parameters
+        ----------
+        edge_name : str
+            : Name of the edge to create
+        edge : LineString
+            LineString object from shapely.geometry.
+        overwrite : bool
+            Should we allow this to overwrite? (Default value = False)
+        Returns
+        -------
+        None
         """
         if (edge_name in self.edges) and (not overwrite):
             raise ValueError(f"Attempted to overwrite the edge {edge_name}.")
@@ -68,12 +93,18 @@ class Geo2DData(GeoData):
             self.build_order += [edge_name]
 
     def remove_edge(self, edge_name: str, ignore_if_absent: bool = False):
-        """
-        Remove an edge from this geometry.
+        """Remove an edge from this geometry.
 
-        :param edge_name: Name of part to remove
-        :param ignore_if_absent: Should we ignore an attempted removal if the part name
-                                      is not found?
+        Parameters
+        ----------
+        edge_name : str
+            Name of part to remove.
+        ignore_if_absent : bool
+            Should we ignore an attempted removal if the part name
+            is not found? (Default value = False)
+        Returns
+        -------
+        None
         """
         if edge_name in self.edges:
             del self.edges[edge_name]
@@ -84,10 +115,11 @@ class Geo2DData(GeoData):
             )
 
     def compute_bb(self) -> List[float]:
-        """
-        Computes the bounding box of all of the parts and edges in the geometry.
+        """Computes the bounding box of all of the parts and edges in the geometry.
 
-        :return bb_list: List of [min_x,max_x,min_y,max_y]
+        Returns
+        -------
+        List of [min_x, max_x, min_y, max_y].
         """
         all_shapes = list(self.parts.values()) + list(self.edges.values())
         bbox_vertices = unary_union(all_shapes).envelope.exterior.coords.xy
@@ -98,10 +130,13 @@ class Geo2DData(GeoData):
         return [min_x, max_x, min_y, max_y]
 
     def part_build_order(self) -> List[str]:
-        """
-        Returns the build order restricted to parts.
+        """Returns the build order restricted to parts.
 
-        :return build_order: build order restricted to parts.
+        Parameters
+        ----------
+        Returns
+        -------
+        build order restricted to parts.
         """
         priority = []
         for geo_item in self.build_order:
@@ -110,22 +145,30 @@ class Geo2DData(GeoData):
         return priority
 
     def part_coord_list(self, part_name: str) -> List:
-        """
-        Get the list of vertex coordinates for a part
+        """Get the list of vertex coordinates for a part
 
-        :param part_name: Name of the part
-        :return coord_list: List of coordinates of the vertices of the part.
+        Parameters
+        ----------
+        part_name : str
+            Name of the part
+        Returns
+        -------
+        coord_list
         """
         # Note that in shapely, the first coord is repeated at the end, which we trim off:
         coord_list = list(np.array(self.parts[part_name].exterior.coords.xy).T)[:-1]
         return coord_list
 
     def edge_coord_list(self, edge_name: str) -> List:
-        """
-        Get the list of vertex coordinates for an edge.
+        """Get the list of vertex coordinates for an edge.
 
-        :param edge_name: Name of the edge.
-        :return coord_list: List of the coordinates of the edge.
+        Parameters
+        ----------
+        edge_name : str
+            Name of the edge.
+        Returns
+        -------
+        coord_list
         """
         coord_list = list(np.array(self.edges[edge_name].coords.xy).T)[:]
         return coord_list
@@ -137,15 +180,25 @@ class Geo2DData(GeoData):
         ax: Optional[Axes] = None,
         colors: Sequence = list(mcd.XKCD_COLORS.values()),
     ) -> Axes:
-        """
-        Plots the 2d geometry
-        :param parts_to_exclude: Part/edge names that won't be plotted
-        :param line_width: Thickness of lines (only for edge lines)
-        :param ax: You can pass in a matplotlib axes to plot in. If it's None, a new
+        """ Plots the 2d geometry
+
+        Parameters
+        ----------
+        parts_to_exclude : Sequence[str]
+            Part/edge names that won't be plotted (Default value = [])
+        line_width : float
+            Thickness of lines (only for edge lines). (Default value = 20.0)
+        ax : Optional[Axes]
+            You can pass in a matplotlib axes to plot in. If it's None, a new
             figure with its corresponding axes will be created
-        :param subplot_args: Tuple of args and kwargs to pass to add_subplot
-        :param colors: Colors to use for plotting the parts and edges
-        :return:
+            (Default value = None)
+        colors : Sequence[str]
+            Colors to use for plotting the parts and edges
+            (Default value = list(mcd.XKCD_COLORS.values()))
+        Returns
+        -------
+        Axes object.
+
         """
         from matplotlib import pyplot as plt
         import descartes

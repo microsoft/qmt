@@ -8,17 +8,21 @@ from enum import Enum
 
 
 class Part3DData:
-    """
-    Base class for a 3D geometric part.
-    :param fc_name: The name of the 2D/3D freeCAD object that this is built from. Note
-        that if the label used for the 3D part is the same as the freeCAD label, and that
-        label is unique, None may be used here as a shortcut
-    :param label: The descriptive name of this new part
-    :param virtual: Whether the part is virtual or not
-    """
-
     def __init__(self, label: str, fc_name: Optional[str], virtual: bool = False):
+        """Base class for a 3D geometric part.
 
+        Parameters
+        ----------
+        label : str
+            The descriptive name of this new part.
+        fc_name : str
+            The name of the 2D/3D freeCAD object that this is built from. Note that if the
+            label used for the 3D part is the same as the freeCAD label, and that label is
+            unique, None may be used here as a shortcut.
+        virtual : bool
+            Whether the part is virtual or not
+            (Default value = False)
+        """
         self.built_fc_name: Optional[str] = None  # This gets set on geometry build
         self.fc_name = label if fc_name is None else fc_name
         self.label = label
@@ -30,6 +34,15 @@ class Part3DData:
         """Write part geometry to a STEP file.
 
         Returns the STEP file path.
+
+        Parameters
+        ----------
+        file_path : str
+            (Default value = None)
+        Returns
+        -------
+        file_path
+
         """
         if file_path is None:
             file_path = f"{self.label}.stp"
@@ -40,6 +53,15 @@ class Part3DData:
         """Write part geometry to a STEP file.
 
         Returns the STEP file path.
+
+        Parameters
+        ----------
+        file_path : str
+            (Default value = None)
+        Returns
+        -------
+        file_path
+
         """
         if file_path is None:
             file_path = f"{self.label}.stl"
@@ -56,14 +78,24 @@ class ExtrudeData(Part3DData):
         z0: float = 0.0,
         virtual: bool = False,
     ):
-        """
-        :param label: The descriptive name of this new part
-        :param fc_name: The name of the 2D/3D freeCAD object that this is built from. Note
-            that if the label used for the 3D part is the same as the freeCAD label, and that
-            label is unique, None may be used here as a shortcut
-        :param thickness: The extrusion thickness
-        :param z0: The starting z coordinate
-        :param virtual: Whether the part is virtual or not
+        """Class for geometric extrusions.
+
+        Parameters
+        ----------
+        label : str
+            The descriptive name of this new part.
+        fc_name : str
+            The name of the 2D/3D freeCAD object that this is built from. Note that if the
+            label used for the 3D part is the same as the freeCAD label, and that label is
+            unique, None may be used here as a shortcut.
+        thickness : float
+            The extrusion thickness.
+        z0 : float
+            The starting z coordinate.
+            (Default value = 0.0)
+        virtual : bool
+            Whether the part is virtual or not.
+            (Default value = False)
         """
         self.thickness = thickness
         self.z0 = z0
@@ -79,14 +111,24 @@ class WireData(Part3DData):
         z0: float = 0.0,
         virtual: bool = False,
     ):
-        """
-        :param label: The descriptive name of this new part
-        :param fc_name: The name of the 2D/3D freeCAD object that this is built from. Note
-            that if the label used for the 3D part is the same as the freeCAD label, and that
-            label is unique, None may be used here as a shortcut
-        :param thickness: The extrusion thickness
-        :param z0: The starting z coordinate
-        :param virtual: Whether the part is virtual or not
+        """Class for hexagonal wire.
+
+        Parameters
+        ----------
+        label : str
+            The descriptive name of this new part.
+        fc_name : str
+            The name of the 2D/3D freeCAD object that this is built from. Note that if the
+            label used for the 3D part is the same as the freeCAD label, and that label is
+            unique, None may be used here as a shortcut.
+        thickness : float
+            The wire thickness.
+        z0 : float
+            The starting z coordinate.
+            (Default value = 0.0)
+        virtual : bool
+            Whether the part is virtual or not.
+            (Default value = False)
         """
         self.thickness = thickness
         self.z0 = z0
@@ -96,7 +138,7 @@ class WireData(Part3DData):
 class DepoMode(Enum):
     """
     'depo' or 'etch' defines the positive or negative mask for the deposition of a wire
-    coating
+    coating.
     """
 
     depo = 1
@@ -114,16 +156,27 @@ class WireShellData(Part3DData):
         depo_mode: str,
         virtual: bool = False,
     ):
-        """
-        :param label: The descriptive name of this new part
-        :param fc_name: The name of the 2D/3D freeCAD object that this is built from. Note
-            that if the label used for the 3D part is the same as the freeCAD label, and that
-            label is unique, None may be used here as a shortcut
-        :param thickness: The extrusion thickness
-        :param target_wire: Target wire for coating
-        :param shell_verts: Vertices to use when rendering the coating
-        :param depo_mode: 'depo' or 'etch' defines the positive or negative mask
-        :param virtual: Whether the part is virtual or not
+        """Class for the geometry of a wire shell.
+
+        Parameters
+        ----------
+        label : str
+            The descriptive name of this new part.
+        fc_name : str
+            The name of the 2D/3D freeCAD object that this is built from. Note that if the
+            label used for the 3D part is the same as the freeCAD label, and that label is
+            unique, None may be used here as a shortcut.
+        thickness : float
+            The shell thickness.
+        target_wire : WireData
+            Target wire for coating.
+        shell_verts : List[int]
+            Vertices to use when rendering the coating.
+        depo_mode : str
+            'depo' or 'etch' defines the positive or negative mask.
+        virtual : bool
+            Whether the part is virtual or not.
+            (Default value = False)
         """
         self.thickness = thickness
         self.target_wire = target_wire
@@ -150,18 +203,31 @@ class SAGData(Part3DData):
         z0: float = 0.0,
         virtual: bool = False,
     ):
-        """
-        :param label: The descriptive name of this new part
-        :param fc_name: The name of the 2D/3D freeCAD object that this is built from. Note
-            that if the label used for the 3D part is the same as the freeCAD label, and that
-            label is unique, None may be used here as a shortcut
-        :param thickness: The total SAG thickness
-        :param z_middle: The location for the "flare out"
-        :param t_in: The lateral distance from the 2D profile to the edge of the top bevel
-        :param t_out: The lateral distance from the 2D profile to the furthest "flare out"
-            location
-        :param z0: The starting z coordinate
-        :param virtual: Whether the part is virtual or not
+        """Class for selective area growth
+
+        Parameters
+        ----------
+        label : str
+            The descriptive name of this new part.
+        fc_name : str
+            The name of the 2D/3D freeCAD object that this is built from. Note that if the
+            label used for the 3D part is the same as the freeCAD label, and that label is
+            unique, None may be used here as a shortcut.
+        thickness : float
+            The total SAG thickness.
+        z_middle : float
+            The location for the "flare out".
+        t_in : float
+            The lateral distance from the 2D profile to the edge of the top bevel.
+        t_out : float
+            The lateral distance from the 2D profile to the furthest "flare out"
+            location.
+        z0 : float
+            The starting z coordinate.
+            (Default value = 0.0)
+        virtual : bool
+            Whether the part is virtual or not.
+            (Default value = False)
         """
         self.thickness = thickness
         self.z0 = z0
@@ -182,18 +248,31 @@ class LithographyData(Part3DData):
         litho_base: List[str] = [],
         virtual: bool = False,
     ):
-        """
-        :param label: The descriptive name of this new part
-        :param fc_name: The name of the 2D/3D freeCAD object that this is built from. Note
-            that if the label used for the 3D part is the same as the freeCAD label, and that
-            label is unique, None may be used here as a shortcut
-        :param thickness: The lithography thickness
-        :param layer_num: The layer number. Lower numbers go down first, with higher numbers
-            deposited last
-        :param z0: The starting z coordinate
-        :param litho_base: The base partNames to use. For multi-step lithography, the bases
-            are just all merged, so there is no need to list this more than once
-        :param virtual: Whether the part is virtual or not
+        """Class for lithography.
+
+        Parameters
+        ----------
+        label : str
+            The descriptive name of this new part.
+        fc_name : str
+            The name of the 2D/3D freeCAD object that this is built from. Note that if the
+            label used for the 3D part is the same as the freeCAD label, and that label is
+            unique, None may be used here as a shortcut.
+        thickness : float
+            The lithography thickness.
+        layer_num : int
+            The layer number. Lower numbers go down first, with higher numbers deposited
+            last.
+        z0 : float
+            The starting z coordinate.
+            (Default value = 0.0)
+        litho_base : List[str]
+            The base partNames to use. For multi-step lithography, the bases are just all
+            merged, so there is no need to list this more than once.
+            (Default value = [])
+        virtual : bool
+            Whether the part is virtual or not.
+            (Default value = False)
         """
         self.thickness = thickness
         self.z0 = z0

@@ -16,8 +16,7 @@ from .geo_data_base import GeoData
 
 
 class Geo3DData(GeoData):
-    """
-    Class for a 3D geometry specification. It holds:
+    """Class for a 3D geometry specification. It holds:
         - parts is a dict of Part3D objects, keyed by the label of each Part3D object
         - build_order is a list of strings indicating the construction order
     """
@@ -31,12 +30,19 @@ class Geo3DData(GeoData):
         self.serial_fcdoc: str = None  # serialized FreeCAD document for this geometry
 
     def add_part(self, part_name: str, part: Part3DData, overwrite: bool = False):
-        """
-        Add a part to this geometry.
+        """Add a part to this geometry.
 
-        :param part_name: Name of the part to create
-        :param part: Part3D object.
-        :param overwrite: Should we allow this to overwrite?
+        Parameters
+        ----------
+        part_name : str
+            Name of the part to create
+        part : Part3D
+            Part3D object.
+        overwrite : bool
+            Should we allow this to overwrite? (Default value = False)
+        Returns
+        -------
+        None
         """
         if (part_name in self.parts) and (not overwrite):
             raise ValueError(f"Attempted to overwrite the part {part_name}.")
@@ -45,12 +51,19 @@ class Geo3DData(GeoData):
             self.parts[part_name] = part
 
     def remove_part(self, part_name: str, ignore_if_absent: bool = False):
-        """
-        Remove a part from this geometry.
+        """Remove a part from this geometry.
 
-        :param part_name: Name of part to remove
-        :param ignore_if_absent: Should we ignore an attempted removal if the part name
+        Parameters
+        ----------
+        part_name : str
+            Name of part to remove.
+        ignore_if_absent : bool
+            Should we ignore an attempted removal if the part name
             is not found?
+            (Default value = False)
+        Returns
+        -------
+        None
         """
         if part_name in self.parts:
             del self.parts[part_name]
@@ -69,12 +82,23 @@ class Geo3DData(GeoData):
         axis: Tuple[float, float, float] = (1.0, 0.0, 0.0),
         distance: float = 0.0,
     ):
-        """
-        Make a cross-section of the geometry perpendicular to the axis at a given distance from the origin.
-        :param xsec_name: a strong giving the name for the cross section.
-        :param polygons: dict corresponding to the cross-section polygons.
-        :param tuple axis: Tuple defining the axis that defines the normal of the cross section.
-        :param float distance: Distance along the axis used to set the cross section.
+        """Make a cross-section of the geometry perpendicular to the axis at a given distance from the origin.
+
+        Parameters
+        ----------
+        xsec_name : str
+            a strong giving the name for the cross section.
+        polygons : dict
+            dict conrresponding to the cross-section polygons.
+        axis : tuple
+            Tuple defining the axis that defines the normal of the cross section.
+            (Default value = (1.0, 0.0, 0.0))
+        distance : float
+            Distance along the axis used to set the cross section.
+        Returns
+        -------
+        None
+
         """
         self.xsecs[xsec_name] = {
             "axis": axis,
@@ -83,15 +107,21 @@ class Geo3DData(GeoData):
         }
 
     def set_data(self, data_name: str, data: Any, scratch_dir: Optional[str] = None):
-        """
-        Set data to a serial format that is easily portable.
+        """Set data to a serial format that is easily portable.
 
-        :param data_name:
-            - "fcdoc" freeCAD document
-            - "mesh"  fenics mesh
-            - "rmf"   fenics region marker function
-        :param data: The corresponding data that we would like to set.
-        :param scratch_dir: Optional existing temporary (fast) storage location.
+        Parameters
+        ----------
+        data_name : str
+            "fcdoc" freeCAD document
+            "mesh"  fenics mesh
+            "rmf"   fenics region marker function
+        data :
+            The corresponding data that we would like to set.
+        scratch_dir : str
+            Optional existing temporary (fast) storage location. (Default value = None)
+        Returns
+        -------
+        None
         """
         if data_name == "fcdoc":
 
@@ -120,12 +150,19 @@ class Geo3DData(GeoData):
             raise ValueError(f"{data_name} was not a valid data_name.")
 
     def get_data(self, data_name: str, scratch_dir: Optional[str] = None):
-        """
-        Get data from stored serial format.
+        """Get data from stored serial format.
 
-        :param data_name: "fcdoc" freeCAD document.
-        :param scratch_dir: Optional existing temporary (fast) storage location.
-        :return data: The freeCAD document or fenics object that was stored.
+        Parameters
+        ----------
+        data_name : str
+            "fcdoc" freeCAD document.
+        scratch_dir : str
+            Optional existing temporary (fast) storage location. (Default value = None)
+        mesh :
+            (Default value = None)
+        Returns
+        -------
+        data
         """
         if data_name == "fcdoc":
 
@@ -143,6 +180,15 @@ class Geo3DData(GeoData):
         """Write geometry to a fcstd file.
 
         Returns the fcstd file path.
+
+        Parameters
+        ----------
+        file_path :
+            (Default value = None)
+        Returns
+        -------
+        file_path
+
         """
         if file_path is None:
             file_path = (
@@ -153,10 +199,20 @@ class Geo3DData(GeoData):
         return file_path
 
     def xsec_to_2d(self, xsec_name: str, lunit: Optional[str] = None) -> Geo2DData:
-        """
-        Generates a Geo2DData from a cross section
-        :param xsec_name: Name of the cross section
-        :return: Geo2DData object
+        """Generates a Geo2DData from a cross section
+
+        Parameters
+        ----------
+        xsec_name : str
+            Name of the cross section
+        lunit : Optional[str] :
+            (Default value = None)
+        lunit: Optional[str] :
+             (Default value = None)
+        Returns
+        -------
+        None
+
         """
 
         # Get our new coordinates
@@ -174,12 +230,30 @@ class Geo3DData(GeoData):
         z_new = np.cross(x_new, y_new)
 
         def _project(vec):
-            """Projects a 3D vector into our 2D cross section plane"""
+            """Projects a 3D vector into our 2D cross section plane
+            
+            Parameters
+            ----------
+            vec :
+            Returns
+            -------
+            List of projection.
+
+            """
             vec = vec - x_new * self.xsecs[xsec_name]["distance"]
             return [vec.dot(y_new), vec.dot(z_new)]
 
         def _inverse_project(vec):
-            """Inverse of _project"""
+            """Inverse of _project
+            
+            Parameters
+            ----------
+            vec :
+            Returns
+            -------
+            Float, inverse of _project.
+
+            """
             return (
                 x_new * self.xsecs[xsec_name]["distance"]
                 + vec[0] * y_new
@@ -205,11 +279,18 @@ class Geo3DData(GeoData):
                     part_polygons[part_name] = polygons
 
         def _build_containment_graph(poly_list):
-            """
-            Given a list of polygons, build a directed graph where edge A -> B means
+            """Given a list of polygons, build a directed graph where edge A -> B means
             A contains B. This intentionally does not include nested containment. Which
             means if A contains B and B contains C, we will only get the edges A -> B
-            and B -> C, not A -> C
+            and B -> C, not A -> C.
+
+            Parameters
+            ----------
+            poly_list :
+            Returns
+            -------
+            graph
+
             """
             poly_by_area = sorted(poly_list, key=lambda p: p.area)
 
@@ -226,9 +307,17 @@ class Geo3DData(GeoData):
             return graph
 
         def _is_inside(poly, part):
-            """
-            Given a polygon, find a point inside of it, and then check if that point is
+            """Given a polygon, find a point inside of it, and then check if that point is
             in the (3D) part
+
+            Parameters
+            ----------
+            poly :
+            part :
+            Returns
+            -------
+            Boolean
+
             """
             # Find the midpoint in x, then find the intersections with the polygon on
             # that vertical line. Then find the midpoint in y along the first

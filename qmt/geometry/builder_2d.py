@@ -9,18 +9,28 @@ def build_2d_geometry(
     lunit: str = "nm",
     build_order: Optional[List[str]] = None,
 ) -> Geo2DData:
-    """
-    Build a geometry in 2D.
+    """Build a geometry in 2D.
 
-    :param parts: Dictionary for holding the 2D parts, of the form
+    Parameters
+    ----------
+    parts : dict
+        Dictionary for holding the 2D parts, of the form
         {'part_name':list of 2d points}.
-    :param edges: Dictionary of 2D edges, of the form:
+    edges : dict
+        Dictionary of 2D edges, of the form:
         {'edge_name':list of 2d points}.
-    :param lunit: length_unit (nm).
-    :param build_order: None or a list of all parts, determining the build order. Items on
+    lunit : str
+        length_unit (nm).
+        (Default value = "nm")
+    build_order : list
+        None or a list of all parts, determining the build order. Items on
         the left are highest priority and items on the right are lowest.
         If None is given (default), then build order is determined just
         taken to be the order of the parts and edges.
+        (Default value = None)
+    Returns
+    -------
+    Geo2DData instance
     """
     geo_2d = Geo2DData()
     if build_order is None:
