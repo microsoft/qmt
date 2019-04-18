@@ -16,7 +16,24 @@ vec = FreeCAD.Vector
 
 
 def extrude_partwb(sketch, length, reverse=False, name=None):
-    """Extrude via Part workbench."""
+    """Extrude via Part workbench.
+
+    Parameters
+    ----------
+    sketch :
+
+    length :
+
+    reverse :
+        (Default value = False)
+    name : str
+        (Default value = None)
+
+    Returns
+    -------
+    FreeCAD.Part.Feature
+
+    """
     doc = FreeCAD.ActiveDocument
     if name is None:
         f = doc.addObject("Part::Extrusion")
@@ -38,12 +55,42 @@ def extrude_partwb(sketch, length, reverse=False, name=None):
 
 
 def extrude(sketch, length, reverse=False, name=None):
-    """Selector for extrude method."""
+    """Selector for extrude method.
+
+    Parameters
+    ----------
+    sketch :
+
+    length :
+
+    reverse :
+        (Default value = False)
+    name : str
+        (Default value = None)
+
+    Returns
+    -------
+    FreeCAD.Part.Feature
+
+    """
     return extrude_partwb(sketch, length, reverse, name)
 
 
 def copy_move(obj, moveVec=(0.0, 0.0, 0.0), copy=True):
     """Create a duplciate of the object using a draft move operation.
+
+    Parameters
+    ----------
+    obj : FreeCAD.App.Document
+        A FreeCAD object.
+    moveVec :
+        (Default value = (0.0, 0.0, 0.0))
+    copy :
+        (Default value = True)
+
+    Returns
+    -------
+    f
     """
     f = Draft.move([obj], vec(moveVec[0], moveVec[1], moveVec[2]), copy=copy)
     if f.Shape.Vertexes:
@@ -69,6 +116,20 @@ def makeHexFace(sketch, zBottom, width):
     """Given a sketch for a wire, make the first face. Also need to make sure it
     is placed normal to the initial line segment in the sketch. This will ensure
     that the wire and shell can be constructed with sweep operations.
+
+    Parameters
+    ----------
+    sketch :
+
+    zBottom :
+
+    width :
+
+
+    Returns
+    -------
+    face3
+
     """
     doc = FreeCAD.ActiveDocument
     lineSegments = findSegments(sketch)
@@ -104,6 +165,18 @@ def makeHexFace(sketch, zBottom, width):
 
 def genUnion(objList, consumeInputs=False):
     """Generates a Union non-destructively.
+
+    Parameters
+    ----------
+    objList :
+
+    consumeInputs :
+        (Default value = False)
+
+    Returns
+    -------
+    Object(s).
+
     """
     doc = FreeCAD.ActiveDocument
     if not objList:
@@ -135,6 +208,15 @@ def genUnion(objList, consumeInputs=False):
 
 def getBB(obj):
     """Get the bounding box coords of an object.
+
+    Parameters
+    ----------
+    obj : FreeCAD.App.Document
+        A FreeCAD object.
+    Returns
+    -------
+    Tuple of (xMin, xMax, yMin, yMax, zMin, zMax).
+
     """
     xMin = obj.Shape.BoundBox.XMin
     xMax = obj.Shape.BoundBox.XMax
@@ -147,6 +229,16 @@ def getBB(obj):
 
 def makeBB(BB):
     """Make a bounding box given BB tuple.
+
+    Parameters
+    ----------
+    BB :
+
+
+    Returns
+    -------
+    box
+
     """
     doc = FreeCAD.ActiveDocument
     xMin, xMax, yMin, yMax, zMin, zMax = BB
@@ -164,6 +256,20 @@ def makeBB(BB):
 
 def subtract(obj0, obj1, consumeInputs=False):
     """Subtract two objects, optionally deleting the input objects.
+
+    Parameters
+    ----------
+    obj0 :
+
+    obj1 :
+
+    consumeInputs :
+        (Default value = False)
+
+    Returns
+    -------
+    FreeCAD.App.Document
+
     """
     doc = FreeCAD.ActiveDocument
     tempObj = doc.addObject("Part::Cut")
@@ -181,7 +287,19 @@ def subtract(obj0, obj1, consumeInputs=False):
 
 
 def subtractParts(domainObj, partList):
-    """ Subtract given part objects from a domain.
+    """Subtract given part objects from a domain.
+
+    Parameters
+    ----------
+    domainObj :
+
+    partList :
+
+
+    Returns
+    -------
+    FreeCAD.App.Document
+
     """
     doc = FreeCAD.ActiveDocument
     diffObj = copy_move(domainObj)
@@ -196,6 +314,18 @@ def subtractParts(domainObj, partList):
 
 def intersect(objList, consumeInputs=False):
     """Intersect a list of objects, optionally deleting the input objects.
+
+    Parameters
+    ----------
+    objList :
+
+    consumeInputs :
+        (Default value = False)
+
+    Returns
+    -------
+    FreeCAD.App.Document
+
     """
     doc = FreeCAD.ActiveDocument
     intersectTemp = doc.addObject("Part::MultiCommon")
@@ -212,8 +342,18 @@ def intersect(objList, consumeInputs=False):
 
 
 def checkOverlap(objList):
-    """ Checks if a list of objects, when intersected, contains a finite volume.abs
+    """Checks if a list of objects, when intersected, contains a finite volume.abs
     Returns true if it does, returns false if the intersection is empty.
+
+    Parameters
+    ----------
+    objList :
+
+
+    Returns
+    -------
+    Boolean
+
     """
     intObj = intersect(objList)
     if not intObj.Shape.Vertexes:
@@ -225,7 +365,16 @@ def checkOverlap(objList):
 
 
 def isNonempty(obj):
-    """ Checks if an object is nonempty (returns True) or empty (returns False).
+    """Checks if an object is nonempty (returns True) or empty (returns False).
+
+    Parameters
+    ----------
+    obj : FreeCAD.App.Document
+        A FreeCAD object.
+    Returns
+    -------
+    Boolean
+
     """
     if not obj.Shape.Vertexes:
         return False
@@ -234,7 +383,23 @@ def isNonempty(obj):
 
 
 def extrudeBetween(sketch, zMin, zMax, name=None):
-    """ Non-destructively extrude a sketch between zMin and zMax.
+    """Non-destructively extrude a sketch between zMin and zMax.
+
+    Parameters
+    ----------
+    sketch :
+
+    zMin : float
+
+    zMax : float
+
+    name : str
+        (Default value = None)
+
+    Returns
+    -------
+    ext
+
     """
     doc = FreeCAD.ActiveDocument
     tempExt = extrude(sketch, zMax - zMin, name=name)
@@ -246,8 +411,22 @@ def extrudeBetween(sketch, zMin, zMax, name=None):
 
 
 def liftObject(obj, d, consumeInputs=False):
-    """ Create a new solid by lifting an object by a distance d along z, filling
+    """Create a new solid by lifting an object by a distance d along z, filling
     in the space swept out.
+
+    Parameters
+    ----------
+    obj : FreeCAD.App.Document
+        A FreeCAD object.
+    d : float
+        Distance.
+    consumeInputs :
+        (Default value = False)
+
+    Returns
+    -------
+    returnObj
+
     """
     objBB = getBB(obj)
     liftedObj = copy_move(obj, moveVec=(0.0, 0.0, d))  # lift up the original sketch
@@ -261,8 +440,21 @@ def liftObject(obj, d, consumeInputs=False):
 
 
 def draftOffset(inputSketch, t):
-    """ Attempt to offset the draft figure by a thickness t. Positive t is an
+    """Attempt to offset the draft figure by a thickness t. Positive t is an
     inflation, while negative t is a deflation.
+
+    Parameters
+    ----------
+    inputSketch :
+
+    t : float
+        Thickness.
+
+
+    Returns
+    -------
+    returnSketch
+
     """
     # ~ from qmt.geometry.freecad.geomUtils import extrude, copy_move, delete
 
@@ -370,8 +562,18 @@ def draftOffset(inputSketch, t):
 
 
 def centerObjects(objsList):
-    """ Move all the objects in the list in the x-y plane so that they are
+    """Move all the objects in the list in the x-y plane so that they are
     centered about the origin.
+
+    Parameters
+    ----------
+    objsList :
+
+
+    Returns
+    -------
+    None
+
     """
     if not objsList:
         return
@@ -385,7 +587,24 @@ def centerObjects(objsList):
 
 
 def crossSection(obj, axis=(1.0, 0.0, 0.0), d=1.0, name=None):
-    """Return cross section of object along axis."""
+    """Return cross section of object along axis.
+
+    Parameters
+    ----------
+    obj : FreeCAD.App.Document
+        A FreeCAD object.
+    axis :
+        (Default value = (1.0, 0.0, 0.0)
+    d : float
+        (Default value = 1.0)
+    name : str
+        (Default value = None)
+
+    Returns
+    -------
+    returnObj
+
+    """
     doc = FreeCAD.ActiveDocument
     if name is None:
         name = obj.Name + "_section"

@@ -17,14 +17,19 @@ from .data_utils import load_serial, store_serial, write_deserialised
 from matplotlib.axes import Axes
 
 
-class Geo2DData(object):
-    """
-    Class for holding a 2D geometry specification. This class holds two main dicts:
+class Geo2DData:
+    """Class for holding a 2D geometry specification. This class holds two main dicts:
         - parts is a dictionary of shapely Polygon objects
         - edges is a dictionary of shapely LineString objects
 
     Parts are intended to be 2D domains, while edges are used for setting boundary
     conditions and surface conditions.
+
+    Parameters
+    ----------
+    lunit : str
+        Length unit (Default value = 'nm')
+
     """
 
     def __init__(self, lunit="nm"):
@@ -34,12 +39,21 @@ class Geo2DData(object):
         self.lunit = lunit
 
     def add_part(self, part_name, part, overwrite=False):
-        """
-        Add a part to this geometry.
+        """Add a part to this geometry.
 
-        :param str part_name: Name of the part to create
-        :param Polygon part: Polygon object from shapely.geometry. This must be a valid Polygon.
-        :param bool overwrite: Should we allow this to overwrite?
+        Parameters
+        ----------
+        part_name : str
+            Name of the part to create
+        part : Polygon
+            Polygon object from shapely.geometry. This must be a valid Polygon.
+        overwrite : bool
+            Should we allow this to overwrite? (Default value = False)
+
+        Returns
+        -------
+        None
+
         """
         if not part.is_valid:
             raise ValueError("Part " + part_name + " is not a valid polygon.")
@@ -50,12 +64,20 @@ class Geo2DData(object):
             self.build_order += [part_name]
 
     def remove_part(self, part_name, ignore_if_absent=False):
-        """
-        Remove a part from this geometry.
+        """Remove a part from this geometry.
 
-        :param str part_name: Name of part to remove
-        :param bool ignore_if_absent: Should we ignore an attempted removal if the part name
-                                      is not found?
+        Parameters
+        ----------
+        part_name : str
+            Name of part to remove.
+        ignore_if_absent : bool
+            Should we ignore an attempted removal if the part name
+            is not found? (Default value = False)
+
+        Returns
+        -------
+        None
+
         """
         if part_name in self.parts:
             del self.parts[part_name]
@@ -71,12 +93,21 @@ class Geo2DData(object):
                 pass
 
     def add_edge(self, edge_name, edge, overwrite=False):
-        """
-        Add an edge to this geometry.
+        """Add an edge to this geometry.
 
-        :param str edge_name: Name of the edge to create
-        :param LineString edge: LineString object from shapely.geometry.
-        :param bool overwrite: Should we allow this to overwrite?
+        Parameters
+        ----------
+        edge_name : str
+            : Name of the edge to create
+        edge : LineString
+            LineString object from shapely.geometry.
+        overwrite : bool
+            Should we allow this to overwrite? (Default value = False)
+
+        Returns
+        -------
+        None
+
         """
         if (edge_name in self.edges) and (not overwrite):
             raise ValueError("Attempted to overwrite the edge " + edge_name + ".")
@@ -85,12 +116,20 @@ class Geo2DData(object):
             self.build_order += [edge_name]
 
     def remove_edge(self, edge_name, ignore_if_absent=False):
-        """
-        Remove an edge from this geometry.
+        """Remove an edge from this geometry.
 
-        :param str edge_name: Name of part to remove
-        :param bool ignore_if_absent: Should we ignore an attempted removal if the part name
-                                      is not found?
+        Parameters
+        ----------
+        edge_name : str
+            Name of part to remove.
+        ignore_if_absent : bool
+            Should we ignore an attempted removal if the part name
+            is not found? (Default value = False)
+
+        Returns
+        -------
+        None
+
         """
         if edge_name in self.edges:
             del self.edges[edge_name]
@@ -106,10 +145,12 @@ class Geo2DData(object):
                 pass
 
     def compute_bb(self):
-        """
-        Computes the bounding box of all of the parts and edges in the geometry.
+        """Computes the bounding box of all of the parts and edges in the geometry.
 
-        :return bb_list: List of [min_x,max_x,min_y,max_y]
+        Returns
+        -------
+        List of [min_x, max_x, min_y, max_y].
+
         """
         all_shapes = list(self.parts.values()) + list(self.edges.values())
         bbox_vertices = unary_union(all_shapes).envelope.exterior.coords.xy
@@ -120,10 +161,15 @@ class Geo2DData(object):
         return [min_x, max_x, min_y, max_y]
 
     def part_build_order(self):
-        """
-        Returns the build order restricted to parts.
+        """Returns the build order restricted to parts.
 
-        :return build_order: build order restricted to parts.
+        Parameters
+        ----------
+
+        Returns
+        -------
+        build order restricted to parts.
+
         """
         priority = []
         for geo_item in self.build_order:
@@ -132,22 +178,36 @@ class Geo2DData(object):
         return priority
 
     def part_coord_list(self, part_name):
-        """
-        Get the list of vertex coordinates for a part
+        """Get the list of vertex coordinates for a part
 
-        :param str part_name: Name of the part
-        :return list coord_list: List of coordinates of the vertices of the part.
+        Parameters
+        ----------
+        part_name : str
+            Name of the part
+
+
+        Returns
+        -------
+        coord_list
+
         """
         # Note that in shapely, the first coord is repeated at the end, which we trim off:
         coord_list = list(np.array(self.parts[part_name].exterior.coords.xy).T)[:-1]
         return coord_list
 
     def edge_coord_list(self, edge_name):
-        """
-        Get the list of vertex coordinates for an edge.
+        """Get the list of vertex coordinates for an edge.
 
-        :param str edge_name: Name of the edge.
-        :return list coord_list: List of the coordinates of the edge.
+        Parameters
+        ----------
+        edge_name : str
+            Name of the edge.
+
+
+        Returns
+        -------
+        coord_list
+
         """
         coord_list = list(np.array(self.edges[edge_name].coords.xy).T)[:]
         return coord_list
@@ -159,15 +219,26 @@ class Geo2DData(object):
         ax: Optional[Axes] = None,
         colors: Sequence = list(mcd.XKCD_COLORS.values()),
     ) -> Axes:
-        """
-        Plots the 2d geometry
-        :param parts_to_exclude: Part/edge names that won't be plotted
-        :param line_width: Thickness of lines (only for edge lines)
-        :param ax: You can pass in a matplotlib axes to plot in. If it's None, a new
+        """Plots the 2d geometry
+
+        Parameters
+        ----------
+        parts_to_exclude : Sequence[str]
+            Part/edge names that won't be plotted (Default value = [])
+        line_width : float
+            Thickness of lines (only for edge lines). (Default value = 20.0)
+        ax : Optional[Axes]
+            You can pass in a matplotlib axes to plot in. If it's None, a new
             figure with its corresponding axes will be created
-        :param subplot_args: Tuple of args and kwargs to pass to add_subplot
-        :param colors: Colors to use for plotting the parts and edges
-        :return:
+            (Default value = None)
+        colors : Sequence[str]
+            Colors to use for plotting the parts and edges
+            (Default value = list(mcd.XKCD_COLORS.values()))
+
+        Returns
+        -------
+        Axes object.
+
         """
         from matplotlib import pyplot as plt
         import descartes
@@ -226,9 +297,9 @@ class Geo2DData(object):
         return ax
 
 
-class Geo3DData(object):
-    """
-    Class for a 3D geometry specification. It holds:
+class Geo3DData:
+
+    """Class for a 3D geometry specification. It holds:
         - parts is a dict of Part3D objects, keyed by the label of each Part3D object.
         - build_order is a list of strings indicating the construction order.
     """
@@ -257,20 +328,31 @@ class Geo3DData(object):
         return self.materials_database[self.parts[part_name].material]
 
     def get_material_mapping(self):
-        """
-        Get mapping of part names to materials.
+        """Get mapping of part names to materials.
 
-        :return:
+        Returns
+        -------
+        Dictionary with name -> material.
+
         """
         return {name: self.get_material(name) for name in self.parts.keys()}
 
     def add_part(self, part_name, part, overwrite=False):
-        """
-        Add a part to this geometry.
+        """Add a part to this geometry.
 
-        :param str part_name: Name of the part to create
-        :param Part3D part: Part3D object.
-        :param bool overwrite: Should we allow this to overwrite?
+        Parameters
+        ----------
+        part_name : str
+            Name of the part to create
+        part : Part3D
+            Part3D object.
+        overwrite : bool
+            Should we allow this to overwrite? (Default value = False)
+
+        Returns
+        -------
+        None
+
         """
         if (part_name in self.parts) and (not overwrite):
             raise ValueError("Attempted to overwrite the part " + part_name + ".")
@@ -279,12 +361,21 @@ class Geo3DData(object):
             self.parts[part_name] = part
 
     def remove_part(self, part_name, ignore_if_absent=False):
-        """
-        Remove a part from this geometry.
+        """Remove a part from this geometry.
 
-        :param str part_name: Name of part to remove
-        :param bool ignore_if_absent: Should we ignore an attempted removal if the part name
-                                      is not found?
+        Parameters
+        ----------
+        part_name : str
+            Name of part to remove.
+        ignore_if_absent : bool
+            Should we ignore an attempted removal if the part name
+            is not found?
+            (Default value = False)
+
+        Returns
+        -------
+        None
+
         """
         if part_name in self.parts:
             del self.parts[part_name]
@@ -299,12 +390,24 @@ class Geo3DData(object):
                 pass
 
     def add_xsec(self, xsec_name, polygons, axis=(1.0, 0.0, 0.0), distance=0.0):
-        """
-        Make a cross-section of the geometry perpendicular to the axis at a given distance from the origin.
-        :param str xsec_name: a strong giving the name for the cross section.
-        :param dict polygons: dict conrresponding to the cross-section polygons.
-        :param tuple axis: Tuple defining the axis that defines the normal of the cross section.
-        :param float distance: Distance along the axis used to set the cross section.
+        """Make a cross-section of the geometry perpendicular to the axis at a given distance from the origin.
+
+        Parameters
+        ----------
+        xsec_name : str
+            a strong giving the name for the cross section.
+        polygons : dict
+            dict conrresponding to the cross-section polygons.
+        axis : tuple
+            Tuple defining the axis that defines the normal of the cross section.
+            (Default value = (1.0, 0.0, 0.0))
+        distance : float
+            Distance along the axis used to set the cross section.
+
+        Returns
+        -------
+        None
+
         """
         self.xsecs[xsec_name] = {
             "axis": axis,
@@ -313,14 +416,23 @@ class Geo3DData(object):
         }
 
     def set_data(self, data_name, data, scratch_dir=None):
-        """
-        Set data to a serial format that is easily portable.
+        """Set data to a serial format that is easily portable.
 
-        :param str data_name:  "fcdoc" freeCAD document \
-                               "mesh"  fenics mesh \
-                               "rmf"   fenics region marker function
-        :param data:           The corresponding data that we would like to set.
-        :param scratch_dir:    Optional existing temporary (fast) storage location.
+        Parameters
+        ----------
+        data_name : str
+            "fcdoc" freeCAD document \
+            "mesh"  fenics mesh \
+            "rmf"   fenics region marker function
+        data :
+            The corresponding data that we would like to set.
+        scratch_dir : str
+            Optional existing temporary (fast) storage location. (Default value = None)
+
+        Returns
+        -------
+        None
+
         """
         if data_name == "fcdoc":
 
@@ -350,12 +462,21 @@ class Geo3DData(object):
             raise ValueError(str(data_name) + " was not a valid data_name.")
 
     def get_data(self, data_name, mesh=None, scratch_dir=None):
-        """
-        Get data from stored serial format.
+        """Get data from stored serial format.
 
-        :param str data_name:  "fcdoc" freeCAD document.
-        :param scratch_dir:    Optional existing temporary (fast) storage location.
-        :return data:          The freeCAD document or fenics object that was stored.
+        Parameters
+        ----------
+        data_name : str
+            "fcdoc" freeCAD document.
+        scratch_dir : str
+            Optional existing temporary (fast) storage location. (Default value = None)
+        mesh :
+            (Default value = None)
+
+        Returns
+        -------
+        data
+
         """
         if data_name == "fcdoc":
 
@@ -373,6 +494,16 @@ class Geo3DData(object):
         """Write geometry to a fcstd file.
 
         Returns the fcstd file path.
+
+        Parameters
+        ----------
+        file_path :
+            (Default value = None)
+
+        Returns
+        -------
+        file_path
+
         """
         if file_path is None:
             file_path = (
@@ -383,10 +514,21 @@ class Geo3DData(object):
         return file_path
 
     def xsec_to_2d(self, xsec_name: str, lunit: Optional[str] = None) -> Geo2DData:
-        """
-        Generates a Geo2DData from a cross section
-        :param xsec_name: Name of the cross section
-        :return: Geo2DData object
+        """Generates a Geo2DData from a cross section
+
+        Parameters
+        ----------
+        xsec_name : str
+            Name of the cross section
+        lunit : Optional[str] :
+            (Default value = None)
+        lunit: Optional[str] :
+             (Default value = None)
+
+        Returns
+        -------
+        None
+
         """
         # Get our new coordinates
         # This construction ensures that y_new (the first axis in our new 2d coodinate
@@ -403,12 +545,34 @@ class Geo3DData(object):
         z_new = np.cross(x_new, y_new)
 
         def _project(vec):
-            """Projects a 3D vector into our 2D cross section plane"""
+            """Projects a 3D vector into our 2D cross section plane
+
+            Parameters
+            ----------
+            vec :
+
+
+            Returns
+            -------
+            List of projection.
+
+            """
             vec = vec - x_new * self.xsecs[xsec_name]["distance"]
             return [vec.dot(y_new), vec.dot(z_new)]
 
         def _inverse_project(vec):
-            """Inverse of _project"""
+            """Inverse of _project
+
+            Parameters
+            ----------
+            vec :
+
+
+            Returns
+            -------
+            Float, inverse of _project.
+
+            """
             return (
                 x_new * self.xsecs[xsec_name]["distance"]
                 + vec[0] * y_new
@@ -434,11 +598,20 @@ class Geo3DData(object):
                     part_polygons[part_name] = polygons
 
         def _build_containment_graph(poly_list):
-            """
-            Given a list of polygons, build a directed graph where edge A -> B means
+            """Given a list of polygons, build a directed graph where edge A -> B means
             A contains B. This intentionally does not include nested containment. Which
             means if A contains B and B contains C, we will only get the edges A -> B
-            and B -> C, not A -> C
+            and B -> C, not A -> C.
+
+            Parameters
+            ----------
+            poly_list :
+
+
+            Returns
+            -------
+            graph
+
             """
             poly_by_area = sorted(poly_list, key=lambda p: p.area)
 
@@ -455,9 +628,20 @@ class Geo3DData(object):
             return graph
 
         def _is_inside(poly, part):
-            """
-            Given a polygon, find a point inside of it, and then check if that point is
-            in the (3D) part
+            """Given a polygon, find a point inside of it, and then check if that point is
+            in the (3D) part.
+
+            Parameters
+            ----------
+            poly :
+
+            part :
+
+
+            Returns
+            -------
+            Boolean
+
             """
             # Find the midpoint in x, then find the intersections with the polygon on
             # that vertical line. Then find the midpoint in y along the first
@@ -514,67 +698,91 @@ class Geo3DData(object):
         return geo_2d
 
 
-class Part3DData(object):
-    """
-    Create a 3D geometric part.
+class Part3DData:
+    """Create a 3D geometric part.
 
-    :param str label: The descriptive name of this new part.
-    :param str fc_name: The name of the 2D/3D freeCAD object that this is built from. Note that if the label used for
+    Parameters
+    ----------
+     label : str
+        The descriptive name of this new part.
+     fc_name : str
+        The name of the 2D/3D freeCAD object that this is built from. Note that if the label used for
         the 3D part is the same as the freeCAD label, and that label is unique, None may be used here as a shortcut.
-    :param str directive: The freeCAD directive is used to construct this part.
+     directive : str
+        The freeCAD directive is used to construct this part.
         Valid options for this are:
-
         - extrude -- simple extrusion
         - wire -- hexagonal nanowire about a polyline
         - wire_shell -- shell coating a specified nanowire
         - sag -- SAG structure
         - lithography -- masked layer deposited on top
         - 3d_shape -- just take the 3D shape directly
-    :param str domain_type: The type of domain this part represents. Valid options are:
-
+     domain_type : str
+        The type of domain this part represents. Valid options are:
         - semiconductor -- region permitted to self-consistently accumulate
         - metal_gate -- an electrode
         - virtual -- a part just used for selection (ignores material)
         - dielectric -- no charge accumulation allowed
-    :param str material: The material of the resulting part.
-    :param float z0: The starting z coordinate. Required for extrude, wire,
+     material : str
+        The material of the resulting part.
+     z0 : float
+        The starting z coordinate. Required for extrude, wire,
         SAG, and lithography directives.
-    :param float thickness: The total thickness. Required for all directives.
+     thickness : float
+        The total thickness. Required for all directives.
         On wireShell, this is interpreted as the layer thickness.
-    :param Part3DData target_wire: Target wire directive for a coating directive.
-    :param list shell_verts: Vertices to use when rendering the coating. Required
+     target_wire : Part3DData
+        Target wire directive for a coating directive.
+     shell_verts : list
+        Vertices to use when rendering the coating. Required
         for the shell directive.
-    :param str depo_mode: 'depo' or 'etch' defines the positive or negative mask for the
+     depo_mode : str
+        'depo' or 'etch' defines the positive or negative mask for the
         deposition of a wire coating.
-    :param float z_middle: The location for the "flare out" of the SAG directive.
-    :param float t_in: The lateral distance from the 2D profile to the edge of the top bevel
+     z_middle : float
+        The location for the "flare out" of the SAG directive.
+     t_in : float
+        The lateral distance from the 2D profile to the edge of the top bevel
         for the SAG directive.
-    :param float t_out: The lateral distance from the 2D profile to the furthest "flare out"
+     t_out : float
+        The lateral distance from the 2D profile to the furthest "flare out"
         location for the SAG directive.
-    :param int layer_num: The layer number used by the lithography directive. Lower numbers
+     layer_num : int
+        The layer number used by the lithography directive. Lower numbers
         go down first, with higher numbers deposited last.
-    :param list litho_base: The base partNames to use for the lithography directive.
+     litho_base : list
+        The base partNames to use for the lithography directive.
         For multi-step lithography, the bases are just all merged,
         so there is no need to list this more than once.
-    :param float mesh_max_size: The maximum allowable mesh size for this part, in microns.
-    :param float mesh_min_size: The minimum allowable mesh size for this part, in microns.
-    :param float mesh_growth_rate: The maximum allowable mesh growth rate for this part.
-    :param tuple mesh_scale_vector: 3D list with scaling factors for the mesh in
+     mesh_max_size : float
+        The maximum allowable mesh size for this part, in microns.
+     mesh_min_size : float
+        The minimum allowable mesh size for this part, in microns.
+     mesh_growth_rate : float
+        The maximum allowable mesh growth rate for this part.
+     mesh_scale_vector : tuple
+        3D list with scaling factors for the mesh in
         x, y, z direction.
-    :param dict boundary_condition: One or more boundary conditions, if applicable, of
+     boundary_condition : dict
+        One or more boundary conditions, if applicable, of
         the form of a type -> value mapping. For example, this could be {'voltage':1.0} or,
         more explicitly, {'voltage': {'type': 'dirichlet', 'value': 1.0,'unit': 'V'}}.
         Assumed by FEniCS solvers to be in the form {"voltage":1.0},
         and the value given is taken to be in meV.
-    :param list subtract_list: A list of partNames that should be subtracted from the current
+     subtract_list : list
+        A list of partNames that should be subtracted from the current
         part when forming the final 3D objects. This subtraction is
         carried out when boundary
         conditions are set.
-    :param float ns: Volume charge density of a part, applicable to semiconductor and
+     ns : float
+        Volume charge density of a part, applicable to semiconductor and
         dielectric parts. The units for this are 1/cm^3.
-    :param float phi_nl: The neutral level for interface traps, measured in units of eV above
+     phi_nl : float
+        The neutral level for interface traps, measured in units of eV above
         the valence band maximum (semiconductor only).
-    :param float ds: Density of interface traps; units are 1/(cm^2*eV).
+     ds : float
+        Density of interface traps; units are 1/(cm^2*eV).
+
     """
 
     def __init__(
@@ -655,6 +863,16 @@ class Part3DData(object):
         """Write part geometry to a STEP file.
 
         Returns the STEP file path.
+
+        Parameters
+        ----------
+        file_path : str
+            (Default value = None)
+
+        Returns
+        -------
+        file_path
+
         """
         if file_path is None:
             file_path = self.label + ".stp"
@@ -665,6 +883,16 @@ class Part3DData(object):
         """Write part geometry to a STEP file.
 
         Returns the STEP file path.
+
+        Parameters
+        ----------
+        file_path : str
+            (Default value = None)
+
+        Returns
+        -------
+        file_path
+
         """
         if file_path is None:
             file_path = self.label + ".stl"
