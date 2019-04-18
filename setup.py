@@ -3,6 +3,12 @@
 # Licensed under the MIT License.
 
 from setuptools import setup
+import sys
+
+
+if sys.version_info < (3, 6):
+    print("qmt requires Python 3.6 or above.")
+    sys.exit(1)
 
 
 # Loads _version.py module without importing the whole package.
@@ -21,6 +27,7 @@ version, cmdclass = get_version_and_cmdclass("qmt")
 setup(
     name="qmt",
     version=version,
+    python_requires=">=3.6",
     cmdclass=cmdclass,
     description="Qubit Modeling Tools (QMT) for computational modeling of quantum devices",
     url="https://github.com/Microsoft/qmt",
