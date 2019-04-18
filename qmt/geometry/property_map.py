@@ -1,5 +1,4 @@
 import numpy as np
-from six import iteritems
 
 
 class PropertyMap:
@@ -67,11 +66,11 @@ class MaterialPropertyMap(PropertyMap):
     ):
         self.fillValue = fill_value
         self.materialsDict = dict(
-            (p, mat_lib.find(m, eunit)) for p, m in iteritems(part_materials)
+            (p, mat_lib.find(m, eunit)) for p, m in part_materials.items()
         )
 
         self.partProps = {}
-        for p, mat in iteritems(self.materialsDict):
+        for p, mat in self.materialsDict.items():
             try:
                 if prop_name == "conductionBandMinimum":
                     self.partProps[p] = mat_lib.conduction_band_minimum(mat)

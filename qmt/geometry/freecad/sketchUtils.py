@@ -105,7 +105,7 @@ def addCycleSketch(name, wire):
     assert wire.isClosed()
     doc = FreeCAD.ActiveDocument
     if doc.getObject(name) is not None:
-        raise ValueError("Error: sketch " + name + " already exists.")
+        raise ValueError(f"Sketch with name '{name}' already exists.")
 
     # makeSketch() could handle constraints itself and does recompute() well,
     # but sometimes we may have invalid wires, which it handles badly (fixsometime)
@@ -131,8 +131,8 @@ def addCycleSketch(name, wire):
 def addPolyLineSketch(name, doc, segmentOrder, lineSegments):
     """ Add a sketch given segment order and line segments
     """
-    if doc.getObject(name) is not None:  # this name already exists
-        raise ValueError("Error: sketch " + name + " already exists.")
+    if doc.getObject(name) is not None:
+        raise ValueError(f"Sketch with name '{name}' already exists.")
     obj = doc.addObject("Sketcher::SketchObject", name)
     for segIndex, segment in enumerate(lineSegments):
         startPoint = segment[0, :]
@@ -172,10 +172,10 @@ def splitSketch(sketch):
     """
     if not sketch.Shape.Wires:
         raise ValueError("No wires in sketch.")
-    sketchList = []
-    for i, wire in enumerate(sketch.Shape.Wires):
-        sketchList.append(addCycleSketch(sketch.Name + "_" + str(i), wire))
-    return sketchList
+    return [
+        addCycleSketch(f"{sketch.Name}_{i}", wire)
+        for i, wire in enumerate(sketch.Shape.Wires)
+    ]
 
 
 def extendSketch(sketch, d):

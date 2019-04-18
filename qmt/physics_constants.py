@@ -1,8 +1,6 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License.
 
-from __future__ import absolute_import, division, print_function
-
 import sympy.physics.units as spu
 from scipy import constants as sc
 from sympy.matrices import eye

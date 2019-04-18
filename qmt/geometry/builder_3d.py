@@ -55,8 +55,13 @@ def build_3d_geometry(
     data = Geo3DData()
     data.serial_fcdoc = serial_fcdoc
     data.get_data("fcdoc")
+
     from qmt.geometry.freecad.objectConstruction import build
 
-    built = build(options_dict)
+    try:
+        built = build(options_dict)
+    except Exception:
+        FreeCAD.closeDocument("instance")
+        raise
     FreeCAD.closeDocument("instance")
     return built
