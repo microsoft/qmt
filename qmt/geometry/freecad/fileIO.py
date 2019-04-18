@@ -14,10 +14,19 @@ from .auxiliary import silent_stdout
 
 
 def exportMeshed(obj_list: Sequence, file_name: str):
-    """ Export a STL 3D Mesh file.
+    """Export a STL 3D Mesh file.
 
-    :param list obj_list:       List of objects to export.
-    :param string file_name:    Name of file to create and export into.
+    Parameters
+    ----------
+    obj_list : list
+        List of objects to export.
+    file_name : str
+        Name of file to create and export into.
+
+    Returns
+    -------
+    None
+
     """
     if not isinstance(obj_list, list):
         raise TypeError("obj_list must be a list of objects.")
@@ -43,10 +52,19 @@ def exportMeshed(obj_list: Sequence, file_name: str):
 
 
 def exportCAD(obj_list: Sequence, file_name: str):
-    """ Export a STEP (Standard for the Exchange of Product Data) 3D CAD file.
+    """Export a STEP (Standard for the Exchange of Product Data) 3D CAD file.
 
-    :param list obj_list:       List of objects to export.
-    :param string file_name:    Name of file to create and export into.
+    Parameters
+    ----------
+    obj_list : list
+        List of objects to export.
+    file_name : str
+        Name of file to create and export into.
+
+    Returns
+    -------
+
+
     """
     if not isinstance(obj_list, list):
         raise TypeError("obj_list must be a list of objects.")

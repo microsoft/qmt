@@ -58,7 +58,7 @@ def test_makeSAG(fix_FCDoc, fix_rectangle_sketch):
         /    \
        /      \
       /        \        NOT TO SCALE
-     /          \ 
+     /          \
     /_          _\
       |________|
     """
@@ -78,7 +78,7 @@ def test_makeSAG_offset(fix_FCDoc, fix_rectangle_sketch):
         //  \\
        //    \\
       //      \\        NOT TO SCALE
-     //_      _\\ 
+     //_      _\\
     /__ |    | __\
        ||____||
        |______|
@@ -95,13 +95,13 @@ def test_makeSAG_offset(fix_FCDoc, fix_rectangle_sketch):
 
 def test_makeSAG_triangle_with_rectangular_base(fix_FCDoc, fix_rectangle_sketch):
     r"""
-    Test the case where the top collapses down to a line 
+    Test the case where the top collapses down to a line
           /\
          /  \
         /    \
        /      \        NOT TO SCALE
       /        \
-     /          \ 
+     /          \
     /_          _\
       |________|
     """
@@ -116,13 +116,13 @@ def test_makeSAG_triangle_with_rectangular_base(fix_FCDoc, fix_rectangle_sketch)
 
 def test_makeSAG_triangle_with_square_base(fix_FCDoc, fix_rectangle_sketch):
     r"""
-    Test the case where the top collapses down to a point 
+    Test the case where the top collapses down to a point
           /\
          /  \
         /    \
        /      \        NOT TO SCALE
       /        \
-     /          \ 
+     /          \
     /_          _\
       |________|
     """
@@ -142,7 +142,7 @@ def test_makeSAG_triangle_with_no_rectangular_part(fix_FCDoc, fix_rectangle_sket
         /    \
        /      \        NOT TO SCALE
       /        \
-     /          \ 
+     /          \
     /____________\
     """
     sketch = fix_rectangle_sketch()

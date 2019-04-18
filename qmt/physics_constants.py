@@ -36,7 +36,18 @@ units = SimpleNamespace(
 
 
 def parse_unit(s):
-    """convert name of a unit into the corresponding sympy value"""
+    """convert name of a unit into the corresponding sympy value
+
+    Parameters
+    ----------
+    s :
+
+
+    Returns
+    -------
+
+
+    """
     for u in dir(units):
         if u[:2] == "__":
             continue
@@ -64,7 +75,20 @@ constants = SimpleNamespace(
 if "convert_to" in dir(spu):
 
     def canonicalize(expr, base=None):
-        """Convert all units to given base units (default: SI base units)"""
+        """Convert all units to given base units (default: SI base units)
+
+        Parameters
+        ----------
+        expr :
+
+        base :
+            (Default value = None)
+
+        Returns
+        -------
+
+
+        """
         if base is None:
             base = (spu.m, spu.kg, spu.s, spu.A, spu.K, spu.mol, spu.cd)
         return spu.convert_to(expr, base)
@@ -77,16 +101,34 @@ else:
 
 
 def cancel(expr):
-    """
-    Cancel different units referring to the same dimension, e.g. cancel(kg/g) -> 1000
+    """Cancel different units referring to the same dimension, e.g. cancel(kg/g) -> 1000
+
+    Parameters
+    ----------
+    expr :
+
+
+    Returns
+    -------
+
+
     """
     return canonicalize(expr, 1)
 
 
 def to_float(expr):
-    """
-    Convert sympy expression involving units to a float. Fails if expr is not
+    """Convert sympy expression involving units to a float. Fails if expr is not
     dimensionless.
+
+    Parameters
+    ----------
+    expr :
+
+
+    Returns
+    -------
+
+
     """
     return float(cancel(expr))
 
@@ -115,9 +157,16 @@ matrices.tau_zz = kron(matrices.s_z, matrices.s_z)
 
 
 class UArray(np.ndarray):
-    """
-    Extend a numpy array to have units information from sympy
+    """Extend a numpy array to have units information from sympy
     From https://docs.scipy.org/doc/numpy/user/basics.subclassing.html#simple-example-adding-an-extra-attribute-to-ndarray
+
+    Parameters
+    ----------
+
+    Returns
+    -------
+
+
     """
 
     def __new__(cls, input_array, unit=None):

@@ -9,18 +9,30 @@ import FreeCAD
 
 
 def build_2d_geometry(parts, edges, lunit="nm", build_order=None):
-    """
-    Build a geometry in 2D.
+    """Build a geometry in 2D.
 
-    :param dict parts: Dictionary for holding the 2D parts, of the form
-                       {'part_name':list of 2d points}.
-    :param dict edges: Dictionary of 2D edges, of the form:
-                       {'edge_name':list of 2d points}.
-    :param str lunit: length_unit (nm).
-    :param list build_order: None or a list of all parts, determining the build order. Items on
-                             the left are highest priority and items on the right are lowest.
-                             If None is given (default), then build order is determined just
-                             taken to be the order of the parts and edges.
+    Parameters
+    ----------
+    parts : dict
+        Dictionary for holding the 2D parts, of the form
+        {'part_name':list of 2d points}.
+    edges : dict
+        Dictionary of 2D edges, of the form:
+        {'edge_name':list of 2d points}.
+    lunit : str
+        length_unit (nm).
+        (Default value = "nm")
+    build_order : list
+        None or a list of all parts, determining the build order. Items on
+        the left are highest priority and items on the right are lowest.
+        If None is given (default), then build order is determined just
+        taken to be the order of the parts and edges.
+        (Default value = None)
+
+    Returns
+    -------
+    Geo2DData instance
+
     """
     geo_2d = Geo2DData()
     if build_order is None:
@@ -53,23 +65,37 @@ def build_3d_geometry(
     serialized_input_file=None,
     params=None,
 ):
-    """
-    Build a geometry in 3D.
+    """Build a geometry in 3D.
 
-    :param list input_parts: Ordered list of input parts, leftmost items get built first
-    :param str input_file: Path to FreeCAD template file. Either this or serialized_input_file
+    Parameters
+    ----------
+    input_parts : list
+        Ordered list of input parts, leftmost items get built first
+    input_file : str
+        Path to FreeCAD template file. Either this or serialized_input_file
         must be set (but not both).
-    :param dict xsec_dict: Dictionary of cross-section specifications. It should be of the
+        (Default value = None)
+    xsec_dict : dict
+        Dictionary of cross-section specifications. It should be of the
         form {'xsec_name':{'axis':(1,0,0),'distance':0.}}, where the axis parameter is a tuple
         defining the axis that defines the normal of the cross section, and distance is
         the length along the axis used to set the cross section.
-    :param bytes serialized_input_file: FreeCAD template file that has been serialized using
+        (Default value = None)
+    serialized_input_file : bytes
+        FreeCAD template file that has been serialized using
         qmt.data.serialize_file. This is useful for passing a
         file into a docker container or other environment that
         doesn't have access to a shared drive. Either this or
         serialized_input_file must be set (but not both).
-    :param dict params: Dictionary of parameters to use in FreeCAD.
-    :return Geo3DData: A built geometry.
+        (Default value = None)
+    params : dict
+        Dictionary of parameters to use in FreeCAD.
+        (Default value = None)
+
+    Returns
+    -------
+    built
+
     """
     if input_file is None and serialized_input_file is None:
         raise ValueError("One of input_file or serialized_input_file must be non-none.")
