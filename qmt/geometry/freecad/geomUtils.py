@@ -308,7 +308,8 @@ def subtractParts(domainObj, partList):
         doc.recompute()
         diffObj = copy_move(diffObjTemp)
         delete(diffObjTemp)
-    # TODO : This routine is leaving some nuisance objects around that should be deleted.
+    # TODO : This routine is leaving some nuisance objects around that should
+    # be deleted.
     return diffObj
 
 
@@ -429,7 +430,8 @@ def liftObject(obj, d, consumeInputs=False):
 
     """
     objBB = getBB(obj)
-    liftedObj = copy_move(obj, moveVec=(0.0, 0.0, d))  # lift up the original sketch
+    # lift up the original sketch
+    liftedObj = copy_move(obj, moveVec=(0.0, 0.0, d))
     fillBB = np.array(objBB)
     fillBB[5] = fillBB[4] + d  # Make a new BB defining the missing space
     fillObj = makeBB(tuple(fillBB))  # Make a box to fill the space
@@ -465,30 +467,34 @@ def draftOffset(inputSketch, t):
     offsetVec2 = vec(deltaT, deltaT, 0.0)
 
     offset0 = copy_move(inputSketch)
-    # Currently FreeCAD throws an error if we try to collapse a shape into a point through offsetting. If that happens, set delta to 5E-5. Any closer and FreeCAD seems to suffer from numerical errors
+    # Currently FreeCAD throws an error if we try to collapse a shape into a
+    # point through offsetting. If that happens, set delta to 5E-5. Any closer
+    # and FreeCAD seems to suffer from numerical errors
     try:
         offset1 = Draft.offset(inputSketch, offsetVec1, copy=True)
-    except:
+    except BaseException:
         deltaT -= 5e-5
         offset1 = Draft.offset(inputSketch, vec(-deltaT, -deltaT, 0.0), copy=True)
     try:
         offset2 = Draft.offset(inputSketch, offsetVec2, copy=True)
-    except:
+    except BaseException:
         deltaT -= 5e-5
         offset2 = Draft.offset(inputSketch, vec(deltaT, deltaT, 0.0), copy=True)
 
-    # Compute the areas of the sketches. FreeCAD will throw an exception if we try to make a Face out of a line or a point, we catch that give it an area of 0
+    # Compute the areas of the sketches. FreeCAD will throw an exception if we
+    # try to make a Face out of a line or a point, we catch that give it an
+    # area of 0
     try:
         A0 = np.abs(Part.Face(offset0.Shape).Area)
-    except:
+    except BaseException:
         A0 = 0
     try:
         A1 = np.abs(Part.Face(offset1.Shape).Area)
-    except:
+    except BaseException:
         A1 = 0
     try:
         A2 = np.abs(Part.Face(offset2.Shape).Area)
-    except:
+    except BaseException:
         A2 = 0
 
     # If everything worked properly, these should either be ordered as

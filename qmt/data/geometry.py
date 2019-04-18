@@ -191,7 +191,8 @@ class Geo2DData:
         coord_list
 
         """
-        # Note that in shapely, the first coord is repeated at the end, which we trim off:
+        # Note that in shapely, the first coord is repeated at the end, which
+        # we trim off:
         coord_list = list(np.array(self.parts[part_name].exterior.coords.xy).T)[:-1]
         return coord_list
 
@@ -319,9 +320,9 @@ class Geo3DData:
             None
         )  # 1D array; each entry is the region ID of the corresponding tet
         self.mesh_id_dict = None  # dictionary with part name keys mapping to region IDs
-        self.virtual_mesh_regions = (
-            None
-        )  # Dict with 1D arrays; each entry specifies what tets belong to virtual region
+        # Dict with 1D arrays; each entry specifies what tets belong to virtual
+        # region
+        self.virtual_mesh_regions = None
         self.materials_database = Materials()
 
     def get_material(self, part_name):
@@ -588,7 +589,8 @@ class Geo3DData:
             for name, points in self.xsecs[xsec_name]["polygons"].items():
                 if name.startswith(f"{part_name}_"):
                     poly = Polygon(map(_project, points))
-                    # we add a name to the polygon so we can reference it easier later
+                    # we add a name to the polygon so we can reference it
+                    # easier later
                     poly.name = name
                     polygons.append(poly)
             if polygons:
@@ -650,7 +652,7 @@ class Geo3DData:
             x = (min_x + max_x) / 2
             x_line = LineString([(x, min_y), (x, max_y)])
             intersec = x_line.intersection(poly)
-            if type(intersec) == MultiLineString:
+            if isinstance(intersec, MultiLineString):
                 intersec = intersec[0]
             x_line_intercept_min, x_line_intercept_max = intersec.xy[1].tolist()
             y = (x_line_intercept_min + x_line_intercept_max) / 2

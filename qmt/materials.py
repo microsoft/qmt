@@ -563,7 +563,8 @@ class Materials(collections.Mapping):
             print(msg)
             return -(mat["electronAffinity"] + mat["directBandGap"])
 
-    # TODO: make this user-configurable and shift all energy properties reported by materials
+    # TODO: make this user-configurable and shift all energy properties
+    # reported by materials
     def reference_level(self, eunit=None):
         if eunit is None:
             eunit = units.meV

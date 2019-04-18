@@ -16,6 +16,7 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
+import subprocess
 import os
 import sys
 
@@ -191,11 +192,10 @@ texinfo_documents = [
 intersphinx_mapping = {"https://docs.python.org/": None}
 
 # Create package and class graphs
-import subprocess
 
 try:
     subprocess.check_call(["pyreverse3", "-o", "png", "../qmt"])
-except:
+except BaseException:
     subprocess.check_call(["pyreverse", "-o", "png", "../qmt"])
 os.rename("packages.png", "source/packages.png")
 os.rename("classes.png", "source/classes.png")

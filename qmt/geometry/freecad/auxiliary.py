@@ -88,7 +88,7 @@ def silent_stdout():
     stored_fileno = None
     try:
         stored_fileno = os.dup(sys.stdout.fileno())
-    except:
+    except BaseException:
         pass
     with open(os.devnull, "w") as devnull:
         sys.stdout = devnull  # for python stdout.write

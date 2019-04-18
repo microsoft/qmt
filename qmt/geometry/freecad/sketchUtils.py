@@ -295,7 +295,7 @@ def extendSketch(sketch, d):
     for i in range(len(segments)):
         try:
             connecting = nextSegment(segments, i)
-        except:
+        except BaseException:
             connecting = len(segments)
         connections += [connecting]
     # Find the first and last segments:

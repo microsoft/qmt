@@ -41,7 +41,8 @@ def test_exportCAD(datadir, fix_FCDoc):
 
     import FreeCAD
 
-    transBB = testBB[0:][::2] + testBB[1:][::2]  # reformat to FreeCAD representation
+    # reformat to FreeCAD representation
+    transBB = testBB[0:][::2] + testBB[1:][::2]
     refBB = FreeCAD.Base.BoundBox(*transBB)
     assert repr(CADImport.Shape.BoundBox) == repr(refBB)
 

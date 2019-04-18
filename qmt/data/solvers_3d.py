@@ -6,7 +6,7 @@ import sympy.physics.units as spu
 
 try:
     import kwant  # kwant import to stop fenics from segfaulting
-except:
+except BaseException:
     pass
 from qmt.data import store_serial, load_serial
 

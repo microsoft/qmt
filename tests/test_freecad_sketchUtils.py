@@ -68,7 +68,8 @@ def test_findCycle(fix_FCDoc, fix_two_cycle_sketch):
     ref1 = [0, 1, 2, 3]  # square cycle indices
     ref2 = [4, 5, 6]  # triangular cycle indices
     for i in range(4):
-        c = findCycle(segArr, i, range(segArr.shape[0]))  # update starting point
+        # update starting point
+        c = findCycle(segArr, i, range(segArr.shape[0]))
         assert c == ref1[i:] + ref1[:i]  # advancing rotation
     for i in range(3):
         c = findCycle(segArr, i + 4, range(segArr.shape[0]))

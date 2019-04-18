@@ -92,7 +92,8 @@ def test_subtract(fix_FCDoc):
 def test_subtractParts(fix_FCDoc):
     """Test subtract by checking volume.
     """
-    #   TODO: the FC v0.16 Draft requires UiLoader, which doesn't work from the cli.
+    # TODO: the FC v0.16 Draft requires UiLoader, which doesn't work from the
+    # cli.
     box1 = fix_FCDoc.addObject("Part::Box", "Box1")
     box2 = fix_FCDoc.addObject("Part::Box", "Box2")
     box3 = fix_FCDoc.addObject("Part::Box", "Box3")

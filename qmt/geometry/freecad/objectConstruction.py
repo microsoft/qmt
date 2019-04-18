@@ -52,8 +52,9 @@ def set_params(doc, paramDict):
     try:
         spreadSheet = doc.modelParams
         spreadSheet.clearAll()  # clear existing spreadsheet
-    except:
-        # Cave: unconditional removeObject on spreadSheet breaks param dependencies.
+    except BaseException:
+        # Cave: unconditional removeObject on spreadSheet breaks param
+        # dependencies.
         doc.removeObject("modelParams")  # it was not a good spreadsheet
         spreadSheet = doc.addObject("Spreadsheet::Sheet", "modelParams")
     spreadSheet.set("A1", "paramName")
@@ -395,7 +396,7 @@ def build_lithography(part, opts, info_holder):
     return genUnion(returnObjs, consumeInputs=True if not DBG_OUT else False)
 
 
-################################################################################
+##########################################################################
 
 
 def buildWire(sketch, zBottom, width, faceOverride=None, offset=0.0):
@@ -559,7 +560,8 @@ def makeSAG(sketch, zBot, zMid, zTop, tIn, tOut, offset=0.0):
     # First, compute the geometric quantities we will need:
     a = zTop - zMid  # height of the top part
     b = tOut + tIn  # width of one of the triangular pieces of the top
-    # if there is no slope to the roof, it's a different geometry which we don't handle:
+    # if there is no slope to the roof, it's a different geometry which we
+    # don't handle:
     assert not np.isclose(
         b, 0
     ), "Either overshoot or inner displacement values need to be non-zero for SAG \
@@ -582,7 +584,9 @@ def makeSAG(sketch, zBot, zMid, zTop, tIn, tOut, offset=0.0):
         midSketch = draftOffset(tempSketch, f + d - tIn)  # the base of the cap
         top_offset = f - tIn
         topSketch = draftOffset(tempSketch, top_offset)  # the top of the cap
-        # If topSketch has been shrunk exactly to a line or a point, relax the offset to 5E-5. Any closer and FreeCAD seems to suffer from numerical errors
+        # If topSketch has been shrunk exactly to a line or a point, relax the
+        # offset to 5E-5. Any closer and FreeCAD seems to suffer from numerical
+        # errors
         if topSketch.Shape.Area == 0:
             top_offset -= 5e-5
             delete(topSketch)
@@ -679,7 +683,7 @@ def initialize_lithography(info, opts, fillShells=True):
     for base_substrate in base_substrate_parts:
         try:
             built_part_name = opts["built_part_names"][base_substrate.label]
-        except:
+        except BaseException:
             raise KeyError(f"No substrate built for '{base_substrate.label}'")
         info.lithoDict["substrate"][()] += [doc.getObject(built_part_name)]
     # ~ import sys
@@ -798,7 +802,7 @@ def gen_offset(opts, obj, offsetVal):
             offsetDupe.Label,
             input_part.label,
         )
-    except:
+    except BaseException:
         logging.debug(
             "%s (%s) -> %s (%s)", obj.Name, obj.Label, offsetDupe.Name, offsetDupe.Label
         )
@@ -1035,7 +1039,8 @@ def gen_U(info, layer_num, objID):
 
     """
     layers = info.lithoDict["layers"]
-    B = layers[layer_num]["objIDs"][objID]["B"]  # B prism for this layer & objID
+    # B prism for this layer & objID
+    B = layers[layer_num]["objIDs"][objID]["B"]
     GList = []
     for m in layers.keys():
         if m < layer_num:  # then this is a lower layer
