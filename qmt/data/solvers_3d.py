@@ -11,7 +11,7 @@ except:
 from qmt.data import store_serial, load_serial
 
 
-class Fem3DData(object):
+class Fem3DData:
     def __init__(
         self,
         coordinates=None,
@@ -45,7 +45,7 @@ class Fem3DData(object):
             print("Unknown datatype {data} for get_data function".format(data=data))
 
 
-class SerialFenicsFunctionData(object):
+class SerialFenicsFunctionData:
     def __init__(self, serial_mesh, serial_function):
         self.serial_mesh = serial_mesh
         self.serial_function = serial_function

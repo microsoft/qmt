@@ -14,24 +14,63 @@ import tempfile
 
 
 def serialize_file(path):
-    """Return a serialised blob of the contents of a given file path."""
+    """Return a serialised blob of the contents of a given file path.
+
+    Parameters
+    ----------
+    path : str
+        Filename.
+
+    Returns
+    -------
+    serial_data
+
+    """
     with open(path, "rb") as f:
         serial_data = codecs.encode(f.read(), "base64").decode()
     return serial_data
 
 
 def write_deserialised(serial_obj, path):
-    """Write a deserialised file from a serialised blob to a given file path."""
+    """Write a deserialised file from a serialised blob to a given file path.
+
+    Parameters
+    ----------
+    serial_obj :
+
+    path : str
+        Filename.
+
+    Returns
+    -------
+    None
+
+    """
     data = codecs.decode(serial_obj.encode(), "base64")
     with open(path, "wb") as f:
         f.write(data)
 
 
 def store_serial(obj, save_fct, ext_format, scratch_dir=None):
-    """
-    Return a serialised representation of
+    """Return a serialised representation of
     `save_fct(obj, scratch_dir/temporary_file.ext_format)`.
     The parameter `ext_format` can be used for format distinction in some `save_fct`.
+
+    Parameters
+    ----------
+    obj : FreeCAD.App.Document
+        A FreeCAD object.
+    save_fct :
+
+    ext_format :
+
+    scratch_dir : str
+        (Default value = None)
+
+    Returns
+    -------
+    serial_data
+
     """
     if not scratch_dir:
         scratch_dir = tempfile.gettempdir()
@@ -43,9 +82,24 @@ def store_serial(obj, save_fct, ext_format, scratch_dir=None):
 
 
 def load_serial(serial_obj, load_fct, ext_format=None, scratch_dir=None):
-    """
-    Return the original object stored with `store_serial`.
-    The `load_fct` must be a correct complement of the previously used `store_fct`.
+    """Return the original object stored with `store_serial`. The `load_fct`
+    must be a correct complement of the previously used `store_fct`.
+
+    Parameters
+    ----------
+    serial_obj :
+
+    load_fct :
+
+    ext_format :
+        (Default value = None)
+    scratch_dir : str
+        (Default value = None)
+
+    Returns
+    -------
+    obj
+
     """
     if not ext_format:
         ext_format = "tmpdata"
@@ -59,18 +113,25 @@ def load_serial(serial_obj, load_fct, ext_format=None, scratch_dir=None):
 
 
 def reduce_data(reduce_function, task, dask_client):
-    """
-    Given a task that has or will be been run, apply a reduce function to all of its outputs in
+    """Given a task that has or will be been run, apply a reduce function to all of its outputs in
     dask. By specifying a custom `reduce_function`, the user is returning exactly what they want from
     a given run.
 
-    :param function reduce_function: A function that takes the output data type of the supplied
-                                     task and returns a dictionary of objects that can be stored in hdf5.
-    :param Task task: The task that we would like to work on. Note that this function doesn't run
-                      the task, but this can be set up either before or after running.
-    :param dask_client: The client we are using for the calculation
-    :return sweep_vals,extracted_data: Returns a list of the sweep tags and a list of the futures
-                                       corresponding to the data objects.
+    Parameters
+    ----------
+    reduce_function : function
+        A function that takes the output data type of the supplied
+        task and returns a dictionary of objects that can be stored in hdf5.
+    task : Task
+        The task that we would like to work on. Note that this function doesn't run
+        the task, but this can be set up either before or after running.
+    dask_client :
+        The client we are using for the calculation
+
+    Returns
+    -------
+    sweep_vals, extracted_data
+
     """
     sweep_holder = task.computed_result  # List of futures that resolve to the data
     sweep_vals = task.computed_result.sweep.sweep_list  # List of the tag values
@@ -87,29 +148,46 @@ def reduce_data(reduce_function, task, dask_client):
 
 
 def retrieve_data(extracted_data, dask_client):
-    """
-    Retrieves all of the data stored in a list of futures.
+    """Retrieves all of the data stored in a list of futures.
 
-    :param extracted_data: List of futures we ant to retrieve.
-    :param dask_client: Dask client we are using for the calculation.
-    :return retrieved_data: The retrieved data in a list.
+    Parameters
+    ----------
+    extracted_data : list
+        List of futures we ant to retrieve.
+    dask_client :
+        Dask client we are using for the calculation.
+
+    Returns
+    -------
+    retrieved_data
+
     """
     retrieved_data = dask_client.gather(extracted_data)
     return retrieved_data
 
 
 def stream_data_to_file(extracted_data, filename, dask_client, sweep_vals=None):
-    """
-    Instead of simply retrieving all the data, we can stream it to a file on disk as the runs
+    """Instead of simply retrieving all the data, we can stream it to a file on disk as the runs
     complete. The data are stored in an hdf5 file with a single level. Data entries are given by
     kesy of the form "index_paramval", where index is the numerical index of the result in the
     extracted_data list and paramval is the descriptive key for the datum of interest.
 
-    :param extracted_data: List of futures we ant to retrieve.
-    :param filename: File name for the local data store.
-    :param dask_client: The client we are using for the calculation
-    :param sweep_vals: Sweep point values to store along with the data. If None, then just uses
-                       an integer list.
+    Parameters
+    ----------
+    extracted_data : list
+        List of futures we ant to retrieve.
+    filename :
+        File name for the local data store.
+    dask_client :
+        The client we are using for the calculation
+    sweep_vals :
+        Sweep point values to store along with the data. If None, then just uses
+        an integer list. (Default value = None)
+
+    Returns
+    -------
+    None
+
     """
     from tqdm import tqdm
 

@@ -84,8 +84,17 @@ class DummyInfo:
 
 def build(opts):
     """Build the 3D geometry in FreeCAD.
-    :param dict opts:   Options dict in the QMT Geometry3D.__init__ input format.
-    :return geo:        Geo3DData object with the built objects.
+
+    Parameters
+    ----------
+    opts : dict
+        Options dict in the QMT Geometry3D.__init__ input format.
+        Options dict in the QMT Geometry3D.__init__ input format.
+
+    Returns
+    -------
+    Geo3DData object.
+
     """
     doc = FreeCAD.ActiveDocument
     geo = Geo3DData()
@@ -202,7 +211,18 @@ def build(opts):
 
 
 def build_pass(part):
-    """Pass a part unchanged."""
+    """Pass a part unchanged.
+
+    Parameters
+    ----------
+    part :
+
+
+    Returns
+    -------
+
+
+    """
     assert isinstance(part, part_3d.Part3DData)
     existing_part = FreeCAD.ActiveDocument.getObject(part.fc_name)
     assert existing_part is not None
@@ -210,7 +230,18 @@ def build_pass(part):
 
 
 def build_extrude(part):
-    """Build an extrude part."""
+    """Build an extrude part.
+
+    Parameters
+    ----------
+    part :
+
+
+    Returns
+    -------
+
+
+    """
     assert isinstance(part, part_3d.ExtrudeData)
     z0 = part.z0
     deltaz = part.thickness
@@ -226,7 +257,20 @@ def build_extrude(part):
 
 
 def build_sag(part, offset=0.0):
-    """Build a SAG part."""
+    """Build a SAG part.
+
+    Parameters
+    ----------
+    part :
+
+    offset :
+        (Default value = 0.0)
+
+    Returns
+    -------
+
+
+    """
     assert isinstance(part, part_3d.SAGData)
     zBot = part.z0
     zMid = part.z_middle
@@ -242,7 +286,20 @@ def build_sag(part, offset=0.0):
 
 
 def build_wire(part, offset=0.0):
-    """Build a wire part."""
+    """Build a wire part.
+
+    Parameters
+    ----------
+    part :
+
+    offset :
+        (Default value = 0.0)
+
+    Returns
+    -------
+
+
+    """
     assert isinstance(part, part_3d.WireData)
     doc = FreeCAD.ActiveDocument
     zBottom = part.z0
@@ -254,7 +311,20 @@ def build_wire(part, offset=0.0):
 
 
 def build_wire_shell(part, offset=0.0):
-    """Build a wire shell part."""
+    """Build a wire shell part.
+
+    Parameters
+    ----------
+    part :
+
+    offset :
+        (Default value = 0.0)
+
+    Returns
+    -------
+
+
+    """
     assert isinstance(part, part_3d.WireShellData)
     doc = FreeCAD.ActiveDocument
     zBottom = part.target_wire.z0
@@ -287,7 +357,23 @@ def build_wire_shell(part, offset=0.0):
 
 
 def build_lithography(part, opts, info_holder):
-    """Build a lithography part."""
+    """Build a lithography part.
+
+    Parameters
+    ----------
+    part :
+
+    opts : dict
+        Options dict in the QMT Geometry3D.__init__ input format.
+
+    info_holder :
+
+
+    Returns
+    -------
+
+
+    """
     assert isinstance(part, part_3d.LithographyData)
     if not info_holder.litho_setup_done:
         initialize_lithography(info_holder, opts, fillShells=True)
@@ -314,6 +400,24 @@ def buildWire(sketch, zBottom, width, faceOverride=None, offset=0.0):
     """Given a line segment, build a nanowire of given cross-sectional width
     with a bottom location at zBottom. Offset produces an offset with a specified
     offset.
+
+    Parameters
+    ----------
+    sketch :
+
+    zBottom :
+
+    width :
+
+    faceOverride :
+        (Default value = None)
+    offset :
+        (Default value = 0.0)
+
+    Returns
+    -------
+
+
     """
     doc = FreeCAD.ActiveDocument
     if faceOverride is None:
@@ -342,6 +446,30 @@ def buildAlShell(
     for simplicity we keep this a thin shell that lies cleanly on top of the
     bigger wire offset. There's no need to include the bottom portion since that's
     already taken up by the wire.
+
+    Parameters
+    ----------
+    sketch :
+
+    zBottom :
+
+    width :
+
+    verts :
+
+    thickness :
+
+    depoZone :
+        (Default value = None)
+    etchZone :
+        (Default value = None)
+    offset :
+        (Default value = 0.0)
+
+    Returns
+    -------
+
+
     """
     lineSegments = findSegments(sketch)[0]
     x0, y0, z0 = lineSegments[0]
@@ -602,7 +730,23 @@ def initialize_lithography(info, opts, fillShells=True):
 
 
 def gen_offset(opts, obj, offsetVal):
-    """Generates an offset non-destructively."""
+    """Generates an offset non-destructively.
+
+    Parameters
+    ----------
+    opts : dict
+        Options dict in the QMT Geometry3D.__init__ input format.
+
+    obj : FreeCAD.App.Document
+        A FreeCAD object.
+    offsetVal :
+
+
+    Returns
+    -------
+
+
+    """
     doc = FreeCAD.ActiveDocument
     # First, we need to identify if we are working with a special part:
     my_part_label = None
@@ -666,6 +810,29 @@ def screened_H_union_list(info, opts, obj, m, j, offsetTuple, checkOffsetTuple):
     first whether the object intersects with the components of the checkOffset version
     of the H object. Then, for each component that would intersect, we return the a list
     of the offsetTuple version of the object.
+
+    Parameters
+    ----------
+    info :
+
+    opts : dict
+        Options dict in the QMT Geometry3D.__init__ input format.
+
+    obj : FreeCAD.App.Document
+        A FreeCAD object.
+    m :
+
+    j :
+
+    offsetTuple :
+
+    checkOffsetTuple :
+
+
+    Returns
+    -------
+
+
     """
     logging.debug(">>> %s (%s)", obj.Name, obj.Label)
     # First, we need to check to see if we need to compute either of the
@@ -705,6 +872,29 @@ def screened_H_union_list(info, opts, obj, m, j, offsetTuple, checkOffsetTuple):
 def screened_A_UnionList(info, opts, obj, t, ti, offsetTuple, checkOffsetTuple):
     """Form the screened union list of obj with the substrate A that has
     been offset according to offsetTuple.
+
+    Parameters
+    ----------
+    info :
+
+    opts : dict
+        Options dict in the QMT Geometry3D.__init__ input format.
+
+    obj : FreeCAD.App.Document
+        A FreeCAD object.
+    t :
+
+    ti :
+
+    offsetTuple :
+
+    checkOffsetTuple :
+
+
+    Returns
+    -------
+
+
     """
     logging.debug(">>> %s (%s)", obj.Name, obj.Label)
     # First, we need to see if we have built the objects before:
@@ -742,6 +932,25 @@ def H_offset(info, opts, layer_num, objID, tList=[]):
 
     Note: this object is returned as a list of objects that need to be unioned together
     in order to form the full H.
+
+    Parameters
+    ----------
+    info :
+
+    opts : dict
+        Options dict in the QMT Geometry3D.__init__ input format.
+
+    layer_num :
+
+    objID :
+
+    tList :
+        (Default value = [])
+
+    Returns
+    -------
+
+
     """
 
     logging.debug(
@@ -808,6 +1017,20 @@ def gen_U(info, layer_num, objID):
     ```
     where the inner union terms are not included if their intersection
     with B_i is empty.
+
+    Parameters
+    ----------
+    info :
+
+    layer_num :
+
+    objID :
+
+
+    Returns
+    -------
+
+
     """
     layers = info.lithoDict["layers"]
     B = layers[layer_num]["objIDs"][objID]["B"]  # B prism for this layer & objID
@@ -830,7 +1053,25 @@ def gen_U(info, layer_num, objID):
 
 
 def gen_G(info, opts, layer_num, objID):
-    """Generate the gate deposition for a given layer_num and objID."""
+    """Generate the gate deposition for a given layer_num and objID.
+
+    Parameters
+    ----------
+    info :
+
+    opts : dict
+        Options dict in the QMT Geometry3D.__init__ input format.
+
+    layer_num :
+
+    objID :
+
+
+    Returns
+    -------
+
+
+    """
 
     layerobj = info.lithoDict["layers"][layer_num]["objIDs"][objID]
     logging.debug(
@@ -897,7 +1138,18 @@ def gen_G(info, opts, layer_num, objID):
 
 
 def collect_garbage(info):
-    """Delete all the objects in trash."""
+    """Delete all the objects in trash.
+
+    Parameters
+    ----------
+    info :
+
+
+    Returns
+    -------
+
+
+    """
     for obj in info.trash:
         try:
             delete(obj)
@@ -906,7 +1158,24 @@ def collect_garbage(info):
 
 
 def buildCrossSection(sliceName, axis, distance, built_parts_dict):
-    """Render the 2D objects required for cross-sections."""
+    """Render the 2D objects required for cross-sections.
+
+    Parameters
+    ----------
+    sliceName :
+
+    axis :
+
+    distance :
+
+    built_parts_dict : dict
+
+
+    Returns
+    -------
+
+
+    """
     polygons = {}
     for part_name in built_parts_dict:
         built_part = built_parts_dict[part_name]

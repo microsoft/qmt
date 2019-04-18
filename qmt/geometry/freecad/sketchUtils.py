@@ -18,7 +18,19 @@ vec = FreeCAD.Vector
 
 def findSegments(sketch):
     """Return the line segments in a sketch as a numpy array.
-    Note: in FC0.17 sketches contain wires by default.
+
+    Parameters
+    ----------
+    sketch :
+
+
+    Returns
+    -------
+    A `np.ndarray` of line segments from `sketch`.
+
+    Notes
+    -----
+    In FC0.17 sketches contain wires by default.
     """
     lineSegments = []
     for wire in sketch.Shape.Wires:
@@ -31,14 +43,24 @@ def findSegments(sketch):
 
 def nextSegment(lineSegments, segIndex, tol=1e-8, fixOrder=True):
     """Return the next line segment index in a collection of tuples defining
-    several cycles.
-    WARNING: this will by default fixOrder, i.e. side effects on the caller.
+    several cycles. WARNING: this will by default fixOrder, i.e. side effects on
+    the caller.
 
-    Args:
-        lineSegments: ndarray with [lineSegmentIndex,start/end point,coordinate]
-        segIndex:     the index to consider
-        tol:          repair tolerance for matching
-        fixOrder:     whether the order lineSegments should be repaired on the fly
+    Parameters
+    ----------
+    lineSegments :
+        ndarray with [lineSegmentIndex,start/end point,coordinate]
+    segIndex :
+        the index to consider
+    tol :
+        repair tolerance for matching (Default value = 1e-8)
+    fixOrder :
+        whether the order lineSegments should be repaired on the fly (Default value = True)
+
+    Returns
+    -------
+    Line segment.
+
     """
     # initial end point - all other segment starts
     diffList0 = np.sum(
@@ -73,7 +95,20 @@ def nextSegment(lineSegments, segIndex, tol=1e-8, fixOrder=True):
 
 def findCycle(lineSegments, startingIndex, availSegIDs):
     """Find a cycle in a collection of line segments given a starting index.
-    Return the list of indices in the cycle.
+
+    Parameters
+    ----------
+    lineSegments :
+
+    startingIndex :
+
+    availSegIDs :
+
+
+    Returns
+    -------
+
+
     """
     currentIndex = startingIndex
     segList = [startingIndex]
@@ -100,7 +135,19 @@ def findCycle(lineSegments, startingIndex, availSegIDs):
 
 
 def addCycleSketch(name, wire):
-    """ Add a sketch of a cycle (closed wire) to a FC document.
+    """Add a sketch of a cycle (closed wire) to a FC document.
+
+    Parameters
+    ----------
+    name :
+
+    wire :
+
+
+    Returns
+    -------
+
+
     """
     assert wire.isClosed()
     doc = FreeCAD.ActiveDocument
@@ -129,7 +176,23 @@ def addCycleSketch(name, wire):
 
 
 def addPolyLineSketch(name, doc, segmentOrder, lineSegments):
-    """ Add a sketch given segment order and line segments
+    """Add a sketch given segment order and line segments.
+
+    Parameters
+    ----------
+    name :
+
+    doc :
+
+    segmentOrder :
+
+    lineSegments :
+
+
+    Returns
+    -------
+
+
     """
     if doc.getObject(name) is not None:
         raise ValueError(f"Sketch with name '{name}' already exists.")
@@ -147,7 +210,18 @@ def addPolyLineSketch(name, doc, segmentOrder, lineSegments):
 
 
 def findEdgeCycles(sketch):  # TODO: port objectConstruction crossection stuff
-    """Find the list of edges in a sketch and separate them into cycles."""
+    """Find the list of edges in a sketch and separate them into cycles.
+
+    Parameters
+    ----------
+    sketch :
+
+
+    Returns
+    -------
+
+
+    """
     lineSegments = findSegments(sketch)
     # Next, detect cycles:
     availSegIDs = range(lineSegments.shape[0])
@@ -163,12 +237,33 @@ def findEdgeCycles(sketch):  # TODO: port objectConstruction crossection stuff
 
 
 def findEdgeCycles2(sketch):
-    """Find the list of edges in a sketch and separate them into cycles."""
+    """Find the list of edges in a sketch and separate them into cycles.
+
+    Parameters
+    ----------
+    sketch :
+
+
+    Returns
+    -------
+
+
+    """
     return sketch.Shape.Wires
 
 
 def splitSketch(sketch):
     """Splits a sketch into several, returning a list of names of the new sketches.
+
+    Parameters
+    ----------
+    sketch :
+
+
+    Returns
+    -------
+
+
     """
     if not sketch.Shape.Wires:
         raise ValueError("No wires in sketch.")
@@ -179,8 +274,20 @@ def splitSketch(sketch):
 
 
 def extendSketch(sketch, d):
-    """ For a disconnected polyline, extends the last points of the sketch by 
-    a distance d. 
+    """For a disconnected polyline, extends the last points of the sketch by
+    a distance d.
+
+    Parameters
+    ----------
+    sketch :
+
+    d :
+
+
+    Returns
+    -------
+
+
     """
     doc = FreeCAD.ActiveDocument
     segments = findSegments(sketch)
@@ -238,7 +345,19 @@ def extendSketch(sketch, d):
 
 
 def makeIntoSketch(inputObj, sketchName=None):
-    """ Turn a 2D generic object like a polyline into a sketch.
+    """Turn a 2D generic object like a polyline into a sketch.
+
+    Parameters
+    ----------
+    inputObj :
+
+    sketchName :
+        (Default value = None)
+
+    Returns
+    -------
+
+
     """
     if sketchName is None:
         sketchName = inputObj.Name + "_sketch"

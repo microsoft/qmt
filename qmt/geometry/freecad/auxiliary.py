@@ -15,21 +15,58 @@ import FreeCAD
 
 
 def delete(obj):
-    """Delete an object by FreeCAD name."""
+    """Delete an object by FreeCAD name.
+
+    Parameters
+    ----------
+    obj : FreeCAD.App.Document
+        A FreeCAD object.
+
+    Returns
+    -------
+    None
+
+    """
     doc = FreeCAD.ActiveDocument
     doc.removeObject(obj.Name)
     doc.recompute()
 
 
 def _deepRemove_impl(obj):
-    """ Implementation helper for deepRemove."""
+    """Implementation helper for deepRemove.
+
+    Parameters
+    ----------
+    obj : FreeCAD.App.Document
+        A FreeCAD object.
+
+    Returns
+    -------
+    None
+
+    """
     for child in obj.OutList:
         _deepRemove_impl(child)
     FreeCAD.ActiveDocument.removeObject(obj.Name)
 
 
 def deepRemove(obj=None, name=None, label=None):
-    """ Remove a targeted object and recursively delete all its sub-objects."""
+    """Remove a targeted object and recursively delete all its sub-objects.
+
+    Parameters
+    ----------
+    obj : FreeCAD.App.Document
+        A FreeCAD object. (Default value = None)
+    name : str
+        (Default value = None)
+    label : str
+        (Default value = None)
+
+    Returns
+    -------
+    None
+
+    """
     doc = FreeCAD.ActiveDocument
     if obj is not None:
         pass
@@ -65,7 +102,20 @@ def silent_stdout():
 
 
 def _remove_from_zip(zipfname, *filenames):  # pragma: no cover
-    """Remove file names from zip archive."""
+    """Remove file names from zip archive.
+
+    Parameters
+    ----------
+    zipfname : str
+        The file name of the zip-file.
+    *filenames : sequence of strings
+
+
+    Returns
+    -------
+    None
+
+    """
     tempdir = tempfile.mkdtemp()
     try:
         tempname = os.path.join(tempdir, "new.zip")
@@ -81,14 +131,40 @@ def _remove_from_zip(zipfname, *filenames):  # pragma: no cover
 
 
 def _replace_in_zip_fstr(zipfname, filename, content):  # pragma: no cover
-    """Replace a file in a zip archive with some content string."""
+    """Replace a file in a zip archive with some content string.
+
+    Parameters
+    ----------
+    zipfname : str
+        The file name of the zip-file.
+    filename : str
+
+    content :
+
+
+    Returns
+    -------
+    None
+
+    """
     _remove_from_zip(zipfname, filename)
     zfile = zipfile.ZipFile(zipfname, mode="a")
     zfile.writestr(filename, content)
 
 
 def make_objects_visible(zipfname):  # pragma: no cover
-    """Make objects visible in a fcstd file with GuiDocument.xml."""
+    """Make objects visible in a fcstd file with GuiDocument.xml.
+
+    Parameters
+    ----------
+    zipfname : str
+        The file name of the zip-file.
+
+    Returns
+    -------
+    None
+
+    """
     zfile = zipfile.ZipFile(zipfname)
     gui_xml = zfile.read("GuiDocument.xml")
     guitree = ElementTree.fromstring(gui_xml)

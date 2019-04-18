@@ -4,8 +4,17 @@ import numpy as np
 class PropertyMap:
     """Map points in the simulation domain to properties of parts containing the points.
 
-    :param PartMap part_map: Mapper from spatial location to part identifier.
-    :param callable prop_map: Map from part identifier to a property value.
+    Parameters
+    ----------
+    part_map : PartMap
+        Mapper from spatial location to part identifier.
+    prop_map : callable
+        Map from part identifier to a property value.
+
+    Returns
+    -------
+
+
     """
 
     def __init__(self, part_map, prop_map):
@@ -15,16 +24,30 @@ class PropertyMap:
     def get_part(self, x):
         """Find the part(s) containing one or more points.
 
-        :param x: Coordinate vector or array of coordinate vectors.
-        :return: Part identifier (if x is a single coordinate vector); or array of part identifiers, of the same shape as x except for the last axis corresponding to coordinate vector extent.
+        Parameters
+        ----------
+        x :
+            Coordinate vector or array of coordinate vectors.
+
+        Returns
+        -------
+
+
         """
         return self.partMap(x)
 
     def __call__(self, x):
         """Do the mapping.
 
-        :param x: Coordinate vector or array of coordinate vectors.
-        :return: Property of the part(s) containing `x`, of the same shape as `x` except for the last axis corresponding to coordinate vector extent.
+        Parameters
+        ----------
+        x :
+            Coordinate vector or array of coordinate vectors.
+
+        Returns
+        -------
+        Property of the part(s) containing `x`, of the same shape as `x` except for
+        the last axis corresponding to coordinate vector extent.
         """
         parts = self.get_part(x)
         if np.isscalar(parts):
@@ -47,12 +70,25 @@ class PropertyMap:
 class MaterialPropertyMap(PropertyMap):
     """Map points in the simulation domain to material properties of parts containing the points.
 
-    :param PartMap part_map: Function that takes a spatial location and maps it to a part identifier.
-    :param dict part_materials: Dict mapping from part identifier to a material name.
-    :param qmt.Materials mat_lib: Materials library used to look up the material properties.
-    :param str prop_name: Name of the material property to be retrieved for each part.
-    :param eunit: Energy unit, passed to `mat_lib.find()`.
-    :param fill_value: Value to be filled in places where there is no part or the part does not have a material or the material does not have the property `prop_name`. The default behavior `fill_value='raise'` is to raise a KeyError in these cases.
+    Parameters
+    ----------
+    part_map : PartMap
+        Function that takes a spatial location and maps it to a part identifier.
+    part_materials : dict
+        Dict mapping from part identifier to a material name.
+    mat_lib : qmt.Materials
+        Materials library used to look up the material properties.
+    str :
+        prop_name: Name of the material property to be retrieved for each part.
+    eunit :
+        Energy unit, passed to `mat_lib.find()`.
+    fill_value :
+        Value to be filled in places where there is no part or the part does not have a material or the material does not have the property `prop_name`. The default behavior `fill_value='raise'` is to raise a KeyError in these cases.
+
+    Returns
+    -------
+
+
     """
 
     def __init__(

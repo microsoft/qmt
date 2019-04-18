@@ -30,13 +30,18 @@ class Material(collections.Mapping):
     Allows for the retrieval of a material's properties. Adds units awareness on top of a plain
     dict containing the properties.
 
-    :param str name: Material name.
-    :param dict properties: Collection of material properties.
-    :param str eunit:
+    Parameters
+    ----------
+    name : str
+        Material name.
+    properties : dict
+        Collection of material properties.
+    eunit : str
         Unit of energy. If specified, all queries for band parameters
         that have the dimension of an energy return floats with respect
         to this energy unit. With the default (None), such queries
         return sympy quantities that have the dimension of an energy.
+
     """
 
     def __init__(self, name, properties, eunit=None):
@@ -94,11 +99,20 @@ class Material(collections.Mapping):
     def hole_mass(self, band, direction):
         """Determine effective mass for a valence band.
 
-        :param str band: Which valence band: 'heavy' or 'light' for a specific band. Also 'dos' for
+        Parameters
+        ----------
+        ban : str
+            Which valence band: 'heavy' or 'light' for a specific band. Also 'dos' for
             a density-of-states mass corresponding to both bands.
-        :param str direction: Momentum direction: One of '001', '110', or '111'. 'z' is equivalent
+        direction : str
+            Momentum direction: One of '001', '110', or '111'. 'z' is equivalent
             to '001'. Can also be 'dos' for the scalar density-of-states mass of a corresponding
             isotropic band dispersion.
+
+        Returns
+        -------
+
+
         """
         # DOS effective mass corresponding to both heavy and light hole band
         # [Lax and Mavroides (1955) Eq. 17]
@@ -162,13 +176,16 @@ class Materials(collections.Mapping):
     materials.json and loads it. If both matPath and matDict are specified, the Materials
     database is initialized from the given path and then updated with the supplied dict.
 
-    :param str matPath:
+    Parameters
+    ----------
+    matPath : str
         Path to the mat json file. If initialized with None, should be set
         manually before loading/saving.
-    :param dict matDict:
+    matDict : dict
         Dictionary of materials to fill the database.
-    :param Bool load:
+    load : bool
         Load the json file. Needs to be False when creating a new materials.json file.
+
     """
 
     def __init__(self, matPath=None, matDict=None, load=True):
@@ -193,13 +210,44 @@ class Materials(collections.Mapping):
 
     def add_material(self, name, mat_type, **kwargs):
         """Generate a material and add it to the matDict.
+
+        Parameters
+        ----------
+        name :
+
+        mat_type :
+
+        **kwargs :
+
+
+        Returns
+        -------
+
+
         """
         if mat_type in ("metal", "dielectric"):
             kwargs["electronMass"] = kwargs.get("electronMass", 1.0)
         self.matDict[name] = self._make_material(mat_type, **kwargs)
 
     def set_bowing_parameters(self, name_a, name_b, mat_type, **kwargs):
-        """Generate a bowing parameter set and add it to the bowingParameters dict."""
+        """Generate a bowing parameter set and add it to the bowingParameters dict.
+
+        Parameters
+        ----------
+        name_a :
+
+        name_b :
+
+        mat_type :
+
+        **kwargs :
+
+
+        Returns
+        -------
+
+
+        """
         self.bowingParameters[(name_a, name_b)] = self._make_material(
             mat_type, **kwargs
         )
@@ -258,10 +306,18 @@ class Materials(collections.Mapping):
         If the material is not found directly, an attempt is made to construct
         it by mixing two known materials. If that also fails, a KeyError is raised.
 
-        :param str name:
+        Parameters
+        ----------
+        name : str
             Name of the desired material.
-        :param str eunit:
+        eunit : str
             Unit of energy. This is passed on to the Material constructor.
+            (Default value = None)
+
+        Returns
+        -------
+        Material instance.
+
         """
         if name in self.matDict:
             properties = self.matDict[name]
@@ -312,6 +368,20 @@ class Materials(collections.Mapping):
         uses the convention
             O(A_{1-x} B_x) = (1-x) O(A) + x O(B) - x(1-x) O_{AB} ,
         with the bowing parameter O_{AB}.
+
+        Parameters
+        ----------
+        nameA :
+
+        nameB :
+
+        x :
+
+
+        Returns
+        -------
+
+
         """
         assert x >= 0 and x <= 1
         if (nameB, nameA) in self.bowingParameters:
@@ -349,15 +419,13 @@ class Materials(collections.Mapping):
             self.bowingParameters[literal_eval(k)] = v
 
     def save(self):
-        """Save the current materials database to disk.
-        """
+        """Save the current materials database to disk."""
         db = self.serialize_dict()
         with open(self.matPath, "w") as myFile:
             json.dump(db, myFile, indent=4, sort_keys=True)
 
     def load(self):
-        """Load the materials database from disk.
-        """
+        """Load the materials database from disk."""
         try:
             with open(self.matPath, "r") as myFile:
                 db = json.load(myFile)
@@ -381,15 +449,21 @@ class Materials(collections.Mapping):
         If the material's valenceBandOffset is not known, we return `-mat[electronAffinity]`,
         effectively falling back on Anderson's rule.
 
-        :param Material mat:
+        Parameters
+        ----------
+        mat: Material instance
             Material whose conduction band position is to be determined.
+
+        Returns
+        -------
 
         See also
         --------
         - valence_band_maximum(mat) is equivalent to
-          `self.conduction_band_minimum(mat) - mat['directBandGap']`
+        `self.conduction_band_minimum(mat) - mat['directBandGap']`
         - conduction_band_offset(mat1, mat2) is equivalent to
-          `self.conduction_band_minimum(mat1) - self.conduction_band_minimum(mat2)`
+        `self.conduction_band_minimum(mat1) - self.conduction_band_minimum(mat2)`
+                mat :
         """
         ref_name = "InSb"
         if mat["type"] == "metal":
@@ -434,15 +508,21 @@ class Materials(collections.Mapping):
         The reference energy E=0 is fixed to the vacuum level, as defined by the electron affinity
         of InSb. See conduction_band_minimum for additional details.
 
-        :param Material mat:
+        Parameters
+        ----------
+        mat : Material
             Material whose valence band position is to be determined.
+
+        Returns
+        -------
 
         See also
         --------
         - conduction_band_minimum(mat) is equivalent to
-          `self.valence_band_maximum(mat) + mat['directBandGap']`
+        `self.valence_band_maximum(mat) + mat['directBandGap']`
         - valence_band_offset(mat1, mat2) is equivalent to
-          `self.valence_band_maximum(mat1) - self.valence_band_maximum(mat2)`
+        `self.valence_band_maximum(mat1) - self.valence_band_maximum(mat2)`
+                mat :
         """
         if mat["type"] == "metal":
             return -10.0e3 * mat.energyUnit  # very low
@@ -489,13 +569,19 @@ class Materials(collections.Mapping):
 
 
 def conduction_band_offset(mat, ref_mat):
-    """
-    Calculate the conduction band offset $E_c - E_{c,ref}$ between two semiconductor materials.
+    """Calculate the conduction band offset $E_c - E_{c,ref}$ between two semiconductor materials.
 
-    :param Material mat:
+    Parameters
+    ----------
+    mat : Material
         Material whose conduction band position is to be determined.
-    :param Material ref_mat:
+    ref_mat : Material
         Material whose conduction band minimum is used as reference energy.
+
+    Returns
+    -------
+
+
     """
     assert mat.energyUnit == ref_mat.energyUnit
     try:
@@ -521,13 +607,19 @@ def conduction_band_offset(mat, ref_mat):
 
 
 def valence_band_offset(mat, ref_mat):
-    """
-    Calculate the valence band offset $E_v - E_{v,ref}$ between two semiconductor materials.
+    """Calculate the valence band offset $E_v - E_{v,ref}$ between two semiconductor materials.
 
-    :param Material mat:
+    Parameters
+    ----------
+    mat : Material
         Material whose conduction band position is to be determined.
-    :param Material ref_mat:
+    ref_mat : Material
         Material whose conduction band minimum is used as reference energy.
+
+    Returns
+    -------
+
+
     """
     assert mat.energyUnit == ref_mat.energyUnit
     try:
@@ -548,11 +640,19 @@ def valence_band_offset(mat, ref_mat):
 
 
 def write_database_to_markdown(out_file, mat_lib):
-    """
-    Write all materials parameters in mat_lib to a nicely formatted markdown file.
+    """Write all materials parameters in mat_lib to a nicely formatted markdown file.
 
-    :param stream out_file: Output file handle.
-    :param Materials mat_lib: Materials database to be written.
+    Parameters
+    ----------
+    out_file : stream
+        Output file handle.
+    mat_lib : Materials
+        Materials database to be written.
+
+    Returns
+    -------
+
+
     """
     import pytablewriter
 
