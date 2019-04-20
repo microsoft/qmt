@@ -2,15 +2,15 @@ from typing import Any, Callable, Dict, Optional
 
 
 class WithParts:
-    def __init__(self, parts: Dict[str, Any] = {}):
+    def __init__(self, parts: Optional[Dict[str, Any]] = None):
         """Base class for an object that contains parts
         
         Parameters
         ----------
         parts : Dict[str, Any], optional
-            A dictionary of parts to initialize with, by default {}
+            A dictionary of parts to initialize with, by default None
         """
-        self.parts = parts
+        self.parts = {} if parts is None else parts
 
     def add_part(
         self,
