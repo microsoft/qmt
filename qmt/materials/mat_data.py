@@ -2,6 +2,7 @@ from ..geometry.geo_data_base import GeoData
 from qmt.materials import Materials
 from qmt.geometry import Geo3DData, Geo2DData
 from typing import Dict
+from qmt.infrastructure import WithParts
 
 
 class MatPart:
@@ -17,7 +18,7 @@ class MatPart:
         self.material = material
 
 
-class MatData:
+class MatData(WithParts):
     def __init__(
         self, materials_database: Materials, materials_mapping: Dict[str, str] = {}
     ):
@@ -32,48 +33,9 @@ class MatData:
             (Default = {})
         """
         self.materials_database = materials_database
-        self.parts = {name: MatPart(mat) for name, mat in materials_mapping.values()}
-
-    def add_part(self, part_name: str, part: MatPart, overwrite: bool = False):
-        """Add a part to this materials information.
-
-        Parameters
-        ----------
-        part_name : str
-            Name of the part to create
-        part : MatPart
-            MatPart containing material properties for the part.
-        overwrite : bool
-            Should we allow this to overwrite? (Default value = False)
-        Returns
-        -------
-        None
-        """
-        if (part_name in self.parts) and (not overwrite):
-            raise ValueError(f"Attempted to overwrite the part {part_name}.")
-        else:
-            self.parts[part_name] = part
-
-    def remove_part(self, part_name: str, ignore_if_absent: bool = False):
-        """Remove a part from this materials information.
-
-        Parameters
-        ----------
-        part_name : str
-            Name of part to remove.
-        ignore_if_absent : bool
-            Should we ignore an attempted removal if the part name
-            is not found? (Default value = False)
-        Returns
-        -------
-        None
-        """
-        if part_name in self.parts:
-            del self.parts[part_name]
-        elif not ignore_if_absent:
-            raise ValueError(
-                f"Attempted to remove the part {part_name}, which doesn't exist."
-            )
+        super().__init__(
+            {name: MatPart(mat) for name, mat in materials_mapping.values()}
+        )
 
     def get_material(self, part_name: str):
         """Get the material for a particular part.

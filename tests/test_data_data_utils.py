@@ -3,7 +3,7 @@
 
 """Testing data utilities."""
 
-from qmt.data.data_utils import *
+from qmt.infrastructure.data_utils import *
 
 
 def test_store_serial(datadir, fix_FCDoc):

@@ -23,7 +23,12 @@ def build_materials(
         A mapping of parts to materials.
     Returns
     -------
-    Built MatData object.
+    MatData
+       Built object with materials information.
+    Raises
+    ------
+    ValueError
+        If materials_mapping does not contain a key for a part in geo_data.
     """
 
     # We keep a copy of materials_mapping around, but also set the material property

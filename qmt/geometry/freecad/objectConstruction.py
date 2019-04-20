@@ -36,7 +36,7 @@ from qmt.geometry.freecad.sketchUtils import (
     findEdgeCycles,
 )
 
-from qmt.data import store_serial
+from qmt.infrastructure import store_serial
 from qmt.geometry import Geo3DData, part_3d
 
 

@@ -2,7 +2,7 @@
 Contains the Geo3DData class, which is used to describe a 3D geometry
 """
 
-from qmt.data import load_serial, store_serial, write_deserialised
+from qmt.infrastructure import load_serial, store_serial, write_deserialised
 from typing import Any, Dict, List, Optional, Tuple
 from .part_3d import Part3DData
 import numpy as np
@@ -31,49 +31,39 @@ class Geo3DData(GeoData):
 
     def add_part(self, part_name: str, part: Part3DData, overwrite: bool = False):
         """Add a part to this geometry.
-
+        
         Parameters
         ----------
         part_name : str
-            Name of the part to create
-        part : Part3D
-            Part3D object.
-        overwrite : bool
-            Should we allow this to overwrite? (Default value = False)
-        Returns
-        -------
-        None
+            Name of the part to add
+        part : Part3DData
+            Part to add
+        overwrite : bool, optional
+            Whether we allow this to overwrite existing part, by default False
         """
-        if (part_name in self.parts) and (not overwrite):
-            raise ValueError(f"Attempted to overwrite the part {part_name}.")
-        else:
-            self.build_order.append(part.label)
-            self.parts[part_name] = part
+        super().add_part(
+            part_name,
+            part,
+            overwrite,
+            lambda p: self.build_order.append(p.label) if p is not None else None,
+        )
 
     def remove_part(self, part_name: str, ignore_if_absent: bool = False):
         """Remove a part from this geometry.
-
+        
         Parameters
         ----------
         part_name : str
-            Name of part to remove.
-        ignore_if_absent : bool
-            Should we ignore an attempted removal if the part name
-            is not found?
-            (Default value = False)
-        Returns
-        -------
-        None
+            Name of the part to remove
+        ignore_if_absent : bool, optional
+            Whether we ignore an attempted removal if the part name is not present, by
+            default False
         """
-        if part_name in self.parts:
-            del self.parts[part_name]
-        else:
-            if not ignore_if_absent:
-                raise ValueError(
-                    f"Attempted to remove the part {part_name}, which doesn't exist."
-                )
-            else:
-                pass
+        super.remove_part(
+            part_name,
+            ignore_if_absent,
+            lambda p: self.build_order.remove(p) if p is not None else None,
+        )
 
     def add_xsec(
         self,

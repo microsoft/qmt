@@ -3,12 +3,8 @@
 
 from collections import namedtuple
 import sympy.physics.units as spu
-
-try:
-    import kwant  # kwant import to stop fenics from segfaulting
-except:
-    pass
-from qmt.data import store_serial, load_serial
+import kwant  # kwant import to stop fenics from segfaulting
+from qmt.infrastructure import store_serial, load_serial
 
 
 class Fem3DData:

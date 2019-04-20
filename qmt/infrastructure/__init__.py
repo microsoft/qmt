@@ -17,3 +17,4 @@ from .solvers_3d import (
     deserialize_fenics_function,
     TransportData,
 )
+from .with_parts import WithParts

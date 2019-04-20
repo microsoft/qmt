@@ -3,7 +3,7 @@ Contains classes used to describe 3d geometry parts
 """
 
 from typing import List, Optional
-from qmt.data import write_deserialised
+from qmt.infrastructure import write_deserialised
 from enum import Enum
 
 

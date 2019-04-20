@@ -1,15 +1,16 @@
 from typing import Any, Dict, List
+from qmt.infrastructure import WithParts
 
 
-class GeoData:
+class GeoData(WithParts):
     def __init__(self, lunit: str = "nm"):
-        """Base Class for geometry data objects
-
+        """Base class for geometry data objects.
+        
         Parameters
         ----------
-        lunit : str
-            Length unit for this geometry.
+        lunit : str, optional
+            Length unit for this geometry, by default "nm"
         """
-        self.parts: Dict[str, Any] = {}
         self.lunit: str = lunit
         self.build_order: List[str] = []
+        super().__init__()

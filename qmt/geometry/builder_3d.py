@@ -3,7 +3,7 @@ The Geo3DBuilder class, which is used to build 3D geometries
 """
 
 from typing import Dict, List, Optional
-from qmt.data import serialize_file
+from qmt.infrastructure import serialize_file
 import FreeCAD
 from .part_3d import Part3DData
 from .geo_3d_data import Geo3DData
@@ -34,7 +34,7 @@ def build_3d_geometry(
         (Default value = None)
     serialized_input_file : bytes
         FreeCAD template file that has been serialized using
-        qmt.data.serialize_file. This is useful for passing a
+        qmt.infrastructure.serialize_file. This is useful for passing a
         file into a docker container or other environment that
         doesn't have access to a shared drive. Either this or
         serialized_input_file must be set (but not both).

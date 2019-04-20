@@ -46,7 +46,7 @@ def build_2d_geometry(
         if object_name in parts:
             geo_2d.add_part(object_name, Polygon(parts[object_name]))
         elif object_name in edges:
-            geo_2d.add_edge(object_name, LineString(edges[object_name]))
+            geo_2d.add_part(object_name, LineString(edges[object_name]))
         else:
             raise ValueError(
                 f"Object of name {object_name} was found neither in edges nor parts."
