@@ -11,7 +11,7 @@ from enum import Enum
 from qmt.infrastructure import write_deserialised
 
 
-class Part3DData:
+class Geo3DPart:
     def __init__(self, label: str, fc_name: Optional[str], virtual: bool = False):
         """Base class for a 3D geometric part.
 
@@ -73,7 +73,7 @@ class Part3DData:
         return file_path
 
 
-class ExtrudeData(Part3DData):
+class ExtrudePart(Geo3DPart):
     def __init__(
         self,
         label: str,
@@ -106,7 +106,7 @@ class ExtrudeData(Part3DData):
         super().__init__(label, fc_name, virtual=virtual)
 
 
-class WireData(Part3DData):
+class WirePart(Geo3DPart):
     def __init__(
         self,
         label: str,
@@ -149,13 +149,13 @@ class DepoMode(Enum):
     etch = 2
 
 
-class WireShellData(Part3DData):
+class WireShellPart(Geo3DPart):
     def __init__(
         self,
         label: str,
         fc_name: str,
         thickness: float,
-        target_wire: WireData,
+        target_wire: WirePart,
         shell_verts: List[int],
         depo_mode: str,
         virtual: bool = False,
@@ -172,7 +172,7 @@ class WireShellData(Part3DData):
             unique, None may be used here as a shortcut.
         thickness : float
             The shell thickness.
-        target_wire : WireData
+        target_wire : WirePart
             Target wire for coating.
         shell_verts : List[int]
             Vertices to use when rendering the coating.
@@ -195,7 +195,7 @@ class WireShellData(Part3DData):
         super().__init__(label, fc_name, virtual=virtual)
 
 
-class SAGData(Part3DData):
+class SAGPart(Geo3DPart):
     def __init__(
         self,
         label: str,
@@ -241,7 +241,7 @@ class SAGData(Part3DData):
         super().__init__(label, fc_name, virtual=virtual)
 
 
-class LithographyData(Part3DData):
+class LithographyPart(Geo3DPart):
     def __init__(
         self,
         label: str,

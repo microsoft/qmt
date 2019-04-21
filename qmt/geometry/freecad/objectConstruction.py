@@ -136,20 +136,20 @@ def build(opts):
     built_parts = []
     for input_part in opts["input_parts"]:
 
-        if isinstance(input_part, part_3d.ExtrudeData):
+        if isinstance(input_part, part_3d.ExtrudePart):
             part = build_extrude(input_part)
-        elif isinstance(input_part, part_3d.SAGData):
+        elif isinstance(input_part, part_3d.SAGPart):
             part = build_sag(input_part)
-        elif isinstance(input_part, part_3d.WireData):
+        elif isinstance(input_part, part_3d.WirePart):
             part = build_wire(input_part)
-        elif isinstance(input_part, part_3d.WireShellData):
+        elif isinstance(input_part, part_3d.WireShellPart):
             part = build_wire_shell(input_part)
-        elif isinstance(input_part, part_3d.LithographyData):
+        elif isinstance(input_part, part_3d.LithographyPart):
             part = build_lithography(input_part, opts, info_holder)
-        elif isinstance(input_part, part_3d.Part3DData):
+        elif isinstance(input_part, part_3d.Geo3DPart):
             part = build_pass(input_part)
         else:
-            raise ValueError(f"{input_part} is not a recognized Part3DData type")
+            raise ValueError(f"{input_part} is not a recognized Geo3DPart type")
 
         assert part is not None
         doc.recompute()
@@ -224,7 +224,7 @@ def build_pass(part):
 
 
     """
-    assert isinstance(part, part_3d.Part3DData)
+    assert isinstance(part, part_3d.Geo3DPart)
     existing_part = FreeCAD.ActiveDocument.getObject(part.fc_name)
     assert existing_part is not None
     return existing_part
@@ -243,7 +243,7 @@ def build_extrude(part):
 
 
     """
-    assert isinstance(part, part_3d.ExtrudeData)
+    assert isinstance(part, part_3d.ExtrudePart)
     z0 = part.z0
     deltaz = part.thickness
     doc = FreeCAD.ActiveDocument
@@ -272,7 +272,7 @@ def build_sag(part, offset=0.0):
 
 
     """
-    assert isinstance(part, part_3d.SAGData)
+    assert isinstance(part, part_3d.SAGPart)
     zBot = part.z0
     zMid = part.z_middle
     zTop = part.thickness + zBot
@@ -301,7 +301,7 @@ def build_wire(part, offset=0.0):
 
 
     """
-    assert isinstance(part, part_3d.WireData)
+    assert isinstance(part, part_3d.WirePart)
     doc = FreeCAD.ActiveDocument
     zBottom = part.z0
     width = part.thickness
@@ -326,7 +326,7 @@ def build_wire_shell(part, offset=0.0):
 
 
     """
-    assert isinstance(part, part_3d.WireShellData)
+    assert isinstance(part, part_3d.WireShellPart)
     doc = FreeCAD.ActiveDocument
     zBottom = part.target_wire.z0
     radius = part.target_wire.thickness
@@ -375,7 +375,7 @@ def build_lithography(part, opts, info_holder):
 
 
     """
-    assert isinstance(part, part_3d.LithographyData)
+    assert isinstance(part, part_3d.LithographyPart)
     if not info_holder.litho_setup_done:
         initialize_lithography(info_holder, opts, fillShells=True)
         info_holder.litho_setup_done = True
@@ -636,7 +636,7 @@ def initialize_lithography(info, opts, fillShells=True):
     base_substrate_parts = []
     for part in opts["input_parts"]:
         # If this part is a litho step
-        if isinstance(part, part_3d.LithographyData):
+        if isinstance(part, part_3d.LithographyPart):
             layer_num = part.layer_num  # layer_num of this part
             # Add the layer_num to the layer dictionary:
             if layer_num not in layers:
@@ -764,7 +764,7 @@ def gen_offset(opts, obj, offsetVal):
                 break
         treatment = type(input_part)
     # Extrude or lithography parts are treated normally:
-    if treatment == part_3d.ExtrudeData or treatment == part_3d.LithographyData:
+    if treatment == part_3d.ExtrudePart or treatment == part_3d.LithographyPart:
         treatment = "standard"
     if treatment == "standard":
         # Apparently the offset function is buggy for very small offsets...
@@ -780,11 +780,11 @@ def gen_offset(opts, obj, offsetVal):
             offsetDupe = copy_move(offset)
             doc.recompute()
             delete(offset)
-    elif treatment == part_3d.WireData:
+    elif treatment == part_3d.WirePart:
         offsetDupe = build_wire(input_part, offset=offsetVal)
-    elif treatment == part_3d.WireShellData:
+    elif treatment == part_3d.WireShellPart:
         offsetDupe = build_wire_shell(input_part, offset=offsetVal)
-    elif treatment == part_3d.SAGData:
+    elif treatment == part_3d.SAGPart:
         offsetDupe = build_sag(input_part, offset=offsetVal)
     doc.recompute()
 

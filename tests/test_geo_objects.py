@@ -5,15 +5,15 @@ import FreeCAD
 
 
 def test_xsection(datadir):
-    small1 = part_3d.ExtrudeData("small1", "Sketch001", z0=-2, thickness=2)
+    small1 = part_3d.ExtrudePart("small1", "Sketch001", z0=-2, thickness=2)
 
-    small2 = part_3d.ExtrudeData("small2", "Sketch002", z0=0, thickness=2)
+    small2 = part_3d.ExtrudePart("small2", "Sketch002", z0=0, thickness=2)
 
-    smallv = part_3d.ExtrudeData(
+    smallv = part_3d.ExtrudePart(
         "smallv", "Sketch001", z0=-1, thickness=2, virtual=True
     )
 
-    big = part_3d.ExtrudeData("big", "Sketch", z0=-4, thickness=8)
+    big = part_3d.ExtrudePart("big", "Sketch", z0=-4, thickness=8)
 
     input_parts = [small1, small2, big, smallv]
     file_path = os.path.join(datadir, "simple.FCStd")
@@ -58,9 +58,9 @@ def test_xsection(datadir):
 
 
 def test_simple_xsection(datadir):
-    small1 = part_3d.ExtrudeData("small1", "Sketch001", z0=-2, thickness=2)
+    small1 = part_3d.ExtrudePart("small1", "Sketch001", z0=-2, thickness=2)
 
-    big = part_3d.ExtrudeData("big", "Sketch", z0=-4, thickness=8)
+    big = part_3d.ExtrudePart("big", "Sketch", z0=-4, thickness=8)
 
     input_parts = [small1, big]
     file_path = os.path.join(datadir, "simple.FCStd")

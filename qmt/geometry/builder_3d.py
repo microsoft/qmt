@@ -5,13 +5,13 @@ The Geo3DBuilder class, which is used to build 3D geometries
 from typing import Dict, List, Optional
 from qmt.infrastructure import serialize_file
 import FreeCAD
-from .part_3d import Part3DData
+from .part_3d import Geo3DPart
 from .geo_3d_data import Geo3DData
 from qmt.geometry.freecad.objectConstruction import build
 
 
 def build_3d_geometry(
-    input_parts: List[Part3DData],
+    input_parts: List[Geo3DPart],
     input_file: Optional[str] = None,
     xsec_dict: Dict[str, Dict] = None,
     serialized_input_file: Optional[bytes] = None,

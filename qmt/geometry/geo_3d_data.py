@@ -4,7 +4,7 @@ Contains the Geo3DData class, which is used to describe a 3D geometry
 
 from qmt.infrastructure import load_serial, store_serial, write_deserialised
 from typing import Any, Dict, List, Optional, Tuple
-from .part_3d import Part3DData
+from .part_3d import Geo3DPart
 import numpy as np
 import fenics as fn
 import FreeCAD
@@ -29,14 +29,14 @@ class Geo3DData(GeoData):
         self.xsecs: Dict[str, Dict] = {}
         self.serial_fcdoc: str = None  # serialized FreeCAD document for this geometry
 
-    def add_part(self, part_name: str, part: Part3DData, overwrite: bool = False):
+    def add_part(self, part_name: str, part: Geo3DPart, overwrite: bool = False):
         """Add a part to this geometry.
         
         Parameters
         ----------
         part_name : str
             Name of the part to add
-        part : Part3DData
+        part : Geo3DPart
             Part to add
         overwrite : bool, optional
             Whether we allow this to overwrite existing part, by default False
