@@ -1,10 +1,14 @@
 """
 Contains classes used to describe 3d geometry parts
+
+Remark: normally part objects are an ideal candidate for dataclasses, but geometry is a
+special case because we need to inherit a base class with a default parameter (namely
+virtual), and dataclasses don't play well with that inheritance
 """
 
 from typing import List, Optional
-from qmt.infrastructure import write_deserialised
 from enum import Enum
+from qmt.infrastructure import write_deserialised
 
 
 class Part3DData:

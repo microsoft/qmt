@@ -3,19 +3,21 @@ from qmt.materials import Materials
 from qmt.geometry import Geo3DData, Geo2DData
 from typing import Dict
 from qmt.infrastructure import WithParts
+from dataclasses import dataclass
 
 
+@dataclass
 class MatPart:
-    def __init__(self, material: str):
-        """Object containing material information for a part.
-        Currently only contains one string. Might contain more things in the future.
+    """Object containing material information for a part.
+    Currently only contains one string. Might contain more things in the future.
 
-        Parameters
-        ----------
-        material : str
-            The material for the part
-        """
-        self.material = material
+    Parameters
+    ----------
+    material : str
+        The material for the part
+    """
+
+    material: str
 
 
 class MatData(WithParts):

@@ -4,7 +4,7 @@
 """Functions that perform composite executions."""
 
 import numpy as np
-
+from copy import deepcopy
 import logging
 
 # ~ logging.getLogger().setLevel(logging.DEBUG)  # toggle debug logging for this file
@@ -190,10 +190,11 @@ def build(opts):
     built_parts_dict = {}  # dict for cross sections
     for input_part, built_part in zip(opts["input_parts"], built_parts):
         built_part.Label = input_part.label  # here it's collision free
-        input_part.serial_stp = store_serial([built_part], exportCAD, "stp")
-        input_part.serial_stl = store_serial([built_part], exportMeshed, "stl")
-        input_part.built_fc_name = built_part.Name
-        geo.add_part(input_part.label, input_part)
+        output_part = deepcopy(input_part)
+        output_part.serial_stp = store_serial([built_part], exportCAD, "stp")
+        output_part.serial_stl = store_serial([built_part], exportMeshed, "stl")
+        output_part.built_fc_name = built_part.Name
+        geo.add_part(output_part.label, output_part)
         # dict for cross sections
         built_parts_dict[input_part.label] = built_part
 

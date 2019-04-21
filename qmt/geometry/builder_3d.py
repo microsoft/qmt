@@ -7,6 +7,7 @@ from qmt.infrastructure import serialize_file
 import FreeCAD
 from .part_3d import Part3DData
 from .geo_3d_data import Geo3DData
+from qmt.geometry.freecad.objectConstruction import build
 
 
 def build_3d_geometry(
@@ -68,8 +69,6 @@ def build_3d_geometry(
     data = Geo3DData()
     data.serial_fcdoc = serial_fcdoc
     data.get_data("fcdoc")
-
-    from qmt.geometry.freecad.objectConstruction import build
 
     try:
         built = build(options_dict)
