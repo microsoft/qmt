@@ -36,7 +36,7 @@ class MatData(WithParts):
         """
         self.materials_database = materials_database
         super().__init__(
-            {name: MatPart(mat) for name, mat in materials_mapping.values()}
+            {name: MatPart(mat) for name, mat in materials_mapping.items()}
         )
 
     def get_material(self, part_name: str):
