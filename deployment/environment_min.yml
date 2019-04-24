@@ -4,47 +4,42 @@
 # This file is kept around so that if we want to upgrade version numbers, we can conda build
 # on this. If not please use environment_full_[platform].yml, which is much less likely to give you issues
 # due to packages versioning
-name: py36
+name: py37_min
 channels:
   - conda-forge
 dependencies:
-  # - python=3.6.5 # higher versions introduce fenics errors on Mac OS. Feel free to comment out if on linux
-  - adaptive
-  - black
-  - boost=1.66 # 1.67 (introduced by freecad) has issues
-  - dask
-  - dask-jobqueue
-  - dataclasses # can be removed once we go to python 3.7+
-  - deepdish
-  - descartes
-  - fenics
+  # qmt dependencies
+  - shapely
+  - sympy
   - freecad
-  - future
-  - holoviews
-  - hpc05
-  - h5py
-  - jupyter
-  - jupyter_contrib_nbextensions
-  - kwant
-  - libgcc-ng=7.2.0 # higher versions cause import errors from FreeCAD
-  - libgfortran-ng # need for fenics
+  - scipy
   - matplotlib
+  - dask
+  - h5py
+  # qms dependencies
+  - fenics
+  - kwant
   - mkl
-  - mkl-service
-  - mpi4py
-  - nb_conda
-  - numpy
-  - numpy-stl
-  - petsc
-  - pre_commit
+  - deepdish
+  # used in qms examples
+  - descartes
+  - tqdm
+  - holoviews
+  # for CI, testing, and docs
+  - black
   - pylint
   - pytest
   - pytest-cov
   - pytest-datadir
   - pytest-xdist
-  - rope
-  - scipy
-  - shapely
   - sphinx
-  - sympy=1.0.* # we're not forward compatible
-  - tqdm
+  - pre_commit
+  # other tools (not needed for qmt/qms)
+  - adaptive
+  - dask-jobqueue
+  - hpc05
+  - jupyter
+  - jupyter_contrib_nbextensions
+  - mpi4py
+  - nb_conda
+  - rope
