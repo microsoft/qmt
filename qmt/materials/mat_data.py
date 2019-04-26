@@ -22,7 +22,7 @@ class MatPart:
 
 class MatData(WithParts):
     def __init__(
-        self, materials_database: Materials, materials_mapping: Dict[str, str] = {}
+        self, materials_database: Materials, materials_mapping: Dict[str, str] = None
     ):
         """Class that contains materials information.
 
@@ -32,12 +32,13 @@ class MatData(WithParts):
             The materials database to use.
         materials_mapping : dict
             Mapping of parts to materials.
-            (Default = {})
+            (Default = None)
         """
         self.materials_database = materials_database
-        super().__init__(
-            {name: MatPart(mat) for name, mat in materials_mapping.items()}
-        )
+        if materials_mapping is not None:
+            super().__init__(
+                {name: MatPart(mat) for name, mat in materials_mapping.items()}
+            )
 
     def get_material(self, part_name: str):
         """Get the material for a particular part.
