@@ -206,18 +206,21 @@ class Geo3DData(GeoData):
         """
 
         # Get our new coordinates
-        # This construction ensures that y_new (the first axis in our new 2d coodinate
-        # system) is always aligned (by projection) to one of the old axes, prefering
-        # x, then y, then z
+        # This constructions tries to align the new coordinates to our old coordinates
+        # In particular, the map from projection axis -> new axes is
+        # [1,0,0] -> [0,1,0] [0,0,1]
+        # [0,1,0] -> [1,0,0] [0,0,1]
+        # [0,0,1] -> [1,0,0] [0,1,0]
+
+        # Find out which axis the projection axis is most closely aligned to
         x_new = np.array(self.xsecs[xsec_name]["axis"])
-        y_new = np.array([0.0, 0, 0])
-        axis_ind = -1
-        while not np.any(y_new):
-            axis_ind += 1
-            y_new[axis_ind] = 1
-            y_new -= y_new.dot(x_new) * x_new
-        y_new /= np.linalg.norm(y_new)
+        ind = np.argmax(np.abs(x_new))
+        y_new = np.array([0, 1.0, 0]) if ind == 0 else np.array([1.0, 0, 0])
+        y_new -= y_new.dot(x_new) * x_new
         z_new = np.cross(x_new, y_new)
+        # Adjust our second axis so that the "height axis" is correctly aligned
+        if z_new[2] < 0:
+            z_new = -z_new
 
         def _project(vec):
             """Projects a 3D vector into our 2D cross section plane
