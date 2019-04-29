@@ -73,8 +73,8 @@ input_parts = [substrate, gate1, gate2, gate3, gate4, wrap1, layer2, wrap2, laye
 geo = build_3d_geometry(input_parts=input_parts, input_file=input_file)
 
 # Create a local temporary directory to investigate results
-if not os.path.exists("tmp"):
-    os.makedirs("tmp")
+os.makedirs("tmp", exist_ok=True)
+
 print("Writing in directory tmp:")
 
 print("Writing parametrised instance to FreeCAD file.")
