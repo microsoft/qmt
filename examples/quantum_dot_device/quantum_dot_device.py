@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Example geometry sweeping."""
+"""Example geometry sweeping for electrostatically-gated quantum dot device.
+
+NOTE: The syntax of this example should match the test test_geo_task.
+      If it does not, this example needs to be updated.
+"""
 
 import os
 import numpy as np
