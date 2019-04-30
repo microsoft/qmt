@@ -78,7 +78,7 @@ os.makedirs("tmp", exist_ok=True)
 print("Writing in directory tmp:")
 
 print("Writing parametrised instance to FreeCAD file.")
-geo.write_fcstd(os.path.join("tmp.fcstd"))
+geo.write_fcstd(os.path.join("tmp", "tmp.fcstd"))
 for label, part in geo.parts.items():
     print(f'"{label}" ({part.fc_name} -> {part.built_fc_name}) to STL file.')
     part.write_stl(os.path.join("tmp", label + ".stl"))
