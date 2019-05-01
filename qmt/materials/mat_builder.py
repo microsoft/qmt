@@ -30,6 +30,8 @@ def build_materials(
     ValueError
         If materials_mapping does not contain a key for a part in geo_data.
     """
+    if materials is None:
+        materials = Materials()
 
     # We keep a copy of materials_mapping around, but also set the material property
     # on all the parts
