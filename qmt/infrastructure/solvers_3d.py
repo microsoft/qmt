@@ -64,4 +64,7 @@ def deserialize_fenics_function(
     return potential
 
 
-TransportData = namedtuple("TransportData", ["conductance", "smatrix", "solver"])
+@dataclass
+class TransportData:
+    conductance: float
+    smatrix: kwant.solvers.common.SMatrix
