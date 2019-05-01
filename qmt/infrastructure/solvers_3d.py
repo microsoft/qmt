@@ -16,11 +16,12 @@ from sympy.core.mul import Mul
 class Fem3DData:
     coordinates: UArray
     potential: UArray
-    charge: Optional[UArray]
-    surface_charge_integrals: Optional[Dict[str, Mul]]
-    volume_charge_integrals: Optional[Dict[str, Mul]]
-    uniform_export: Optional[Dict[str, UArray]]
-    fenics_3d_data: Optional[Dict[str, bytes]]
+    reference_level: Mul
+    charge: Optional[UArray] = None
+    surface_charge_integrals: Optional[Dict[str, Mul]] = None
+    volume_charge_integrals: Optional[Dict[str, Mul]] = None
+    uniform_export: Optional[Dict[str, UArray]] = None
+    fenics_3d_data: Optional[Dict[str, bytes]] = None
 
     def get_data(self, data):
         if data == "function":
