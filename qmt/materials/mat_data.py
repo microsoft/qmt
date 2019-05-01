@@ -40,7 +40,7 @@ class MatData(WithParts):
                 {name: MatPart(mat) for name, mat in materials_mapping.items()}
             )
 
-    def get_material(self, part_name: str):
+    def __getitem__(self, part_name: str):
         """Get the material for a particular part.
         
         Parameters
@@ -59,4 +59,4 @@ class MatData(WithParts):
         -------
         Dictionary parts to materials.
         """
-        return {name: self.get_material(name) for name in self.parts.keys()}
+        return {name: self[name] for name in self.parts.keys()}

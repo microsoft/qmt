@@ -38,7 +38,7 @@ def build_3d_geometry(
         qmt.infrastructure.serialize_file. This is useful for passing a
         file into a docker container or other environment that
         doesn't have access to a shared drive. Either this or
-        serialized_input_file must be set (but not both).
+        input_file must be set (but not both).
         (Default value = None)
     params : dict
         Dictionary of parameters to use in FreeCAD.

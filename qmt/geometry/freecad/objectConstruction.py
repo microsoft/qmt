@@ -334,10 +334,10 @@ def build_wire_shell(part, offset=0.0):
     shell_verts = part.shell_verts
     thickness = part.thickness
 
-    if part.depo_mode == part_3d.DepoMode.depo:
+    if part.depo_mode == "depo":
         depoZone = doc.getObject(part.fc_name)
         etchZone = None
-    elif part.depo_mode == part_3d.DepoMode.etch:
+    elif part.depo_mode == "etch":
         depoZone = None
         etchZone = doc.getObject(part.fc_name)
     else:

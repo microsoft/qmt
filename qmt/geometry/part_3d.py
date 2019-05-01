@@ -139,16 +139,6 @@ class WirePart(Geo3DPart):
         super().__init__(label, fc_name, virtual=virtual)
 
 
-class DepoMode(Enum):
-    """
-    'depo' or 'etch' defines the positive or negative mask for the deposition of a wire
-    coating.
-    """
-
-    depo = 1
-    etch = 2
-
-
 class WireShellPart(Geo3DPart):
     def __init__(
         self,
@@ -182,16 +172,16 @@ class WireShellPart(Geo3DPart):
             Whether the part is virtual or not.
             (Default value = False)
         """
+        valid_depo_modes = ["depo", "etch"]
+        if depo_mode not in ["depo", "etch"]:
+            raise ValueError(
+                f"{depo_mode} is not a valid depo mode. Options are {valid_depo_modes}"
+            )
+
         self.thickness = thickness
         self.target_wire = target_wire
         self.shell_verts = shell_verts
-        try:
-            self.depo_mode = DepoMode[depo_mode]
-        except KeyError:
-            raise ValueError(
-                f"{depo_mode} is not a valid depo mode. Options are "
-                f"{[d.name for d in DepoMode]}"
-            )
+        self.depo_mode = depo_mode
         super().__init__(label, fc_name, virtual=virtual)
 
 

@@ -6,21 +6,21 @@ import warnings
 
 
 def build_materials(
-    materials: Materials,
     geo_data: Union[Geo2DData, Geo3DData],
     materials_mapping: Dict[str, str],
+    materials: Materials = None,
 ) -> MatData:
     """Build a MatData object.
 
     Parameters
     ----------
-    materials : Materials
-        A Materials class, representing a materails library. If you want to override
-        properties, use make_materials.
     geo_data : Union[Geo2DData, Geo3DData]
         A 2D or 3D geometry class.
     materials_mapping : dict
         A mapping of parts to materials.
+    materials : Materials
+        A Materials class, representing a materials library. If you want to override
+        properties, use make_materials.
     Returns
     -------
     MatData
