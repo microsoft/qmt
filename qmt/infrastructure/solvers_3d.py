@@ -68,3 +68,4 @@ def deserialize_fenics_function(
 class TransportData:
     conductance: float
     smatrix: kwant.solvers.common.SMatrix
+    disorder: UArray
