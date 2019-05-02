@@ -3,7 +3,9 @@
 
 """Testing data utilities."""
 
-from qmt.data.data_utils import *
+from qmt.infrastructure import store_serial
+import codecs
+import os
 
 
 def test_store_serial(datadir, fix_FCDoc):
@@ -16,7 +18,6 @@ def test_store_serial(datadir, fix_FCDoc):
 
     # Write to a file
     file_path = os.path.join(datadir, "test.fcstd")
-    import codecs
 
     data = codecs.decode(serial_data.encode(), "base64")
     with open(file_path, "wb") as of:

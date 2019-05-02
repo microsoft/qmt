@@ -4,7 +4,7 @@
 """Functions that perform composite executions."""
 
 import numpy as np
-
+from copy import deepcopy
 import logging
 
 # ~ logging.getLogger().setLevel(logging.DEBUG)  # toggle debug logging for this file
@@ -36,7 +36,8 @@ from qmt.geometry.freecad.sketchUtils import (
     findEdgeCycles,
 )
 
-from qmt.data.geometry import Geo3DData, store_serial
+from qmt.infrastructure import store_serial
+from qmt.geometry import Geo3DData, part_3d
 
 
 DBG_OUT = logging.getLogger().level <= logging.DEBUG
@@ -135,23 +136,20 @@ def build(opts):
     built_parts = []
     for input_part in opts["input_parts"]:
 
-        if input_part.directive == "extrude":
+        if isinstance(input_part, part_3d.ExtrudePart):
             part = build_extrude(input_part)
-        elif input_part.directive == "SAG":
+        elif isinstance(input_part, part_3d.SAGPart):
             part = build_sag(input_part)
-        elif input_part.directive == "wire":
+        elif isinstance(input_part, part_3d.WirePart):
             part = build_wire(input_part)
-        elif input_part.directive == "wire_shell":
+        elif isinstance(input_part, part_3d.WireShellPart):
             part = build_wire_shell(input_part)
-        elif input_part.directive == "lithography":
+        elif isinstance(input_part, part_3d.LithographyPart):
             part = build_lithography(input_part, opts, info_holder)
-        elif input_part.directive == "3d_shape":
+        elif isinstance(input_part, part_3d.Geo3DPart):
             part = build_pass(input_part)
         else:
-            raise ValueError(
-                f"Directive {input_part.directive} is not a"
-                " recognized directive type."
-            )
+            raise ValueError(f"{input_part} is not a recognized Geo3DPart type")
 
         assert part is not None
         doc.recompute()
@@ -168,12 +166,12 @@ def build(opts):
 
     # Subtraction (removes the need for subtractlists)
     for i, (input_part, part) in enumerate(zip(opts["input_parts"], built_parts)):
-        if input_part.domain_type == "virtual":
+        if input_part.virtual:
             continue
         for other_input_part, other_part in zip(
             opts["input_parts"][0:i], built_parts[0:i]
         ):
-            if other_input_part.domain_type == "virtual":
+            if other_input_part.virtual:
                 continue
             if checkOverlap([part, other_part]):
                 cut = subtract(
@@ -192,10 +190,11 @@ def build(opts):
     built_parts_dict = {}  # dict for cross sections
     for input_part, built_part in zip(opts["input_parts"], built_parts):
         built_part.Label = input_part.label  # here it's collision free
-        input_part.serial_stp = store_serial([built_part], exportCAD, "stp")
-        input_part.serial_stl = store_serial([built_part], exportMeshed, "stl")
-        input_part.built_fc_name = built_part.Name
-        geo.add_part(input_part.label, input_part)
+        output_part = deepcopy(input_part)
+        output_part.serial_stp = store_serial([built_part], exportCAD, "stp")
+        output_part.serial_stl = store_serial([built_part], exportMeshed, "stl")
+        output_part.built_fc_name = built_part.Name
+        geo.add_part(output_part.label, output_part)
         # dict for cross sections
         built_parts_dict[input_part.label] = built_part
 
@@ -225,7 +224,7 @@ def build_pass(part):
 
 
     """
-    assert part.directive == "3d_shape"
+    assert isinstance(part, part_3d.Geo3DPart)
     existing_part = FreeCAD.ActiveDocument.getObject(part.fc_name)
     assert existing_part is not None
     return existing_part
@@ -244,7 +243,7 @@ def build_extrude(part):
 
 
     """
-    assert part.directive == "extrude"
+    assert isinstance(part, part_3d.ExtrudePart)
     z0 = part.z0
     deltaz = part.thickness
     doc = FreeCAD.ActiveDocument
@@ -273,7 +272,7 @@ def build_sag(part, offset=0.0):
 
 
     """
-    assert part.directive == "SAG"
+    assert isinstance(part, part_3d.SAGPart)
     zBot = part.z0
     zMid = part.z_middle
     zTop = part.thickness + zBot
@@ -302,7 +301,7 @@ def build_wire(part, offset=0.0):
 
 
     """
-    assert part.directive == "wire"
+    assert isinstance(part, part_3d.WirePart)
     doc = FreeCAD.ActiveDocument
     zBottom = part.z0
     width = part.thickness
@@ -327,7 +326,7 @@ def build_wire_shell(part, offset=0.0):
 
 
     """
-    assert part.directive == "wire_shell"
+    assert isinstance(part, part_3d.WireShellPart)
     doc = FreeCAD.ActiveDocument
     zBottom = part.target_wire.z0
     radius = part.target_wire.thickness
@@ -342,7 +341,7 @@ def build_wire_shell(part, offset=0.0):
         depoZone = None
         etchZone = doc.getObject(part.fc_name)
     else:
-        raise ValueError("Unknown depo_mode " + part.depo_mode)
+        raise ValueError(f"Unknown depo_mode {part.depo_mode}")
 
     shell = buildAlShell(
         wireSketch,
@@ -376,7 +375,7 @@ def build_lithography(part, opts, info_holder):
 
 
     """
-    assert part.directive == "lithography"
+    assert isinstance(part, part_3d.LithographyPart)
     if not info_holder.litho_setup_done:
         initialize_lithography(info_holder, opts, fillShells=True)
         info_holder.litho_setup_done = True
@@ -637,7 +636,7 @@ def initialize_lithography(info, opts, fillShells=True):
     base_substrate_parts = []
     for part in opts["input_parts"]:
         # If this part is a litho step
-        if part.directive == "lithography":
+        if isinstance(part, part_3d.LithographyPart):
             layer_num = part.layer_num  # layer_num of this part
             # Add the layer_num to the layer dictionary:
             if layer_num not in layers:
@@ -759,13 +758,13 @@ def gen_offset(opts, obj, offsetVal):
             break
     if my_part_label is None:  # If we haven't found the part, it's not special
         treatment = "standard"
-    else:  # If we have, figure out which directive we used to make it
+    else:  # If we have, figure out which class we used to make it
         for input_part in opts["input_parts"]:
             if input_part.label == part_label:
                 break
-        treatment = input_part.directive
+        treatment = type(input_part)
     # Extrude or lithography parts are treated normally:
-    if treatment == "extrude" or treatment == "lithography":
+    if treatment == part_3d.ExtrudePart or treatment == part_3d.LithographyPart:
         treatment = "standard"
     if treatment == "standard":
         # Apparently the offset function is buggy for very small offsets...
@@ -781,11 +780,11 @@ def gen_offset(opts, obj, offsetVal):
             offsetDupe = copy_move(offset)
             doc.recompute()
             delete(offset)
-    elif treatment == "wire":
+    elif treatment == part_3d.WirePart:
         offsetDupe = build_wire(input_part, offset=offsetVal)
-    elif treatment == "wire_shell":
+    elif treatment == part_3d.WireShellPart:
         offsetDupe = build_wire_shell(input_part, offset=offsetVal)
-    elif treatment == "SAG":
+    elif treatment == part_3d.SAGPart:
         offsetDupe = build_sag(input_part, offset=offsetVal)
     doc.recompute()
 

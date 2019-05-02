@@ -3,46 +3,31 @@
 
 from collections import namedtuple
 import sympy.physics.units as spu
+import kwant  # kwant import to stop fenics from segfaulting
+from qmt.infrastructure import store_serial, load_serial
+import fenics as fn
+from dataclasses import dataclass
+from typing import Dict, Optional
+from qmt.physics_constants import UArray
+from sympy.core.mul import Mul
 
-try:
-    import kwant  # kwant import to stop fenics from segfaulting
-except:
-    pass
-from qmt.data import store_serial, load_serial
 
-
+@dataclass
 class Fem3DData:
-    def __init__(
-        self,
-        coordinates=None,
-        potential=None,
-        charge=None,
-        surface_charge_integrals=None,
-        volume_charge_integrals=None,
-        uniform_export=None,
-        fenics_3d_data=None,
-        vunit=spu.V,
-        lunit=spu.um,
-        eunit=spu.eV,
-        qunit=spu.coulomb,
-    ):
-        self.coordinates = coordinates
-        self.potential = potential
-        self.charge = charge
-        self.surface_charge_integrals = surface_charge_integrals
-        self.volume_charge_integrals = volume_charge_integrals
-        self.uniform_export = uniform_export
-        self.fenics_3d_data = fenics_3d_data
-        self.vunit = vunit
-        self.lunit = lunit
-        self.eunit = eunit
-        self.qcunit = qunit
+    coordinates: UArray
+    potential: UArray
+    reference_level: Mul
+    charge: Optional[UArray] = None
+    surface_charge_integrals: Optional[Dict[str, Mul]] = None
+    volume_charge_integrals: Optional[Dict[str, Mul]] = None
+    uniform_export: Optional[Dict[str, UArray]] = None
+    fenics_3d_data: Optional[Dict[str, bytes]] = None
 
     def get_data(self, data):
         if data == "function":
             return deserialize_fenics_function(self.fenics_3d_data)
         else:
-            print("Unknown datatype {data} for get_data function".format(data=data))
+            print(f"Unknown datatype {data} for get_data function")
 
 
 class SerialFenicsFunctionData:
@@ -52,8 +37,6 @@ class SerialFenicsFunctionData:
 
 
 def serialize_fenics_function(mesh, fenics_function):
-    import fenics as fn
-
     def _write_fenics_file(data, path):
         fn.File(path) << data
 
@@ -68,7 +51,6 @@ def deserialize_fenics_function(
 ):
     serial_mesh = serial_function_data.serial_mesh
     serial_fenics_function = serial_function_data.serial_function
-    import fenics as fn
 
     mesh = load_serial(serial_mesh, fn.Mesh, ext_format="xml")
 
@@ -82,6 +64,8 @@ def deserialize_fenics_function(
     return potential
 
 
-TransportData = namedtuple(
-    "TransportData", ["conductance", "smatrix", "solver", "disorder"]
-)
+@dataclass
+class TransportData:
+    conductance: float
+    smatrix: kwant.solvers.common.SMatrix
+    disorder: UArray

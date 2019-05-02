@@ -13,17 +13,13 @@ import re
 import sys
 import textwrap
 from ast import literal_eval
-
 import numpy as np
+import qmt.physics_constants as pc
 
-try:
-    import qmt.physics_constants as pc
+units = pc.units
+parseUnit = pc.parse_unit
+toFloat = pc.to_float
 
-    units = pc.units
-    parseUnit = pc.parse_unit
-    toFloat = pc.to_float
-except ImportError:  # to avoid problems if we are using FreeCAD
-    pass
 
 __all__ = ["Material", "Materials", "conduction_band_offset", "valence_band_offset"]
 
