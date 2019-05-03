@@ -105,7 +105,7 @@ def test_sweep(fix_task_env):
     assert len(results) == 630 and results[3] == 0.0
 
 
-def test_docker_sweep(fix_task_env):
+def old_test_docker_sweep(fix_task_env):
     import subprocess
     from dask import delayed as dl
     from dask.distributed import Client

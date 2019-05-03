@@ -11,10 +11,10 @@ dependencies:
   # - python=3.6.5 # higher versions introduce fenics errors on Mac OS. Feel free to comment out if on linux
   - adaptive
   - black
-  - boost=1.66 # 1.67 (introduced by freecad) has issues
+  # - boost=1.66 # 1.67 (introduced by freecad) has issues
   - dask
   - dask-jobqueue
-  - dataclasses # can be removed once we go to python 3.7+
+  # - dataclasses # can be removed once we go to python 3.7+
   - deepdish
   - descartes
   - fenics
@@ -26,8 +26,8 @@ dependencies:
   - jupyter
   - jupyter_contrib_nbextensions
   - kwant
-  - libgcc-ng=7.2.0 # higher versions cause import errors from FreeCAD
-  - libgfortran-ng # need for fenics
+  # - libgcc-ng=7.2.0 # higher versions cause import errors from FreeCAD
+  # - libgfortran-ng # need for fenics
   - matplotlib
   - mkl
   - mkl-service
@@ -46,5 +46,5 @@ dependencies:
   - scipy
   - shapely
   - sphinx
-  - sympy=1.0.* # we're not forward compatible
+  - sympy #=1.0.* # we're not forward compatible
   - tqdm
