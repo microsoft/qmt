@@ -41,7 +41,7 @@ def test_dot_geo(datadir):
     layer3 = part_3d.ExtrudePart("Layer 3", "Sketch023", z0=0, thickness=30)
 
     # Parameters for geometry building
-    input_file = os.path.join(datadir, "qd_device_parts.fcstd")
+    input_file = os.path.join(datadir, "qd_device_parts.FCStd")
     input_parts = [substrate, gate1, wrap1, layer2, wrap2, layer3]
 
     # Compute parametrised geometries in parallel with dask
