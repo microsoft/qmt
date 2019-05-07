@@ -160,6 +160,7 @@ class UArray(np.ndarray):
     """Extend a numpy array to have units information from sympy
     From https://docs.scipy.org/doc/numpy/user/basics.subclassing.html#simple-example-adding-an-extra-attribute-to-ndarray
 
+    Pickle stuff copied from https://stackoverflow.com/questions/26598109/preserve-custom-attributes-when-pickling-subclass-of-numpy-array
     Parameters
     ----------
 
@@ -185,7 +186,20 @@ class UArray(np.ndarray):
         # see InfoArray.__array_finalize__ for comments
         if obj is None:
             return
-        self.info = getattr(obj, "info", None)
+        self.unit = getattr(obj, "unit", None)
+
+    def __reduce__(self):
+        # Get the parent's __reduce__ tuple
+        pickled_state = super(UArray, self).__reduce__()
+        # Create our own tuple to pass to __setstate__
+        new_state = pickled_state[2] + (self.unit,)
+        # Return a tuple that replaces the parent's __setstate__ tuple with our own
+        return (pickled_state[0], pickled_state[1], new_state)
+
+    def __setstate__(self, state):
+        self.unit = state[-1]  # Set the unit attribute
+        # Call the parent's __setstate__ with the other tuple elements.
+        super(UArray, self).__setstate__(state[0:-1])
 
 
 __all__ = ["units", "constants", "matrices", "parse_unit", "to_float", "UArray"]
