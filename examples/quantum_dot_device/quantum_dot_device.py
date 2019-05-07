@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """Example geometry sweeping for electrostatically-gated quantum dot device.
-NOTE: The syntax of this example should match the test test_geo_task.
+NOTE: The syntax of this example should match the test 'test_dot_geo.'
       If it does not, this example needs to be updated.
 """
 
