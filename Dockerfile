@@ -17,6 +17,7 @@ RUN apt-get -qq update && \
     hdf5-tools \
     libgl1-mesa-glx \
     libopenmpi-dev \
+    libopenblas-dev \
     make \
     slurm-client \
     software-properties-common \
