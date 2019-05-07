@@ -123,7 +123,7 @@ class Material(collections.Mapping):
             ) ** (2 / 3.0)
 
         # Retrieve Luttinger parameters
-        gamma1, gamma2, gamma3 = (self["luttingerGamma%s" % i] for i in (1, 2, 3))
+        gamma1, gamma2, gamma3 = (self[f"luttingerGamma{i}"] for i in (1, 2, 3))
         if band == "heavy":
             sign = -1
         elif band == "light":
@@ -431,7 +431,7 @@ class Materials(collections.Mapping):
                 db = json.load(myFile)
             self.deserialize_dict(db)
         except IOError:
-            print("Could not load materials file %s." % self.matPath)
+            print(f"Could not load materials file {self.matPath}.")
             print("Generating a new file at that location...")
             generate_file(self.matPath)
             self.load()
