@@ -185,7 +185,7 @@ class UArray(np.ndarray):
         # see InfoArray.__array_finalize__ for comments
         if obj is None:
             return
-        self.info = getattr(obj, "info", None)
+        self.unit = getattr(obj, "unit", None)
 
 
 __all__ = ["units", "constants", "matrices", "parse_unit", "to_float", "UArray"]
