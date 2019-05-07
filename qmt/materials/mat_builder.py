@@ -35,8 +35,8 @@ def build_materials(
 
     # We keep a copy of materials_mapping around, but also set the material property
     # on all the parts
-    for name in geo_data.parts.keys():
-        if name not in materials_mapping:
+    for name, part in geo_data.parts.items():
+        if name not in materials_mapping and not part.virtual:
             raise ValueError(
                 f"materials_mapping does not contain material for part {name}"
             )
