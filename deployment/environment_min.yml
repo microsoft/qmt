@@ -8,38 +8,38 @@ name: py37
 channels:
   - conda-forge
 dependencies:
-  - adaptive
-  - black
+  # qmt dependencies
   - dask
-  - dask-jobqueue
-  - deepdish
-  - descartes
-  - fenics
   - freecad
-  - future
-  - holoviews
-  - hpc05
   - h5py
-  - jupyter
-  - jupyter_contrib_nbextensions
-  - kwant
   - matplotlib
+  - scipy
+  - shapely
+  - sympy
+  # qms dependencies
+  - deepdish
+  - fenics
+  - kwant
   - mkl
-  - mkl-service
-  - mpi4py
-  - nb_conda
-  - numpy
-  - numpy-stl
-  - petsc
+  # used in qms examples
+  - descartes
+  - holoviews
+  - tqdm
+  # for CI, testing, and docs
+  - black
   - pre_commit
   - pylint
   - pytest
   - pytest-cov
   - pytest-datadir
   - pytest-xdist
-  - rope
-  - scipy
-  - shapely
   - sphinx
-  - sympy
-  - tqdm
+  # other tools (not needed for qmt/qms)
+  - adaptive
+  - dask-jobqueue
+  - hpc05
+  - jupyter
+  - jupyter_contrib_nbextensions
+  - mpi4py
+  - nb_conda
+  - rope
