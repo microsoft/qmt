@@ -196,7 +196,7 @@ class UArray(np.ndarray):
         return (pickled_state[0], pickled_state[1], new_state)
 
     def __setstate__(self, state):
-        self.info = state[-1]  # Set the info attribute
+        self.unit = state[-1]  # Set the info attribute
         # Call the parent's __setstate__ with the other tuple elements.
         super(UArray, self).__setstate__(state[0:-1])
 
