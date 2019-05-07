@@ -187,5 +187,18 @@ class UArray(np.ndarray):
             return
         self.unit = getattr(obj, "unit", None)
 
+    def __reduce__(self):
+        # Get the parent's __reduce__ tuple
+        pickled_state = super(UArray, self).__reduce__()
+        # Create our own tuple to pass to __setstate__
+        new_state = pickled_state[2] + (self.unit,)
+        # Return a tuple that replaces the parent's __setstate__ tuple with our own
+        return (pickled_state[0], pickled_state[1], new_state)
+
+    def __setstate__(self, state):
+        self.info = state[-1]  # Set the info attribute
+        # Call the parent's __setstate__ with the other tuple elements.
+        super(UArray, self).__setstate__(state[0:-1])
+
 
 __all__ = ["units", "constants", "matrices", "parse_unit", "to_float", "UArray"]
