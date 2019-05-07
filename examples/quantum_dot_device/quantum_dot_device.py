@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 """Example geometry sweeping for electrostatically-gated quantum dot device.
-
 NOTE: The syntax of this example should match the test test_geo_task.
       If it does not, this example needs to be updated.
 """
@@ -10,64 +9,36 @@ NOTE: The syntax of this example should match the test test_geo_task.
 import os
 import numpy as np
 
-from qmt.data import Part3DData
-from qmt.tasks import build_3d_geometry
+from qmt.geometry import part_3d, build_3d_geometry
 
 # Set up geometry task
 
-substrate = Part3DData(
-    "Substrate", "Sketch027", "extrude", "dielectric", z0=-2, thickness=2
-)
+substrate = part_3d.ExtrudePart("Substrate", "Sketch027", z0=-2, thickness=2.0)
 
-gate1 = Part3DData(
-    "Gate 1", "Sketch", "extrude", "metal_gate", material="Au", z0=0, thickness=10
-)
-gate2 = Part3DData(
-    "Gate 2", "Sketch003", "extrude", "metal_gate", material="Au", z0=0, thickness=10
-)
-gate3 = Part3DData(
-    "Gate 3", "Sketch006", "extrude", "metal_gate", material="Au", z0=0, thickness=10
-)
-gate4 = Part3DData(
-    "Gate 4", "Sketch011", "extrude", "metal_gate", material="Au", z0=0, thickness=10
-)
+gate1 = part_3d.ExtrudePart("Gate 1", "Sketch", z0=0, thickness=10)
 
+gate2 = part_3d.ExtrudePart("Gate 2", "Sketch003", z0=0, thickness=10)
 
-wrap1 = Part3DData(
-    "First Wrap",
+gate3 = part_3d.ExtrudePart("Gate 3", "Sketch006", z0=0, thickness=10)
+
+gate4 = part_3d.ExtrudePart("Gate 4", "Sketch011", z0=0, thickness=10)
+
+wrap1 = part_3d.LithographyPart(
+    "Wrap 1",
     "Sketch028",
-    "lithography",
-    "dielectric",
-    z0=0.0,
-    layer_num=1,
+    z0=0,
     thickness=2,
+    layer_num=1,
     litho_base=[substrate, gate1, gate2, gate3, gate4],
 )
 
-layer2 = Part3DData(
-    "Layer 2",
-    "Sketch025",
-    "lithography",
-    "metal_gate",
-    material="Au",
-    z0=0,
-    thickness=10.0,
-    layer_num=2,
+layer2 = part_3d.LithographyPart(
+    "Layer 2", "Sketch025", z0=0, thickness=10, layer_num=2
 )
 
-wrap2 = Part3DData(
-    "Second Wrap",
-    "Sketch029",
-    "lithography",
-    "dielectric",
-    z0=0.0,
-    layer_num=3,
-    thickness=2,
-)
+wrap2 = part_3d.LithographyPart("Wrap 2", "Sketch029", z0=0, thickness=2, layer_num=3)
 
-layer3 = Part3DData(
-    "Layer 3", "Sketch026", "extrude", "metal_gate", material="Au", z0=0, thickness=30
-)
+layer3 = part_3d.ExtrudePart("Layer 3", "Sketch026", z0=0, thickness=30)
 
 # Parameters for geometry building
 input_file = "qd_device_parts.fcstd"
