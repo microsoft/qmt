@@ -1,6 +1,7 @@
 name: py36
 channels:
   - conda-forge
+  - conda-forge/label/cf201901
 dependencies:
   - adaptive=0.7.6=py36_0
   - alabaster=0.7.12=py_0
@@ -138,7 +139,7 @@ dependencies:
   - lz4-c=1.8.3=hfc679d8_1
   - lzo=2.10=h470a237_0
   - markupsafe=1.1.0=py36h470a237_0
-  - matplotlib=2.2.2=py36h0e671d2_0
+  - matplotlib=2.2.2=py36_1
   - mccabe=0.6.1=py_1
   - mesalib=17.3.9=h99bdab3_1
   - metis=5.1.0=hfc679d8_3

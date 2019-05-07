@@ -4,74 +4,43 @@
 """Testing the geometry task."""
 
 
+import numpy as np
+import os
+import tempfile
+from qmt.geometry import part_3d, build_3d_geometry
+
+
 def test_geo_task(datadir):
     """
     Tests the build geometry task. For now, just verifies that the build doesn't encounter errors.
     """
-    from qmt.tasks import build_3d_geometry
-    from qmt.data import Part3DData
-    import numpy as np
-    import os
-    import tempfile
 
-    block1 = Part3DData(
-        "Parametrised block",
-        "Sketch",
-        "extrude",
-        "dielectric",
-        material="air",
-        thickness=5.0,
-        z0=-2.5,
+    block1 = part_3d.ExtrudePart("Parametrised block", "Sketch", thickness=5.0, z0=-2.5)
+    block2 = part_3d.ExtrudePart("Two blocks", "Sketch001", thickness=0.5)
+    sag = part_3d.SAGPart(
+        "Garage", "Sketch002", z0=0, z_middle=5, thickness=6, t_in=2.5, t_out=0.5
     )
-    block2 = Part3DData(
-        "Two blocks", "Sketch001", "extrude", "metal_gate", material="Au", thickness=0.5
-    )
-    sag = Part3DData(
-        "Garage",
-        "Sketch002",
-        "SAG",
-        "metal_gate",
-        material="Au",
-        z0=0,
-        z_middle=5,
-        thickness=6,
-        t_in=2.5,
-        t_out=0.5,
-    )
-    wire = Part3DData(
-        "Nanowire", "Sketch003", "wire", "semiconductor", z0=0, thickness=0.5
-    )
-    shell = Part3DData(
+    wire = part_3d.WirePart("Nanowire", "Sketch003", z0=0, thickness=0.5)
+    shell = part_3d.WireShellPart(
         "Wire cover",
         "Sketch004",
-        "wire_shell",
-        "metal_gate",
         depo_mode="depo",
         target_wire=wire,
         thickness=0.2,
         shell_verts=[1, 2],
     )
-    block3 = Part3DData("Passthrough", "Box", "3d_shape", "metal_gate")
-    substrate = Part3DData(
-        "Substrate", "Sketch005", "extrude", "dielectric", z0=-2, thickness=2
-    )
-    wrap = Part3DData(
+    block3 = part_3d.Geo3DPart("Passthrough", "Box")
+    substrate = part_3d.ExtrudePart("Substrate", "Sketch005", z0=-2, thickness=2)
+    wrap = part_3d.LithographyPart(
         "First Layer",
         "Sketch006",
-        "lithography",
-        "dielectric",
         z0=0,
         layer_num=1,
         thickness=4,
         litho_base=[substrate],
     )
-    wrap2 = Part3DData(
-        "Second Layer",
-        "Sketch007",
-        "lithography",
-        "dielectric",
-        layer_num=2,
-        thickness=1,
+    wrap2 = part_3d.LithographyPart(
+        "Second Layer", "Sketch007", layer_num=2, thickness=1
     )
     input_file_path = os.path.join(datadir, "geometry_test.fcstd")
     print(input_file_path)
@@ -87,6 +56,6 @@ def test_geo_task(datadir):
     # Investigate results
     with tempfile.TemporaryDirectory() as temp_dir_path:
         for i, result in enumerate(results):
-            file_name = os.path.join(temp_dir_path, str(i) + ".fcstd")
+            file_name = os.path.join(temp_dir_path, f"{i}.fcstd")
             result.write_fcstd(file_name)
             # TODO: should find a meaningful test here

@@ -1,6 +1,7 @@
 name: py36
 channels:
   - conda-forge
+  - conda-forge/label/cf201901
 dependencies:
   - adaptive=0.7.6=py36_0
   - alabaster=0.7.12=py_0
