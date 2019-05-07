@@ -922,7 +922,7 @@ def screened_A_UnionList(info, opts, obj, t, ti, offsetTuple, checkOffsetTuple):
 
 
 def H_offset(info, opts, layer_num, objID, tList=[]):
-    """For a given layer_num=n and ObjID=i, compute the deposited object.
+    r"""For a given layer_num=n and ObjID=i, compute the deposited object.
 
     ```latex
     H_{n,i}(t) = C_{n,i}(t) \cap [ B_{n,i}(t) \cup (\cup_{m<n;j} H_{m,j}(t_i+t)) \cup (\cup_k A_k(t_i + t))],
@@ -1012,7 +1012,7 @@ def H_offset(info, opts, layer_num, objID, tList=[]):
 
 
 def gen_U(info, layer_num, objID):
-    """For a given layer_num and objID, compute the quantity:
+    r"""For a given layer_num and objID, compute the quantity:
     ```latex
     U_{n,i}(t) = (\cup_{m<n;j} G_{m,j}) \cup (\cup_{k} A_k),
     ```

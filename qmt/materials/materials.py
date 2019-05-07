@@ -67,7 +67,7 @@ class Material(collections.Mapping):
         try:
             value = self.properties[key]
         except KeyError:
-            raise KeyError("KeyError: material '{}' has no '{}'".format(self.name, key))
+            raise KeyError(f"KeyError: material '{self.name}' has no '{key}'")
         if key in self.energy_quantities:
             value *= self.energyUnit
         return value
@@ -129,7 +129,7 @@ class Material(collections.Mapping):
         elif band == "light":
             sign = 1
         else:
-            raise RuntimeError("invalid band: {}".format(band))
+            raise RuntimeError(f"invalid band: {band}")
 
         # DOS effective mass corresponding to anisotropic (possibly warped) band.
         # [We use the expansion from Lax and Mavroides (1955) Eq. 15;
@@ -772,8 +772,8 @@ def write_database_to_markdown(out_file, mat_lib):
         ),
         file=out_file,
     )
-    scale_factors = dict(
-        (p, 1e-3)
+    scale_factors = {
+        p: 1e-3
         for p in (
             "workFunction",
             "fermiEnergy",
@@ -784,7 +784,7 @@ def write_database_to_markdown(out_file, mat_lib):
             "interbandMatrixElement",
             "spinOrbitSplitting",
         )
-    )
+    }
     table = []
     bowing_mats = sorted(mat_lib.bowingParameters.keys())
     bowing_props = []

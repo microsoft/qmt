@@ -57,7 +57,7 @@ def parse_unit(s):
     # through
     if hasattr(s, "subs"):
         return s
-    raise RuntimeError("unknown unit: {}".format(s))
+    raise RuntimeError(f"unknown unit: {s}")
 
 
 constants = SimpleNamespace(
@@ -190,7 +190,7 @@ class UArray(np.ndarray):
 
     def __reduce__(self):
         # Get the parent's __reduce__ tuple
-        pickled_state = super(UArray, self).__reduce__()
+        pickled_state = super().__reduce__()
         # Create our own tuple to pass to __setstate__
         new_state = pickled_state[2] + (self.unit,)
         # Return a tuple that replaces the parent's __setstate__ tuple with our own
@@ -199,7 +199,7 @@ class UArray(np.ndarray):
     def __setstate__(self, state):
         self.unit = state[-1]  # Set the unit attribute
         # Call the parent's __setstate__ with the other tuple elements.
-        super(UArray, self).__setstate__(state[0:-1])
+        super().__setstate__(state[0:-1])
 
 
 __all__ = ["units", "constants", "matrices", "parse_unit", "to_float", "UArray"]

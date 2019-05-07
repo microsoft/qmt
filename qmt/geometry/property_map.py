@@ -101,9 +101,9 @@ class MaterialPropertyMap(PropertyMap):
         fill_value="raise",
     ):
         self.fillValue = fill_value
-        self.materialsDict = dict(
-            (p, mat_lib.find(m, eunit)) for p, m in part_materials.items()
-        )
+        self.materialsDict = {
+            p: mat_lib.find(m, eunit) for p, m in part_materials.items()
+        }
 
         self.partProps = {}
         for p, mat in self.materialsDict.items():
@@ -131,4 +131,4 @@ class MaterialPropertyMap(PropertyMap):
                     raise
                 return self.fillValue
 
-        super(MaterialPropertyMap, self).__init__(part_map, prop_map)
+        super().__init__(part_map, prop_map)
