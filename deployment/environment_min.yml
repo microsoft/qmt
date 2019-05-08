@@ -20,7 +20,6 @@ dependencies:
   - deepdish
   - fenics
   - kwant
-  - mkl
   - mkl-service
   # used in qms examples
   - descartes
