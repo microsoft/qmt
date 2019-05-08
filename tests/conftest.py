@@ -4,9 +4,9 @@
 """Fixtures for QMT unit tests."""
 
 import os
-import sys
 import pytest
 import qmt
+import sys
 
 
 @pytest.fixture(scope="session")
