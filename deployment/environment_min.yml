@@ -20,13 +20,14 @@ dependencies:
   - deepdish
   - fenics
   - kwant
-  - mkl
+  - mkl-service
   # used in qms examples
   - descartes
   - holoviews
   - tqdm
   # for CI, testing, and docs
   - black
+  - conda-build
   - pre_commit
   - pylint
   - pytest

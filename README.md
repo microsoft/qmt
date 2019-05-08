@@ -18,7 +18,7 @@ Note that this initial release does not contain examples or introductory documen
 
 We are using GitHub Flow for the development of this code. Please see [here](https://guides.github.com/introduction/flow/) for a tutorial.
 
-This project uses [black](https://github.com/ambv/black) to improve code readability and to make changesets more readable. The package is included with the conda environment, and you can run it with `black [path_to_qmt] -t py36`. There's an included pre-commit hook that automatically formats your code on commit. It also integrates with popular IDEs such as [PyCharm](https://plugins.jetbrains.com/plugin/10563-black-pycharm) and [VSCode](https://code.visualstudio.com/docs/python/editing#_formatting).
+This project uses [black](https://github.com/ambv/black) to improve code readability and to make changesets more readable. The package is included with the conda environment, and you can run it with `black [path_to_qmt] -t py37`. There's an included pre-commit hook that automatically formats your code on commit. It also integrates with popular IDEs such as [PyCharm](https://plugins.jetbrains.com/plugin/10563-black-pycharm) and [VSCode](https://code.visualstudio.com/docs/python/editing#_formatting).
 
 ## Contributing
 
