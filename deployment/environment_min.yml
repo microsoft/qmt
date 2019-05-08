@@ -21,6 +21,7 @@ dependencies:
   - fenics
   - kwant
   - mkl-service
+  - openblas # fenics needs this, but somehow fenics didn't include this as a dependency when conda forge moved to mkl
   # used in qms examples
   - descartes
   - holoviews
