@@ -171,6 +171,8 @@ class Geo2DData(GeoData):
                 else:
                     part1 = part
                 pgn = Polygon(LinearRing(part1))
+            else:
+                pgn = part
 
             patch = descartes.PolygonPatch(pgn, fc=colors[pn].upper(), label=part_name)
             ax.add_patch(patch)
