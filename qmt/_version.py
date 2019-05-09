@@ -53,7 +53,7 @@ def pep440_format(version_info):
         if release.endswith("-dev") or release.endswith(".dev"):
             version_parts.append(dev)
         else:  # prefer PEP440 over strict adhesion to semver
-            version_parts.append(".dev{}".format(dev))
+            version_parts.append(f".dev{dev}")
 
     if labels:
         version_parts.append("+")
@@ -150,13 +150,13 @@ def get_version_from_git_archive(version_info):
         return None
 
     VTAG = "tag: v"
-    refs = set(r.strip() for r in refnames.split(","))
-    version_tags = set(r[len(VTAG) :] for r in refs if r.startswith(VTAG))
+    refs = {r.strip() for r in refnames.split(",")}
+    version_tags = {r[len(VTAG) :] for r in refs if r.startswith(VTAG)}
     if version_tags:
         release, *_ = sorted(version_tags)  # prefer e.g. "2.0" over "2.0rc1"
         return Version(release, dev=None, labels=None)
     else:
-        return Version("unknown", dev=None, labels=["g{}".format(git_hash)])
+        return Version("unknown", dev=None, labels=[f"g{git_hash}"])
 
 
 __version__ = get_version()

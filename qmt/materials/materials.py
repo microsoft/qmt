@@ -67,7 +67,7 @@ class Material(collections.Mapping):
         try:
             value = self.properties[key]
         except KeyError:
-            raise KeyError("KeyError: material '{}' has no '{}'".format(self.name, key))
+            raise KeyError(f"KeyError: material '{self.name}' has no '{key}'")
         if key in self.energy_quantities:
             value *= self.energyUnit
         return value
@@ -123,13 +123,13 @@ class Material(collections.Mapping):
             ) ** (2 / 3.0)
 
         # Retrieve Luttinger parameters
-        gamma1, gamma2, gamma3 = (self["luttingerGamma%s" % i] for i in (1, 2, 3))
+        gamma1, gamma2, gamma3 = (self[f"luttingerGamma{i}"] for i in (1, 2, 3))
         if band == "heavy":
             sign = -1
         elif band == "light":
             sign = 1
         else:
-            raise RuntimeError("invalid band: {}".format(band))
+            raise RuntimeError(f"invalid band: {band}")
 
         # DOS effective mass corresponding to anisotropic (possibly warped) band.
         # [We use the expansion from Lax and Mavroides (1955) Eq. 15;
@@ -431,7 +431,7 @@ class Materials(collections.Mapping):
                 db = json.load(myFile)
             self.deserialize_dict(db)
         except IOError:
-            print("Could not load materials file %s." % self.matPath)
+            print(f"Could not load materials file {self.matPath}.")
             print("Generating a new file at that location...")
             generate_file(self.matPath)
             self.load()
@@ -772,8 +772,8 @@ def write_database_to_markdown(out_file, mat_lib):
         ),
         file=out_file,
     )
-    scale_factors = dict(
-        (p, 1e-3)
+    scale_factors = {
+        p: 1e-3
         for p in (
             "workFunction",
             "fermiEnergy",
@@ -784,7 +784,7 @@ def write_database_to_markdown(out_file, mat_lib):
             "interbandMatrixElement",
             "spinOrbitSplitting",
         )
-    )
+    }
     table = []
     bowing_mats = sorted(mat_lib.bowingParameters.keys())
     bowing_props = []
