@@ -211,6 +211,13 @@ def build(opts):
     return geo
 
 
+def get_freecad_object(doc, fc_name):
+    obj = doc.getObject(fc_name)
+    if obj is None:
+        raise ValueError(f"Cannot find object with name {fc_name}")
+    return obj
+
+
 def build_pass(part):
     """Pass a part unchanged.
 
@@ -225,7 +232,7 @@ def build_pass(part):
 
     """
     assert isinstance(part, part_3d.Geo3DPart)
-    existing_part = FreeCAD.ActiveDocument.getObject(part.fc_name)
+    existing_part = get_freecad_object(FreeCAD.ActiveDocument, part.fc_name)
     assert existing_part is not None
     return existing_part
 
@@ -247,7 +254,7 @@ def build_extrude(part):
     z0 = part.z0
     deltaz = part.thickness
     doc = FreeCAD.ActiveDocument
-    sketch = doc.getObject(part.fc_name)
+    sketch = get_freecad_object(doc, part.fc_name)
     splitSketches = splitSketch(sketch)
     extParts = []
     for sketch in splitSketches:
@@ -279,7 +286,7 @@ def build_sag(part, offset=0.0):
     tIn = part.t_in
     tOut = part.t_out
     doc = FreeCAD.ActiveDocument
-    sketch = doc.getObject(part.fc_name)
+    sketch = get_freecad_object(doc, part.fc_name)
     sag = makeSAG(sketch, zBot, zMid, zTop, tIn, tOut, offset=offset)[0]
     sag.Label = part.label
     doc.recompute()
@@ -305,7 +312,7 @@ def build_wire(part, offset=0.0):
     doc = FreeCAD.ActiveDocument
     zBottom = part.z0
     width = part.thickness
-    sketch = doc.getObject(part.fc_name)
+    sketch = get_freecad_object(doc, part.fc_name)
     wire = buildWire(sketch, zBottom, width, offset=offset)
     wire.Label = part.label
     return wire
@@ -330,16 +337,16 @@ def build_wire_shell(part, offset=0.0):
     doc = FreeCAD.ActiveDocument
     zBottom = part.target_wire.z0
     radius = part.target_wire.thickness
-    wireSketch = doc.getObject(part.target_wire.fc_name)
+    wireSketch = get_freecad_object(doc, part.target_wire.fc_name)
     shell_verts = part.shell_verts
     thickness = part.thickness
 
     if part.depo_mode == "depo":
-        depoZone = doc.getObject(part.fc_name)
+        depoZone = get_freecad_object(doc, part.fc_name)
         etchZone = None
     elif part.depo_mode == "etch":
         depoZone = None
-        etchZone = doc.getObject(part.fc_name)
+        etchZone = get_freecad_object(doc, part.fc_name)
     else:
         raise ValueError(f"Unknown depo_mode {part.depo_mode}")
 
@@ -658,7 +665,7 @@ def initialize_lithography(info, opts, fillShells=True):
             # A given part references a base sketch. However, we need to split
             # the sketch here into possibly disjoint sub-sketches to work
             # with them:
-            sketch = doc.getObject(part.fc_name)
+            sketch = get_freecad_object(doc, part.fc_name)
             splitSketches = splitSketch(sketch)
             for mySplitSketch in splitSketches:
                 objID = len(layer["objIDs"])
@@ -680,7 +687,7 @@ def initialize_lithography(info, opts, fillShells=True):
             built_part_name = opts["built_part_names"][base_substrate.label]
         except:
             raise KeyError(f"No substrate built for '{base_substrate.label}'")
-        info.lithoDict["substrate"][()] += [doc.getObject(built_part_name)]
+        info.lithoDict["substrate"][()] += [get_freecad_object(doc, built_part_name)]
     # ~ import sys
     # ~ sys.stderr.write(">>> litdic " + str(info.lithoDict) + "\n")
 

@@ -28,7 +28,7 @@ class Geo3DPart:
             (Default value = False)
         """
         self.built_fc_name: Optional[str] = None  # This gets set on geometry build
-        self.fc_name = label if fc_name is None else fc_name
+        self.fc_name = fc_name
         self.label = label
         self.serial_stl: Optional[str] = None  # This gets set on geometry build
         self.serial_stp: Optional[str] = None  # This gets set on geometry build
