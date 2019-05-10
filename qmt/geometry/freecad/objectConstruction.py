@@ -312,7 +312,7 @@ def build_wire(part, offset=0.0):
     doc = FreeCAD.ActiveDocument
     zBottom = part.z0
     width = part.thickness
-    sketch = get_freecad_object(obj, part.fc_name)
+    sketch = get_freecad_object(doc, part.fc_name)
     wire = buildWire(sketch, zBottom, width, offset=offset)
     wire.Label = part.label
     return wire
