@@ -48,6 +48,7 @@ def build_3d_geometry(
 
     """
     from qmt.geometry.freecad.objectConstruction import build
+
     if input_file is None and serialized_input_file is None:
         raise ValueError("One of input_file or serialized_input_file must be non-none.")
     elif input_file is not None and serialized_input_file is not None:
