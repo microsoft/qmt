@@ -7,7 +7,6 @@ from qmt.infrastructure import serialize_file
 import FreeCAD
 from .part_3d import Geo3DPart
 from .geo_3d_data import Geo3DData
-from qmt.geometry.freecad.objectConstruction import build
 
 
 def build_3d_geometry(
@@ -48,6 +47,8 @@ def build_3d_geometry(
     Geo3DData instance
 
     """
+    from qmt.geometry.freecad.objectConstruction import build
+
     if input_file is None and serialized_input_file is None:
         raise ValueError("One of input_file or serialized_input_file must be non-none.")
     elif input_file is not None and serialized_input_file is not None:
