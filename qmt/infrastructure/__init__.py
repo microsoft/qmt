@@ -11,7 +11,5 @@ from .data_utils import (
     stream_data_to_file,
 )
 from .solvers_2d import Potential2dData, ThomasFermi2dData, Bdg2dData, Phase2dData
-from .solvers_3d import (
-    TransportData,
-)
+from .solvers_3d import TransportData
 from .with_parts import WithParts
