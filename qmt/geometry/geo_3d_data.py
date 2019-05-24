@@ -89,7 +89,7 @@ class Geo3DData(GeoData):
         None
 
         """
-        if np.linalg.norm(axis) != 1:
+        if not np.isclose(np.linalg.norm(axis), 1):
             raise ValueError("Given axis is not a unit vector")
 
         self.xsecs[xsec_name] = {
