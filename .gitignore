@@ -109,6 +109,7 @@ ENV/
 
 # Binary output and IDEs
 *.pdf
+*.h5
 .idea
 .vscode
 /qmt/freecadMacros/dxfColorMap.py

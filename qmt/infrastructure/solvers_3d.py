@@ -3,11 +3,11 @@
 
 from dataclasses import dataclass
 from qmt.physics_constants import UArray
-import kwant
+from kwant.solvers.common import SMatrix
 
 
 @dataclass
 class TransportData:
     conductance: float
-    smatrix: kwant.solvers.common.SMatrix
+    smatrix: SMatrix
     disorder: UArray
