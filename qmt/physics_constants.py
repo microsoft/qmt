@@ -72,33 +72,25 @@ constants = SimpleNamespace(
     pi=sc.pi,
 )
 
-# Unify unit conversion between old and new units module
-if "convert_to" in dir(spu):
 
-    def canonicalize(expr, base=None):
-        """Convert all units to given base units (default: SI base units)
+def canonicalize(expr, base=None):
+    """Convert all units to given base units (default: SI base units)
 
-        Parameters
-        ----------
-        expr :
+    Parameters
+    ----------
+    expr :
 
-        base :
-            (Default value = None)
+    base :
+        (Default value = None)
 
-        Returns
-        -------
+    Returns
+    -------
 
 
-        """
-        if base is None:
-            base = (spu.m, spu.kg, spu.s, spu.A, spu.K, spu.mol, spu.cd)
-        return spu.convert_to(expr, base)
-
-
-else:
-
-    def canonicalize(expr, base=None):
-        return expr
+    """
+    if base is None:
+        base = (spu.m, spu.kg, spu.s, spu.A, spu.K, spu.mol, spu.cd)
+    return spu.convert_to(expr, base)
 
 
 def cancel(expr):
