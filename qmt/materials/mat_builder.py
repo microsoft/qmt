@@ -1,6 +1,6 @@
 from qmt.geometry import Geo3DData, Geo2DData
 from qmt.materials import Materials
-from typing import Dict, Union
+from typing import Dict, Optional, Union
 from .mat_data import MatData
 import warnings
 
@@ -8,7 +8,7 @@ import warnings
 def build_materials(
     geo_data: Union[Geo2DData, Geo3DData],
     materials_mapping: Dict[str, str],
-    materials: Materials = None,
+    materials: Optional[Materials] = None,
 ) -> MatData:
     """Build a MatData object.
 
