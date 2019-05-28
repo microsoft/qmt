@@ -8,6 +8,7 @@ from sympy.physics.matrices import msigma
 from sympy.physics.quantum import TensorProduct as kron
 from types import SimpleNamespace
 import numpy as np
+import deepdish
 
 
 units = SimpleNamespace(
@@ -71,33 +72,25 @@ constants = SimpleNamespace(
     pi=sc.pi,
 )
 
-# Unify unit conversion between old and new units module
-if "convert_to" in dir(spu):
 
-    def canonicalize(expr, base=None):
-        """Convert all units to given base units (default: SI base units)
+def canonicalize(expr, base=None):
+    """Convert all units to given base units (default: SI base units)
 
-        Parameters
-        ----------
-        expr :
+    Parameters
+    ----------
+    expr :
 
-        base :
-            (Default value = None)
+    base :
+        (Default value = None)
 
-        Returns
-        -------
+    Returns
+    -------
 
 
-        """
-        if base is None:
-            base = (spu.m, spu.kg, spu.s, spu.A, spu.K, spu.mol, spu.cd)
-        return spu.convert_to(expr, base)
-
-
-else:
-
-    def canonicalize(expr, base=None):
-        return expr
+    """
+    if base is None:
+        base = (spu.m, spu.kg, spu.s, spu.A, spu.K, spu.mol, spu.cd)
+    return spu.convert_to(expr, base)
 
 
 def cancel(expr):
@@ -156,11 +149,14 @@ matrices.tau_zy = kron(matrices.s_z, matrices.s_y)
 matrices.tau_zz = kron(matrices.s_z, matrices.s_z)
 
 
-class UArray(np.ndarray):
+class UArray(np.ndarray, deepdish.util.SaveableRegistry):
     """Extend a numpy array to have units information from sympy
     From https://docs.scipy.org/doc/numpy/user/basics.subclassing.html#simple-example-adding-an-extra-attribute-to-ndarray
 
     Pickle stuff copied from https://stackoverflow.com/questions/26598109/preserve-custom-attributes-when-pickling-subclass-of-numpy-array
+    
+    Deepdish save from https://deepdish.readthedocs.io/en/latest/io.html#class-instances
+    
     Parameters
     ----------
 
@@ -200,6 +196,14 @@ class UArray(np.ndarray):
         self.unit = state[-1]  # Set the unit attribute
         # Call the parent's __setstate__ with the other tuple elements.
         super().__setstate__(state[0:-1])
+
+    @classmethod
+    def load_from_dict(self, d):
+        obj = UArray(d["array"], d["unit"])
+        return obj
+
+    def save_to_dict(self):
+        return {"array": np.asarray(self), "unit": self.unit}
 
 
 __all__ = ["units", "constants", "matrices", "parse_unit", "to_float", "UArray"]

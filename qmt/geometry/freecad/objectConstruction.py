@@ -206,7 +206,7 @@ def build(opts):
         geo.add_xsec(xsec_name, polygons, axis=axis, distance=distance)
 
     # Store the FreeCAD document
-    geo.set_data("fcdoc", doc)
+    geo.set_data(doc)
 
     return geo
 

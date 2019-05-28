@@ -14,11 +14,7 @@ import sys
 import textwrap
 from ast import literal_eval
 import numpy as np
-import qmt.physics_constants as pc
-
-units = pc.units
-parseUnit = pc.parse_unit
-toFloat = pc.to_float
+from qmt.physics_constants import parse_unit, to_float, units
 
 
 __all__ = ["Material", "Materials", "conduction_band_offset", "valence_band_offset"]
@@ -50,7 +46,7 @@ class Material(collections.Mapping):
         if eunit is None:
             self.energyUnit = units.meV
         else:
-            self.energyUnit = toFloat(units.meV / parseUnit(eunit))
+            self.energyUnit = to_float(units.meV / parse_unit(eunit))
         # Tuple of key values that have energy units:
         self.energy_quantities = (
             "workFunction",
@@ -74,7 +70,7 @@ class Material(collections.Mapping):
 
     def __setitem__(self, key, value):
         if key in self.energy_quantities:
-            scaled_value = toFloat(
+            scaled_value = to_float(
                 value / self.energyUnit
             )  # if is an energy quantity, scale it
         else:
@@ -564,7 +560,7 @@ class Materials(collections.Mapping):
         if eunit is None:
             eunit = units.meV
         else:
-            eunit = toFloat(units.meV / parseUnit(eunit))
+            eunit = to_float(units.meV / parse_unit(eunit))
         return -self.matDict["InSb"]["electronAffinity"] * eunit
 
 

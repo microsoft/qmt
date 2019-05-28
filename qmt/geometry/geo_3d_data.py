@@ -6,7 +6,6 @@ from qmt.infrastructure import load_serial, store_serial, write_deserialised
 from typing import Any, Dict, List, Optional, Tuple
 from .part_3d import Geo3DPart
 import numpy as np
-import fenics as fn
 import FreeCAD
 import Part
 from FreeCAD import Base
@@ -90,21 +89,20 @@ class Geo3DData(GeoData):
         None
 
         """
+        if not np.isclose(np.linalg.norm(axis), 1):
+            raise ValueError("Given axis is not a unit vector")
+
         self.xsecs[xsec_name] = {
             "axis": axis,
             "distance": distance,
             "polygons": polygons,
         }
 
-    def set_data(self, data_name: str, data: Any, scratch_dir: Optional[str] = None):
+    def set_data(self, data: Any, scratch_dir: Optional[str] = None):
         """Set data to a serial format that is easily portable.
 
         Parameters
         ----------
-        data_name : str
-            "fcdoc" freeCAD document
-            "mesh"  fenics mesh
-            "rmf"   fenics region marker function
         data :
             The corresponding data that we would like to set.
         scratch_dir : str
@@ -113,31 +111,13 @@ class Geo3DData(GeoData):
         -------
         None
         """
-        if data_name == "fcdoc":
 
-            def _save_fct(doc, path):
-                doc.saveAs(path)
+        def _save_fct(doc, path):
+            doc.saveAs(path)
 
-            self.serial_fcdoc = store_serial(
-                data, _save_fct, "fcstd", scratch_dir=scratch_dir
-            )
-
-        elif data_name == "mesh" or data_name == "rmf":
-
-            def _save_fct(data, path):
-                fn.File(path) << data
-
-            if data_name == "mesh":
-                self.serial_mesh = store_serial(
-                    data, _save_fct, "xml", scratch_dir=scratch_dir
-                )
-            if data_name == "rmf":
-                self.serial_region_marker = store_serial(
-                    data, _save_fct, "xml", scratch_dir=scratch_dir
-                )
-
-        else:
-            raise ValueError(f"{data_name} was not a valid data_name.")
+        self.serial_fcdoc = store_serial(
+            data, _save_fct, "fcstd", scratch_dir=scratch_dir
+        )
 
     def get_data(self, data_name: str, scratch_dir: Optional[str] = None):
         """Get data from stored serial format.
