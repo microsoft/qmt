@@ -43,6 +43,8 @@ class Geo2DData(GeoData):
         if isinstance(part, Polygon) and not part.is_valid:
             raise ValueError(f"Part {part_name} is not a valid polygon.")
 
+        part.virtual = False
+
         super().add_part(
             part_name,
             part,

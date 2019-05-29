@@ -3,6 +3,7 @@ from qmt.materials import Materials
 from typing import Dict, Optional, Union
 from .mat_data import MatData
 import warnings
+from shapely.geometry import LineString
 
 
 def build_materials(
@@ -36,7 +37,11 @@ def build_materials(
     # We keep a copy of materials_mapping around, but also set the material property
     # on all the parts
     for name, part in geo_data.parts.items():
-        if name not in materials_mapping and not part.virtual:
+        if (
+            name not in materials_mapping
+            and not part.virtual
+            and not isinstance(part, LineString)
+        ):
             raise ValueError(
                 f"materials_mapping does not contain material for part {name}"
             )
