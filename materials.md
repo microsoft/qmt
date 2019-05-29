@@ -75,4 +75,3 @@ with the bowing parameter $O_{AB}$.
 Sources:
 * [Vurgaftman] Vurgaftman et al., APR 89, 5815 (2001): Band parameters for III-V compound
   semiconductors and their alloys,  https://doi.org/10.1063/1.1368156
-

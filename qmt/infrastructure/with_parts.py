@@ -4,7 +4,7 @@ from typing import Any, Callable, Dict, Optional
 class WithParts:
     def __init__(self, parts: Optional[Dict[str, Any]] = None):
         """Base class for an object that contains parts
-        
+
         Parameters
         ----------
         parts : Dict[str, Any], optional
@@ -20,7 +20,7 @@ class WithParts:
         call_back: Callable[[Any], None] = lambda x: None,
     ):
         """Add a part to this object.
-        
+
         Parameters
         ----------
         part_name : str
@@ -32,7 +32,7 @@ class WithParts:
         call_back : Callable[[bool], None], optional
             A callback function. If the part is successfully added, the part is passed
             to the function. Otherwise None is passed. By default lambdax:None
-        
+
         Raises
         ------
         ValueError
@@ -52,7 +52,7 @@ class WithParts:
         call_back: Callable[[bool], None] = lambda x: None,
     ):
         """Remove a part from this object.
-        
+
         Parameters
         ----------
         part_name : str
@@ -63,11 +63,11 @@ class WithParts:
         call_back : Callable[[bool], None], optional
             A callback function. If the part is successfully removed, the part is passed
             to the function. Otherwise None is passed. By default lambdax:None
-        
+
         Raises
         ------
         ValueError
-            Attempted to remove a missing part while ignore_if_absent is not True 
+            Attempted to remove a missing part while ignore_if_absent is not True
         """
         if part_name in self.parts:
             part = self.parts[part_name]

@@ -30,7 +30,7 @@ class Geo3DData(GeoData):
 
     def add_part(self, part_name: str, part: Geo3DPart, overwrite: bool = False):
         """Add a part to this geometry.
-        
+
         Parameters
         ----------
         part_name : str
@@ -49,7 +49,7 @@ class Geo3DData(GeoData):
 
     def remove_part(self, part_name: str, ignore_if_absent: bool = False):
         """Remove a part from this geometry.
-        
+
         Parameters
         ----------
         part_name : str
@@ -204,7 +204,7 @@ class Geo3DData(GeoData):
 
         def _project(vec):
             """Projects a 3D vector into our 2D cross section plane
-            
+
             Parameters
             ----------
             vec :
@@ -218,7 +218,7 @@ class Geo3DData(GeoData):
 
         def _inverse_project(vec):
             """Inverse of _project
-            
+
             Parameters
             ----------
             vec :

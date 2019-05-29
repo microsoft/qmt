@@ -13,7 +13,7 @@ class Geo2DData(GeoData):
         shapely Polygon or LineString objects. Polygon are intended to be 2D domains,
         while LineString are used for setting boundary conditions and surface
         conditions.
-        
+
         Parameters
         ----------
         lunit : str, optional
@@ -25,7 +25,7 @@ class Geo2DData(GeoData):
         self, part_name: str, part: Union[LineString, Polygon], overwrite: bool = False
     ):
         """Add a part to this geometry.
-        
+
         Parameters
         ----------
         part_name : str
@@ -34,7 +34,7 @@ class Geo2DData(GeoData):
             Part to add
         overwrite : bool, optional
             Whether we allos this to overwrite existing part, by default False
-        
+
         Raises
         ------
         ValueError
@@ -52,7 +52,7 @@ class Geo2DData(GeoData):
 
     def remove_part(self, part_name: str, ignore_if_absent: bool = False):
         """Remove a part from this geometry.
-        
+
         Parameters
         ----------
         part_name : str
