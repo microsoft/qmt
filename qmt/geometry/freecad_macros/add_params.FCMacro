@@ -30,4 +30,3 @@ for i in range(len(param_dict)):
     spreadSheet.set('B' + str(i + 2), valStr)
     spreadSheet.setAlias('B' + str(i + 2), str(key))
 doc.recompute()
-

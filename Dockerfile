@@ -26,7 +26,7 @@ RUN apt-get -qq update && \
     wget && \
     apt-get -qq -y autoremove && \
     apt-get autoclean && \
-    rm -rf /var/lib/apt/lists/* /var/log/dpkg.log 
+    rm -rf /var/lib/apt/lists/* /var/log/dpkg.log
 
 # Set up conda:
 ENV PATH /usr/local/bin:$PATH

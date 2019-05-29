@@ -154,9 +154,9 @@ class UArray(np.ndarray, deepdish.util.SaveableRegistry):
     From https://docs.scipy.org/doc/numpy/user/basics.subclassing.html#simple-example-adding-an-extra-attribute-to-ndarray
 
     Pickle stuff copied from https://stackoverflow.com/questions/26598109/preserve-custom-attributes-when-pickling-subclass-of-numpy-array
-    
+
     Deepdish save from https://deepdish.readthedocs.io/en/latest/io.html#class-instances
-    
+
     Parameters
     ----------
 

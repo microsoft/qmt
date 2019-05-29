@@ -5,7 +5,7 @@ from qmt.infrastructure import WithParts
 class GeoData(WithParts):
     def __init__(self, lunit: str = "nm"):
         """Base class for geometry data objects.
-        
+
         Parameters
         ----------
         lunit : str, optional

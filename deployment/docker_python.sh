@@ -20,9 +20,9 @@
 # source activate py36
 # jupyter notebook --port=$JUPYTER_PORT --ip=0.0.0.0 --no-browser
 
-## -- BEGIN CONFIGURATION -- 
+## -- BEGIN CONFIGURATION --
 
-# This is the absolute path to this script - you will need to change it! 
+# This is the absolute path to this script - you will need to change it!
 # This could in principle be inferred, but that might be unsafe with symlinks.
 export DOCKER_PYTHON_SCRIPT=/Users/MYNAME/docker_python.sh
 
@@ -37,7 +37,7 @@ export JUPYTER_PORT=9000
 # The python environment:
 export PYENV=py36
 
-## -- END CONFIGURATION -- 
+## -- END CONFIGURATION --
 
 # TODO: move this to an entrypoint script
 if [ -f /.dockerenv ]; then
@@ -106,4 +106,3 @@ else
             $DOCKER_IMAGE $DOCKER_PYTHON_SCRIPT "$@";
     fi
 fi
-

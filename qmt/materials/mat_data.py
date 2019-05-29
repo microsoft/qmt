@@ -42,7 +42,7 @@ class MatData(WithParts):
 
     def __getitem__(self, part_name: str):
         """Get the material for a particular part.
-        
+
         Parameters
         ----------
         part_name : str
