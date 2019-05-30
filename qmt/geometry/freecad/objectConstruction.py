@@ -173,6 +173,7 @@ def build(opts):
         ):
             if other_input_part.virtual:
                 continue
+            print(checkOverlap([part, other_part]))
             if checkOverlap([part, other_part]):
                 cut = subtract(
                     part,
@@ -860,6 +861,7 @@ def screened_H_union_list(info, opts, obj, m, j, offsetTuple, checkOffsetTuple):
             info, opts, m, j, tList=list(offsetTuple)
         )  # list of H parts
         info.trash += HDict[offsetTuple]
+    print(HDict)
     HObjCheckList = HDict[checkOffsetTuple]
     HObjList = HDict[offsetTuple]
 
