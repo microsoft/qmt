@@ -98,7 +98,8 @@ def copy_move(obj, moveVec=(0.0, 0.0, 0.0), copy=True):
     FreeCAD.ActiveDocument.recompute()
     return f
 
-def nudge_objects(list_of_objects,nudge=-10e-6):
+
+def nudge_objects(list_of_objects, nudge=-10e-6):
     """Slightly move objects in a list so that they aren't coplanar. This is to avoid OCC errors with Boolean
     operations involving solids with coplanar faces.
 
@@ -117,10 +118,11 @@ def nudge_objects(list_of_objects,nudge=-10e-6):
 
     """
     nudged_list = [copy_move(list_of_objects[0])]
-    for i,obj in enumerate(list_of_objects[1:]):
-        nudge_amt = (i+1)*nudge
-        nudged_list += [copy_move(obj,moveVec=(nudge_amt,nudge_amt,nudge_amt))]
+    for i, obj in enumerate(list_of_objects[1:]):
+        nudge_amt = (i + 1) * nudge
+        nudged_list += [copy_move(obj, moveVec=(nudge_amt, nudge_amt, nudge_amt))]
     return nudged_list
+
 
 # ~ # TODO: consuming is questionable because inputs might be needed in a delayed fashion
 def make_solid(obj, consumeInputs=False):
@@ -295,7 +297,9 @@ def subtract(obj0, obj1, consumeInputs=False):
 
     """
     doc = FreeCAD.ActiveDocument
-    nudged_objs = nudge_objects([obj0,obj1]) # nudge the objects list to avoid OCC errors
+    nudged_objs = nudge_objects(
+        [obj0, obj1]
+    )  # nudge the objects list to avoid OCC errors
     tempObj = doc.addObject("Part::Cut")
     tempObj.Base = nudged_objs[0]
     tempObj.Tool = nudged_objs[1]
@@ -303,7 +307,7 @@ def subtract(obj0, obj1, consumeInputs=False):
     returnObj = copy_move(tempObj)
     doc.removeObject(tempObj.Name)
     doc.recompute()
-    doc.removeObject(nudged_objs[0].Name) # clean up temp objs
+    doc.removeObject(nudged_objs[0].Name)  # clean up temp objs
     doc.removeObject(nudged_objs[1].Name)
     if consumeInputs:
         doc.removeObject(obj0.Name)
@@ -355,14 +359,14 @@ def intersect(objList, consumeInputs=False):
     """
     doc = FreeCAD.ActiveDocument
     # Generate the shifted list to avoid OCC errors:
-    temp_obj_list = nudge_objects(objList) # nudge the objects list to avoid OCC errors
+    temp_obj_list = nudge_objects(objList)  # nudge the objects list to avoid OCC errors
     intersectTemp = doc.addObject("Part::MultiCommon")
     intersectTemp.Shapes = temp_obj_list
     doc.recompute()
     returnObj = copy_move(intersectTemp)
     doc.removeObject(intersectTemp.Name)
     doc.recompute()
-    for obj in temp_obj_list: # clean up temp objs
+    for obj in temp_obj_list:  # clean up temp objs
         doc.removeObject(obj.Name)
     if consumeInputs:
         for obj in objList:
