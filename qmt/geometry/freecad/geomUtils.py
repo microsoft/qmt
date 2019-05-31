@@ -99,7 +99,7 @@ def copy_move(obj, moveVec=(0.0, 0.0, 0.0), copy=True):
     return f
 
 
-def nudge_objects(list_of_objects, nudge=-10e-6):
+def nudge_objects(list_of_objects, nudge=-20e-6):
     """Slightly move objects in a list so that they aren't coplanar. This is to avoid OCC errors with Boolean
     operations involving solids with coplanar faces.
 

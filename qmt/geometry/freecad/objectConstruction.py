@@ -861,14 +861,15 @@ def screened_H_union_list(info, opts, obj, m, j, offsetTuple, checkOffsetTuple):
             info, opts, m, j, tList=list(offsetTuple)
         )  # list of H parts
         info.trash += HDict[offsetTuple]
-    print(HDict)
     HObjCheckList = HDict[checkOffsetTuple]
     HObjList = HDict[offsetTuple]
-
     returnList = []
-    for i, HObjPart in enumerate(HObjCheckList):
-        if checkOverlap([obj, HObjPart]):  # if we need to include an overlap
-            returnList.append(HObjList[i])
+    # I think that this was trying to check to see if a part could be deposited cleanly without
+    # needing to wrap over it. For now, it introduced a bug since HObjList and HObjCheckList don't need to have
+    # the same number of entries.
+    # for i, HObjPart in enumerate(HObjCheckList):
+    #     if checkOverlap([obj, HObjPart]):  # if we need to include an overlap
+    #         returnList.append(HObjList[i])
 
     # fix for multilayer intersections: make sure we really check all overlaps
     for i, HObjPart in enumerate(HObjList):
@@ -934,7 +935,7 @@ def H_offset(info, opts, layer_num, objID, tList=[]):
     r"""For a given layer_num=n and ObjID=i, compute the deposited object.
 
     ```latex
-    H_{n,i}(t) = C_{n,i}(t) \cap [ B_{n,i}(t) \cup (\cup_{m<n;j} H_{m,j}(t_i+t)) \cup (\cup_k A_k(t_i + t))],
+    H_{n,i}(t) = C_{n,i}(t) \cap [ B_{n,i}(t) \cup (\cup_{m<n;j} H_{m,j}(t_n+t)) \cup (\cup_k A_k(t_n + t))],
     ```
     where A_k is from the base substrate list. This is computed recursively. The list of integers
     tList determines the offset t; t = the sum of all layer thicknesses ti that appear
@@ -970,7 +971,7 @@ def H_offset(info, opts, layer_num, objID, tList=[]):
 
     # This is a tuple that encodes the check offset t:
     checkOffsetTuple = tuple(sorted(tList))
-    # This is a tuple that encodes the total offset t_i+t:
+    # This is a tuple that encodes the total offset t_n+t:
     offsetTuple = tuple(sorted(tList + [layer_num]))
     # First, check if we have to do anything:
     layers = info.lithoDict["layers"]
