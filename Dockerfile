@@ -48,8 +48,8 @@ COPY . qmt/
 RUN conda config --set always_yes yes --set changeps1 no && \
     conda env create -v -q -f qmt/deployment/environment_full_linux.yml && \
     conda clean -aq && \
-    echo "conda activate py37" >> ~/.bashrc
-ENV PATH /usr/local/envs/py37/bin:$PATH
+    echo "conda activate py36" >> ~/.bashrc
+ENV PATH /usr/local/envs/py36/bin:$PATH
 
 # Expose 8888 for jupyter notebook
 EXPOSE 8888
@@ -58,7 +58,7 @@ EXPOSE 8888
 # and fix the link to libstdc++, which is currently a conda bug
 RUN find /usr/local/pkgs/ -maxdepth 1 -type d -name freecad* | \
     tail -n 1 | awk '{print $1"/lib"}' > \
-    /usr/local/envs/py37/lib/python3.7/site-packages/freecad.pth
+    /usr/local/envs/py36/lib/python3.6/site-packages/freecad.pth
 
 # Move the dask config file into place
 RUN mkdir /root/.dask && mv qmt/deployment/dask_config.yaml /root/.dask/.
