@@ -120,17 +120,17 @@ class Geo2DData(GeoData):
 
     def plot(
         self,
-        parts_to_exclude: Sequence[str] = [],
+        parts_to_exclude: Optional[Sequence[str]] = None,
         line_width: float = 20.0,
         ax: Optional[Axes] = None,
-        colors: Sequence = list(mcd.XKCD_COLORS.values()),
+        colors: Optional[Sequence] = None,
     ) -> Axes:
         """ Plots the 2d geometry
 
         Parameters
         ----------
         parts_to_exclude : Sequence[str]
-            Part/edge names that won't be plotted (Default value = [])
+            Part/edge names that won't be plotted (Default value = None)
         line_width : float
             Thickness of lines (only for edge lines). (Default value = 20.0)
         ax : Optional[Axes]
@@ -139,7 +139,7 @@ class Geo2DData(GeoData):
             (Default value = None)
         colors : Sequence[str]
             Colors to use for plotting the parts
-            (Default value = list(mcd.XKCD_COLORS.values()))
+            (Default value = None)
         Returns
         -------
         Axes object.
@@ -147,6 +147,11 @@ class Geo2DData(GeoData):
         """
         from matplotlib import pyplot as plt
         import descartes
+
+        if parts_to_exclude is None:
+            parts_to_exclude = []
+        if colors is None:
+            colors = list(mcd.XKCD_COLORS.values())
 
         if not ax:
             ax = plt.figure().gca()
