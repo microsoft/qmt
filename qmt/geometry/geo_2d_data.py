@@ -18,6 +18,7 @@ class Geo2DData(GeoData):
         ----------
         lunit : str, optional
             Length unit, by default "nm"
+
         """
         super().__init__(lunit)
 
@@ -39,9 +40,12 @@ class Geo2DData(GeoData):
         ------
         ValueError
             Part is not a valid Polygon
+
         """
         if isinstance(part, Polygon) and not part.is_valid:
             raise ValueError(f"Part {part_name} is not a valid polygon.")
+
+        part.virtual = False
 
         super().add_part(
             part_name,
@@ -60,6 +64,7 @@ class Geo2DData(GeoData):
         ignore_if_absent : bool, optional
             Whether we ignore an attempted removal if the part name is not present, by
             default False
+    
         """
         super.remove_part(
             part_name,
@@ -67,12 +72,23 @@ class Geo2DData(GeoData):
             lambda p: self.build_order.remove(p) if p is not None else None,
         )
 
+    @property
+    def polygons(self):
+        """Return dictionary of parts that are polygons."""
+        return {k: v for k, v in self.parts.items() if isinstance(v, Polygon)}
+
+    @property
+    def edges(self):
+        """Return dictionary of parts that are lines."""
+        return {k: v for k, v in self.parts.items() if isinstance(v, LineString)}
+
     def compute_bb(self) -> List[float]:
-        """Computes the bounding box of all of the parts in the geometry.
+        """Compute the bounding box of all of the parts in the geometry.
 
         Returns
         -------
         List of [min_x, max_x, min_y, max_y].
+
         """
         all_shapes = list(self.parts.values())
         bbox_vertices = unary_union(all_shapes).envelope.exterior.coords.xy
@@ -118,17 +134,17 @@ class Geo2DData(GeoData):
 
     def plot(
         self,
-        parts_to_exclude: Sequence[str] = [],
+        parts_to_exclude: Optional[Sequence[str]] = None,
         line_width: float = 20.0,
         ax: Optional[Axes] = None,
-        colors: Sequence = list(mcd.XKCD_COLORS.values()),
+        colors: Optional[Sequence] = None,
     ) -> Axes:
         """ Plots the 2d geometry
 
         Parameters
         ----------
         parts_to_exclude : Sequence[str]
-            Part/edge names that won't be plotted (Default value = [])
+            Part/edge names that won't be plotted (Default value = None)
         line_width : float
             Thickness of lines (only for edge lines). (Default value = 20.0)
         ax : Optional[Axes]
@@ -137,7 +153,7 @@ class Geo2DData(GeoData):
             (Default value = None)
         colors : Sequence[str]
             Colors to use for plotting the parts
-            (Default value = list(mcd.XKCD_COLORS.values()))
+            (Default value = None)
         Returns
         -------
         Axes object.
@@ -145,6 +161,11 @@ class Geo2DData(GeoData):
         """
         from matplotlib import pyplot as plt
         import descartes
+
+        if parts_to_exclude is None:
+            parts_to_exclude = []
+        if colors is None:
+            colors = list(mcd.XKCD_COLORS.values())
 
         if not ax:
             ax = plt.figure().gca()
