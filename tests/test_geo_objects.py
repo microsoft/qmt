@@ -86,12 +86,13 @@ def test_simple_xsection(datadir):
         (10.0, 4.0),
     }
 
+
 def test_overlapping_parts(datadir):
     """
     This tests that two parts that were generated from lithography over a wire register as intersecting. Due to
     an OCC bug, FC 0.18 at one point would claim that these didn't intersect, resulting in geometry and meshing errors.
     """
-    path = os.path.join(datadir,'intersection_test.FCStd')
+    path = os.path.join(datadir, "intersection_test.FCStd")
     doc = FreeCAD.newDocument("instance")
     FreeCAD.setActiveDocument("instance")
     doc.load(path)
