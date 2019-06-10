@@ -2,6 +2,7 @@ from qmt.geometry import part_3d, build_3d_geometry
 import numpy as np
 import os
 import FreeCAD
+from qmt.geometry.freecad.geomUtils import checkOverlap
 
 
 def test_xsection(datadir):
@@ -84,3 +85,18 @@ def test_simple_xsection(datadir):
         (10.0, -4.0),
         (10.0, 4.0),
     }
+
+
+def test_overlapping_parts(datadir):
+    """
+    This tests that two parts that were generated from lithography over a wire register as intersecting. Due to
+    an OCC bug, FC 0.18 at one point would claim that these didn't intersect, resulting in geometry and meshing errors.
+    """
+    path = os.path.join(datadir, "intersection_test.FCStd")
+    doc = FreeCAD.newDocument("instance")
+    FreeCAD.setActiveDocument("instance")
+    doc.load(path)
+    shape_1 = doc.Objects[0]
+    shape_2 = doc.Objects[1]
+    assert checkOverlap([shape_1, shape_2])
+    FreeCAD.closeDocument(doc.Name)
