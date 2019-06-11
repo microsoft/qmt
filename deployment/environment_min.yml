@@ -22,7 +22,6 @@ dependencies:
   - kwant
   - mkl-service
   - libblas=*=*mkl
-  - openblas  # because of https://github.com/conda-forge/fenics-feedstock/issues/82
   # used in qms examples
   - descartes
   - holoviews
