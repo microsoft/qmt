@@ -21,7 +21,7 @@ dependencies:
   - fenics
   - kwant
   - mkl-service
-  - openblas # fenics needs this, but somehow fenics didn't include this as a dependency when conda forge moved to mkl
+  - libblas=*=*mkl
   # used in qms examples
   - descartes
   - holoviews
@@ -38,6 +38,7 @@ dependencies:
   - sphinx
   # other tools (not needed for qmt/qms)
   - adaptive
+  - adaptive-scheduler
   - dask-jobqueue
   - hpc05
   - jupyter
