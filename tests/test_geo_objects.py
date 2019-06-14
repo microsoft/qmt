@@ -32,13 +32,13 @@ def test_xsection(datadir):
         (5.0, -2.0),
         (5.0, 0.0),
     }
-    assert set(cut_2d_geo_data.parts["small2_0"].exterior.coords) == {
+    assert set(cut_2d_geo_data.parts["small2:0"].exterior.coords) == {
         (1.0, 0.0),
         (1.0, 2.0),
         (7.5, 0.0),
         (7.5, 2.0),
     }
-    assert set(cut_2d_geo_data.parts["small2_1"].exterior.coords) == {
+    assert set(cut_2d_geo_data.parts["small2:1"].exterior.coords) == {
         (-7.5, 0.0),
         (-7.5, 2.0),
         (-1.0, 0.0),
