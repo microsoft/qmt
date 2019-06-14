@@ -21,7 +21,7 @@ class Geo3DData(GeoData):
     """
 
     def __init__(self, lunit: Optional[str] = None):
-        super().__init__("nm" if lunit is None else lunit)
+        super().__init__(lunit or "nm")
         # dict of cross sections in this geometry
         # A cross section is a dict with axis and distance fields
         # E.g. xsec_dict={"test_xsec": {"axis": (1, 0, 0), "distance": 0}}

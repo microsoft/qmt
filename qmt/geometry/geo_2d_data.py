@@ -22,7 +22,7 @@ class Geo2DData(GeoData):
             Length unit, by default "nm"
 
         """
-        super().__init__("nm" if lunit is None else lunit)
+        super().__init__(lunit or "nm")
 
     def add_part(
         self, part_name: str, part: Union[LineString, Polygon], overwrite: bool = False
@@ -162,9 +162,7 @@ class Geo2DData(GeoData):
             cropped_part = crop_poly.intersection(part)
             if cropped_part.is_empty:
                 continue
-            if isinstance(cropped_part, Polygon) or isinstance(
-                cropped_part, LineString
-            ):
+            if isinstance(cropped_part, (Polygon, LineString)):
                 cropped_geo.add_part(name, cropped_part)
                 ind_count[ind_name] += 1
             elif isinstance(cropped_part, GeometryCollection):

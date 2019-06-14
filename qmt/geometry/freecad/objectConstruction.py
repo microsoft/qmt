@@ -97,7 +97,7 @@ def build(opts):
 
     """
     doc = FreeCAD.ActiveDocument
-    geo = Geo3DData(opts["lunit"] if "lunit" in opts else None)
+    geo = Geo3DData(opts.get("lunit", None))
 
     # Schedule for deletion all objects not explicitly selected by the user
     input_parts_names = []
