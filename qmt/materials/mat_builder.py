@@ -36,7 +36,13 @@ def build_materials(
 
     # We keep a copy of materials_mapping around, but also set the material property
     # on all the parts
+    new_mapping = {}
     for name, part in geo_data.parts.items():
+        if ":" in name:
+            old_name, _ = name.split(":")
+            new_mapping[name] = materials_mapping[old_name]
+            continue
+
         if (
             name not in materials_mapping
             and not part.virtual
@@ -45,13 +51,13 @@ def build_materials(
             raise ValueError(
                 f"materials_mapping does not contain material for part {name}"
             )
-    extra_materials = set(materials_mapping.keys()) - set(geo_data.parts.keys())
+    extra_materials = set(new_mapping.keys()) - set(geo_data.parts.keys())
     if extra_materials:
         warnings.warn(
             f"{extra_materials} are provided in materials_mapping but not found in "
             "geometry parts"
         )
-    return MatData(materials, materials_mapping)
+    return MatData(materials, new_mapping)
 
 
 def make_materials_library(material_properties: Dict[str, Dict]) -> Materials:

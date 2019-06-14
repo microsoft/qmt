@@ -1,14 +1,16 @@
 from shapely.geometry import LinearRing, LineString, MultiLineString, Polygon
 from shapely.ops import unary_union
+from shapely.geometry.collection import GeometryCollection
 from typing import List, Optional, Sequence, Union
 import numpy as np
 from matplotlib.axes import Axes
 import matplotlib._color_data as mcd
 from .geo_data_base import GeoData
+from collections import defaultdict
 
 
 class Geo2DData(GeoData):
-    def __init__(self, lunit="nm"):
+    def __init__(self, lunit: Optional[str] = None):
         """Class for holding a 2D geometry specification. The parts dict can contain
         shapely Polygon or LineString objects. Polygon are intended to be 2D domains,
         while LineString are used for setting boundary conditions and surface
@@ -20,7 +22,7 @@ class Geo2DData(GeoData):
             Length unit, by default "nm"
 
         """
-        super().__init__(lunit)
+        super().__init__("nm" if lunit is None else lunit)
 
     def add_part(
         self, part_name: str, part: Union[LineString, Polygon], overwrite: bool = False
@@ -132,10 +134,63 @@ class Geo2DData(GeoData):
         elif isinstance(part, LineString):
             return list(np.array(part.coords.xy).T)[:]
 
+    def crop(
+        self,
+        x_min: float = None,
+        x_max: float = None,
+        y_min: float = None,
+        y_max: float = None,
+    ):
+        if x_min is not None and x_max is not None:
+            assert x_min < x_max, "x_max must be greater than x_min"
+        if y_min is not None and y_max is not None:
+            assert y_min < y_max, "y_max must be greater than y_min"
+        cropped_geo = Geo2DData(self.lunit)
+        x_min_old, x_max_old, y_min_old, y_max_old = self.compute_bb()
+        x_min = x_min_old if x_min is None else x_min
+        x_max = x_max_old if x_max is None else x_max
+        y_min = y_min_old if y_min is None else y_min
+        y_max = y_max_old if y_max is None else y_max
+        crop_poly = Polygon(
+            [[x_min, y_min], [x_min, y_max], [x_max, y_max], [x_max, y_min]]
+        )
+
+        ind_count = defaultdict(int)
+
+        for name, part in self.parts.items():
+            ind_name = name.split(":")[0] if ":" in name else name
+            cropped_part = crop_poly.intersection(part)
+            if cropped_part.is_empty:
+                continue
+            if isinstance(cropped_part, Polygon) or isinstance(
+                cropped_part, LineString
+            ):
+                cropped_geo.add_part(name, cropped_part)
+                ind_count[ind_name] += 1
+            elif isinstance(cropped_part, GeometryCollection):
+                for part in cropped_part:
+                    if not (isinstance(part, Polygon) or isinstance(part, LineString)):
+                        print(type(part))
+                    cropped_geo.add_part(f"{ind_name}:{ind_count[ind_name]}", part)
+                    ind_count[ind_name] += 1
+            else:
+                raise RuntimeError(
+                    "Unknown intersection of type ({type(cropped_part)}) encountered "
+                    f"during cropping of {name}"
+                )
+        assert [
+            x_min,
+            x_max,
+            y_min,
+            y_max,
+        ] == cropped_geo.compute_bb(), "Cropped geometry has wrong bounds"
+
+        return cropped_geo
+
     def plot(
         self,
         parts_to_exclude: Optional[Sequence[str]] = None,
-        line_width: float = 20.0,
+        line_width: float = None,
         ax: Optional[Axes] = None,
         colors: Optional[Sequence] = None,
     ) -> Axes:
@@ -146,7 +201,7 @@ class Geo2DData(GeoData):
         parts_to_exclude : Sequence[str]
             Part/edge names that won't be plotted (Default value = None)
         line_width : float
-            Thickness of lines (only for edge lines). (Default value = 20.0)
+            Thickness of lines (only for edge lines). (Default value = None)
         ax : Optional[Axes]
             You can pass in a matplotlib axes to plot in. If it's None, a new
             figure with its corresponding axes will be created
@@ -166,9 +221,13 @@ class Geo2DData(GeoData):
             parts_to_exclude = []
         if colors is None:
             colors = list(mcd.XKCD_COLORS.values())
-
-        if not ax:
+        if line_width is None:
+            x_min, x_max, y_min, y_max = self.compute_bb()
+            width = min(x_max - x_min, y_max - y_min)
+            line_width = width / 50
+        if ax is None:
             ax = plt.figure().gca()
+
         pn = 0
         for part_name, part in self.parts.items():
             if part_name in parts_to_exclude:
