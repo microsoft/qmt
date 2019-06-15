@@ -141,12 +141,20 @@ class Geo2DData(GeoData):
         y_min: float = None,
         y_max: float = None,
     ):
-        if x_min is not None and x_max is not None:
-            assert x_min < x_max, "x_max must be greater than x_min"
-        if y_min is not None and y_max is not None:
-            assert y_min < y_max, "y_max must be greater than y_min"
+        if x_min is not None and x_max is not None and x_min > x_max:
+            raise ValueError(f"x_max ({x_max}) must be greater than x_min ({x_min})")
+        if y_min is not None and y_max is not None and y_min > y_max:
+            raise ValueError(f"y_max ({y_max}) must be greater than y_min ({y_min})")
         cropped_geo = Geo2DData(self.lunit)
         x_min_old, x_max_old, y_min_old, y_max_old = self.compute_bb()
+        if x_min < x_min_old:
+            raise ValueError(f"x_min ({x_min}) smaller than minimal x ({x_min_old})")
+        if x_max > x_max_old:
+            raise ValueError(f"x_max ({x_max}) greater than maximal x ({x_max_old})")
+        if y_min < y_min_old:
+            raise ValueError(f"y_min ({y_min}) smaller than minimal y ({y_min_old})")
+        if y_max > y_max_old:
+            raise ValueError(f"y_max ({y_max}) greater than maximal y ({y_max_old})")
         x_min = x_min_old if x_min is None else x_min
         x_max = x_max_old if x_max is None else x_max
         y_min = y_min_old if y_min is None else y_min
