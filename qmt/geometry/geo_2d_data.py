@@ -175,8 +175,7 @@ class Geo2DData(GeoData):
                 ind_count[ind_name] += 1
             elif isinstance(cropped_part, GeometryCollection):
                 for part in cropped_part:
-                    if not (isinstance(part, Polygon) or isinstance(part, LineString)):
-                        print(type(part))
+                    assert isinstance(part, (Polygon, LineString))
                     cropped_geo.add_part(f"{ind_name}:{ind_count[ind_name]}", part)
                     ind_count[ind_name] += 1
             else:
@@ -196,7 +195,7 @@ class Geo2DData(GeoData):
     def plot(
         self,
         parts_to_exclude: Optional[Sequence[str]] = None,
-        line_width: float = None,
+        line_width: Optional[float] = None,
         ax: Optional[Axes] = None,
         colors: Optional[Sequence] = None,
     ) -> Axes:
@@ -207,7 +206,8 @@ class Geo2DData(GeoData):
         parts_to_exclude : Sequence[str]
             Part/edge names that won't be plotted (Default value = None)
         line_width : float
-            Thickness of lines (only for edge lines). (Default value = None)
+            Thickness of lines (only for edge lines). If left as None, then it defaults
+            to 2% of the shorter length (Default value = None)
         ax : Optional[Axes]
             You can pass in a matplotlib axes to plot in. If it's None, a new
             figure with its corresponding axes will be created
