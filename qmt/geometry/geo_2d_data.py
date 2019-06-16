@@ -180,7 +180,7 @@ class Geo2DData(GeoData):
                     ind_count[ind_name] += 1
             else:
                 raise RuntimeError(
-                    "Unknown intersection of type ({type(cropped_part)}) encountered "
+                    f"Unknown intersection of type ({type(cropped_part)}) encountered "
                     f"during cropping of {name}"
                 )
         assert [
