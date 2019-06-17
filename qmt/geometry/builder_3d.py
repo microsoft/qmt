@@ -15,6 +15,7 @@ def build_3d_geometry(
     xsec_dict: Dict[str, Dict] = None,
     serialized_input_file: Optional[bytes] = None,
     params: Optional[Dict] = None,
+    lunit: Optional[str] = None,
 ) -> Geo3DData:
     """Build a geometry in 3D.
 
@@ -66,8 +67,9 @@ def build_3d_geometry(
     options_dict["input_parts"] = input_parts
     options_dict["params"] = params
     options_dict["xsec_dict"] = xsec_dict
+    options_dict["lunit"] = lunit
 
-    data = Geo3DData()
+    data = Geo3DData(lunit)
     data.serial_fcdoc = serial_fcdoc
     data.get_data("fcdoc")
 

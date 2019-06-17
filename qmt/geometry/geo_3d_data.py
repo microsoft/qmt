@@ -20,8 +20,8 @@ class Geo3DData(GeoData):
         - build_order is a list of strings indicating the construction order
     """
 
-    def __init__(self, lunit: str = "nm"):
-        super().__init__(lunit)
+    def __init__(self, lunit: Optional[str] = None):
+        super().__init__(lunit or "nm")
         # dict of cross sections in this geometry
         # A cross section is a dict with axis and distance fields
         # E.g. xsec_dict={"test_xsec": {"axis": (1, 0, 0), "distance": 0}}
@@ -40,6 +40,11 @@ class Geo3DData(GeoData):
         overwrite : bool, optional
             Whether we allow this to overwrite existing part, by default False
         """
+        # We use : as a special character when a part is cut into multiple parts when
+        # taking a cross section
+        if ":" in part_name:
+            raise ValueError("Cannot use : in part name")
+
         super().add_part(
             part_name,
             part,
@@ -177,8 +182,6 @@ class Geo3DData(GeoData):
             Name of the cross section
         lunit : Optional[str] :
             (Default value = None)
-        lunit: Optional[str] :
-             (Default value = None)
         Returns
         -------
         None
@@ -331,7 +334,7 @@ class Geo3DData(GeoData):
                 geo_2d.add_part(name, polys_to_add[0])
                 continue
             for i, poly in enumerate(polys_to_add):
-                geo_2d.add_part(f"{name}_{i}", poly)
+                geo_2d.add_part(f"{name}:{i}", poly)
 
         # Now we deal with the virtual parts, which are just added as is
         for name, poly_list in virtual_part_polygons.items():
@@ -339,9 +342,9 @@ class Geo3DData(GeoData):
                 geo_2d.add_part(name, poly_list[0])
                 continue
             for i, poly in enumerate(poly_list):
-                geo_2d.add_part(f"{name}_{i}", poly)
+                geo_2d.add_part(f"{name}:{i}", poly)
 
-        geo_2d.lunit = lunit
+        geo_2d.lunit = self.lunit if lunit is None else None
         # Clean up freecad document
         FreeCAD.closeDocument("instance")
         return geo_2d
