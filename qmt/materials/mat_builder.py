@@ -51,6 +51,9 @@ def build_materials(
             raise ValueError(
                 f"materials_mapping does not contain material for part {name}"
             )
+        mat = materials_mapping.get(name)
+        if mat is not None:
+            new_mapping[name] = mat
     extra_materials = set(new_mapping.keys()) - set(geo_data.parts.keys())
     if extra_materials:
         warnings.warn(
