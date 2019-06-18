@@ -45,4 +45,5 @@ dependencies:
   - jupyter_contrib_nbextensions
   - mpi4py
   - nb_conda
+  - pycairo
   - rope
