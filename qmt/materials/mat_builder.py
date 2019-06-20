@@ -42,6 +42,8 @@ def build_materials(
             old_name, _ = name.split(":")
             new_mapping[name] = materials_mapping[old_name]
             continue
+        else:
+            new_mapping[name] = materials_mapping[name]
 
         if (
             name not in materials_mapping
