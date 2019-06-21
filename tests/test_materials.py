@@ -159,4 +159,4 @@ def test_material_mapping():
     mat_lib = Materials()
     mat_data = build_materials(geo_data, material_mapping, mat_lib)
 
-    assert set(mat_data.parts().keys()) == set(["wire", "substrate"])
+    assert set(mat_data.parts.keys()) == set(["wire", "substrate"])
