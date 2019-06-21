@@ -141,6 +141,9 @@ def test_effective_mass():
 def test_material_mapping():
     """Confirm that a material mapping is created from simple parts"""
 
+    from qmt.geometry import part_3d, geo_3d_data
+    from qmt.materials import Materials, build_materials
+
     # To test build_materials, we need a Geo3DData object
     # Create two dummy Geo3DPart objects
     wire = part_3d.Geo3DPart(label="wire", fc_name=None)
