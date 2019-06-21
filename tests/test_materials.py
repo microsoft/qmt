@@ -136,3 +136,24 @@ def test_effective_mass():
     assert inas.hole_mass("heavy", "dos") == approx(0.41, rel=0.2)
     assert inas.hole_mass("light", "dos") == approx(0.026, rel=0.2)
     assert inas.hole_mass("dos", "dos") == approx(0.41, rel=0.2)
+
+
+def test_material_mapping():
+    """Confirm that a material mapping is created from simple parts"""
+
+    # To test build_materials, we need a Geo3DData object
+    # Create two dummy Geo3DPart objects
+    wire = part_3d.Geo3DPart(label="wire", fc_name=None)
+    substrate = part_3d.Geo3DPart(label="substrate", fc_name=None)
+    # Create the Geo3DData object
+    geo_data = geo_3d_data.Geo3DData()
+    # Populate geo_data with the dummy parts
+    geo_data.add_part(part_name=wire.label, part=wire)
+    geo_data.add_part(part_name=substrate.label, part=substrate)
+
+    # Material mapping dictionary
+    material_mapping = {"substrate": "Si", "wire": "InSb"}
+    mat_lib = Materials()
+    mat_data = build_materials(geo_data, material_mapping, mat_lib)
+
+    assert set(mat_data.parts().keys()) == set(["wire", "substrate"])
